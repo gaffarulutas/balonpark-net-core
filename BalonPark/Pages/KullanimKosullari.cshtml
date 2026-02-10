@@ -5,7 +5,7 @@
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
     ViewData["Title"] = "Kullanım Koşulları";
     ViewData["Description"] = $"{companyName} kullanım koşulları ve şartları. Web sitemizi kullanırken uymanız gereken kurallar ve koşullar.";
-    ViewData["Keywords"] = "kullanım koşulları, şartlar, ünlü park, şişme oyun grupları, kurallar";
+    ViewData["Keywords"] = "kullanım koşulları, şartlar, balon park, şişme oyun grupları, kurallar";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
 

@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model IndexModel
 @{
     var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
@@ -6,7 +6,7 @@
     
     ViewData["Title"] = $"Şişme Oyun Parkları ve Çocuk Oyun Grupları | {settings?.MetaTitle ?? companyName}";
     ViewData["Description"] = "Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları. Güvenli, dayanıklı ve eğlenceli ürünler. Hızlı teslimat ve uygun fiyatlar. Çocuklarınız için en iyi oyun deneyimi!";
-    ViewData["Keywords"] = "şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, ünlü park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı, eğlence parkı, çocuk eğlence merkezi";
+    ViewData["Keywords"] = "şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı, eğlence parkı, çocuk eğlence merkezi";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
 

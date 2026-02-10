@@ -7,7 +7,7 @@
     ViewData["Description"] = !string.IsNullOrEmpty(Model.SubCategory?.Description) 
         ? $"{Model.SubCategory.CategoryName} - {Model.SubCategory.Name}: {Model.SubCategory.Description} | {companyName}"
         : $"{Model.SubCategory?.CategoryName} - {Model.SubCategory?.Name} şişme oyun grupları ve oyuncakları. {companyName}'ta kaliteli şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar.";
-    ViewData["Keywords"] = $"{Model.SubCategory?.CategoryName}, {Model.SubCategory?.Name}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, ünlü park";
+    ViewData["Keywords"] = $"{Model.SubCategory?.CategoryName}, {Model.SubCategory?.Name}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
 

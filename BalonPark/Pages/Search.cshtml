@@ -5,7 +5,7 @@
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
     ViewData["Title"] = "Arama Sonuçları";
     ViewData["Description"] = $"'{Model.Query}' için arama sonuçları - {companyName}";
-    ViewData["Keywords"] = $"arama, {Model.Query}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, ünlü park";
+    ViewData["Keywords"] = $"arama, {Model.Query}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
 

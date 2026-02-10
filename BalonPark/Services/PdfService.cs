@@ -139,7 +139,7 @@ public class PdfService(
         {
             // Settings'i cache'den al
             var settings = settingsRepository.GetFirstAsync().GetAwaiter().GetResult();
-            var companyName = settings?.CompanyName ?? "ÜNLÜ PARK";
+            var companyName = settings?.CompanyName ?? "BALON PARK";
             
             // Header için tablo oluştur - Logo sol, İletişim sağ
             var headerTable = new PdfPTable(2)

@@ -100,9 +100,9 @@ try
     // SQL Migrations - uygulama başlarken Migrations klasöründeki scriptleri çalıştır
     using (var migrationScope = app.Services.CreateScope())
     {
+        var migrationRunner = migrationScope.ServiceProvider.GetRequiredService<SqlMigrationRunner>();
         try
         {
-            var migrationRunner = migrationScope.ServiceProvider.GetRequiredService<SqlMigrationRunner>();
             await migrationRunner.RunAsync();
         }
         catch (Exception ex)

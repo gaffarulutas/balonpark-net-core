@@ -1,11 +1,11 @@
-﻿@page "/GizlilikPolitikasi"
+@page "/GizlilikPolitikasi"
 @model PrivacyModel
 @{
     var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
     ViewData["Title"] = "Gizlilik Politikası";
     ViewData["Description"] = $"{companyName} gizlilik politikası. Kişisel verilerinizin nasıl toplandığı, işlendiği ve korunduğu hakkında bilgi.";
-    ViewData["Keywords"] = "gizlilik politikası, kişisel veriler, veri koruma, ünlü park, güvenlik";
+    ViewData["Keywords"] = "gizlilik politikası, kişisel veriler, veri koruma, balon park, güvenlik";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
 

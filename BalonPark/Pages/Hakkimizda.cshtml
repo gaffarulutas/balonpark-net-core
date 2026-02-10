@@ -7,7 +7,7 @@
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
     ViewData["Title"] = "Hakkımızda";
     ViewData["Description"] = $"{companyName} hakkında bilgi alın. Kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve daha fazlası için güvenilir çözüm ortağınız.";
-    ViewData["Keywords"] = "hakkımızda, ünlü park, şişme oyun grupları, kaliteli ürünler, güvenilir firma";
+    ViewData["Keywords"] = "hakkımızda, balon park, şişme oyun grupları, kaliteli ürünler, güvenilir firma";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
     var defaultDescription = $"Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları üreticisi. Güvenli, dayanıklı ve eğlenceli ürünler.";
 }

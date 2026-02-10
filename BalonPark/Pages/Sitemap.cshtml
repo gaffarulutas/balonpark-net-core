@@ -5,7 +5,7 @@
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
     ViewData["Title"] = "Site Haritası";
     ViewData["Description"] = $"{companyName} site haritası. Tüm sayfalar, kategoriler, ürünler ve blog yazılarına buradan ulaşabilirsiniz.";
-    ViewData["Keywords"] = "site haritası, sitemap, tüm sayfalar, ünlü park, şişme oyun parkı";
+    ViewData["Keywords"] = "site haritası, sitemap, tüm sayfalar, balon park, şişme oyun parkı";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
 

@@ -62,7 +62,7 @@ public class BlogModel : BasePage
         
         ViewData["Title"] = "Blog - Balon Park Şişme Oyun Grupları";
         ViewData["Description"] = "Balon Park blog sayfasında şişme oyun parkları hakkında güncel yazıları keşfedin.";
-        ViewData["Keywords"] = "blog, şişme oyun parkı, çocuk oyun alanı, ünlü park";
+        ViewData["Keywords"] = "blog, şişme oyun parkı, çocuk oyun alanı, balon park";
         ViewData["Image"] = _urlService.GetImageUrl("/assets/images/logo/logo.png");
 
         try

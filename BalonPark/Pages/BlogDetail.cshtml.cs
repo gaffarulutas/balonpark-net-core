@@ -69,7 +69,7 @@ public class BlogDetailModel : BasePage
                 Blog.Excerpt;
 
             ViewData["Keywords"] = Blog.MetaKeywords ?? 
-                $"blog, {Blog.Title}, şişme oyun parkı, çocuk oyun alanı, ünlü park";
+                $"blog, {Blog.Title}, şişme oyun parkı, çocuk oyun alanı, balon park";
 
             ViewData["Image"] = !string.IsNullOrEmpty(Blog.FeaturedImage) ? 
                 _urlService.GetImageUrl(Blog.FeaturedImage) : 

@@ -1,7 +1,3 @@
-@using BalonPark.Services
-@using System.Collections.Generic
-@using System.Linq
-@using BalonPark.Models
 @{
     var siteSettings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
     var companyName = siteSettings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
@@ -37,7 +33,7 @@
     <meta name="description"
         content="@Html.Raw(ViewData["Description"] ?? siteSettings?.MetaDescription ?? defaultDescription)">
     <meta name="keywords"
-        content="@Html.Raw(ViewData["Keywords"] ?? siteSettings?.MetaKeywords ?? "şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, ünlü park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı")">
+        content="@Html.Raw(ViewData["Keywords"] ?? siteSettings?.MetaKeywords ?? "şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı")">
     <meta name="author" content="@Html.Raw(companyName)">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta name="language" content="tr">
@@ -49,7 +45,7 @@
     <meta name="geo.placename" content="Türkiye">
     <meta name="theme-color" content="#6262a6">
     <meta name="msapplication-TileColor" content="#6262a6">
-    <meta name="msapplication-TileImage" content="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))"
+    <meta name="msapplication-TileImage" content="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" />
     
     <!-- Google Site Verification -->
     <meta name="google-site-verification" content="F_BstXveZuxy3SW8EKy17v6P8JKhcQ7cm_U3jaaEcu0">

@@ -7,7 +7,7 @@
     ViewData["Description"] = !string.IsNullOrEmpty(Model.Product?.Description) 
         ? $"{Model.Product.Name} - {Model.Product.Description.Substring(0, Math.Min(Model.Product.Description.Length, 150))}... | {Model.Product.CategoryName} - {Model.Product.SubCategoryName} | {companyName}"
         : $"{Model.Product?.Name} - {Model.Product?.CategoryName} - {Model.Product?.SubCategoryName} şişme oyun grubu. {companyName}'ta kaliteli şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar.";
-    ViewData["Keywords"] = $"{Model.Product?.Name}, {Model.Product?.CategoryName}, {Model.Product?.SubCategoryName}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, ünlü park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı";
+    ViewData["Keywords"] = $"{Model.Product?.Name}, {Model.Product?.CategoryName}, {Model.Product?.SubCategoryName}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı";
     ViewData["Image"] = Model.MainImage != null ? ((IUrlService?)ViewData["UrlService"])?.GetImageUrl(Model.MainImage.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{Model.MainImage.LargePath}" : ((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png";
     ViewData["ProductPrice"] = Model.Product?.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
     ViewData["ProductCurrency"] = "TRY";
@@ -289,8 +289,7 @@
                 </div>
             </div>
         }
-    </div>
-</section>
+</div>
 
 <!-- Product Section End -->
 
