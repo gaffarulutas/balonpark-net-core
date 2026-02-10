@@ -56,6 +56,9 @@ try
     // Dapper Context
     builder.Services.AddSingleton<DapperContext>();
 
+    // SQL Migration Runner (uygulama başlarken Migrations/*.sql çalıştırılır)
+    builder.Services.AddScoped<SqlMigrationRunner>();
+
     // Repositories (Örnek)
     builder.Services.AddScoped<ExampleRepository>();
     builder.Services.AddScoped<SettingsRepository>();
@@ -93,6 +96,20 @@ try
     builder.Services.AddScoped<IAiService, AiService>();
 
     var app = builder.Build();
+
+    // SQL Migrations - uygulama başlarken Migrations klasöründeki scriptleri çalıştır
+    using (var migrationScope = app.Services.CreateScope())
+    {
+        try
+        {
+            var migrationRunner = migrationScope.ServiceProvider.GetRequiredService<SqlMigrationRunner>();
+            await migrationRunner.RunAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "SQL migration çalıştırılırken hata (veritabanı erişilemiyor olabilir). Uygulama devam ediyor.");
+        }
+    }
 
     // BaseAdminPage için SettingsRepository'yi set et (cache'den Settings yükleme için)
     Log.Information("SettingsRepository yükleniyor...");
