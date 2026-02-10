@@ -1,0 +1,972 @@
+@page "/Compare/{slugs?}"
+@model CompareModel
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    ViewData["Title"] = $"Ürün Karşılaştırma | {companyName}";
+    ViewData["Description"] = $"Seçtiğiniz ürünleri karşılaştırın. Fiyat, özellik ve detaylı bilgileri yan yana görün.";
+}
+
+<!-- Breadcrumb Section -->
+
+<div class="row">
+            <div class="col-12">
+                <!-- Section Title -->
+                <div class="section-title text-center mb-5">
+                    <h2>Ürünleri Karşılaştır</h2>
+                    <p class="section-subtitle">Seçtiğiniz ürünlerin özelliklerini yan yana görün ve en uygun olanı seçin</p>
+                    @* Debug: Seçili Para Birimi *@
+                    <small class="text-muted d-block mt-2">
+                        <i class="fa-solid fa-info-circle me-1"></i>
+                        Fiyatlar <strong>@Model.SelectedCurrency</strong> cinsinden gösteriliyor
+                        @if (Model.SelectedCurrency == "TL")
+                        {
+                            <span>(₺)</span>
+                        }
+                        else if (Model.SelectedCurrency == "USD")
+                        {
+                            <span>($)</span>
+                        }
+                        else if (Model.SelectedCurrency == "EUR")
+                        {
+                            <span>(€)</span>
+                        }
+                    </small>
+                </div>
+
+        @if (!Model.Products.Any())
+        {
+            <!-- Empty State -->
+            <div class="empty-compare-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-shuffle"></i>
+                </div>
+                <h3>Karşılaştırma Listeniz Boş</h3>
+                <p>Ürünleri karşılaştırmak için ürün sayfalarından "Karşılaştır" butonuna tıklayın.</p>
+                <a href="/" class="btn btn-primary">
+                    <i class="fa-solid fa-home me-2"></i>
+                    Ana Sayfaya Dön
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Compare Table -->
+            <div class="compare-table-wrapper">
+                <div class="table-responsive">
+                    <table class="table compare-products-table">
+                        <tbody>
+                            <!-- Ürün Görselleri -->
+                            <tr class="compare-row-images">
+                                <th class="compare-label">Ürün Görseli</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="compare-cell">
+                                        <a
+                                            href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
+                                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage?.LargePath ?? "/assets/images/no-image.png") ?? $"/{item.MainImage?.LargePath ?? "assets/images/no-image.png"}")"
+                                                alt="@Html.Raw(item.Product.Name)" class="compare-product-image">
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+
+                            <!-- Ürün Adı -->
+                            <tr>
+                                <th class="compare-label">Ürün Adı</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="compare-cell">
+                                        <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug"
+                                            class="compare-product-name">
+                                            @Html.Raw(item.Product.Name)
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+
+                            <!-- Ürün Kodu -->
+                            <tr>
+                                <th class="compare-label">Ürün Kodu</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="compare-cell">
+                                        <span class="badge bg-secondary">U-@item.Product.Id</span>
+                                    </td>
+                                }
+                            </tr>
+
+                            <!-- Kategori -->
+                            <tr>
+                                <th class="compare-label">Kategori</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="compare-cell">
+                                        <a href="/category/@item.Product.CategorySlug" class="category-link">
+                                            @Html.Raw(item.Product.CategoryName)
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+
+                            <!-- Alt Kategori -->
+                            <tr>
+                                <th class="compare-label">Alt Kategori</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="compare-cell">
+                                        <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug"
+                                            class="category-link">
+                                            @Html.Raw(item.Product.SubCategoryName)
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+
+                                    <!-- Fiyat (Seçili Para Birimi) -->
+                                    <tr class="compare-row-highlight">
+                                        <th class="compare-label">
+                                            @if (Model.SelectedCurrency == "TL")
+                                            {
+                                                <text>Fiyat (₺)</text>
+                                            }
+                                            else if (Model.SelectedCurrency == "USD")
+                                            {
+                                                <text>Fiyat ($)</text>
+                                            }
+                                            else if (Model.SelectedCurrency == "EUR")
+                                            {
+                                                <text>Fiyat (€)</text>
+                                            }
+                                        </th>
+                                        @foreach (var item in Model.Products)
+                                        {
+                                            <td class="compare-cell">
+                                                <div class="compare-price">
+                                                    @if (item.Product.Price <= 0)
+                                                    {
+                                                        <span class="price-contact-text">Fiyat için iletişime geçin</span>
+                                                    }
+                                                    else if (Model.SelectedCurrency == "TL")
+                                                    {
+                                                        <text>₺@item.Product.Price.ToString("N2")</text>
+                                                    }
+                                                    else if (Model.SelectedCurrency == "USD")
+                                                    {
+                                                        <text>$@item.Product.UsdPrice.ToString("N2")</text>
+                                                    }
+                                                    else if (Model.SelectedCurrency == "EUR")
+                                                    {
+                                                        <text>€@item.Product.EuroPrice.ToString("N2")</text>
+                                                    }
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+
+                            <!-- Boyutlar -->
+                            <tr>
+                                <th class="compare-label">Boyutlar</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="compare-cell">
+                                        @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                                        {
+                                            <span class="compare-dimensions">
+                                                <i class="fa-solid fa-ruler-combined me-1"></i>
+                                                @Html.Raw(item.Product.Dimensions)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+
+                            <!-- Stok Durumu -->
+                            <tr>
+                                <th class="compare-label">Stok</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="compare-cell">
+                                        @if (item.Product.Stock > 0)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fa-solid fa-check me-1"></i>
+                                                Stokta (@item.Product.Stock adet)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fa-solid fa-times me-1"></i>
+                                                Stokta Yok
+                                            </span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+
+                            <!-- Açıklama -->
+                            @if (Model.Products.Any(p => !string.IsNullOrEmpty(p.Product.Description)))
+                            {
+                                <tr>
+                                    <th class="compare-label">Açıklama</th>
+                                    @foreach (var item in Model.Products)
+                                    {
+                                        <td class="compare-cell">
+                                            <div class="compare-description">
+                                                @Html.Raw(item.Product.Description ?? "<span class='text-muted'>-</span>")
+                                            </div>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+
+                                    <!-- Listeden Çıkar -->
+                                    <tr class="compare-row-actions">
+                                        <th class="compare-label">İşlem</th>
+                                        @foreach (var item in Model.Products)
+                                        {
+                                            <td class="compare-cell text-center">
+                                                <button onclick="removeFromCompare('@item.Product.Slug')"
+                                                    class="contact-btn danger-btn">
+                                                    <i class="fa-solid fa-times me-1"></i>
+                                                    <span>Listeden Çıkar</span>
+                                                </button>
+                                            </td>
+                                        }
+                                    </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mt-4 mb-4">
+                <div class="col-12">
+                    <div class="compare-bottom-actions">
+                        <button onclick="window.print()" class="contact-btn phone-btn">
+                            <i class="fa-solid fa-print me-2"></i>
+                            <span>Yazdır</span>
+                        </button>
+                        <button onclick="clearAllCompare()" class="contact-btn danger-btn">
+                            <i class="fa-solid fa-trash me-2"></i>
+                            <span>Tümünü Temizle</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            @if (Model.Products.Count < 4)
+            {
+                <div class="row mt-4 mb-4">
+                    <div class="col-12">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Daha Fazla Ürün Ekleyebilirsiniz</h3>
+                                <p>Şu anda @Model.Products.Count ürünü karşılaştırıyorsunuz. En fazla 4 ürün
+                                    karşılaştırabilirsiniz. Ana sayfadan veya kategori sayfalarından "Karşılaştır" butonuna
+                                    tıklayarak liste ekleyebilirsiniz.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Breadcrumb Section */
+        .breadcrumb-section {
+            background: linear-gradient(135deg, #6262a6, #4a4a8a);
+            padding: 2rem 0;
+            color: white;
+        }
+
+        .breadcrumb-title {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .breadcrumb {
+            margin-bottom: 0;
+            background: transparent;
+        }
+
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: white;
+        }
+
+        .breadcrumb-item.active {
+            color: white;
+        }
+
+        .breadcrumb-item+.breadcrumb-item::before {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+         /* Compare Section */
+         .compare-section {
+             padding: 2rem 0 3rem 0;
+             background-color: #f8f9fa;
+             min-height: calc(100vh - 200px);
+         }
+
+         .section-title h2 {
+             color: #333;
+             font-weight: 700;
+             margin-bottom: 0.5rem;
+             font-size: 1.5rem;
+         }
+
+         .section-subtitle {
+             color: #666;
+             font-size: 0.95rem;
+         }
+
+        /* Info Cards */
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6262a6, #4a4a8a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .info-content h3 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .info-content p {
+            color: #666;
+            line-height: 1.5;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Empty State */
+        .empty-compare-state {
+            background: white;
+            border-radius: 10px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6262a6, #4a4a8a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .empty-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .empty-compare-state h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-compare-state p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        /* Compare Table */
+        .compare-table-wrapper {
+            background: white;
+            border: 1px solid #dee2e6;
+            overflow: hidden;
+        }
+
+        .compare-products-table {
+            margin: 0;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .compare-products-table tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+
+        .compare-products-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .compare-products-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .compare-label {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            padding: 15px;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: 140px;
+            min-width: 140px;
+            border-right: 2px solid #dee2e6;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            font-size: 0.85rem;
+        }
+
+        .compare-cell {
+            padding: 15px;
+            vertical-align: top;
+            min-width: 220px;
+            max-width: 320px;
+        }
+
+        .compare-row-highlight {
+            background: transparent;
+        }
+
+        .compare-row-highlight .compare-label {
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        .compare-row-images td {
+            text-align: center;
+            padding: 20px 15px;
+        }
+
+        .compare-product-image {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .compare-product-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .compare-product-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .compare-product-name:hover {
+            color: #6262a6;
+        }
+
+        .compare-price {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .compare-dimensions {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .compare-description {
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #6c757d;
+        }
+
+        .compare-description::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .compare-description::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 4px;
+        }
+
+        .compare-description::-webkit-scrollbar-thumb {
+            background: #6262a6;
+            border-radius: 4px;
+        }
+
+        .compare-description::-webkit-scrollbar-thumb:hover {
+            background: #4a4a8a;
+        }
+
+        .category-link {
+            color: #6262a6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .category-link:hover {
+            color: #4a4a8a;
+            text-decoration: underline;
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Contact Buttons */
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .primary-btn {
+            background-color: #6262a6;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #4a4a8a;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .whatsapp-btn {
+            background-color: #25d366;
+            color: white;
+        }
+
+        .whatsapp-btn:hover {
+            background-color: #128c7e;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .phone-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .phone-btn:hover {
+            background-color: #0056b3;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .danger-btn {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .danger-btn:hover {
+            background-color: #b91c1c;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Bottom Actions */
+        .compare-bottom-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .breadcrumb-title {
+                font-size: 1.3rem;
+            }
+
+            .section-title h2 {
+                font-size: 1.3rem;
+            }
+
+            .section-subtitle {
+                font-size: 0.85rem;
+            }
+
+            .compare-bottom-actions {
+                flex-direction: column;
+            }
+
+            .contact-btn {
+                width: 100%;
+                font-size: 0.85rem;
+                padding: 0.5rem 1rem;
+            }
+
+            .compare-label {
+                min-width: 100px;
+                width: 100px;
+                font-size: 0.75rem;
+                padding: 12px 10px;
+            }
+
+            .compare-cell {
+                min-width: 180px;
+                padding: 12px 10px;
+                font-size: 0.85rem;
+            }
+
+            .compare-product-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .compare-price {
+                font-size: 1.2rem;
+            }
+
+            .compare-product-name {
+                font-size: 0.9rem;
+            }
+
+            .info-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.25rem;
+            }
+
+            .info-icon {
+                margin: 0 auto;
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+
+            .info-content h3 {
+                font-size: 1rem;
+            }
+
+            .info-content p {
+                font-size: 0.85rem;
+            }
+
+            .compare-dimensions {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+            }
+
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        /* Print Styles - A4 Landscape Optimize */
+        @@media print {
+            /* Sayfa düzeni - A4 Landscape */
+            @@page {
+                size: A4 landscape;
+                margin: 0.8cm 1cm;
+            }
+
+            /* Her şeyi gizle */
+            body * {
+                visibility: hidden;
+            }
+
+            /* Sadece tabloyu göster */
+            .compare-table-wrapper,
+            .compare-table-wrapper * {
+                visibility: visible;
+            }
+
+            /* Tablo konumlandırma - A4'e tam sığacak şekilde */
+            .compare-table-wrapper {
+                position: absolute;
+                left: 1cm;
+                top: 0.8cm;
+                width: calc(100% - 2cm);
+                max-width: 27.7cm; /* A4 landscape genişlik - margin */
+                box-shadow: none;
+                border: 1.5px solid #000;
+                margin: 0;
+            }
+
+            /* İşlem satırını gizle */
+            .compare-row-actions,
+            .compare-row-actions * {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* Tablo - A4'e optimize */
+            .compare-products-table {
+                font-size: 8pt;
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .compare-products-table tbody tr {
+                page-break-inside: avoid;
+            }
+
+            /* Label - Dar */
+            .compare-label {
+                background: #f5f5f5 !important;
+                color: #000 !important;
+                font-size: 7pt;
+                padding: 4px 6px;
+                border: 1px solid #000 !important;
+                font-weight: 700;
+                width: 90px;
+                min-width: 90px;
+                white-space: nowrap;
+                vertical-align: middle;
+            }
+
+            /* Cell - Eşit dağıtım */
+            .compare-cell {
+                padding: 4px 6px;
+                border: 1px solid #000 !important;
+                font-size: 7.5pt;
+                color: #000;
+                vertical-align: top;
+                width: auto;
+            }
+
+            /* Resimler - Küçük */
+            .compare-row-images td {
+                padding: 6px;
+            }
+
+            .compare-product-image {
+                width: 50px;
+                height: 50px;
+                border: 1px solid #000;
+                object-fit: cover;
+            }
+
+            /* Ürün adı */
+            .compare-product-name {
+                color: #000;
+                font-size: 8pt;
+                font-weight: 700;
+                text-decoration: none;
+                display: block;
+                line-height: 1.2;
+            }
+
+            /* Fiyat */
+            .compare-price {
+                color: #000;
+                font-size: 9pt;
+                font-weight: 700;
+            }
+
+            /* Boyutlar */
+            .compare-dimensions {
+                font-size: 7pt;
+                background: white;
+                border: 1px solid #333;
+                color: #000;
+                padding: 2px 5px;
+                display: inline-block;
+            }
+
+            .compare-dimensions i {
+                display: none; /* İkon gizle */
+            }
+
+            /* Badge */
+            .badge {
+                font-size: 6.5pt;
+                padding: 2px 5px;
+                border: 1px solid #000 !important;
+                color: #000 !important;
+                font-weight: 600;
+            }
+
+            .bg-success {
+                background-color: #e8e8e8 !important;
+                color: #000 !important;
+            }
+
+            .bg-danger {
+                background-color: #f5f5f5 !important;
+                color: #000 !important;
+            }
+
+            .bg-secondary {
+                background-color: #f0f0f0 !important;
+                color: #000 !important;
+            }
+
+            /* Linkler */
+            .category-link {
+                color: #000;
+                text-decoration: none;
+                font-size: 7.5pt;
+            }
+
+            /* Açıklama */
+            .compare-description {
+                font-size: 6.5pt;
+                max-height: 60px;
+                overflow: hidden;
+                color: #000;
+                line-height: 1.3;
+            }
+
+            /* İkonları gizle (sadece text) */
+            i, svg {
+                display: none;
+            }
+
+            /* Responsive kapalı */
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            /* Container genişlikleri iptal */
+            .container-fluid-lg {
+                max-width: none !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Karşılaştırmadan kaldır
+        function removeFromCompare(slug) {
+            if (!window.favoritesAndCompare) return;
+
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: 'Bu ürünü karşılaştırmadan kaldırmak istediğinize emin misiniz?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Evet, Kaldır',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Slug'a göre kaldır
+                    window.favoritesAndCompare.removeFromCompareBySlug(slug);
+
+                    // Yeni URL'e yönlendir
+                    const compareList = window.favoritesAndCompare.getCompareList();
+
+                    if (compareList.length === 0) {
+                        // Liste boşsa ana sayfaya yönlendir
+                        window.location.href = '/';
+                    } else {
+                        // Yeni slug'larla URL oluştur
+                        const newSlugs = compareList.map(p => p.slug).filter(s => s).join(':');
+                        window.location.href = `/Compare/${newSlugs}`;
+                    }
+                }
+            });
+        }
+
+        // Tümünü temizle
+        function clearAllCompare() {
+            if (!window.favoritesAndCompare) {
+                window.location.href = '/';
+                return;
+            }
+
+            Swal.fire({
+                title: 'Tümünü Temizle?',
+                text: 'Tüm karşılaştırma listesini temizlemek istediğinize emin misiniz?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Evet, Temizle',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Listeyi temizle
+                    window.favoritesAndCompare.clearCompare();
+                    
+                    // Ana sayfaya yönlendir (SweetAlert olmadan direkt)
+                    window.location.href = '/';
+                }
+            });
+        }
+
+        // Sayfa yüklendiğinde URL'i güncelle
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.favoritesAndCompare) {
+                window.favoritesAndCompare.syncUrlWithStorage();
+            }
+        });
+    </script>
+}

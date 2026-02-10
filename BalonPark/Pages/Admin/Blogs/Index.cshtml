@@ -1,0 +1,299 @@
+@page
+@model BalonPark.Pages.Admin.Blogs.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Blog Yönetimi";
+}
+
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Blog Yönetimi
+            </h1>
+            <p class="text-gray-600 mt-2">Blog yazılarını görüntüle, ekle, düzenle ve sil</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="/Admin/Blogs/Create" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Yeni Blog Yazısı
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-green-800">İşlem Başarılı</p>
+                <p class="text-green-700">@Model.SuccessMessage</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Filter Form -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+        </svg>
+        Filtreleme
+    </h3>
+    
+    <form method="get" id="filterForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Başlık</label>
+                <input type="text" name="TitleFilter" value="@Model.TitleFilter" placeholder="Blog başlığı ara..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                <input type="text" name="CategoryFilter" value="@Model.CategoryFilter" placeholder="Kategori ara..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Durum</label>
+                <select name="IsActiveFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                    <option value="">Tümü</option>
+                    <option value="true" selected="@(Model.IsActiveFilter == true)">Aktif</option>
+                    <option value="false" selected="@(Model.IsActiveFilter == false)">Pasif</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Öne Çıkan</label>
+                <select name="IsFeaturedFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                    <option value="">Tümü</option>
+                    <option value="true" selected="@(Model.IsFeaturedFilter == true)">Öne Çıkan</option>
+                    <option value="false" selected="@(Model.IsFeaturedFilter == false)">Normal</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Filtrele
+            </button>
+            <a href="/Admin/Blogs" class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Temizle
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Blog List -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    @if (Model.Blogs.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resim</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Başlık</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yazar</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görüntülenme</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var blog in Model.Blogs)
+                    {
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (!string.IsNullOrEmpty(blog.FeaturedImage))
+                                {
+                                    <img src="@blog.FeaturedImage" class="w-16 h-16 object-cover rounded-lg" alt="@Html.Raw(blog.Title)" />
+                                }
+                                else
+                                {
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                }
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold text-gray-900">@Html.Raw(blog.Title)</span>
+                                    @if (blog.IsFeatured)
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                            Öne Çıkan
+                                        </span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(blog.Excerpt))
+                                {
+                                    <p class="text-sm text-gray-500 mt-1">@(blog.Excerpt.Length > 80 ? blog.Excerpt.Substring(0, 80) + "..." : blog.Excerpt)</p>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (!string.IsNullOrEmpty(blog.Category))
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                                        </svg>
+                                        @Html.Raw(blog.Category)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400 text-sm">-</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    @blog.AuthorName
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    @blog.ViewCount
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (blog.IsActive)
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Aktif
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Pasif
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                <div class="flex flex-col gap-1">
+                                    <span class="inline-flex items-center text-xs">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        @blog.CreatedAt.ToString("dd.MM.yyyy")
+                                    </span>
+                                    @if (blog.UpdatedAt.HasValue)
+                                    {
+                                        <span class="inline-flex items-center text-xs text-gray-500">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                            @blog.UpdatedAt.Value.ToString("dd.MM.yyyy")
+                                        </span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-2">
+                                    <a href="/Admin/Blogs/Edit?id=@blog.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-200">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                        Düzenle
+                                    </a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@blog.Id" class="delete-form inline">
+                                        <button type="button" class="delete-btn inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200" data-blog-title="@blog.Title" data-loading-text="Blog siliniyor...">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                            Sil
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-12">
+            <svg class="mx-auto w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Henüz blog yazısı bulunmuyor</h3>
+            <p class="text-gray-500 mb-6">İlk blog yazınızı oluşturmak için aşağıdaki butona tıklayın</p>
+            <a href="/Admin/Blogs/Create" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                İlk Blog Yazısını Oluştur
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide success messages
+        setTimeout(() => { $('.bg-green-50').fadeOut(); }, 5000);
+        
+        // Delete confirmation
+        $('.delete-btn').on('click', function() {
+            const $btn = $(this);
+            const blogTitle = $btn.data('blog-title');
+            const $form = $btn.closest('form');
+            
+            showDeleteConfirm(
+                `<strong>${blogTitle}</strong> blog yazısını silmek istediğinizden emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>`,
+                function() {
+                    showLoading('Blog siliniyor...');
+                    $form.submit();
+                }
+            );
+        });
+        
+        // Enter key submit
+        $('input[name="TitleFilter"], input[name="CategoryFilter"]').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $('#filterForm').submit();
+            }
+        });
+    </script>
+}

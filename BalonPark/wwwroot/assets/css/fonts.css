@@ -1,0 +1,57 @@
+
+/* Local Fonts CSS */
+@font-face {
+    font-family: 'Russo One';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Russo One'), local('RussoOne-Regular'), 
+         url('./fonts/google-fonts/russo-one.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Pacifico';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Pacifico'), local('Pacifico-Regular'),
+         url('./fonts/google-fonts/pacifico.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Kaushan Script';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Kaushan Script'), local('KaushanScript-Regular'),
+         url('./fonts/google-fonts/kaushan-script.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Exo 2';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Exo 2'), local('Exo2-Regular'),
+         url('./fonts/google-fonts/exo2-regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Exo 2';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Exo 2 Bold'), local('Exo2-Bold'),
+         url('./fonts/google-fonts/exo2-bold.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Public Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Public Sans'), local('PublicSans-Regular'),
+         url('./fonts/google-fonts/public-sans-regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Public Sans';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Public Sans Bold'), local('PublicSans-Bold'),
+         url('./fonts/google-fonts/public-sans-bold.woff2') format('woff2');
+}

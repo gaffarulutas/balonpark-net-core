@@ -1,0 +1,491 @@
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+}
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @(settings?.MetaTitle ?? companyName) Admin</title>
+    
+    <!-- Tailwind CSS v4 Play CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
+    
+    <style>
+        /* Minimal animations (Tailwind can't do @@keyframes) */
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Scrollbar styling (no Tailwind support) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+
+<body class="h-screen overflow-hidden bg-gray-50">
+    <!-- Header - Fixed at top -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 h-16">
+            <div class="h-16 flex items-center">
+                <!-- Left: Logo Section (Fixed width to match sidebar) -->
+                <div class="flex items-center gap-3 w-64 flex-shrink-0 px-6 border-r border-gray-200">
+                    <!-- Mobile menu button -->
+                    <button id="mobileMenuBtn" type="button" class="md:hidden -ml-2 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+
+                    <!-- Logo -->
+                    <div class="flex items-center gap-2.5">
+                        <div class="bg-gray-900 p-2 rounded-lg">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="hidden md:block">
+                            <h1 class="text-base font-semibold text-gray-900 leading-tight">Admin Yönetim Paneli</h1>
+                            <p class="text-[10px] text-gray-500">Admin Paneli</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center: Search Bar -->
+                <div class="flex-1 flex items-center px-6">
+                    <div class="max-w-lg w-full">
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <input type="search" id="headerSearch" placeholder="Ürün ara..." 
+                                class="block w-full rounded-md border border-gray-300 bg-white py-1.5 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Actions + User -->
+                <div class="flex items-center gap-3 px-6">
+                    @{
+                        var userName = ViewData["AdminUserName"]?.ToString() ?? "Admin";
+                        var userEmail = ViewData["AdminEmail"]?.ToString() ?? "";
+                        var lowStockCount = ViewData["LowStockCount"] as int? ?? 0;
+                    }
+
+                    <!-- Stock Status Badge -->
+                    @if (lowStockCount > 0)
+                    {
+                        <a href="/admin/products?stockStatus=low" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-yellow-50 text-yellow-800 hover:bg-yellow-100 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span class="text-xs font-medium">@lowStockCount</span>
+                        </a>
+                    }
+
+                    <!-- Notifications -->
+                    <button type="button" class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                        @if (lowStockCount > 0)
+                        {
+                            <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">@lowStockCount</span>
+                        }
+                    </button>
+
+                    <!-- User Avatar -->
+                    <div class="hidden md:flex items-center gap-2 pl-2 border-l border-gray-200">
+                        <div class="h-8 w-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                            @userName.Substring(0, 1).ToUpper()
+                        </div>
+                        <div class="hidden lg:block">
+                            <p class="text-sm font-medium text-gray-900 leading-tight">@userName</p>
+                            @if (!string.IsNullOrEmpty(userEmail))
+                            {
+                                <p class="text-xs text-gray-500">@userEmail</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </header>
+
+    <!-- Layout Container - Below header -->
+    <div class="flex h-screen pt-16">
+        <!-- Sidebar - Fixed on left -->
+        <aside class="hidden md:flex md:flex-shrink-0 fixed left-0 top-16 bottom-0 w-64 z-40">
+            <div class="flex w-64 flex-col border-r border-gray-200 bg-white h-full" id="sidebar">
+
+                <!-- Menu -->
+                <nav class="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+            <a href="/admin"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString() == "/Admin/Index" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                    </path>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/admin/categories"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Categories") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
+                <span>Kategoriler</span>
+            </a>
+
+            <a href="/admin/subcategories"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/SubCategories") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                    </path>
+                </svg>
+                <span>Alt Kategoriler</span>
+            </a>
+
+            <a href="/admin/products"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Products") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                <span>Ürünler</span>
+            </a>
+
+            <a href="/admin/blogs"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Blogs") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                <span>Blog Yönetimi</span>
+            </a>
+
+            <a href="/admin/mails"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Mails") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                    </path>
+                </svg>
+                <span>E-posta Yönetimi</span>
+            </a>
+
+            <a href="/admin/googleshopping"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/GoogleShopping") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <span>Google Shopping</span>
+            </a>
+
+            <a href="/admin/cachetest"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/CacheTest") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4">
+                    </path>
+                </svg>
+                <span>Cache Test</span>
+            </a>
+
+            <a href="/admin/settings"
+                class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Settings") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span>Genel Ayarlar</span>
+            </a>
+        </nav>
+
+                <!-- Logout Button -->
+                <div class="border-t border-gray-200 p-3">
+                    <form method="post" asp-page="/Admin/Index" asp-page-handler="Logout">
+                        <button type="submit"
+                            class="w-full flex items-center justify-center gap-x-2 px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-md transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span>Çıkış Yap</span>
+                        </button>
+                    </form>
+                </div>
+                </div>
+            </aside>
+
+        <!-- Mobile Sidebar -->
+        <div class="md:hidden fixed inset-0 z-[60] hidden" id="mobileMenuOverlay">
+            <div class="fixed inset-0 bg-gray-600/75" id="mobileMenuBackdrop"></div>
+            <div class="fixed inset-y-0 left-0 flex w-64 flex-col bg-white border-r border-gray-200 transform transition-transform duration-300 -translate-x-full" id="mobileSidebar">
+                    <!-- Mobile Menu (same as desktop) -->
+                    <nav class="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+                        <a href="/admin" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString() == "/Admin/Index" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="/admin/categories" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Categories") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                            </svg>
+                            <span>Kategoriler</span>
+                        </a>
+                        <a href="/admin/subcategories" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/SubCategories") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                            </svg>
+                            <span>Alt Kategoriler</span>
+                        </a>
+                        <a href="/admin/products" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Products") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            </svg>
+                            <span>Ürünler</span>
+                        </a>
+                        <a href="/admin/blogs" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Blogs") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>Blog Yönetimi</span>
+                        </a>
+                        <a href="/admin/mails" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Mails") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>E-posta Yönetimi</span>
+                        </a>
+                        <a href="/admin/googleshopping" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/GoogleShopping") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span>Google Shopping</span>
+                        </a>
+                        <a href="/admin/cachetest" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/CacheTest") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                            </svg>
+                            <span>Cache Test</span>
+                        </a>
+                        <a href="/admin/settings" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Admin/Settings") == true ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Genel Ayarlar</span>
+                        </a>
+                    </nav>
+                <div class="border-t border-gray-200 p-3">
+                    <form method="post" asp-page="/Admin/Index" asp-page-handler="Logout">
+                        <button type="submit" class="w-full flex items-center justify-center gap-x-2 px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-md transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span>Çıkış Yap</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area - With left margin for sidebar -->
+        <main class="flex-1 md:ml-64 overflow-y-auto bg-gray-50 h-full">
+            <div class="py-6 px-4 sm:px-6 lg:px-8">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden items-center justify-center z-[9999]">
+        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+            <div class="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full mx-auto mb-4 animate-spin">
+            </div>
+            <p class="text-gray-900 font-medium" id="loadingText">İşlem yapılıyor...</p>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 for alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // Loading Functions
+        function showLoading(message = 'İşlem yapılıyor...') {
+            $('#loadingText').text(message);
+            $('#loadingOverlay').removeClass('hidden').addClass('flex');
+        }
+        
+        function hideLoading() {
+            $('#loadingOverlay').removeClass('flex').addClass('hidden');
+        }
+
+        // SweetAlert2 Functions
+        function showDeleteConfirm(message, callback) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                html: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#1f2937',
+                cancelButtonColor: '#9ca3af',
+                confirmButtonText: 'Evet, Sil',
+                cancelButtonText: 'İptal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    callback();
+                }
+            });
+        }
+        
+        function showSuccessAlert(message) {
+            Swal.fire({
+                title: 'Başarılı!',
+                text: message,
+                icon: 'success',
+                confirmButtonColor: '#1f2937',
+                confirmButtonText: 'Tamam'
+            });
+        }
+        
+        function showErrorAlert(message) {
+            Swal.fire({
+                title: 'Hata!',
+                text: message,
+                icon: 'error',
+                confirmButtonColor: '#1f2937',
+                confirmButtonText: 'Tamam'
+            });
+        }
+
+        function showConfirm(options) {
+            return Swal.fire({
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1f2937',
+                cancelButtonColor: '#9ca3af',
+                confirmButtonText: 'Tamam',
+                cancelButtonText: 'İptal',
+                ...options
+            });
+        }
+
+        // Mobile Menu Toggle
+        $(document).ready(function () {
+            $('#mobileMenuBtn').on('click', function () {
+                $('#mobileSidebar').toggleClass('-translate-x-full');
+                $('#mobileMenuOverlay').toggleClass('hidden');
+            });
+
+            // Close sidebar when clicking backdrop
+            $('#mobileMenuBackdrop').on('click', function () {
+                $('#mobileSidebar').addClass('-translate-x-full');
+                $('#mobileMenuOverlay').addClass('hidden');
+            });
+
+            // Form submit loading
+            $('form').on('submit', function (e) {
+                const $form = $(this);
+                const $submitBtn = $form.find('button[type="submit"]');
+                
+                // Get custom loading message from button data attribute
+                const loadingText = $submitBtn.data('loading-text') || 'Kaydediliyor...';
+                
+                // Show loading overlay
+                showLoading(loadingText);
+                
+                // Disable button
+                $submitBtn.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+                
+                // Set a timeout to hide loading after 2 seconds as a safety measure
+                setTimeout(function () {
+                    hideLoading();
+                    $submitBtn.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+                }, 2000);
+                
+                // Allow form to submit normally
+                return true;
+            });
+            
+            // Always hide loading on page load
+            hideLoading();
+            $('button[type="submit"]').prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+        });
+
+        // Hide loading when page is about to unload
+        $(window).on('beforeunload', function () {
+            hideLoading();
+        });
+        
+        // Hide loading when page is fully loaded
+        $(window).on('load', function () {
+            hideLoading();
+            $('button[type="submit"]').prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+        });
+
+        // Header Search
+        $('#headerSearch').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                e.preventDefault();
+                const searchTerm = $(this).val().trim();
+                if (searchTerm) {
+                    window.location.href = `/admin/products?ProductNameFilter=${encodeURIComponent(searchTerm)}`;
+                }
+            }
+        });
+    </script>
+    
+    @await RenderSectionAsync("Styles", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

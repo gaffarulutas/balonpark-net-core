@@ -1,0 +1,2413 @@
+@using BalonPark.Services
+@using System.Collections.Generic
+@using System.Linq
+@using BalonPark.Models
+@{
+    var siteSettings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = siteSettings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    var defaultDescription = $"{companyName} - Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları. Güvenli, dayanıklı ve eğlenceli ürünler. Hızlı teslimat ve uygun fiyatlar.";
+    
+    var sameAsLinks = new List<string>();
+    if (!string.IsNullOrEmpty(siteSettings?.WhatsApp))
+        sameAsLinks.Add($"https://wa.me/{siteSettings.WhatsApp.Replace("+", "").Replace(" ", "")}");
+    if (!string.IsNullOrEmpty(siteSettings?.Facebook))
+        sameAsLinks.Add(siteSettings.Facebook);
+    if (!string.IsNullOrEmpty(siteSettings?.Instagram))
+        sameAsLinks.Add(siteSettings.Instagram);
+    if (!string.IsNullOrEmpty(siteSettings?.Twitter))
+        sameAsLinks.Add(siteSettings.Twitter);
+    if (!string.IsNullOrEmpty(siteSettings?.LinkedIn))
+        sameAsLinks.Add(siteSettings.LinkedIn);
+    if (!string.IsNullOrEmpty(siteSettings?.YouTube))
+        sameAsLinks.Add(siteSettings.YouTube);
+}
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="@Html.Raw(ViewData["Description"] ?? siteSettings?.MetaDescription ?? defaultDescription)">
+    <meta name="keywords"
+        content="@Html.Raw(ViewData["Keywords"] ?? siteSettings?.MetaKeywords ?? "şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, ünlü park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı")">
+    <meta name="author" content="@Html.Raw(companyName)">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="language" content="tr">
+    <meta name="revisit-after" content="1 days">
+    <meta name="rating" content="general">
+    <meta name="distribution" content="global">
+    <meta name="geo.region" content="TR">
+    <meta name="geo.country" content="Turkey">
+    <meta name="geo.placename" content="Türkiye">
+    <meta name="theme-color" content="#6262a6">
+    <meta name="msapplication-TileColor" content="#6262a6">
+    <meta name="msapplication-TileImage" content="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))"
+    
+    <!-- Google Site Verification -->
+    <meta name="google-site-verification" content="F_BstXveZuxy3SW8EKy17v6P8JKhcQ7cm_U3jaaEcu0">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8VRG223YDS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-8VRG223YDS');
+    </script>
+
+    <!-- Event snippet for Sayfa görüntüleme conversion page -->
+    <script>
+        gtag('event', 'conversion', {
+            'send_to': 'AW-17719505609/BlBkCPLF2L0bEMnlqIFC',
+            'value': 1.0,
+            'currency': 'TRY'
+        });
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TV5NVNB4');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="@(ViewData["Image"] != null && ViewData["Image"]?.ToString()?.Contains("uploads") == true ? "product" : "website")">
+    <meta property="og:title" content="@Html.Raw(ViewData["Title"] ?? siteSettings?.MetaTitle ?? companyName)">
+    <meta property="og:description"
+        content="@Html.Raw(ViewData["Description"] ?? siteSettings?.MetaDescription ?? defaultDescription)">
+    <meta property="og:image" content="@(ViewData["Image"] ?? ((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{Context.Request.Scheme}://{Context.Request.Host}/assets/images/logo/logo.png")">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="@Html.Raw(ViewData["Title"] ?? companyName)">
+    <meta property="og:url"
+        content="@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"{Context.Request.Path}{Context.Request.QueryString}") ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}")">
+    <meta property="og:site_name" content="@Html.Raw(companyName)">
+    <meta property="og:locale" content="tr_TR">
+    
+    @if (ViewData["ProductPrice"] != null)
+    {
+        <meta property="product:price:amount" content="@ViewData["ProductPrice"]">
+        <meta property="product:price:currency" content="@ViewData["ProductCurrency"]">
+        <meta property="product:availability" content="@ViewData["ProductAvailability"]">
+        <meta property="product:condition" content="@ViewData["ProductCondition"]">
+        <meta property="product:brand" content="@ViewData["ProductBrand"]">
+        <meta property="product:retailer_item_id" content="@ViewData["ProductSku"]">
+    }
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="@(ViewData["ProductPrice"] != null ? "summary_large_image" : "summary_large_image")">
+    <meta name="twitter:title" content="@Html.Raw(ViewData["Title"] ?? siteSettings?.MetaTitle ?? companyName)">
+    <meta name="twitter:description"
+        content="@Html.Raw(ViewData["Description"] ?? siteSettings?.MetaDescription ?? defaultDescription)">
+    <meta name="twitter:image" content="@(ViewData["Image"] ?? ((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{Context.Request.Scheme}://{Context.Request.Host}/assets/images/logo/logo.png")">
+    <meta name="twitter:image:alt" content="@Html.Raw(ViewData["Title"] ?? companyName)">
+    <meta name="twitter:site" content="@@balonpark">
+    <meta name="twitter:creator" content="@@balonpark">
+
+    <!-- Additional SEO -->
+    <meta name="theme-color" content="#fdfdfe">
+    <meta name="msapplication-TileColor" content="#fdfdfe">
+    <link rel="canonical"
+        href="@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"{Context.Request.Path}{Context.Request.QueryString}") ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}")">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": ["Organization", "LocalBusiness", "Store"],
+        "name": "@Html.Raw(companyName)",
+        "alternateName": "@Html.Raw(companyName.Replace(" ", ""))",
+        "description": "@Html.Raw(siteSettings?.About ?? defaultDescription)",
+        "url": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"{Context.Request.Path}{Context.Request.QueryString}") ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}")",
+        "logo": "@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? $"{Context.Request.Scheme}://{Context.Request.Host}{siteSettings.Logo}") : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{Context.Request.Scheme}://{Context.Request.Host}/assets/images/logo/logo.png"))",
+        "image": "@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? $"{Context.Request.Scheme}://{Context.Request.Host}{siteSettings.Logo}") : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{Context.Request.Scheme}://{Context.Request.Host}/assets/images/logo/logo.png"))",
+        "sameAs": [@Html.Raw(string.Join(", ", sameAsLinks.Select(l => $"\"{l}\"")))],
+        "contactPoint": {
+            "@@type": "ContactPoint",
+            "contactType": "customer service",
+            "telephone": "@Html.Raw(siteSettings?.PhoneNumber ?? "+90-533-635-50-39")",
+            "email": "@Html.Raw(siteSettings?.Email ?? "info@balonpark.com")",
+            "availableLanguage": ["Turkish", "English"],
+            "contactOption": "TollFree",
+            "areaServed": "TR",
+            "hoursAvailable": {
+                "@@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                "opens": "00:00",
+                "closes": "23:59"
+            }
+        },
+        "address": {
+            "@@type": "PostalAddress",
+            "streetAddress": "@Html.Raw(siteSettings?.Address ?? "")",
+            "addressLocality": "@Html.Raw(siteSettings?.City ?? "Türkiye")",
+            "addressRegion": "@Html.Raw(siteSettings?.District ?? "")",
+            "postalCode": "@Html.Raw(siteSettings?.PostalCode ?? "")",
+            "addressCountry": "@Html.Raw(siteSettings?.Country ?? "TR")"
+        },
+        "foundingDate": "2020",
+        "numberOfEmployees": "10-50",
+        "industry": "Manufacturing",
+        "knowsAbout": [
+            "@Html.Raw("Şişme Oyun Parkları")",
+            "@Html.Raw("Çocuk Oyun Grupları")",
+            "@Html.Raw("Şişme Kaydıraklar")",
+            "@Html.Raw("Şişme Havuzlar")",
+            "@Html.Raw("Top Havuzları")",
+            "@Html.Raw("İç Mekan Oyun Parkları")"
+        ],
+        "aggregateRating": {
+            "@@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "250",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "priceRange": "$$"
+    }
+    </script>
+
+    <!-- Favicon -->
+    @{
+        var logoUrl = siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png");
+    }
+    <link rel="icon" href="@logoUrl" type="image/png">
+    <link rel="shortcut icon" href="@logoUrl" type="image/png">
+    <link rel="apple-touch-icon" href="@logoUrl">
+    <link rel="icon" sizes="32x32" href="@logoUrl">
+    <link rel="icon" sizes="16x16" href="@logoUrl">
+    <title>@Html.Raw(ViewData["Title"] ?? siteSettings?.MetaTitle ?? companyName)</title>
+
+    <!-- Google font with preload for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"></noscript>
+    
+    <!-- Critical fonts loaded immediately -->
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <!-- bootstrap css -->
+    <link id="rtl-link" rel="stylesheet" type="text/css" href="~/assets/css/vendors/bootstrap.css">
+
+    <!-- wow css -->
+    <link rel="stylesheet" href="~/assets/css/animate.min.css">
+
+    <!-- Iconly css -->
+    <link rel="stylesheet" type="text/css" href="~/assets/css/bulk-style.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/css/vendors/animate.css">
+
+    <!-- Template css -->
+    <link id="color-link" rel="stylesheet" type="text/css" href="~/assets/css/style.css">
+
+    <!-- Semantic UI CSS -->
+    <link rel="stylesheet" type="text/css" href="~/assets/semantic-ui/semantic.min.css">
+    
+    <!-- jQuery Confirm -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js" defer></script>
+    
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+    <!-- Phosphor Icons CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@@phosphor-icons/web@2.1.4/src/duotone/style.css">
+
+    <!-- Favorites & Compare CSS -->
+    <link rel="stylesheet" href="~/css/favorites-compare.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    @await RenderSectionAsync("Styles", required: false)
+
+    <!-- Blog Structured Data -->
+    @if (ViewData["StructuredData"] != null)
+    {
+        <script type="application/ld+json">
+            @Html.Raw(ViewData["StructuredData"])
+        </script>
+    }
+
+    <!-- Global Font Styles -->
+    <style>
+        /* Inter Font Import */
+        @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+            font-size: 13px !important;
+        }
+        
+    </style>
+
+    <!-- Currency Button Styles -->
+    <style>
+        .currency-selector .btn.active {
+            background-color: #989898 !important;
+            border-color: #989898 !important;
+            color: white !important;
+        }
+
+        .currency-selector .btn:hover:not(.active) {
+            background-color: #f8f9fa !important;
+            border-color: #989898 !important;
+            color: #989898 !important;
+        }
+
+        .currency-selector .btn {
+            margin-right: 2px;
+            border-radius: 0.375rem !important;
+        }
+
+        /* Currency Button Styles */
+        .currency-btn {
+            background: white;
+            border: 1px solid #989898;
+            color: #989898;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .currency-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #989898;
+            color: #989898;
+        }
+
+        .currency-btn.active {
+            background-color: #989898;
+            border-color: #989898;
+            color: white;
+        }
+
+        .currency-btn i {
+            font-size: 16px;
+        }
+
+        /* Phosphor Icons Styles */
+        .ph {
+            font-family: "Phosphor Duotone" !important;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-transform: none;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .ph-duotone {
+            font-family: "Phosphor Duotone" !important;
+        }
+
+        /* Sticky Footer */
+        html, body {
+            height: 100%;
+        }
+
+        .main-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        footer {
+            margin-top: auto;
+        }
+
+        /* Navbar Toggler Styles */
+        .navbar-toggler {
+            background: white;
+            border: 1px solid #6262a6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #6262a6;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .navbar-toggler:hover {
+            background-color: #6262a6;
+            border-color: #6262a6;
+            color: white;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.2rem rgba(98, 98, 166, 0.25);
+            outline: none;
+        } 
+
+        /* Semantic UI Card Custom Styles */
+        .ui.card {
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .ui.card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .ui.card .image {
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .ui.card .image img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .ui.card:hover .image img {
+            transform: scale(1.05);
+        }
+
+        .ui.card .content {
+            padding: 1.5rem;
+        }
+
+        .ui.card .content .header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #6262a6;
+        }
+
+        .ui.card .content .description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-top: 0.5rem;
+        }
+
+        .ui.card .extra.content {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .ui.card .extra.content .ui.button {
+            width: auto;
+            background: #6262a6 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 0.75rem 1rem !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+        }
+
+        .ui.card .extra.content .ui.button:hover {
+            background: #4a4a8a !important;
+            transform: translateY(-1px);
+        }
+
+        .ui.card .extra.content .ui.button i {
+            margin: 0 !important;
+        }
+
+        /* Swiper Category Cards */
+        .categorySwiper {
+            padding: 20px 0 60px 0;
+        }
+
+        .categorySwiper .swiper-slide {
+            height: auto;
+        }
+
+        .categorySwiper .card {
+            height: 100%;
+            margin: 0;
+        }
+
+        /* Swiper Navigation Buttons */
+        .categorySwiper .swiper-button-next,
+        .categorySwiper .swiper-button-prev {
+            color: #6262a6;
+            background: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .categorySwiper .swiper-button-next:after,
+        .categorySwiper .swiper-button-prev:after {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .categorySwiper .swiper-button-next:hover,
+        .categorySwiper .swiper-button-prev:hover {
+            background: #6262a6;
+            color: white;
+        }
+
+        /* Swiper Pagination */
+        .categorySwiper .swiper-pagination-bullet {
+            background: #6262a6;
+            opacity: 0.3;
+        }
+
+        .categorySwiper .swiper-pagination-bullet-active {
+            opacity: 1;
+            background: #6262a6;
+        }
+
+        /* Mobile Category Menu */
+
+        .category-menu-close {
+            display: flex;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 1002;
+            transition: all 0.3s ease;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-menu-close:hover {
+            background: #c82333;
+        }
+
+        /* Ensure sidebar content doesn't overlap with close button */
+        .category-menu {
+            position: relative;
+        }
+
+        /* Product Code Styling */
+        .product-code-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+        }
+
+        /* Product Gallery Swiper Styling */
+        .product-gallery {
+            position: relative;
+            z-index: 0;
+        }
+
+        .product-gallery .productMainSwiper {
+            margin-bottom: 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding: 10px;
+        }
+
+        .product-gallery .productMainSwiper .swiper-slide {
+            height: 450px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            background: #f8f9fa;
+        }
+
+        .product-gallery .productMainSwiper .image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            background: #f8f9fa;
+        }
+
+        .product-gallery .productMainSwiper .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: white;
+        }
+
+        .product-gallery .productMainSwiper .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .product-gallery .productMainSwiper .swiper-slide:hover .image-overlay {
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 1;
+        }
+
+        .product-gallery .productMainSwiper .zoom-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6262a6;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-gallery .productMainSwiper .zoom-btn:hover {
+            background: #6262a6;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .product-gallery .productThumbsSwiper {
+            height: 90px;
+            padding: 0 10px;
+            text-align: left;
+        }
+
+        .product-gallery .productThumbsSwiper .swiper-slide {
+            width: 80px;
+            height: 80px;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .product-gallery .productThumbsSwiper .swiper-slide-thumb-active {
+            opacity: 1;
+        }
+
+        .product-gallery .productThumbsSwiper .thumbnail-item {
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-gallery .productThumbsSwiper .thumbnail-item:hover {
+            border-color: #6262a6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(98, 98, 166, 0.3);
+        }
+
+        .product-gallery .productThumbsSwiper .swiper-slide-thumb-active .thumbnail-item {
+            border-color: #6262a6;
+            box-shadow: 0 4px 15px rgba(98, 98, 166, 0.4);
+        }
+
+        .product-gallery .productThumbsSwiper .thumbnail-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Swiper Navigation Buttons */
+        .product-gallery .swiper-button-next,
+        .product-gallery .swiper-button-prev {
+            color: #6262a6;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: -22px;
+            transition: all 0.3s ease;
+        }
+
+        .product-gallery .swiper-button-next:after,
+        .product-gallery .swiper-button-prev:after {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .product-gallery .swiper-button-next:hover,
+        .product-gallery .swiper-button-prev:hover {
+            background: #6262a6;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .product-gallery .swiper-button-disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Swiper Pagination */
+        .product-gallery .swiper-pagination {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .product-gallery .swiper-pagination-fraction {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            width: 80px;
+        }
+
+        /* Mobile responsive adjustments */
+        @@media (max-width: 768px) {
+            .product-gallery .productMainSwiper .swiper-slide {
+                height: 300px;
+            }
+            
+            .product-gallery .productMainSwiper .main-image {
+                object-fit: cover;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .product-gallery .productMainSwiper .swiper-slide {
+                align-items: flex-start;
+                justify-content: flex-start;
+            }
+            
+            .product-gallery .productThumbsSwiper {
+                height: 70px;
+                text-align: left;
+                justify-content: flex-start;
+            }
+            
+            .product-gallery .productThumbsSwiper .swiper-slide {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .product-gallery .swiper-button-next,
+            .product-gallery .swiper-button-prev {
+                width: 36px;
+                height: 36px;
+                margin-top: -18px;
+            }
+            
+            .product-gallery .swiper-button-next:after,
+            .product-gallery .swiper-button-prev:after {
+                font-size: 14px;
+            }
+            
+            .product-gallery .swiper-pagination {
+                bottom: 15px;
+            }
+            
+            .product-gallery .swiper-pagination-fraction {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+            
+            /* Mobile responsive for product code row - Keep on same line */
+            .product-code-row {
+                gap: 10px;
+                align-items: center;
+            }
+
+            .product-code {
+                flex: 1;
+                min-width: 0;
+                gap: 8px;
+            }
+
+            .code-label,
+            .code-value {
+                font-size: 12px;
+            }
+            
+            .whatsapp-contact {
+                flex-shrink: 0;
+            }
+            
+            .whatsapp-contact-btn {
+                padding: 10px 14px;
+                font-size: 14px;
+                gap: 6px;
+            }
+
+            .whatsapp-contact-btn span {
+                display: inline;
+            }
+            
+            /* Mobile responsive for price row - Keep on same line */
+            .price-row {
+                gap: 10px;
+                align-items: center;
+            }
+
+            .price-container {
+                flex: 1;
+                min-width: 0;
+            }
+            
+            .social-share-mini {
+                gap: 6px;
+                flex-shrink: 0;
+            }
+            
+            .social-btn-mini {
+                width: 26px;
+                height: 26px;
+                font-size: 11px;
+            }
+        }
+
+        /* Fallback for when Swiper fails to load */
+        .product-gallery .swiper-slide {
+            display: none;
+        }
+        
+        .product-gallery .swiper-slide:first-child {
+            display: block;
+        }
+        
+        .product-gallery .swiper-initialized .swiper-slide {
+            display: block;
+        }
+
+        .product-code-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: nowrap;
+        }
+
+        .product-code {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .whatsapp-contact {
+            flex-shrink: 0;
+        }
+
+        .whatsapp-contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+        }
+
+        .whatsapp-contact-btn:hover {
+            background: #128C7E;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+
+        .whatsapp-contact-btn i {
+            font-size: 16px;
+        }
+
+        /* Price Row with Social Share Mini */
+        .price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: nowrap;
+        }
+
+        .price-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .social-share-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .social-btn-mini {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-btn-mini.facebook {
+            background: #1877f2;
+            color: white;
+        }
+
+        .social-btn-mini.twitter {
+            background: #1da1f2;
+            color: white;
+        }
+
+        .social-btn-mini.linkedin {
+            background: #0077b5;
+            color: white;
+        }
+
+        .social-btn-mini.whatsapp {
+            background: #25d366;
+            color: white;
+        }
+
+        .social-btn-mini:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+
+        .social-btn-mini.facebook:hover {
+            background: #166fe5;
+        }
+
+        .social-btn-mini.twitter:hover {
+            background: #0d8bd9;
+        }
+
+        .social-btn-mini.linkedin:hover {
+            background: #006ba1;
+        }
+
+        .social-btn-mini.whatsapp:hover {
+            background: #128c7e;
+        }
+
+        .code-label {
+            font-weight: 600;
+            color: #6262a6;
+            font-size: 14px;
+        }
+
+        .code-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 16px;
+            background: #6262a6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Mobile Responsive */
+        @@media (max-width: 1199px) {
+            .mobile-category-toggle {
+                display: block;
+            }
+            
+            .sidebar-col {
+                position: fixed;
+                top: 0;
+                left: -350px;
+                width: 350px;
+                height: 100vh;
+                background: white;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+                overflow-y: auto;
+            }
+            
+            .sidebar-col.active {
+                left: 0;
+            }
+            
+            .sidebar-col.show {
+                left: 0;
+            }
+            
+            .category-menu-close {
+                display: block;
+            }
+            
+            .content-col {
+                width: 100%;
+                margin-left: 0;
+            }
+        }
+
+        @@media (min-width: 1200px) {
+            .sidebar-col {
+                position: static;
+                width: auto;
+                height: auto;
+                background: transparent;
+                box-shadow: none;
+            }
+            
+            .category-menu-close {
+                display: none;
+            }
+        }
+
+        .price-tl,
+        .price-usd,
+        .price-eur {
+            display: none;
+        }
+
+        .price-tl.active,
+        .price-usd.active,
+        .price-eur.active {
+            display: block;
+        }
+
+        /* Header Navigation Links */
+        .right-side-menu .nav-link {
+            color: #333 !important;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .right-side-menu .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #007bff !important;
+        }
+
+        .right-side-menu .nav-link span {
+            white-space: nowrap;
+        }
+
+
+        .ui.category.search {
+            width: 100%;
+            min-width: 400px;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .ui.category.search .prompt {
+            border-radius: 8px;
+            border: 2px solid #e1e5e9;
+            padding: 12px 16px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+            min-width: 380px;
+        }
+
+        .ui.category.search .prompt:focus {
+            border-color: #6262a6;
+            box-shadow: 0 0 0 3px rgba(98, 98, 166, 0.1);
+        }
+        .ui.input{
+            width: 100%;
+        }
+
+        /* Category List with Icons */
+        .category-list {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .category-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+
+        .category-icon-placeholder {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6262a6, #4a4a8a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            border: 2px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+
+        .category-link:hover .category-icon {
+            border-color: #6262a6;
+            transform: scale(1.1);
+        }
+
+        .category-link:hover .category-icon-placeholder {
+            border-color: #6262a6;
+            transform: scale(1.1);
+        }
+
+        .category-list h5 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .category-link:hover .category-list h5 {
+            color: #6262a6;
+        }
+
+        /* Category Menu Header */
+        .category-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #6262a6 0%, #4a4a8a 100%);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(98, 98, 166, 0.2);
+        }
+
+        .menu-header-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-menu-header h6 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Category Menu Container */
+        .category-menu {
+            padding: 20px;
+            background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar for Category Menu */
+        .category-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .category-menu::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 10px;
+        }
+
+        .category-menu::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #6262a6 0%, #4a4a8a 100%);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .category-menu::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #4a4a8a 0%, #6262a6 100%);
+        }
+
+        @@media (max-width: 1199px) {
+            .category-menu {
+                padding: 16px;
+                background: white;
+            }
+        }
+
+        /* Hierarchical Category Menu Styles - Modern & Beautiful */
+        .category-accordion {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .category-item {
+            margin-bottom: 8px;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            border: 1px solid #e5e7eb;
+        }
+
+        .category-item:hover {
+            box-shadow: 0 4px 12px rgba(98, 98, 166, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .category-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            transition: all 0.3s ease;
+        }
+
+        .category-item:hover .category-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        }
+
+        .category-header .category-link {
+            flex: 1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 14px 16px;
+            display: block;
+        }
+
+        .category-list {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-icon,
+        .category-icon-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-icon {
+            object-fit: cover;
+            border: 2px solid #ffffff;
+        }
+
+        .category-icon-placeholder {
+            background: linear-gradient(135deg, #6262a6 0%, #4a4a8a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            border: 2px solid #ffffff;
+        }
+
+        .category-link:hover .category-icon,
+        .category-link:hover .category-icon-placeholder {
+            transform: scale(1.08) rotate(2deg);
+            box-shadow: 0 4px 12px rgba(98, 98, 166, 0.25);
+        }
+
+        .category-toggle {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border: 2px solid #e5e7eb;
+            padding: 12px;
+            cursor: pointer;
+            color: #6b7280;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin: 8px;
+            margin-left: 0;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+
+        .category-toggle:hover {
+            background: linear-gradient(135deg, #6262a6 0%, #4a4a8a 100%);
+            border-color: #4a4a8a;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .category-toggle.active {
+            background: linear-gradient(135deg, #6262a6 0%, #4a4a8a 100%);
+            border-color: #4a4a8a;
+            color: white;
+        }
+
+        .category-toggle.active i {
+            transform: rotate(180deg);
+        }
+
+        .category-toggle i {
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-size: 14px;
+        }
+
+        .category-name {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+            transition: all 0.3s ease;
+            letter-spacing: 0.01em;
+        }
+
+        .category-link:hover .category-name {
+            color: #6262a6;
+            transform: translateX(2px);
+        }
+
+        .subcategory-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .subcategory-list.show {
+            max-height: 1000px;
+            opacity: 1;
+            padding: 12px 8px;
+        }
+
+        .subcategory-item {
+            margin: 0;
+            margin-bottom: 4px;
+        }
+
+        .subcategory-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .subcategory-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #4b5563;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+        }
+
+        .subcategory-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, #6262a6 0%, #4a4a8a 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .subcategory-link:hover::before {
+            transform: scaleY(1);
+        }
+
+        .subcategory-link:hover {
+            background: linear-gradient(90deg, rgba(98, 98, 166, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+            color: #6262a6;
+            padding-left: 24px;
+            box-shadow: 0 2px 8px rgba(98, 98, 166, 0.1);
+        }
+
+        .subcategory-link i {
+            font-size: 12px;
+            transition: all 0.3s ease;
+            color: #9ca3af;
+        }
+
+        .subcategory-link:hover i {
+            transform: translateX(4px);
+            color: #6262a6;
+        }
+
+        /* Active states */
+        .category-item.active {
+            border-color: #6262a6;
+            box-shadow: 0 0 0 2px rgba(98, 98, 166, 0.1);
+        }
+
+        .category-item.active .category-header {
+            background: linear-gradient(135deg, #6262a6 0%, #4a4a8a 100%);
+        }
+
+        .category-item.active .category-name {
+            color: white;
+        }
+
+        .category-item.active .category-icon,
+        .category-item.active .category-icon-placeholder {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .subcategory-link.active {
+            background: linear-gradient(90deg, rgba(98, 98, 166, 0.15) 0%, rgba(98, 98, 166, 0.05) 100%);
+            color: #6262a6;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(98, 98, 166, 0.15);
+        }
+
+        .subcategory-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .subcategory-link.active i {
+            color: #6262a6;
+        }
+
+        /* Mobile responsive */
+        @@media (max-width: 1199px) {
+            .category-item {
+                margin-bottom: 6px;
+            }
+
+            .category-header .category-link {
+                padding: 12px 14px;
+            }
+
+            .category-icon,
+            .category-icon-placeholder {
+                width: 36px;
+                height: 36px;
+            }
+
+            .category-toggle {
+                width: 36px;
+                height: 36px;
+                padding: 10px;
+            }
+
+            .category-name {
+                font-size: 14px;
+            }
+
+            .subcategory-link {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+        }
+
+        /* Smooth animation for opening/closing */
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .subcategory-list.show .subcategory-item {
+            animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .subcategory-list.show .subcategory-item:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .subcategory-list.show .subcategory-item:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+
+        .subcategory-list.show .subcategory-item:nth-child(3) {
+            animation-delay: 0.11s;
+        }
+
+        .subcategory-list.show .subcategory-item:nth-child(4) {
+            animation-delay: 0.14s;
+        }
+
+        .subcategory-list.show .subcategory-item:nth-child(5) {
+            animation-delay: 0.17s;
+        }
+
+        .subcategory-list.show .subcategory-item:nth-child(n+6) {
+            animation-delay: 0.2s;
+        }
+
+        /* Pulse animation for category toggle when opened */
+        @@keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .category-toggle.active {
+            animation: pulse 0.6s ease;
+        }
+
+        /* Category item entrance animation */
+        .category-item {
+            animation: fadeInScale 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .category-item:nth-child(1) { animation-delay: 0.05s; }
+        .category-item:nth-child(2) { animation-delay: 0.1s; }
+        .category-item:nth-child(3) { animation-delay: 0.15s; }
+        .category-item:nth-child(4) { animation-delay: 0.2s; }
+        .category-item:nth-child(5) { animation-delay: 0.25s; }
+        .category-item:nth-child(n+6) { animation-delay: 0.3s; }
+
+    </style>
+</head>
+
+<body class="theme-color-4 bg-gradient-color">
+
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TV5NVNB4"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<div class="main-wrapper">
+
+    <!-- Header Start -->
+    <header class="pb-0 fixed-header">
+        <div class="top-nav top-header">
+            <div class="container-fluid-xs">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="navbar-top">
+                            <button class="navbar-toggler d-xl-none d-inline navbar-menu-button" type="button"
+                                onclick="toggleCategoryMenu()">
+                                    <i class="fas fa-bars"></i>
+                            </button>
+
+                            <!-- Mobile Logo -->
+                            <div class="mobile-logo d-xl-none">
+                                <a asp-page="/Index" class="nav-logo">
+                                    <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="mobile-logo-img" width="120" height="60" loading="eager">
+                                </a>
+                            </div>
+
+                            <div class="middle-box d-flex align-items-center">
+                                <div class="currency-selector me-3 d-none d-xl-block">
+                                    <div class="currency-buttons">
+                                        <button type="button"
+                                            class="currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "active" : "")"
+                                            data-currency="TL" onclick="setCurrency('TL')">
+                                            <i class="fa-solid fa-turkish-lira-sign"></i>
+                                        </button>
+                                        <button type="button"
+                                            class="currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "active" : "")"
+                                            data-currency="USD" onclick="setCurrency('USD')">
+                                            <i class="fa-solid fa-dollar-sign"></i>
+                                        </button>
+                                        <button type="button"
+                                            class="currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "active" : "")"
+                                            data-currency="EUR" onclick="setCurrency('EUR')">
+                                            <i class="fa-solid fa-euro-sign"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="search-box flex-grow-1">
+                                    <div class="ui category search">
+                                        <div class="ui icon input">
+                                            <input class="prompt" type="text" placeholder="Şişme oyun parkı arıyorum...">
+                                            <i class="search icon"></i>
+                                        </div>
+                                        <div class="results"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rightside-box">
+                                <ul class="right-side-menu">
+                                    <!-- Favorites & Compare -->
+                                    <li class="right-side">
+                                        <a href="#" class="contact-box favorites-box" onclick="showFavorites(); return false;">
+                                            <div class="contact-icon">
+                                                <i class="fa-regular fa-heart"></i>
+                                            </div>
+                                            <div class="contact-detail">
+                                                <h6>Favoriler</h6>
+                                                <h5 class="favorites-count-text">0 Ürün</h5>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="right-side">
+                                        <a href="#" class="contact-box compare-box" onclick="showCompare(); return false;">
+                                            <div class="contact-icon">
+                                                <i class="fa-solid fa-shuffle"></i>
+                                            </div>
+                                            <div class="contact-detail">
+                                                <h6>Karşılaştır</h6>
+                                                <h5 class="compare-count-text">0 Ürün</h5>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                    <li class="right-side">
+                                        <a href="tel:+905336355039" class="contact-box phone-contact">
+                                            <div class="contact-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="feather feather-phone-call">
+                                                    <path
+                                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                            <div class="contact-detail">
+                                                <h6>Telefon</h6>
+                                                <h5>+90 533 635 50 39</h5>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="right-side">
+                                        <a asp-page="/Iletisim" class="contact-box contact-link-box">
+                                            <div class="contact-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                                </svg>
+                                            </div>
+                                            <div class="contact-detail">
+                                                <h6>İletişim</h6>
+                                                <h5>Bize Ulaşın</h5>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Header End -->
+
+    <div class="product-section pt-0">
+        <div class="container-fluid p-0">
+            <div class="custom-row">
+                <div class="sidebar-col">
+                    <div class="category-menu">
+                        <!-- Mobile Category Close Button -->
+                        <button class="category-menu-close" onclick="toggleCategoryMenu()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <a asp-page="/Index" class="web-logo nav-logo d-none d-xl-block">
+                            <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="sidebar-logo-img"  loading="eager">
+                        </a>
+
+                        <!-- Mobile Navigation Links -->
+                        <div class="mobile-navigation d-xl-none mb-3 mt-5">
+                            <h6 class="mb-2">Sayfalar</h6>
+                            <ul class="mobile-nav-links">
+                                <li>
+                                    <a asp-page="/Index" class="mobile-nav-link">
+                                        <div class="mobile-nav-icon">
+                                            <i class="fas fa-home"></i>
+                                        </div>
+                                        <span>Ana Sayfa</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-page="/Hakkimizda" class="mobile-nav-link">
+                                        <div class="mobile-nav-icon">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <span>Hakkımızda</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-page="/Blog" class="mobile-nav-link">
+                                        <div class="mobile-nav-icon">
+                                            <i class="fas fa-blog"></i>
+                                        </div>
+                                        <span>Blog</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-page="/Iletisim" class="mobile-nav-link">
+                                        <div class="mobile-nav-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <span>İletişim</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="category-menu-header">
+                            <div class="menu-header-icon">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <h6>Kategoriler</h6>
+                        </div>
+                        <ul class="category-accordion">
+                            @if (Model.Categories != null && Model.Categories.Count > 0)
+                            {
+                                @foreach (var category in Model.Categories)
+                                {
+                                    var hasSubCategories = category.SubCategories != null && category.SubCategories.Count > 0;
+                                    var isLastCategory = category == Model.Categories[Model.Categories.Count - 1];
+                                    
+                                    <li class="category-item @(isLastCategory && !hasSubCategories ? "pb-30" : "")" data-category-id="@category.Id">
+                                        <div class="category-header">
+                                            <a href="/category/@category.Slug" class="category-link" data-category-slug="@category.Slug">
+                                                <div class="category-list">
+                                                    @if (!string.IsNullOrEmpty(category.FirstProductImage))
+                                                    {
+                                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="@Html.Raw(category.Name)" class="category-icon" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="category-icon-placeholder">
+                                                            <i class="fas fa-folder"></i>
+                                                        </div>
+                                                    }
+                                                    <h5 class="category-name">@Html.Raw(category.Name)</h5>
+                                                </div>
+                                            </a>
+                                            @if (hasSubCategories)
+                                            {
+                                                <button class="category-toggle" type="button" data-category-id="@category.Id" onclick="toggleSubCategories(event, @category.Id)">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                        
+                                        @if (hasSubCategories)
+                                        {
+                                            <ul class="subcategory-list" id="subcategories-@category.Id">
+                                                @foreach (var subCategory in category.SubCategories)
+                                                {
+                                                    <li class="subcategory-item">
+                                                        <a href="/category/@category.Slug/@subCategory.Slug" class="subcategory-link" data-category-slug="@category.Slug" data-subcategory-slug="@subCategory.Slug">
+                                                            <i class="fas fa-angle-right"></i>
+                                                            <span>@Html.Raw(subCategory.Name)</span>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="category-item">
+                                    <div class="category-list">
+                                        <h5>Kategoriler Yok</h5>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+
+                        <!-- Mobile Quick Access & Currency - Bottom Section -->
+                        <div class="mobile-bottom-section d-xl-none mt-4 pt-3" style="border-top: 1px solid #e5e7eb;">
+                            <!-- Quick Access -->
+                            <h6 class="mb-2">Hızlı Erişim</h6>
+                            <ul class="mobile-nav-links mb-3">
+                                <li>
+                                    <a href="#" class="mobile-nav-link" onclick="showFavorites(); return false;">
+                                        <div class="mobile-nav-icon" style="background: #fef2f2; color: #dc2626;">
+                                            <i class="fa-regular fa-heart"></i>
+                                        </div>
+                                        <span>Favoriler <span class="favorites-count-text badge">0</span></span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="mobile-nav-link" onclick="showCompare(); return false;">
+                                        <div class="mobile-nav-icon" style="background: #eff6ff; color: #2563eb;">
+                                            <i class="fa-solid fa-shuffle"></i>
+                                        </div>
+                                        <span>Karşılaştır <span class="compare-count-text badge">0</span></span>
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <!-- Currency Selector -->
+                            <div class="mobile-currency-selector">
+                                <h6 class="mb-2">Para Birimi</h6>
+                                <div class="currency-buttons" style="display: flex; gap: 8px;">
+                                    <button type="button"
+                                        class="currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "active" : "")"
+                                        data-currency="TL" onclick="setCurrency('TL')" style="flex: 1;">
+                                        <i class="fa-solid fa-turkish-lira-sign"></i> TL
+                                    </button>
+                                    <button type="button"
+                                        class="currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "active" : "")"
+                                        data-currency="USD" onclick="setCurrency('USD')" style="flex: 1;">
+                                        <i class="fa-solid fa-dollar-sign"></i> USD
+                                    </button>
+                                    <button type="button"
+                                        class="currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "active" : "")"
+                                        data-currency="EUR" onclick="setCurrency('EUR')" style="flex: 1;">
+                                        <i class="fa-solid fa-euro-sign"></i> EUR
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-col">
+                    <div class="main-content">
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Floating Action Button -->
+    <a href="https://wa.me/905336355039" target="_blank" class="whatsapp-fab" aria-label="WhatsApp ile iletişime geç">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+    </a>
+
+    <!-- Footer Section Start -->
+    <footer class="footer-sm">
+        <div class="container-fluid">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-auto">
+                    <p class="copyright-text mb-0">© @DateTime.Now.Year @Html.Raw(companyName). Tüm hakları saklıdır.</p>
+                </div>
+                <div class="col-auto">
+                    <div class="footer-menu">
+                        <ul class="footer-links d-flex mb-0">
+                            <li class="me-3"><a asp-page="/Hakkimizda">Hakkımızda</a></li>
+                            <li class="me-3"><a asp-page="/Blog">Blog</a></li>
+                            <li class="me-3"><a asp-page="/Iletisim">İletişim</a></li>
+                            <li class="me-3"><a asp-page="/Sitemap">Site Haritası</a></li>
+                            <li class="me-3"><a asp-page="/Privacy">Gizlilik Politikası</a></li>
+                            <li><a asp-page="/KullanimKosullari">Kullanım Koşulları</a></li>
+                        </ul>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(siteSettings?.Facebook) || !string.IsNullOrEmpty(siteSettings?.Instagram) || !string.IsNullOrEmpty(siteSettings?.Twitter) || !string.IsNullOrEmpty(siteSettings?.LinkedIn) || !string.IsNullOrEmpty(siteSettings?.YouTube))
+                {
+                    <div class="col-auto">
+                        <div class="social-links d-flex gap-3">
+                            @if (!string.IsNullOrEmpty(siteSettings?.Facebook))
+                            {
+                                <a href="@siteSettings.Facebook" target="_blank" rel="noopener" class="text-dark"><i class="fab fa-facebook"></i></a>
+                            }
+                            @if (!string.IsNullOrEmpty(siteSettings?.Instagram))
+                            {
+                                <a href="@siteSettings.Instagram" target="_blank" rel="noopener" class="text-dark"><i class="fab fa-instagram"></i></a>
+                            }
+                            @if (!string.IsNullOrEmpty(siteSettings?.Twitter))
+                            {
+                                <a href="@siteSettings.Twitter" target="_blank" rel="noopener" class="text-dark"><i class="fab fa-twitter"></i></a>
+                            }
+                            @if (!string.IsNullOrEmpty(siteSettings?.LinkedIn))
+                            {
+                                <a href="@siteSettings.LinkedIn" target="_blank" rel="noopener" class="text-dark"><i class="fab fa-linkedin"></i></a>
+                            }
+                            @if (!string.IsNullOrEmpty(siteSettings?.YouTube))
+                            {
+                                <a href="@siteSettings.YouTube" target="_blank" rel="noopener" class="text-dark"><i class="fab fa-youtube"></i></a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </footer>
+    <!-- Footer Section End -->
+
+</div> <!-- main-wrapper end -->
+
+    <!-- Critical JavaScript (loaded immediately) -->
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
+
+    <!-- Non-critical JavaScript (loaded asynchronously) -->
+    <script src="~/assets/js/bootstrap/bootstrap-notify.min.js" defer></script>
+    <script src="~/assets/js/bootstrap/popper.min.js" defer></script>
+    <script src="~/assets/js/feather/feather.min.js" defer></script>
+    <script src="~/assets/js/feather/feather-icon.js" defer></script>
+    <script src="~/assets/js/lazysizes.min.js" defer></script>
+    <script src="~/assets/js/slick/slick.js" defer></script>
+    <script src="~/assets/js/slick/slick-animation.min.js" defer></script>
+    <script src="~/assets/js/slick/custom_slick.js" defer></script>
+    <script src="~/assets/js/auto-height.js" defer></script>
+    <script src="~/assets/js/fly-cart.js" defer></script>
+    <script src="~/assets/js/quantity-2.js" defer></script>
+    <script src="~/assets/js/wow.min.js" defer></script>
+    <script src="~/assets/js/custom-wow.js" defer></script>
+    <script src="~/assets/js/script.js" defer></script>
+    <script src="~/assets/js/theme-setting.js" defer></script>
+    <script src="~/assets/semantic-ui/semantic.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+
+    <!-- Swiper Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Category Swiper
+            const categorySwiper = new Swiper('.categorySwiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    640: {
+                        slidesPerView: 2,
+                        spaceBetween: 20,
+                    },
+                    768: {
+                        slidesPerView: 3,
+                        spaceBetween: 20,
+                    },
+                    1024: {
+                        slidesPerView: 4,
+                        spaceBetween: 20,
+                    },
+                    1200: {
+                        slidesPerView: 5,
+                        spaceBetween: 20,
+                    },
+                },
+            });
+        });
+    </script>
+
+    <!-- Mobile Category Menu JavaScript -->
+    <script>
+        function toggleCategoryMenu() {
+            var $sidebar = $('.sidebar-col');
+            $sidebar.toggleClass('active');
+            $sidebar.removeClass('show');
+        }
+
+        // Toggle subcategories accordion
+        function toggleSubCategories(event, categoryId) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const button = event.currentTarget;
+            const subcategoryList = document.getElementById('subcategories-' + categoryId);
+            
+            if (!subcategoryList) return;
+            
+            // Toggle active class on button
+            button.classList.toggle('active');
+            
+            // Toggle show class on subcategory list
+            subcategoryList.classList.toggle('show');
+            
+            // Close other open subcategory lists (optional - for accordion behavior)
+            const allSubcategoryLists = document.querySelectorAll('.subcategory-list');
+            const allToggleButtons = document.querySelectorAll('.category-toggle');
+            
+            allSubcategoryLists.forEach((list) => {
+                if (list.id !== 'subcategories-' + categoryId) {
+                    list.classList.remove('show');
+                }
+            });
+            
+            allToggleButtons.forEach((btn) => {
+                if (btn !== button) {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Initialize category menu on page load
+        $(document).ready(function() {
+            // Mark active category and subcategory based on current URL
+            const currentPath = window.location.pathname;
+            console.log('Current Path:', currentPath);
+            
+            // Extract category and subcategory slugs from URL
+            const pathParts = currentPath.split('/').filter(part => part !== '');
+            
+            // Check for different URL patterns
+            let categorySlug = null;
+            let subCategorySlug = null;
+            
+            // Pattern: /category/{slug} - just category
+            if (pathParts[0] === 'category' && pathParts.length === 2) {
+                categorySlug = pathParts[1];
+            }
+            // Pattern: /category/{categorySlug}/{subCategorySlug} - subcategory/products page
+            else if (pathParts[0] === 'category' && pathParts.length === 3) {
+                categorySlug = pathParts[1];
+                subCategorySlug = pathParts[2];
+            }
+            // Pattern: /category/{categorySlug}/{subCategorySlug}/{productSlug} - product detail
+            else if (pathParts[0] === 'category' && pathParts.length === 4) {
+                categorySlug = pathParts[1];
+                subCategorySlug = pathParts[2];
+            }
+            
+            console.log('Category Slug:', categorySlug);
+            console.log('SubCategory Slug:', subCategorySlug);
+            
+            // Mark active subcategory if we have one
+            if (subCategorySlug) {
+                $('.subcategory-link').each(function() {
+                    const linkCategorySlug = $(this).data('category-slug');
+                    const linkSubCategorySlug = $(this).data('subcategory-slug');
+                    
+                    if (linkCategorySlug === categorySlug && linkSubCategorySlug === subCategorySlug) {
+                        console.log('Found active subcategory:', linkSubCategorySlug);
+                        
+                        // Mark subcategory as active
+                        $(this).addClass('active');
+                        
+                        // Open parent category
+                        const subcategoryList = $(this).closest('.subcategory-list');
+                        const categoryId = subcategoryList.attr('id').replace('subcategories-', '');
+                        const toggleButton = $('.category-toggle[data-category-id="' + categoryId + '"]');
+                        
+                        subcategoryList.addClass('show');
+                        toggleButton.addClass('active');
+                        
+                        // Mark parent category as active
+                        $(this).closest('.category-item').addClass('active');
+                    }
+                });
+            }
+            // Mark active category (only if no subcategory)
+            else if (categorySlug) {
+                $('.category-link').each(function() {
+                    const linkCategorySlug = $(this).data('category-slug');
+                    
+                    if (linkCategorySlug === categorySlug) {
+                        console.log('Found active category:', linkCategorySlug);
+                        $(this).closest('.category-item').addClass('active');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Semantic UI Search Configuration -->
+    <script>
+        $(document).ready(function() {
+            $('.ui.category.search')
+                .search({
+                    type: 'category',
+                    apiSettings: {
+                        url: '/api/search/all?q={query}',
+                        onResponse: function(searchResponse) {
+                            console.log('Raw API Response:', searchResponse);
+                            
+                            var response = {
+                                results: {}
+                            };
+
+                            // Group results by type for Semantic UI Category Search
+                            if (searchResponse && searchResponse.results && Array.isArray(searchResponse.results)) {
+                                searchResponse.results.forEach(function(item) {
+                                    if (item && item.type) {
+                                        var typeKey = item.type;
+                                        
+                                        if (!response.results[typeKey]) {
+                                            response.results[typeKey] = {
+                                                name: getTypeDisplayName(typeKey),
+                                                results: []
+                                            };
+                                        }
+                                        
+                                        response.results[typeKey].results.push({
+                                            title: item.title || '',
+                                            url: item.url || '',
+                                            image: item.image || '',
+                                            price: item.price || '',
+                                            category: item.category || ''
+                                        });
+                                    }
+                                });
+                            }
+
+                            console.log('Formatted Response:', response);
+                            console.log('Formatted Response Structure:', JSON.stringify(response, null, 2));
+                            return response;
+                        }
+                    },
+                    fields: {
+                        results: 'results',
+                        title: 'title', 
+                        url: 'url'
+                    },
+                    minCharacters: 2,
+                    onSelect: function(result, response) {
+                        if (result.url) {
+                            window.location.href = result.url;
+                        }
+                    },
+                    // Remove custom templates to use Semantic UI defaults
+                    // templates: {
+                    //     category: function(response, category, html) { ... },
+                    //     result: function(result, html) { ... }
+                    // }
+                });
+        });
+
+        function getTypeDisplayName(type) {
+            switch(type) {
+                case 'product':
+                    return 'Ürünler';
+                case 'category':
+                    return 'Kategoriler';
+                case 'subcategory':
+                    return 'Alt Kategoriler';
+                default:
+                    return 'Sonuçlar';
+            }
+        }
+
+        // Search popup'ının kapanmasını önle
+        $(document).on('click', '.ui.category.search .prompt', function(e) {
+            e.stopPropagation();
+            $(this).focus();
+        });
+
+        $(document).on('click', '.ui.category.search .results', function(e) {
+            e.stopPropagation();
+        });
+
+        // Dışarı tıklandığında kapat
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.ui.category.search').length) {
+                $('.ui.category.search').search('hide');
+            }
+        });
+    </script>
+
+    <!-- Currency Management JavaScript -->
+    <script>
+        function setCurrency(currency) {
+            // API'ye para birimi değişikliği gönder
+            fetch('/api/currency/set', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ currency: currency })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Tüm currency butonlarından active class'ını kaldır
+                    document.querySelectorAll('.currency-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Seçilen currency butonuna active class'ını ekle
+                    const selectedBtn = document.querySelector(`[data-currency="${currency}"]`);
+                    if (selectedBtn) {
+                        selectedBtn.classList.add('active');
+                    }
+                    
+                    // Sayfayı yenile
+                    window.location.reload();
+                } else {
+                    console.error('Currency değiştirilemedi:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Currency değiştirilirken hata oluştu:', error);
+            });
+        }
+
+        // Sayfa yüklendiğinde mevcut currency'yi kontrol et
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/currency/current')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Tüm currency butonlarından active class'ını kaldır
+                        document.querySelectorAll('.currency-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        
+                        // Mevcut currency butonuna active class'ını ekle
+                        const currentBtn = document.querySelector(`[data-currency="${data.currency}"]`);
+                        if (currentBtn) {
+                            currentBtn.classList.add('active');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Mevcut currency alınırken hata oluştu:', error);
+                });
+        });
+
+        // Favorites & Compare Functions
+        function showFavorites() {
+            const favorites = window.favoritesAndCompare.getFavorites();
+            if (favorites.length === 0) {
+                alert('Favori listesi boş');
+                return;
+            }
+            
+            // Favori listesini göster (modal veya yeni sayfa)
+            let favoritesHtml = '<div class="favorites-modal"><h3>Favori Ürünlerim</h3><div class="favorites-grid">';
+            
+            favorites.forEach(item => {
+                favoritesHtml += `
+                    <div class="favorites-item">
+                        <img src="${item.image}" alt="${item.name}" class="product-image">
+                        <div class="product-info">
+                            <div class="product-name">${item.name}</div>
+                            <div class="product-price">${item.price}</div>
+                            <div class="product-actions">
+                                <a href="${item.url}" class="btn btn-primary btn-sm">Ürüne Git</a>
+                                <button class="btn btn-outline-danger btn-sm" onclick="removeFromFavorites(${item.id})">Kaldır</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            favoritesHtml += '</div></div>';
+            
+            // Modal göster (basit implementasyon)
+            const modal = document.createElement('div');
+            modal.className = 'favorites-modal-overlay';
+            modal.innerHTML = `
+                <div class="favorites-modal-content">
+                    <div class="modal-header">
+                        <h3>Favori Ürünlerim (${favorites.length})</h3>
+                        <button onclick="this.closest('.favorites-modal-overlay').remove()" class="close-btn">&times;</button>
+                    </div>
+                    <div class="favorites-grid">
+                        ${favorites.map(item => `
+                            <div class="favorites-item">
+                                <img src="${item.image}" alt="${item.name}" class="product-image">
+                                <div class="product-info">
+                                    <div class="product-name">${item.name}</div>
+                                    <div class="product-price">${item.price}</div>
+                                    <div class="product-actions">
+                                        <a href="${item.url}" class="btn btn-primary btn-sm">Ürüne Git</a>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="removeFromFavorites(${item.id}); this.closest('.favorites-modal-overlay').remove();">Kaldır</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function showCompare() {
+            const compareList = window.favoritesAndCompare.getCompareList();
+            if (compareList.length === 0) {
+                alert('Karşılaştırma listesi boş');
+                return;
+            }
+            
+            // Karşılaştırma sayfasına yönlendir veya modal göster
+            if (compareList.length === 1) {
+                alert('En az 2 ürün karşılaştırmanız gerekiyor');
+                return;
+            }
+            
+            // Karşılaştırma modal'ı göster
+            const modal = document.createElement('div');
+            modal.className = 'compare-modal-overlay';
+            modal.innerHTML = `
+                <div class="compare-modal-content">
+                    <div class="modal-header">
+                        <h3>Ürün Karşılaştırması (${compareList.length})</h3>
+                        <button onclick="this.closest('.compare-modal-overlay').remove()" class="close-btn">&times;</button>
+                    </div>
+                    <div class="compare-table-container">
+                        <table class="compare-table">
+                            <thead>
+                                <tr>
+                                    <th>Özellik</th>
+                                    ${compareList.map(item => `<th class="product-cell">${item.name}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Resim</td>
+                                    ${compareList.map(item => `
+                                        <td class="product-cell">
+                                            <img src="${item.image}" alt="${item.name}" class="product-image">
+                                        </td>
+                                    `).join('')}
+                                </tr>
+                                <tr>
+                                    <td>Fiyat</td>
+                                    ${compareList.map(item => `<td class="product-price">${item.price}</td>`).join('')}
+                                </tr>
+                                <tr>
+                                    <td>İşlemler</td>
+                                    ${compareList.map(item => `
+                                        <td>
+                                            <a href="${item.url}" class="btn btn-primary btn-sm">Ürüne Git</a>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="removeFromCompare(${item.id}); this.closest('.compare-modal-overlay').remove();">Kaldır</button>
+                                        </td>
+                                    `).join('')}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function removeFromFavorites(productId) {
+            const favorites = window.favoritesAndCompare.getFavorites();
+            const product = favorites.find(item => item.id === productId);
+            if (product) {
+                window.favoritesAndCompare.toggleFavorite(productId, product);
+            }
+        }
+
+        function removeFromCompare(productId) {
+            const compareList = window.favoritesAndCompare.getCompareList();
+            const product = compareList.find(item => item.id === productId);
+            if (product) {
+                window.favoritesAndCompare.toggleCompare(productId, product);
+            }
+        }
+    </script>
+
+    <!-- SweetAlert2 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Favorites & Compare JavaScript -->
+    <script src="~/js/favorites-compare.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

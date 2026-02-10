@@ -1,0 +1,445 @@
+@page "/category/{categorySlug}/{subCategorySlug}"
+@model ProductsModel
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    ViewData["Title"] = $"{Model.SubCategory?.CategoryName} - {Model.SubCategory?.Name}";
+    ViewData["Description"] = !string.IsNullOrEmpty(Model.SubCategory?.Description) 
+        ? $"{Model.SubCategory.CategoryName} - {Model.SubCategory.Name}: {Model.SubCategory.Description} | {companyName}"
+        : $"{Model.SubCategory?.CategoryName} - {Model.SubCategory?.Name} şişme oyun grupları ve oyuncakları. {companyName}'ta kaliteli şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar.";
+    ViewData["Keywords"] = $"{Model.SubCategory?.CategoryName}, {Model.SubCategory?.Name}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, ünlü park";
+    ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
+}
+
+<!-- SubCategory Products Structured Data -->
+@if (Model.SubCategory != null)
+{
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "CollectionPage",
+        "name": "@Html.Raw(Model.SubCategory.CategoryName) - @Html.Raw(Model.SubCategory.Name)",
+        "description": "@Html.Raw(Model.SubCategory.Description ?? Model.SubCategory.CategoryName + " - " + Model.SubCategory.Name + " şişme oyun grupları ve oyuncakları")",
+        "url": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"/category/{Model.CategorySlug}/{Model.SubCategory.Slug}") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.CategorySlug}/{Model.SubCategory.Slug}")",
+        "mainEntity": {
+            "@@type": "ItemList",
+            "name": "@Html.Raw(Model.SubCategory.Name) Ürünleri",
+            "description": "@Html.Raw(Model.SubCategory.Description ?? Model.SubCategory.Name + " kategorisindeki tüm ürünler")",
+            "numberOfItems": "@Model.Products.Count",
+            "itemListElement": [
+                @for (int i = 0; i < Model.Products.Count && i < 20; i++)
+                {
+                    var productWithImage = Model.Products[i];
+                    var product = productWithImage.Product;
+                    @: {
+                    @:     "@@type": "ListItem",
+                    @:     "position": @(i + 1),
+                    @:     "item": {
+                    @:         "@@type": "Product",
+                    @:         "name": "@Html.Raw(product.Name)",
+                    @:         "description": "@Html.Raw(product.Description ?? product.Name)",
+                    @:         "url": "@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.CategorySlug, Model.SubCategory.Slug, product.Slug) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.CategorySlug}/{Model.SubCategory.Slug}/{product.Slug}")",
+                    @:         "image": "@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(productWithImage.MainImage?.LargePath ?? "/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{(productWithImage.MainImage?.LargePath ?? "/assets/images/no-image.png")}")",
+                    @:         "offers": {
+                    @:             "@@type": "Offer",
+                    @:             "price": "@product.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)",
+                    @:             "priceCurrency": "TRY",
+                    @:             "availability": "@(product.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")"
+                    @:         }
+                    @:     }
+                    @: }@(i < Math.Min(Model.Products.Count, 20) - 1 ? "," : "")
+                }
+            ]
+        },
+        "breadcrumb": {
+            "@@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@@type": "ListItem",
+                    "position": 1,
+                    "name": "Ana Sayfa",
+                    "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/")"
+                },
+                {
+                    "@@type": "ListItem",
+                    "position": 2,
+                    "name": "@Html.Raw(Model.SubCategory.CategoryName)",
+                    "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"/category/{Model.CategorySlug}") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.CategorySlug}")"
+                },
+                {
+                    "@@type": "ListItem",
+                    "position": 3,
+                    "name": "@Html.Raw(Model.SubCategory.Name)",
+                    "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"/category/{Model.CategorySlug}/{Model.SubCategory.Slug}") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.CategorySlug}/{Model.SubCategory.Slug}")"
+                }
+            ]
+        }
+    }
+    </script>
+}
+
+
+<!-- Products Section Start -->
+<div class="section-b-space">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb-nav">
+            <div class="breadcrumb-container">
+                <a href="/" class="breadcrumb-item">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/category/@Model.CategorySlug" class="breadcrumb-item">
+                    <span>@Html.Raw(Model.SubCategory?.CategoryName)</span>
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">@Html.Raw(Model.SubCategory?.Name)</span>
+            </div>
+        </nav>
+
+        <div class="title d-block modern-category-header">
+            <h2 class="font-sm" style="color: #6262a6;">@Html.Raw(Model.SubCategory?.CategoryName) > @Html.Raw(Model.SubCategory?.Name) (@Model.TotalProducts ürün)</h2>
+            @if (!string.IsNullOrEmpty(Model.SubCategory?.Description))
+            {
+                <p style="color: #6b7280;">@Html.Raw(Model.SubCategory.Description)</p>
+            }
+            else
+            {
+                <p style="color: #6b7280;">@Html.Raw(Model.SubCategory?.Name) kategorisindeki harika ürünlerimizi keşfedin</p>
+            }
+        </div>
+
+        @if (Model.Products.Any())
+        {
+            <div class="row row-cols-xxl-6 row-cols-lg-5 row-cols-md-4 row-cols-sm-3 row-cols-2 g-sm-4 g-3 section-b-space">
+                @foreach (var item in Model.Products)
+                {
+                    <div>
+                        <div class="product-box modern-product-card wow fadeIn">
+                            <!-- Product Actions -->
+                            <div class="product-actions">
+                                <button class="favorite-btn" data-product-id="@item.Product.Id">
+                                    <i class="fa-regular fa-heart"></i>
+                                    <span class="btn-text">Favori</span>
+                                </button>
+                                <button class="compare-btn" data-product-id="@item.Product.Id">
+                                    <i class="fa-solid fa-shuffle"></i>
+                                    <span class="btn-text">Karşılaştır</span>
+                                </button>
+                            </div>
+
+                            <div class="product-image">
+                                <a href="/category/@Model.CategorySlug/@Model.SubCategory?.Slug/@item.Product.Slug">
+                                    @if (item.MainImage != null)
+                                    {
+                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}")" class="img-fluid blur-up lazyload product-thumbnail" alt="@Html.Raw(item.Product.Name)">
+                                    }
+                                    else
+                                    {
+                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" class="img-fluid blur-up lazyload product-thumbnail" alt="@Html.Raw(item.Product.Name)">
+                                    }
+                                </a>
+                            </div>
+                            <div class="product-detail position-relative">
+                                <a href="/category/@Model.CategorySlug/@Model.SubCategory?.Slug/@item.Product.Slug">
+                                    <h6 class="name">@Html.Raw(item.Product.Name)</h6>
+                                </a>
+
+                                @if (!string.IsNullOrEmpty(item.Product.Description))
+                                {
+                                    <p class="product-description text-content">
+                                        @Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)
+                                    </p>
+                                }
+
+                                @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                                {
+                                    <div class="product-dimensions">
+                                        <i class="fa-solid fa-ruler-combined"></i>
+                                        <span class="dimensions-text">@Html.Raw(item.Product.Dimensions)</span>
+                                    </div>
+                                }
+
+                                <div class="price-section">
+                                    @if (item.Product.Price <= 0)
+                                    {
+                                        <p class="price-contact-text">Fiyat için iletişime geçin</p>
+                                    }
+                                    else
+                                    {
+                                        <h6 class="price price-tl @(Model.SelectedCurrency == "TL" ? "active" : "")" style="color: #6262a6;">₺@item.Product.Price.ToString("N2")</h6>
+                                        <h6 class="price price-usd @(Model.SelectedCurrency == "USD" ? "active" : "")" style="color: #6262a6;">$@item.Product.UsdPrice.ToString("N2")</h6>
+                                        <h6 class="price price-eur @(Model.SelectedCurrency == "EUR" ? "active" : "")" style="color: #6262a6;">€@item.Product.EuroPrice.ToString("N2")</h6>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fa-solid fa-box-open fa-3x mb-3"></i>
+                        <h5>Ürün bulunmamaktadır</h5>
+                        <p>Bu kategoride henüz ürün bulunmamaktadır. Lütfen daha sonra tekrar kontrol edin.</p>
+                        <a href="/category/@Model.CategorySlug" class="btn modern-cta-btn mt-3">
+                            <i class="fa-solid fa-arrow-left"></i> @Model.SubCategory?.CategoryName'e Dön
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="pagination-container text-center mt-4">
+                <nav aria-label="Sayfa navigasyonu">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?PageNumber=@(Model.CurrentPage - 1)" aria-label="Önceki">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        }
+                        
+                        @{
+                            int startPage = Math.Max(1, Model.CurrentPage - 2);
+                            int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                        }
+                        
+                        @if (startPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?PageNumber=1">1</a>
+                            </li>
+                            @if (startPage > 2)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                        }
+                        
+                        @for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                @if (i == Model.CurrentPage)
+                                {
+                                    <span class="page-link active">@i</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link" href="?PageNumber=@i">@i</a>
+                                }
+                            </li>
+                        }
+                        
+                        @if (endPage < Model.TotalPages)
+                        {
+                            @if (endPage < Model.TotalPages - 1)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                            <li class="page-item">
+                                <a class="page-link" href="?PageNumber=@Model.TotalPages">@Model.TotalPages</a>
+                            </li>
+                        }
+                        
+                        @if (Model.CurrentPage < Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?PageNumber=@(Model.CurrentPage + 1)" aria-label="Sonraki">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+                
+                <div class="pagination-info mt-2">
+                    <small class="text-muted">
+                        Sayfa @Model.CurrentPage / @Model.TotalPages 
+                        (@Model.TotalProducts ürün)
+                    </small>
+                </div>
+            </div>
+        }
+</div>
+<!-- Products Section End -->
+
+@section Styles {
+<style>
+    .breadscrumb-section {
+        padding: 30px 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .breadscrumb-contain h2 {
+        color: #fff;
+        margin-bottom: 10px;
+    }
+
+    .breadscrumb-contain .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+
+    .breadscrumb-contain .breadcrumb-item {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .breadscrumb-contain .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .breadscrumb-contain .breadcrumb-item a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .breadscrumb-contain .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .breadscrumb-contain .breadcrumb-item.active {
+        color: #fff;
+    }
+
+    .product-section {
+        padding: 60px 0;
+    }
+
+    .category-description {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+
+    .product-description {
+        font-size: 13px;
+        color: #666;
+        margin-top: 5px;
+        line-height: 1.4;
+    }
+
+    .product-rating {
+        font-size: 12px;
+    }
+
+    .out-of-stock {
+        margin-top: 10px;
+    }
+
+    .alert i.fa-box-open {
+        color: #17a2b8;
+        opacity: 0.3;
+    }
+
+    .product-dimensions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 8px 0;
+        padding: 4px 8px;
+        background: rgba(98, 98, 166, 0.1);
+        border-radius: 6px;
+        font-size: 12px;
+        color: #6262a6;
+        font-weight: 500;
+    }
+
+    .product-dimensions i {
+        font-size: 11px;
+        color: #6262a6;
+    }
+
+    .dimensions-text {
+        font-size: 11px;
+        color: #6262a6;
+        font-weight: 500;
+    }
+
+    .modern-product-card .product-dimensions {
+        margin: 6px 0;
+        padding: 3px 6px;
+        background: rgba(98, 98, 166, 0.08);
+        border-radius: 4px;
+    }
+
+    .modern-product-card .product-dimensions i {
+        font-size: 10px;
+    }
+
+    .modern-product-card .dimensions-text {
+        font-size: 10px;
+    }
+
+    /* Price Section Styles */
+    .price-section {
+        margin-top: 8px;
+    }
+
+    .price-section .price {
+        margin: 0;
+        font-weight: 600;
+        display: none;
+    }
+
+    .price-section .price.active {
+        display: block;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .product-dimensions {
+            margin: 6px 0;
+            padding: 3px 6px;
+            font-size: 11px;
+        }
+        
+        .product-dimensions i {
+            font-size: 10px;
+        }
+        
+        .dimensions-text {
+            font-size: 10px;
+        }
+
+        .price-section .price {
+            font-size: 14px;
+        }
+    }
+</style>
+}
+
+@section Scripts {
+<script>
+    // Pagination Debug
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('═══════════════════════════════════════');
+        console.log('📄 Products Page - Pagination Debug');
+        console.log('═══════════════════════════════════════');
+        console.log('CurrentPage (Model):', @Model.CurrentPage);
+        console.log('TotalPages:', @Model.TotalPages);
+        console.log('TotalProducts:', @Model.TotalProducts);
+        console.log('PageSize:', @Model.PageSize);
+        console.log('Products Count:', @Model.Products.Count);
+        console.log('URL:', window.location.href);
+        console.log('Query String:', window.location.search);
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log('Page param from URL:', urlParams.get('page'));
+        console.log('═══════════════════════════════════════');
+    });
+</script>
+}
+

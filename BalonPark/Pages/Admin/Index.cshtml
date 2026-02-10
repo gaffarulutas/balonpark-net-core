@@ -1,0 +1,446 @@
+@page
+@model BalonPark.Pages.Admin.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Dashboard";
+}
+
+@{
+    ViewData["AdminUserName"] = Model.AdminUserName;
+    ViewData["AdminEmail"] = Model.AdminEmail;
+    ViewData["LowStockCount"] = Model.LowStockProducts;
+}
+
+<!-- Page Header -->
+<div class="mb-6">
+    <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+    <p class="mt-1 text-sm text-gray-500">
+        Hoş geldiniz, @Model.AdminUserName - İşletme genel durumunuzu buradan takip edebilirsiniz
+    </p>
+</div>
+
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-6">
+    <!-- Total Products -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Toplam Ürün</dt>
+                        <dd class="flex items-baseline">
+                            <div class="text-2xl font-semibold text-gray-900">@Model.TotalProducts</div>
+                            <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                                @Model.ActiveProducts aktif
+                            </div>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+                <a href="/admin/products" class="font-medium text-gray-700 hover:text-gray-900">Tümünü gör</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Value -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Envanter Değeri</dt>
+                        <dd class="flex items-baseline">
+                            <div class="text-2xl font-semibold text-gray-900">₺@Model.TotalInventoryValue.ToString("N0")</div>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+                <span class="text-gray-500">Ort. fiyat: </span>
+                <span class="font-medium text-gray-900">₺@Model.AverageProductPrice.ToString("N2")</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Kategoriler</dt>
+                        <dd class="flex items-baseline">
+                            <div class="text-2xl font-semibold text-gray-900">@Model.TotalCategories</div>
+                            <div class="ml-2 flex items-baseline text-sm font-semibold text-gray-600">
+                                / @Model.TotalSubCategories alt
+                            </div>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+                <a href="/admin/categories" class="font-medium text-gray-700 hover:text-gray-900">Yönet</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Alert -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    @if (Model.LowStockProducts > 0 || Model.OutOfStockProducts > 0)
+                    {
+                        <svg class="h-6 w-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg class="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    }
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Stok Durumu</dt>
+                        <dd class="flex items-baseline">
+                            @if (Model.OutOfStockProducts > 0)
+                            {
+                                <div class="text-2xl font-semibold text-red-600">@Model.OutOfStockProducts</div>
+                                <div class="ml-2 text-sm font-medium text-red-600">tükendi</div>
+                            }
+                            else if (Model.LowStockProducts > 0)
+                            {
+                                <div class="text-2xl font-semibold text-yellow-600">@Model.LowStockProducts</div>
+                                <div class="ml-2 text-sm font-medium text-yellow-600">düşük</div>
+                            }
+                            else
+                            {
+                                <div class="text-2xl font-semibold text-green-600">İyi</div>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+                <a href="/admin/products?stockStatus=low" class="font-medium text-gray-700 hover:text-gray-900">Detaylar</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Statistics -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Blog Yazıları</dt>
+                        <dd class="flex items-baseline">
+                            <div class="text-2xl font-semibold text-gray-900">@Model.TotalBlogs</div>
+                            <div class="ml-2 flex items-baseline text-sm font-semibold text-blue-600">
+                                @Model.FeaturedBlogs öne çıkan
+                            </div>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm flex items-center">
+                <a href="/admin/blogs" class="font-medium text-gray-700 hover:text-gray-900">Tümünü gör</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Statistics -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    @if (Model.UnreadEmails > 0)
+                    {
+                        <div class="relative">
+                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    }
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">E-posta</dt>
+                        <dd class="flex items-baseline">
+                            @if (Model.UnreadEmails > 0)
+                            {
+                                <div class="text-2xl font-semibold text-red-600">@Model.UnreadEmails</div>
+                                <div class="ml-2 text-sm font-medium text-red-600">okunmadı</div>
+                            }
+                            else
+                            {
+                                <div class="text-2xl font-semibold text-gray-900">@Model.TotalInboxEmails</div>
+                                <div class="ml-2 text-sm font-medium text-gray-600">e-posta</div>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+                <a href="/admin/mails" class="font-medium text-gray-700 hover:text-gray-900">Gelen Kutusu</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Grid -->
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <!-- Recent Products & Low Stock -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Recent Products -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Son Eklenen Ürünler</h3>
+            </div>
+            <ul role="list" class="divide-y divide-gray-200">
+                @if (Model.RecentlyAddedProducts.Any())
+                {
+                    @foreach (var product in Model.RecentlyAddedProducts)
+                    {
+                        <li class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center min-w-0 flex-1">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-medium text-gray-900 truncate">@Html.Raw(product.Name)</p>
+                                        <p class="text-sm text-gray-500">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                ID: @product.Id
+                                            </span>
+                                            <span class="ml-2">Stok: @product.Stock</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center gap-3">
+                                    <span class="text-sm font-semibold text-gray-900">₺@product.Price.ToString("N2")</span>
+                                    @if (product.IsActive)
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Pasif</span>
+                                    }
+                                </div>
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="px-4 py-8 text-center text-gray-500">Henüz ürün eklenmemiş</li>
+                }
+            </ul>
+            <div class="px-4 py-4 sm:px-6 bg-gray-50 border-t border-gray-200">
+                <a href="/admin/products" class="text-sm font-medium text-gray-900 hover:text-gray-700">
+                    Tüm ürünleri gör <span aria-hidden="true">&rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Blogs -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Son Blog Yazıları</h3>
+            </div>
+            <ul role="list" class="divide-y divide-gray-200">
+                @if (Model.RecentBlogs.Any())
+                {
+                    @foreach (var blog in Model.RecentBlogs)
+                    {
+                        <li class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center min-w-0 flex-1">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-medium text-gray-900 truncate">@Html.Raw(blog.Title)</p>
+                                        <p class="text-sm text-gray-500">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                @blog.CreatedAt.ToString("dd MMM yyyy")
+                                            </span>
+                                            <span class="ml-2">@blog.ViewCount görüntülenme</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center gap-3">
+                                    @if (blog.IsFeatured)
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Öne Çıkan</span>
+                                    }
+                                    @if (blog.IsActive)
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Pasif</span>
+                                    }
+                                </div>
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="px-4 py-8 text-center text-gray-500">Henüz blog yazısı eklenmemiş</li>
+                }
+            </ul>
+            <div class="px-4 py-4 sm:px-6 bg-gray-50 border-t border-gray-200">
+                <a href="/admin/blogs" class="text-sm font-medium text-gray-900 hover:text-gray-700">
+                    Tüm blog yazılarını gör <span aria-hidden="true">&rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        @if (Model.LowStockProductsList.Any())
+        {
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-medium text-yellow-800">Düşük Stok Uyarısı</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <ul role="list" class="list-disc pl-5 space-y-1">
+                                @foreach (var product in Model.LowStockProductsList)
+                                {
+                                    <li>@Html.Raw(product.Name) - <span class="font-semibold">@product.Stock adet</span></li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="mt-4">
+                            <a href="/admin/products?stockStatus=low" class="text-sm font-medium text-yellow-800 hover:text-yellow-600">
+                                Tümünü gör <span aria-hidden="true">&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Quick Actions & Top Categories -->
+    <div class="space-y-6">
+        <!-- Quick Actions -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Hızlı İşlemler</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="space-y-3">
+                    <a href="/admin/products/create" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Yeni Ürün Ekle
+                    </a>
+                    <a href="/admin/categories/create" class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        Yeni Kategori Ekle
+                    </a>
+                    <a href="/admin/blogs/create" class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Yeni Blog Yazısı
+                    </a>
+                    <a href="/admin/googleshopping" class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Google Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Categories -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Popüler Kategoriler</h3>
+            </div>
+            <ul role="list" class="divide-y divide-gray-200">
+                @if (Model.TopCategories.Any())
+                {
+                    @foreach (var category in Model.TopCategories)
+                    {
+                        var productCount = Model.TotalProducts > 0 ? (Model.RecentlyAddedProducts.Count(p => p.CategoryId == category.Id) * 100 / Model.TotalProducts) : 0;
+                        <li class="px-4 py-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">@Html.Raw(category.Name)</p>
+                                </div>
+                                <div class="ml-4 flex-shrink-0">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        @category.Id ürün
+                                    </span>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="px-4 py-4 text-center text-gray-500">Kategori bulunamadı</li>
+                }
+            </ul>
+            <div class="px-4 py-4 bg-gray-50 border-t border-gray-200">
+                <a href="/admin/categories" class="text-sm font-medium text-gray-900 hover:text-gray-700">
+                    Tüm kategoriler <span aria-hidden="true">&rarr;</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

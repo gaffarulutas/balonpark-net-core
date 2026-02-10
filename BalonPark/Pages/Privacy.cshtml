@@ -1,0 +1,413 @@
+﻿@page "/GizlilikPolitikasi"
+@model PrivacyModel
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    ViewData["Title"] = "Gizlilik Politikası";
+    ViewData["Description"] = $"{companyName} gizlilik politikası. Kişisel verilerinizin nasıl toplandığı, işlendiği ve korunduğu hakkında bilgi.";
+    ViewData["Keywords"] = "gizlilik politikası, kişisel veriler, veri koruma, ünlü park, güvenlik";
+    ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
+}
+
+<!-- Privacy Policy Section Start -->
+<div class="privacy-section py-5">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-title text-center mb-5">
+                    <h2>Gizlilik Politikası</h2>
+                    <p class="section-subtitle">Kişisel Verilerinizin Korunması ve Güvenliği</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="privacy-content">
+                    <!-- Introduction -->
+                    <div class="row mb-5">
+                        <div class="col-12">
+                            <div class="info-card">
+                                <div class="info-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="info-content">
+                                    <h3>Gizlilik Politikamız</h3>
+                                    <p>@companyName olarak, kişisel verilerinizin gizliliği ve güvenliği bizim için son derece önemlidir. Bu gizlilik politikası, kişisel verilerinizin nasıl toplandığı, işlendiği ve korunduğu hakkında bilgi vermektedir.</p>
+                                    <p class="last-updated"><strong>Son Güncelleme:</strong> @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Privacy Policy Cards -->
+                    <div class="row mb-5">
+                        <div class="col-lg-6 mb-4">
+                            <div class="info-card">
+                                <div class="info-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="info-content">
+                                    <h3>Veri Sorumlusu</h3>
+                                    <p>Kişisel verilerinizin işlenmesinden sorumlu olan veri sorumlusu @companyName'dır.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="info-card">
+                                <div class="info-icon">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="info-content">
+                                    <h3>Toplanan Veriler</h3>
+                                    <p>İletişim bilgileri, iletişim geçmişi, web sitesi kullanım bilgileri ve IP adresi gibi kişisel verilerinizi toplayabiliriz.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Processing Purposes -->
+                    <div class="row mb-5">
+                        <div class="col-12">
+                            <div class="vision-card">
+                                <div class="vision-icon">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <div class="vision-content">
+                                    <h3>Veri İşleme Amaçları</h3>
+                                    <p>Müşteri hizmetleri, ürün bilgileri sunma, web sitesi performans analizi ve yasal yükümlülükleri yerine getirme amaçlarıyla verilerinizi işliyoruz.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="features-section">
+                                <h3 class="features-title">Veri Güvenliği ve Haklarınız</h3>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-6 mb-4">
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <i class="fas fa-lock"></i>
+                                            </div>
+                                            <h4>Veri Güvenliği</h4>
+                                            <p>Kişisel verilerinizi güvenli sunucularda saklıyor ve yetkisiz erişimlere karşı koruyoruz.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6 mb-4">
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <i class="fas fa-share-alt-slash"></i>
+                                            </div>
+                                            <h4>Veri Paylaşımı</h4>
+                                            <p>Verileriniz yasal zorunluluklar dışında üçüncü taraflarla paylaşılmaz.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6 mb-4">
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <i class="fas fa-cookie-bite"></i>
+                                            </div>
+                                            <h4>Çerezler</h4>
+                                            <p>Kullanıcı deneyimini iyileştirmek için çerezler kullanırız. Tarayıcı ayarlarınızdan yönetebilirsiniz.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6 mb-4">
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <i class="fas fa-balance-scale"></i>
+                                            </div>
+                                            <h4>KVKK Hakları</h4>
+                                            <p>Verileriniz hakkında bilgi alma, düzeltme ve silme haklarınız bulunmaktadır.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <div class="contact-section">
+                                <h3 class="contact-title">İletişim</h3>
+                                <p class="contact-text">Gizlilik politikası hakkında sorularınız veya kişisel verilerinizle ilgili talepleriniz için bizimle iletişime geçebilirsiniz.</p>
+                                <div class="contact-buttons">
+                                    <a href="https://wa.me/905336355039" target="_blank" class="contact-btn whatsapp-btn">
+                                        <i class="fab fa-whatsapp"></i>
+                                        <span>WhatsApp</span>
+                                    </a>
+                                    <a href="tel:+905336355039" class="contact-btn phone-btn">
+                                        <i class="fas fa-phone"></i>
+                                        <span>Telefon</span>
+                                    </a>
+                                    <a asp-page="/Iletisim" class="contact-btn contact-page-btn">
+                                        <i class="fas fa-envelope"></i>
+                                        <span>İletişim Sayfası</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Privacy Policy Section End -->
+
+@section Styles {
+<style>
+/* Privacy Section */
+.privacy-section {
+    background-color: #f8f9fa;
+}
+
+.section-title h2 {
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Info Cards */
+.info-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.info-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.info-content h3 {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.info-content p {
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.last-updated {
+    color: #007bff;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+/* Vision Card */
+.vision-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    text-align: center;
+}
+
+.vision-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.vision-content h3 {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.vision-content p {
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Features Section */
+.features-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.features-title {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.feature-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    height: 100%;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.feature-card .feature-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.feature-card h4 {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+    color: #666;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Contact Section */
+.contact-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.contact-title {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.contact-text {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.contact-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.whatsapp-btn {
+    background-color: #25d366;
+    color: white;
+}
+
+.whatsapp-btn:hover {
+    background-color: #128c7e;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.phone-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.phone-btn:hover {
+    background-color: #0056b3;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.contact-page-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.contact-page-btn:hover {
+    background-color: #545b62;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+    .info-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .vision-card {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .contact-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .contact-btn {
+        width: 200px;
+        justify-content: center;
+    }
+}
+</style>
+}

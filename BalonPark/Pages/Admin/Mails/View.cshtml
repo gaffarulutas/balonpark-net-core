@@ -1,0 +1,1136 @@
+@page
+@model BalonPark.Pages.Admin.Mails.ViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "E-posta Detayı";
+    ViewData["AdminUserName"] = Model.AdminUserName;
+    ViewData["AdminEmail"] = Model.AdminEmail;
+}
+
+@if (Model.Message == null)
+{
+    <div class="email-view-empty">
+        <div class="empty-content">
+            <div class="empty-icon">
+                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+            </div>
+            <h3 class="empty-title">E-posta bulunamadı</h3>
+            <p class="empty-message">İstediğiniz e-posta mevcut değil veya silinmiş.</p>
+            <a href="/admin/mails" class="btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                E-posta Kutusuna Dön
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <!-- E-posta Görüntüleme Arayüzü -->
+    <div class="email-view">
+        <!-- Header -->
+        <div class="email-view-header">
+            <div class="email-view-nav">
+                <a href="/admin/mails?folder=@Model.Folder" class="nav-back">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Geri
+                </a>
+                <div class="nav-breadcrumb">
+                    <span class="breadcrumb-item">E-posta Yönetimi</span>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span class="breadcrumb-item active">@Model.Message.Subject</span>
+                </div>
+            </div>
+            <div class="email-view-actions">
+                <button type="button" onclick="toggleFlag()" class="action-btn @(Model.Message.IsFlagged ? "starred" : "")" title="@(Model.Message.IsFlagged ? "Önemliden çıkar" : "Önemli olarak işaretle")">
+                    <svg class="w-5 h-5" fill="@(Model.Message.IsFlagged ? "currentColor" : "none")" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                </button>
+                <button type="button" onclick="moveToSpam()" class="action-btn" title="Gereksiz'e taşı">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </button>
+                <button type="button" onclick="deleteMessage()" class="action-btn delete-btn" title="Sil">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+                <a href="/admin/mails/compose?folder=@Model.Folder&uid=@Model.Uid" class="btn-reply">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                    Yanıtla
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+        {
+            <div class="alert alert-success">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>@TempData["SuccessMessage"]</span>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+        {
+            <div class="alert alert-error">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>@TempData["ErrorMessage"]</span>
+            </div>
+        }
+
+        <!-- E-posta İçeriği -->
+        <div class="email-view-content">
+            <!-- E-posta Başlığı -->
+            <div class="email-header">
+                <div class="email-header-main">
+                    <div class="sender-avatar">
+                        @Model.Message.FromName.Substring(0, 1).ToUpper()
+                    </div>
+                    <div class="email-header-info">
+                        <div class="email-sender-info">
+                            <h2 class="sender-name">@Model.Message.FromName</h2>
+                            <span class="sender-email">@Model.Message.From</span>
+                        </div>
+                        <div class="email-subject-line">
+                            <h1 class="email-subject">@Model.Message.Subject</h1>
+                        </div>
+                        <div class="email-meta">
+                            <div class="email-date">
+                                @Model.Message.Date.ToString("dd MMMM yyyy, HH:mm")
+                            </div>
+                            <div class="email-status">
+                                @if (Model.Message.IsSeen)
+                                {
+                                    <span class="status-badge read">Okundu</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge unread">Okunmadı</span>
+                                }
+                                @if (Model.Message.IsFlagged)
+                                {
+                                    <span class="status-badge flagged">Önemli</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="email-header-actions">
+                    <button type="button" onclick="toggleFlag()" class="action-btn @(Model.Message.IsFlagged ? "starred" : "")" title="@(Model.Message.IsFlagged ? "Önemliden çıkar" : "Önemli olarak işaretle")">
+                        <svg class="w-5 h-5" fill="@(Model.Message.IsFlagged ? "currentColor" : "none")" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </button>
+                    <a href="/admin/mails/compose?folder=@Model.Folder&uid=@Model.Uid" class="action-btn reply-btn" title="Yanıtla">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Attachments -->
+            @if (Model.Message.HasAttachments && Model.Message.Attachments.Any())
+            {
+                <div class="email-attachments">
+                    <h3 class="attachments-title">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                        Ekler (@Model.Message.Attachments.Count)
+                    </h3>
+                    <div class="attachments-list">
+                        @foreach (var attachment in Model.Message.Attachments)
+                        {
+                            <div class="attachment-item">
+                                <div class="attachment-icon">
+                                    @{
+                                        var extension = System.IO.Path.GetExtension(attachment.FileName).ToLower();
+                                        var iconColor = extension switch
+                                        {
+                                            ".pdf" => "text-red-500",
+                                            ".doc" or ".docx" => "text-blue-500",
+                                            ".xls" or ".xlsx" => "text-green-500",
+                                            ".jpg" or ".jpeg" or ".png" or ".gif" => "text-purple-500",
+                                            ".zip" or ".rar" => "text-yellow-500",
+                                            _ => "text-gray-500"
+                                        };
+                                    }
+                                    <svg class="h-8 w-8 @iconColor" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div class="attachment-info">
+                                    <div class="attachment-name">@attachment.FileName</div>
+                                    <div class="attachment-size">
+                                        @((attachment.Size / 1024).ToString("N0")) KB
+                                        @if (!string.IsNullOrEmpty(attachment.ContentType))
+                                        {
+                                            <span> • @attachment.ContentType.Split('/').LastOrDefault()?.ToUpper()</span>
+                                        }
+                                    </div>
+                                </div>
+                                <button type="button" class="attachment-download" title="İndir">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- E-posta Gövdesi -->
+            <div class="email-body">
+                <div class="email-body-content">
+                    @if (Model.Message.IsHtml)
+                    {
+                        <div class="email-html-content">
+                            @Html.Raw(Model.Message.Body)
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="email-text-content">
+                            <p class="email-text">@Model.Message.Body</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- E-posta Alt Bilgisi -->
+            <div class="email-footer">
+                <div class="email-footer-info">
+                    <div class="footer-item">
+                        <span class="footer-label">Alıcı:</span>
+                        <span class="footer-value">@Model.Message.To</span>
+                    </div>
+                    <div class="footer-item">
+                        <span class="footer-label">Gönderim Tarihi:</span>
+                        <span class="footer-value">@Model.Message.Date.ToString("dd MMMM yyyy, HH:mm:ss")</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Message.MessageId))
+                    {
+                        <div class="footer-item">
+                            <span class="footer-label">Message ID:</span>
+                            <span class="footer-value message-id">@Model.Message.MessageId</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Styles {
+<style>
+/* Modern Email View Styles */
+.email-view {
+    height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+}
+
+/* View Header */
+.email-view-header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.email-view-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-back {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+}
+
+.nav-back:hover {
+    background: #f1f5f9;
+    color: #374151;
+}
+
+.nav-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.breadcrumb-item {
+    color: #64748b;
+}
+
+.breadcrumb-item.active {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.email-view-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    background: #f1f5f9;
+    color: #374151;
+}
+
+.action-btn.starred {
+    color: #fbbf24;
+}
+
+.action-btn.delete-btn:hover {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.btn-reply {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-reply:hover {
+    background: #2563eb;
+    color: white;
+}
+
+/* Content */
+.email-view-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Email Header */
+.email-header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.email-header-main {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+}
+
+.sender-avatar {
+    width: 3rem;
+    height: 3rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.email-header-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.email-sender-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.sender-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.sender-email {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.email-subject-line {
+    margin-bottom: 0.75rem;
+}
+
+.email-subject {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    word-break: break-word;
+}
+
+.email-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.email-date {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.email-status {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.status-badge.read {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.unread {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.flagged {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.email-header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Attachments */
+.email-attachments {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem;
+}
+
+.attachments-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.attachments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+.attachment-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.attachment-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attachment-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.attachment-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.25rem;
+    word-break: break-all;
+}
+
+.attachment-size {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.attachment-download {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attachment-download:hover {
+    background: #e2e8f0;
+    color: #374151;
+}
+
+/* Email Body */
+.email-body {
+    flex: 1;
+    background: white;
+    overflow-y: auto;
+    /* Prevent content from breaking layout */
+    overflow-x: hidden;
+    contain: layout;
+}
+
+.email-body-content {
+    padding: 1.5rem;
+    max-width: none;
+    /* Container protection */
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    /* Prevent horizontal scroll */
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Email HTML Content Styles */
+.email-html-content {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #374151;
+    max-width: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    /* Container isolation */
+    isolation: isolate;
+    contain: layout style;
+}
+
+/* Force all elements to respect container bounds */
+.email-html-content *,
+.email-html-content *:before,
+.email-html-content *:after {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    /* Prevent overflow */
+    overflow: hidden !important;
+}
+
+/* Reset problematic styles from email HTML */
+.email-html-content table {
+    max-width: 100% !important;
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+.email-html-content td,
+.email-html-content th {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: none !important;
+}
+
+/* Prevent email styles from affecting layout */
+.email-html-content div {
+    max-width: 100% !important;
+    width: auto !important;
+}
+
+/* Isolate email content from page styles */
+.email-html-content {
+    all: initial;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    line-height: 1.6 !important;
+    color: #374151 !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.email-html-content h1,
+.email-html-content h2,
+.email-html-content h3,
+.email-html-content h4,
+.email-html-content h5,
+.email-html-content h6 {
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: #111827;
+}
+
+.email-html-content h1 { font-size: 1.875rem; }
+.email-html-content h2 { font-size: 1.5rem; }
+.email-html-content h3 { font-size: 1.25rem; }
+.email-html-content h4 { font-size: 1.125rem; }
+.email-html-content h5 { font-size: 1rem; }
+.email-html-content h6 { font-size: 0.875rem; }
+
+.email-html-content p {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    line-height: 1.7;
+}
+
+.email-html-content a {
+    color: #2563eb;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.email-html-content a:hover {
+    color: #1d4ed8;
+}
+
+.email-html-content ul,
+.email-html-content ol {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding-left: 2em;
+}
+
+.email-html-content li {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.email-html-content blockquote {
+    margin: 1.5em 0;
+    padding-left: 1em;
+    border-left: 4px solid #e5e7eb;
+    font-style: italic;
+    color: #6b7280;
+}
+
+.email-html-content code {
+    background-color: #f3f4f6;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875em;
+    color: #374151;
+}
+
+.email-html-content pre {
+    background-color: #f3f4f6;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.email-html-content pre code {
+    background-color: transparent;
+    padding: 0;
+    font-size: 0.875rem;
+}
+
+.email-html-content table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+}
+
+.email-html-content th,
+.email-html-content td {
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+}
+
+.email-html-content th {
+    background-color: #f9fafb;
+    font-weight: 600;
+}
+
+.email-html-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1em 0;
+}
+
+.email-html-content hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 2em 0;
+}
+
+/* Reset any potentially problematic styles */
+.email-html-content div,
+.email-html-content span,
+.email-html-content p {
+    max-width: 100% !important;
+    width: auto !important;
+}
+
+/* Override email inline styles that break layout */
+.email-html-content [style*="width"] {
+    max-width: 100% !important;
+    width: auto !important;
+}
+
+.email-html-content [style*="min-width"] {
+    min-width: auto !important;
+}
+
+.email-html-content [style*="max-width"] {
+    max-width: 100% !important;
+}
+
+/* Handle email tables specifically */
+.email-html-content table[width],
+.email-html-content td[width],
+.email-html-content th[width] {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Prevent email images from breaking layout */
+.email-html-content img {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block !important;
+}
+
+/* Handle email containers */
+.email-html-content .email-container,
+.email-html-content .email-wrapper,
+.email-html-content .email-content,
+.email-html-content [class*="email"] {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Force responsive behavior */
+.email-html-content * {
+    -webkit-box-sizing: border-box !important;
+    -moz-box-sizing: border-box !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure text content doesn't break layout */
+.email-text-content {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #374151;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.email-text {
+    white-space: pre-wrap;
+    font-size: 1rem;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* Email Footer */
+.email-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 1rem 1.5rem;
+}
+
+.email-footer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footer-item {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.footer-label {
+    font-weight: 500;
+    color: #64748b;
+    min-width: 120px;
+}
+
+.footer-value {
+    color: #374151;
+    word-break: break-all;
+}
+
+.footer-value.message-id {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.75rem;
+    background: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+/* Empty State */
+.email-view-empty {
+    height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+}
+
+.empty-content {
+    text-align: center;
+    padding: 3rem;
+}
+
+.empty-icon {
+    margin-bottom: 1.5rem;
+}
+
+.empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-message {
+    color: #6b7280;
+    margin: 0 0 2rem 0;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+    color: white;
+}
+
+/* Alerts */
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    margin: 0 1.5rem 1rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+    .email-view-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .email-view-actions {
+        justify-content: flex-end;
+    }
+
+    .email-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .email-header-main {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .email-sender-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .email-subject {
+        font-size: 1.25rem;
+    }
+
+    .email-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .email-attachments,
+    .email-body-content {
+        padding: 1rem;
+    }
+
+    .email-footer {
+        padding: 1rem;
+    }
+
+    .footer-item {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .footer-label {
+        min-width: auto;
+    }
+}
+
+@@media (max-width: 640px) {
+    .nav-breadcrumb {
+        display: none;
+    }
+
+    .email-view-actions {
+        flex-wrap: wrap;
+    }
+
+    .attachment-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .attachment-download {
+        align-self: flex-end;
+    }
+}
+</style>
+}
+
+@section Scripts {
+<script>
+    // Sanitize HTML email content to prevent layout breaking
+    function sanitizeEmailContent() {
+        const htmlContent = document.querySelector('.email-html-content');
+        if (htmlContent) {
+            // Remove or modify problematic inline styles
+            const elementsWithWidth = htmlContent.querySelectorAll('[style*="width"]');
+            elementsWithWidth.forEach(el => {
+                el.style.maxWidth = '100%';
+                el.style.width = 'auto';
+            });
+            
+            // Fix table layouts
+            const tables = htmlContent.querySelectorAll('table');
+            tables.forEach(table => {
+                table.style.maxWidth = '100%';
+                table.style.width = '100%';
+                table.style.tableLayout = 'fixed';
+            });
+            
+            // Fix images
+            const images = htmlContent.querySelectorAll('img');
+            images.forEach(img => {
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.display = 'block';
+            });
+            
+            // Remove any fixed widths from containers
+            const containers = htmlContent.querySelectorAll('div, span, p');
+            containers.forEach(container => {
+                if (container.style.width && container.style.width.includes('px')) {
+                    container.style.width = 'auto';
+                }
+                if (container.style.minWidth && container.style.minWidth.includes('px')) {
+                    container.style.minWidth = 'auto';
+                }
+            });
+        }
+    }
+    
+    // Run sanitization when page loads
+    document.addEventListener('DOMContentLoaded', sanitizeEmailContent);
+    
+    async function toggleFlag() {
+        try {
+            showLoading('İşleniyor...');
+            const response = await fetch('/api/mails/toggle-flag', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder: '@Model.Folder', uid: @Model.Uid })
+            });
+            
+            const result = await response.json();
+            hideLoading();
+            
+            if (result.success) {
+                showSuccessAlert('İşaretleme güncellendi');
+                setTimeout(() => location.reload(), 800);
+            } else {
+                showErrorAlert(result.message || 'İşlem başarısız oldu');
+            }
+        } catch (error) {
+            hideLoading();
+            console.error('Error:', error);
+            showErrorAlert('Bir hata oluştu');
+        }
+    }
+
+    async function moveToSpam() {
+        const result = await showConfirm({
+            title: 'Spam\'e taşınsın mı?',
+            text: 'Bu mesajı spam klasörüne taşımak istediğinize emin misiniz?',
+            icon: 'warning'
+        });
+        
+        if (result.isConfirmed) {
+            try {
+                showLoading('Taşınıyor...');
+                const response = await fetch('/api/mails/move', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sourceFolder: '@Model.Folder', uid: @Model.Uid, targetFolder: 'Spam' })
+                });
+                
+                const data = await response.json();
+                hideLoading();
+                
+                if (data.success) {
+                    showSuccessAlert('Mesaj spam klasörüne taşındı');
+                    setTimeout(() => {
+                        window.location.href = '/admin/mails?folder=@Model.Folder';
+                    }, 1000);
+                } else {
+                    showErrorAlert(data.message || 'İşlem başarısız oldu');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error:', error);
+                showErrorAlert('Bir hata oluştu');
+            }
+        }
+    }
+
+    async function deleteMessage() {
+        showDeleteConfirm('Bu mesajı silmek istediğinize emin misiniz? Mesaj çöp kutusuna taşınacak.', async function() {
+            try {
+                showLoading('Siliniyor...');
+                const response = await fetch('/api/mails/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folder: '@Model.Folder', uid: @Model.Uid })
+                });
+                
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.success) {
+                    showSuccessAlert('Mesaj silindi');
+                    setTimeout(() => {
+                        window.location.href = '/admin/mails?folder=@Model.Folder';
+                    }, 1000);
+                } else {
+                    showErrorAlert(result.message || 'İşlem başarısız oldu');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error:', error);
+                showErrorAlert('Bir hata oluştu');
+            }
+        });
+    }
+</script>
+}

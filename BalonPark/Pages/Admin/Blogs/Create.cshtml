@@ -1,0 +1,397 @@
+@page
+@model BalonPark.Pages.Admin.Blogs.CreateModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Yeni Blog Yazısı";
+}
+
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Yeni Blog Yazısı
+            </h1>
+            <p class="text-gray-600 mt-2">Yeni bir blog yazısı oluşturun</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="/Admin/Blogs" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Geri Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Messages -->
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-green-800">Başarılı!</p>
+                <p class="text-green-700">@Model.SuccessMessage</p>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-red-800">Hata!</p>
+                <p class="text-red-700">@Model.ErrorMessage</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Form -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <form method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        
+        <div class="space-y-6">
+            <!-- Title and Category -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Blog.Title" class="block text-sm font-medium text-gray-700 mb-2">
+                        Başlık <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" asp-for="Blog.Title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Blog yazısının başlığını girin">
+                    <span asp-validation-for="Blog.Title" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Blog.Category" class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                    <select asp-for="Blog.Category" id="blogCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                        <option value="">Kategori seçin...</option>
+                        <option value="Çocuk Parkları">Çocuk Parkları</option>
+                        <option value="Reklam Balonları">Reklam Balonları</option>
+                        <option value="Softplay Oyun Alanı">Softplay Oyun Alanı</option>
+                        <option value="Şişme Çadırlar">Şişme Çadırlar</option>
+                        <option value="Şişme Parklar">Şişme Parklar</option>
+                        <option value="Top Havuzları">Top Havuzları</option>
+                        <option value="Trambolinler">Trambolinler</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Excerpt with AI -->
+            <div>
+                <label asp-for="Blog.Excerpt" class="block text-sm font-medium text-gray-700 mb-2">
+                    Özet <span class="text-red-500">*</span>
+                </label>
+                <div class="flex gap-2">
+                    <textarea asp-for="Blog.Excerpt" id="blogExcerpt" rows="3" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Blog yazısının kısa özeti..."></textarea>
+                    <button type="button" id="aiGenerateBtn" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors duration-200 whitespace-nowrap flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        AI ile Doldur
+                    </button>
+                </div>
+                <small class="text-gray-500 text-sm mt-1 block">Bu özet blog listesinde ve sosyal medyada görünecek</small>
+                <span asp-validation-for="Blog.Excerpt" class="text-red-500 text-sm mt-1 block"></span>
+            </div>
+
+            <!-- Content (CKEditor) -->
+            <div>
+                <label asp-for="Blog.Content" class="block text-sm font-medium text-gray-700 mb-2">
+                    İçerik <span class="text-red-500">*</span>
+                </label>
+                <textarea asp-for="Blog.Content" id="blogContentEditor" rows="15" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200"></textarea>
+                <span asp-validation-for="Blog.Content" class="text-red-500 text-sm mt-1 block"></span>
+            </div>
+
+            <!-- Meta Description -->
+            <div>
+                <label asp-for="Blog.MetaDescription" class="block text-sm font-medium text-gray-700 mb-2">Meta Açıklama (SEO)</label>
+                <textarea asp-for="Blog.MetaDescription" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="SEO için meta açıklama (max 160 karakter)"></textarea>
+                <small class="text-gray-500 text-sm mt-1 block">Arama motorlarında görünecek açıklama</small>
+            </div>
+
+            <!-- Featured Image -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Öne Çıkan Görsel</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-400 transition-colors duration-200">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600">
+                            <label for="FeaturedImageFile" class="relative cursor-pointer bg-white rounded-md font-medium text-gray-900 hover:text-gray-800">
+                                <span>Dosya yükle</span>
+                                <input type="file" id="FeaturedImageFile" name="FeaturedImageFile" accept="image/*" class="sr-only">
+                            </label>
+                            <p class="pl-1">veya URL girin</p>
+                        </div>
+                        <input type="text" asp-for="Blog.FeaturedImage" class="w-full mt-2 px-3 py-2 text-sm border border-gray-200 rounded-md" placeholder="https://example.com/image.jpg">
+                    </div>
+                </div>
+                <small class="text-gray-500 text-sm mt-2 block">Görsel dosyası yükleyin veya URL girin</small>
+            </div>
+
+            <!-- Author and Tags -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Blog.AuthorName" class="block text-sm font-medium text-gray-700 mb-2">
+                        Yazar <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" asp-for="Blog.AuthorName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Yazar adı">
+                    <span asp-validation-for="Blog.AuthorName" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Blog.Tags" class="block text-sm font-medium text-gray-700 mb-2">Etiketler</label>
+                    <input type="text" asp-for="Blog.Tags" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="etiket1, etiket2, etiket3">
+                    <small class="text-gray-500 text-sm mt-1 block">Virgülle ayırarak etiket ekleyin</small>
+                </div>
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center">
+                    <input type="checkbox" asp-for="Blog.IsActive" checked class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                    <label asp-for="Blog.IsActive" class="ml-2 block text-sm text-gray-900">Aktif</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" asp-for="Blog.IsFeatured" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                    <label asp-for="Blog.IsFeatured" class="ml-2 block text-sm text-gray-900">Öne Çıkan</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="border-t border-gray-200 mt-8 pt-6">
+            <div class="flex items-center gap-3">
+                <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Blog kaydediliyor...">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                    </svg>
+                    Kaydet
+                </button>
+                <a href="/Admin/Blogs" class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                    İptal
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <!-- CKEditor CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
+    
+    <script>
+        // CKEditor initialization
+        let editor;
+        ClassicEditor
+            .create(document.querySelector('#blogContentEditor'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'underline', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'link', 'blockQuote', 'insertTable', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                language: 'tr',
+                placeholder: 'Blog içeriğini buraya yazın...'
+            })
+            .then(editorInstance => {
+                editor = editorInstance;
+            })
+            .catch(error => {
+                console.error('CKEditor yüklenirken hata oluştu:', error);
+            });
+
+        // AI Generate with Google-style progress
+        $('#aiGenerateBtn').on('click', function() {
+            const excerpt = $('#blogExcerpt').val();
+            
+            if (!excerpt || excerpt.trim() === '') {
+                Swal.fire('Uyarı', 'Lütfen önce blog özeti yazın! AI bu özetten yola çıkarak tam blog içeriği oluşturacak.', 'warning');
+                return;
+            }
+            
+            const $btn = $(this);
+            const originalHtml = $btn.html();
+            $btn.prop('disabled', true);
+            
+            // Google-style progress modal
+            Swal.fire({
+                title: 'AI İçerik Oluşturuyor...',
+                html: `
+                    <div class="text-left">
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-700">İşlem Durumu</span>
+                                <span class="text-sm text-gray-500" id="progress-percentage">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out" id="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div id="progress-step-1" class="flex items-center">
+                                <div class="w-4 h-4 rounded-full bg-gray-300 mr-2 flex items-center justify-center">
+                                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                                <span>AI ile bağlantı kuruluyor...</span>
+                            </div>
+                            <div id="progress-step-2" class="flex items-center opacity-50">
+                                <div class="w-4 h-4 rounded-full bg-gray-300 mr-2 flex items-center justify-center">
+                                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                                <span>Blog içeriği oluşturuluyor...</span>
+                            </div>
+                            <div id="progress-step-3" class="flex items-center opacity-50">
+                                <div class="w-4 h-4 rounded-full bg-gray-300 mr-2 flex items-center justify-center">
+                                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                                <span>SEO verileri hazırlanıyor...</span>
+                            </div>
+                            <div id="progress-step-4" class="flex items-center opacity-50">
+                                <div class="w-4 h-4 rounded-full bg-gray-300 mr-2 flex items-center justify-center">
+                                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                                <span>Etiketler ve kategoriler belirleniyor...</span>
+                            </div>
+                            <div id="progress-step-5" class="flex items-center opacity-50">
+                                <div class="w-4 h-4 rounded-full bg-gray-300 mr-2 flex items-center justify-center">
+                                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                                <span>İçerik tamamlanıyor...</span>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    // Simulate progress steps
+                    let progress = 0;
+                    const steps = [
+                        { id: 'progress-step-1', delay: 500, progress: 20 },
+                        { id: 'progress-step-2', delay: 1500, progress: 40 },
+                        { id: 'progress-step-3', delay: 2500, progress: 60 },
+                        { id: 'progress-step-4', delay: 3500, progress: 80 },
+                        { id: 'progress-step-5', delay: 4500, progress: 100 }
+                    ];
+                    
+                    steps.forEach((step, index) => {
+                        setTimeout(() => {
+                            // Update step visual
+                            const stepElement = document.getElementById(step.id);
+                            if (stepElement) {
+                                stepElement.classList.remove('opacity-50');
+                                stepElement.querySelector('div').classList.remove('bg-gray-300');
+                                stepElement.querySelector('div').classList.add('bg-blue-600');
+                                stepElement.querySelector('div > div').classList.remove('bg-white');
+                                stepElement.querySelector('div > div').classList.add('bg-white');
+                            }
+                            
+                            // Update progress bar
+                            progress = step.progress;
+                            const progressBar = document.getElementById('progress-bar');
+                            const progressPercentage = document.getElementById('progress-percentage');
+                            if (progressBar) progressBar.style.width = progress + '%';
+                            if (progressPercentage) progressPercentage.textContent = progress + '%';
+                        }, step.delay);
+                    });
+                }
+            });
+            
+            $.ajax({
+                url: window.location.pathname + '?handler=GenerateAiContent',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ blogTopic: excerpt }),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Fill form fields
+                        if (response.data.title) $('#Blog_Title').val(response.data.title);
+                        if (response.data.excerpt) $('#blogExcerpt').val(response.data.excerpt);
+                        if (response.data.content && editor) editor.setData(response.data.content);
+                        if (response.data.category) $('#blogCategory').val(response.data.category);
+                        if (response.data.metaTitle) $('#Blog_MetaTitle').val(response.data.metaTitle);
+                        if (response.data.metaDescription) $('#Blog_MetaDescription').val(response.data.metaDescription);
+                        if (response.data.metaKeywords) $('#Blog_MetaKeywords').val(response.data.metaKeywords);
+                        if (response.data.tags) $('#Blog_Tags').val(response.data.tags);
+                        
+                        // Close progress modal and show success
+                        Swal.close();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Başarılı!',
+                            text: 'Yapay zeka ile kapsamlı blog içeriği oluşturuldu!',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.close();
+                        Swal.fire('Hata', response.message, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.close();
+                    Swal.fire('Hata', 'AI içerik oluşturulurken hata: ' + error, 'error');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).html(originalHtml);
+                }
+            });
+        });
+
+        // Featured Image Preview
+        $('#FeaturedImageFile').on('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Show preview
+                    const previewHtml = `
+                        <div class="mt-4">
+                            <img src="${e.target.result}" alt="Önizleme" class="max-w-xs mx-auto rounded-lg shadow-md">
+                            <p class="text-sm text-gray-600 mt-2 text-center">${file.name}</p>
+                        </div>
+                    `;
+                    $('.featured-image-preview').remove();
+                    $(this).closest('.space-y-1').after(`<div class="featured-image-preview">${previewHtml}</div>`);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submit
+        $('form').on('submit', function() {
+            if (editor) {
+                editor.updateSourceElement();
+            }
+        });
+        
+        // Auto-hide messages
+        setTimeout(() => {
+            $('.bg-green-50, .bg-red-50').fadeOut();
+        }, 5000);
+    </script>
+}

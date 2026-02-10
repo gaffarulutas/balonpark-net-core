@@ -1,0 +1,758 @@
+@page
+@model BalonPark.Pages.Admin.Products.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Ürünler";
+}
+
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                Ürün Yönetimi
+            </h1>
+            <p class="text-gray-600 mt-2">Ürünleri görüntüle, ekle, düzenle ve sil</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="/admin/products/create" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Yeni Ürün
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-green-800">İşlem Başarılı</p>
+                <p class="text-green-700">@Model.SuccessMessage</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Filter Form -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+        </svg>
+        Filtreleme
+    </h3>
+    
+    <form method="get" id="filterForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <!-- Categories Custom Select - Tailwind UI Style -->
+            <div>
+                <label class="block text-sm font-medium text-gray-900 mb-2">Kategoriler</label>
+                <div class="relative" id="categorySelectWrapper">
+                    <button type="button" id="categorySelectBtn" class="relative w-full cursor-default rounded-lg bg-white py-2.5 pl-3 pr-10 text-left border border-gray-300 shadow-sm focus:border-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-800 sm:text-sm transition-all duration-200 hover:border-gray-400">
+                        <span class="flex items-center">
+                            <span class="block truncate text-gray-900 font-medium" id="categorySelectText">Tüm Kategoriler</span>
+                        </span>
+                        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                    </button>
+
+                    <div id="categorySelectDropdown" class="hidden absolute z-50 mt-2 w-full rounded-lg bg-white py-1 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-200 ease-out">
+                        <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Kategori Seçin</p>
+                            <div class="flex gap-2">
+                                <button type="button" id="selectAllCategories" class="text-xs text-gray-900 hover:text-gray-800 font-medium">Tümü</button>
+                                <span class="text-gray-300">|</span>
+                                <button type="button" id="clearCategories" class="text-xs text-gray-500 hover:text-gray-700 font-medium">Temizle</button>
+                            </div>
+                        </div>
+                        <div class="max-h-60 overflow-auto py-1">
+                            @foreach (var category in Model.Categories)
+                            {
+                                <div class="group relative">
+                                    <label class="flex items-center px-3 py-2.5 cursor-pointer hover:bg-indigo-50 transition-colors duration-150">
+                                        <input type="checkbox" name="SelectedCategoryIds" value="@category.Id" class="category-checkbox h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 focus:ring-offset-0" @(Model.SelectedCategoryIds.Contains(category.Id) ? "checked" : "")>
+                                        <span class="ml-3 flex-1 text-sm font-medium text-gray-900 group-hover:text-indigo-900">@Html.Raw(category.Name)</span>
+                                        @if (Model.SelectedCategoryIds.Contains(category.Id))
+                                        {
+                                            <span class="checkmark">
+                                                <svg class="h-5 w-5 text-gray-900" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                                </svg>
+                                            </span>
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SubCategories Custom Select - Tailwind UI Style -->
+            <div>
+                <label class="block text-sm font-medium text-gray-900 mb-2">Alt Kategoriler</label>
+                <div class="relative" id="subCategorySelectWrapper">
+                    <button type="button" id="subCategorySelectBtn" class="relative w-full cursor-default rounded-lg bg-white py-2.5 pl-3 pr-10 text-left border border-gray-300 shadow-sm focus:border-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-800 sm:text-sm transition-all duration-200 hover:border-gray-400">
+                        <span class="flex items-center">
+                            <span class="block truncate text-gray-900 font-medium" id="subCategorySelectText">Tüm Alt Kategoriler</span>
+                        </span>
+                        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                    </button>
+
+                    <div id="subCategorySelectDropdown" class="hidden absolute z-50 mt-2 w-full rounded-lg bg-white py-1 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-200 ease-out">
+                        <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Alt Kategori Seçin</p>
+                            <div class="flex gap-2">
+                                <button type="button" id="selectAllSubCategories" class="text-xs text-gray-900 hover:text-gray-800 font-medium">Tümü</button>
+                                <span class="text-gray-300">|</span>
+                                <button type="button" id="clearSubCategories" class="text-xs text-gray-500 hover:text-gray-700 font-medium">Temizle</button>
+                            </div>
+                        </div>
+                        <div class="max-h-60 overflow-auto py-1">
+                            @foreach (var subCategory in Model.SubCategories)
+                            {
+                                <div class="subcategory-option group relative" data-category-id="@subCategory.CategoryId">
+                                    <label class="flex items-center px-3 py-2.5 cursor-pointer hover:bg-indigo-50 transition-colors duration-150">
+                                        <input type="checkbox" name="SelectedSubCategoryIds" value="@subCategory.Id" class="subcategory-checkbox h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 focus:ring-offset-0" @(Model.SelectedSubCategoryIds.Contains(subCategory.Id) ? "checked" : "")>
+                                        <span class="ml-3 flex-1 text-sm font-medium text-gray-900 group-hover:text-indigo-900">@Html.Raw(subCategory.Name)</span>
+                                        @if (Model.SelectedSubCategoryIds.Contains(subCategory.Id))
+                                        {
+                                            <span class="checkmark">
+                                                <svg class="h-5 w-5 text-gray-900" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                                </svg>
+                                            </span>
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Ürün Adı</label>
+                <input type="text" name="ProductNameFilter" value="@Model.ProductNameFilter" placeholder="Ürün adı ara..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Ürün ID</label>
+                <input type="number" name="ProductIdFilter" value="@Model.ProductIdFilter" placeholder="Ürün ID ara..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3 flex-wrap">
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                Filtrele
+            </button>
+            <button type="button" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200" id="exportPdfBtn">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                PDF Çıktısı
+            </button>
+            <button type="button" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors duration-200" id="exportExcelBtn">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Excel Çıktısı
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Products Table -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    @if (!Model.Products.Any())
+    {
+        <div class="text-center py-12">
+            <svg class="mx-auto w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Henüz ürün eklenmedi</h3>
+            <p class="text-gray-500 mb-6">İlk ürünü oluşturmak için aşağıdaki butona tıklayın</p>
+            <a href="/admin/products/create" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Ürün Ekle
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resim</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ürün Adı</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alt Kategori</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ölçü</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fiyat</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var product in Model.Products)
+                    {
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (Model.MainImages.ContainsKey(product.Id) && Model.MainImages[product.Id] != null)
+                                {
+                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(Model.MainImages[product.Id]!.ThumbnailPath) ?? $"/{Model.MainImages[product.Id]!.ThumbnailPath}")" class="w-16 h-16 object-cover rounded-lg" alt="@Html.Raw(product.Name)" />
+                                }
+                                else
+                                {
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                }
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm font-semibold text-gray-900">@Html.Raw(product.Name)</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                    </svg>
+                                    @Html.Raw(product.CategoryName)
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                                    </svg>
+                                    @Html.Raw(product.SubCategoryName)
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (!string.IsNullOrEmpty(product.Dimensions))
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                                        </svg>
+                                        @product.Dimensions
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400 text-sm">-</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm font-bold text-gray-900">₺@product.Price.ToString("N2")</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-gray-600">@product.Stock adet</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (product.IsActive)
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Aktif
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Pasif
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-2">
+                                    <a href="/admin/products/edit?id=@product.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-200">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                        Düzenle
+                                    </a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@product.Id" class="delete-form inline">
+                                        <button type="button" class="delete-btn inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200" data-product-name="@product.Name" data-loading-text="Ürün siliniyor...">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                            Sil
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <a href="?PageNumber=@(Model.PageNumber - 1)@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Önceki
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
+                            Önceki
+                        </span>
+                    }
+                    
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <a href="?PageNumber=@(Model.PageNumber + 1)@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Sonraki
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
+                            Sonraki
+                        </span>
+                    }
+                </div>
+                
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Toplam <span class="font-medium">@Model.TotalProducts</span> üründen
+                            <span class="font-medium">@((Model.PageNumber - 1) * Model.PageSize + 1)</span> - 
+                            <span class="font-medium">@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalProducts)</span> arası gösteriliyor
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            <!-- Previous Button -->
+                            @if (Model.PageNumber > 1)
+                            {
+                                <a href="?PageNumber=@(Model.PageNumber - 1)@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            }
+                            
+                            <!-- Page Numbers -->
+                            @{
+                                var startPage = Math.Max(1, Model.PageNumber - 2);
+                                var endPage = Math.Min(Model.TotalPages, Model.PageNumber + 2);
+                                
+                                if (startPage > 1)
+                                {
+                                    <a href="?PageNumber=1@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                        1
+                                    </a>
+                                    if (startPage > 2)
+                                    {
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                                    }
+                                }
+                                
+                                for (var i = startPage; i <= endPage; i++)
+                                {
+                                    if (i == Model.PageNumber)
+                                    {
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-800 bg-indigo-50 text-sm font-medium text-gray-900 z-10">
+                                            @i
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <a href="?PageNumber=@i@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                            @i
+                                        </a>
+                                    }
+                                }
+                                
+                                if (endPage < Model.TotalPages)
+                                {
+                                    if (endPage < Model.TotalPages - 1)
+                                    {
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                                    }
+                                    <a href="?PageNumber=@Model.TotalPages@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                        @Model.TotalPages
+                                    </a>
+                                }
+                            }
+                            
+                            <!-- Next Button -->
+                            @if (Model.PageNumber < Model.TotalPages)
+                            {
+                                <a href="?PageNumber=@(Model.PageNumber + 1)@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            }
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Helper functions
+        function showSuccessMessage(message) {
+            const messageDiv = $('<div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg"><div class="flex items-center"><svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><div><p class="font-semibold text-green-800">İşlem Başarılı</p><p class="text-green-700">' + message + '</p></div></div></div>');
+            $('main > div').prepend(messageDiv);
+            setTimeout(() => messageDiv.fadeOut(), 5000);
+        }
+        
+        function showErrorMessage(message) {
+            const messageDiv = $('<div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg"><div class="flex items-center"><svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg><div><p class="font-semibold text-red-800">Hata</p><p class="text-red-700">' + message + '</p></div></div></div>');
+            $('main > div').prepend(messageDiv);
+            setTimeout(() => messageDiv.fadeOut(), 8000);
+        }
+        
+        // Auto-hide success messages
+        setTimeout(() => { $('.bg-green-50').fadeOut(); }, 5000);
+        
+        // Custom Select Menu Functions
+        function updateSelectText(selectId, checkboxClass, defaultText) {
+            const checked = $(`.${checkboxClass}:checked`);
+            const $textElement = $(`#${selectId}Text`);
+            
+            if (checked.length === 0) {
+                $textElement.html(`<span class="text-gray-500">${defaultText}</span>`);
+            } else if (checked.length === 1) {
+                const name = checked.first().closest('label').find('span').first().text();
+                $textElement.html(`<span class="text-gray-900">${name}</span>`);
+            } else {
+                $textElement.html(`
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        ${checked.length} kategori seçildi
+                    </span>
+                `);
+            }
+        }
+        
+        function updateCheckmarks() {
+            // Update category checkmarks
+            $('.category-checkbox').each(function() {
+                const $checkbox = $(this);
+                const $label = $checkbox.closest('label');
+                const $checkmark = $label.find('.checkmark');
+                
+                if ($checkbox.is(':checked')) {
+                    if ($checkmark.length === 0) {
+                        $label.append(`
+                            <span class="checkmark">
+                                <svg class="h-5 w-5 text-gray-900" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        `);
+                    }
+                    $label.addClass('bg-indigo-50');
+                } else {
+                    $checkmark.remove();
+                    $label.removeClass('bg-indigo-50');
+                }
+            });
+            
+            // Update subcategory checkmarks
+            $('.subcategory-checkbox').each(function() {
+                const $checkbox = $(this);
+                const $label = $checkbox.closest('label');
+                const $checkmark = $label.find('.checkmark');
+                
+                if ($checkbox.is(':checked')) {
+                    if ($checkmark.length === 0) {
+                        $label.append(`
+                            <span class="checkmark">
+                                <svg class="h-5 w-5 text-gray-900" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        `);
+                    }
+                    $label.addClass('bg-indigo-50');
+                } else {
+                    $checkmark.remove();
+                    $label.removeClass('bg-indigo-50');
+                }
+            });
+        }
+        
+        // Toggle Category Select
+        $('#categorySelectBtn').on('click', function(e) {
+            e.stopPropagation();
+            $('#categorySelectDropdown').toggleClass('hidden');
+            $('#subCategorySelectDropdown').addClass('hidden');
+        });
+        
+        // Toggle SubCategory Select
+        $('#subCategorySelectBtn').on('click', function(e) {
+            e.stopPropagation();
+            $('#subCategorySelectDropdown').toggleClass('hidden');
+            $('#categorySelectDropdown').addClass('hidden');
+        });
+        
+        // Close dropdowns when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#categorySelectWrapper').length) {
+                $('#categorySelectDropdown').addClass('hidden');
+            }
+            if (!$(e.target).closest('#subCategorySelectWrapper').length) {
+                $('#subCategorySelectDropdown').addClass('hidden');
+            }
+        });
+        
+        // Close dropdowns with ESC key
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                $('#categorySelectDropdown').addClass('hidden');
+                $('#subCategorySelectDropdown').addClass('hidden');
+            }
+        });
+        
+        // Category checkbox change
+        $('.category-checkbox').on('change', function() {
+            updateSelectText('categorySelect', 'category-checkbox', 'Tüm Kategoriler');
+            updateCheckmarks();
+            filterSubCategories();
+        });
+        
+        // SubCategory checkbox change
+        $('.subcategory-checkbox').on('change', function() {
+            updateSelectText('subCategorySelect', 'subcategory-checkbox', 'Tüm Alt Kategoriler');
+            updateCheckmarks();
+        });
+        
+        // Filter subcategories based on selected categories
+        function filterSubCategories() {
+            const selectedCategoryIds = $('.category-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+            
+            $('.subcategory-option').each(function() {
+                const $option = $(this);
+                const categoryId = $option.data('category-id').toString();
+                
+                if (selectedCategoryIds.length === 0 || selectedCategoryIds.includes(categoryId)) {
+                    $option.show();
+                } else {
+                    $option.hide();
+                    // Uncheck hidden subcategories
+                    $option.find('.subcategory-checkbox').prop('checked', false);
+                }
+            });
+            
+            updateSelectText('subCategorySelect', 'subcategory-checkbox', 'Tüm Alt Kategoriler');
+            updateCheckmarks();
+        }
+        
+        // Select All / Clear All buttons
+        $('#selectAllCategories').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('.category-checkbox:visible').prop('checked', true);
+            updateSelectText('categorySelect', 'category-checkbox', 'Tüm Kategoriler');
+            updateCheckmarks();
+            filterSubCategories();
+        });
+        
+        $('#clearCategories').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('.category-checkbox').prop('checked', false);
+            updateSelectText('categorySelect', 'category-checkbox', 'Tüm Kategoriler');
+            updateCheckmarks();
+            filterSubCategories();
+        });
+        
+        $('#selectAllSubCategories').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('.subcategory-checkbox:visible').prop('checked', true);
+            updateSelectText('subCategorySelect', 'subcategory-checkbox', 'Tüm Alt Kategoriler');
+            updateCheckmarks();
+        });
+        
+        $('#clearSubCategories').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('.subcategory-checkbox').prop('checked', false);
+            updateSelectText('subCategorySelect', 'subcategory-checkbox', 'Tüm Alt Kategoriler');
+            updateCheckmarks();
+        });
+        
+        // Initialize on page load
+        $(document).ready(function() {
+            updateSelectText('categorySelect', 'category-checkbox', 'Tüm Kategoriler');
+            updateSelectText('subCategorySelect', 'subcategory-checkbox', 'Tüm Alt Kategoriler');
+            updateCheckmarks();
+            filterSubCategories();
+            
+            // Apply initial background to checked items
+            $('.category-checkbox:checked, .subcategory-checkbox:checked').each(function() {
+                $(this).closest('label').addClass('bg-indigo-50');
+            });
+        });
+        
+        // PDF Export
+        $('#exportPdfBtn').on('click', function() {
+            const $btn = $(this);
+            const originalHtml = $btn.html();
+            
+            $btn.prop('disabled', true).html('<svg class="w-5 h-5 mr-2 animate-spin inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> PDF Oluşturuluyor...');
+            
+            const filterData = {
+                SelectedCategoryIds: $('.category-checkbox:checked').map(function() { return $(this).val(); }).get(),
+                SelectedSubCategoryIds: $('.subcategory-checkbox:checked').map(function() { return $(this).val(); }).get(),
+                ProductNameFilter: $('input[name="ProductNameFilter"]').val() || '',
+                ProductIdFilter: $('input[name="ProductIdFilter"]').val() || ''
+            };
+            
+            const queryParams = new URLSearchParams();
+            filterData.SelectedCategoryIds.forEach(id => queryParams.append('SelectedCategoryIds', id));
+            filterData.SelectedSubCategoryIds.forEach(id => queryParams.append('SelectedSubCategoryIds', id));
+            if (filterData.ProductNameFilter) queryParams.append('ProductNameFilter', filterData.ProductNameFilter);
+            if (filterData.ProductIdFilter) queryParams.append('ProductIdFilter', filterData.ProductIdFilter);
+            
+            fetch(`/admin/products?handler=ExportPdf&${queryParams.toString()}`)
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    const url = window.URL.createObjectURL(blob);
+                    link.href = url;
+                    link.download = `Urun_Fiyat_Katalogu_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    showSuccessMessage('PDF başarıyla oluşturuldu ve indirildi!');
+                })
+                .catch(error => {
+                    showErrorMessage('PDF oluşturulurken hata oluştu: ' + error.message);
+                })
+                .finally(() => {
+                    $btn.prop('disabled', false).html(originalHtml);
+                });
+        });
+        
+        // Excel Export
+        $('#exportExcelBtn').on('click', function() {
+            const $btn = $(this);
+            const originalHtml = $btn.html();
+            
+            $btn.prop('disabled', true).html('<svg class="w-5 h-5 mr-2 animate-spin inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Excel Oluşturuluyor...');
+            
+            const filterData = {
+                SelectedCategoryIds: $('.category-checkbox:checked').map(function() { return $(this).val(); }).get(),
+                SelectedSubCategoryIds: $('.subcategory-checkbox:checked').map(function() { return $(this).val(); }).get(),
+                ProductNameFilter: $('input[name="ProductNameFilter"]').val() || '',
+                ProductIdFilter: $('input[name="ProductIdFilter"]').val() || ''
+            };
+            
+            const queryParams = new URLSearchParams();
+            filterData.SelectedCategoryIds.forEach(id => queryParams.append('SelectedCategoryIds', id));
+            filterData.SelectedSubCategoryIds.forEach(id => queryParams.append('SelectedSubCategoryIds', id));
+            if (filterData.ProductNameFilter) queryParams.append('ProductNameFilter', filterData.ProductNameFilter);
+            if (filterData.ProductIdFilter) queryParams.append('ProductIdFilter', filterData.ProductIdFilter);
+            
+            fetch(`/admin/products?handler=ExportExcel&${queryParams.toString()}`)
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    const url = window.URL.createObjectURL(blob);
+                    link.href = url;
+                    link.download = `Urun_Fiyat_Katalogu_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    showSuccessMessage('Excel dosyası başarıyla oluşturuldu ve indirildi!');
+                })
+                .catch(error => {
+                    showErrorMessage('Excel oluşturulurken hata oluştu: ' + error.message);
+                })
+                .finally(() => {
+                    $btn.prop('disabled', false).html(originalHtml);
+                });
+        });
+        
+        // Delete confirmation
+        $('.delete-btn').on('click', function() {
+            const $btn = $(this);
+            const productName = $btn.data('product-name');
+            const $form = $btn.closest('.delete-form');
+            
+            showDeleteConfirm(
+                `<strong>${productName}</strong> adlı ürünü silmek istediğinize emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>`,
+                function() {
+                    showLoading('Ürün siliniyor...');
+                    $form.submit();
+                }
+            );
+        });
+        
+        // Enter key submit
+        $('input[name="ProductNameFilter"], input[name="ProductIdFilter"]').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $('#filterForm').submit();
+            }
+        });
+    </script>
+}

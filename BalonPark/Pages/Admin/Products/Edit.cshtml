@@ -1,0 +1,381 @@
+@page
+@model BalonPark.Pages.Admin.Products.EditModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Ürün Düzenle";
+}
+
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Ürün Düzenle
+            </h1>
+            <p class="text-gray-600 mt-2">Ürün bilgilerini güncelleyin</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="/admin/products" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Geri Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-green-800">Başarılı!</p>
+                <p class="text-green-700">@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-red-800">Hata!</p>
+                <p class="text-red-700">@TempData["ErrorMessage"]</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Existing Images Gallery -->
+@if (Model.ProductImages.Any())
+{
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Ürün Resimleri
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            @foreach (var image in Model.ProductImages)
+            {
+                <div class="relative group bg-gray-50 rounded-lg overflow-hidden border-2 @(image.IsMainImage ? "border-gray-800 ring-2 ring-indigo-200" : "border-gray-200")">
+                    <img src="/@image.ThumbnailPath" class="w-full h-40 object-cover" alt="Product Image" />
+                    
+                    <!-- Main Image Badge -->
+                    @if (image.IsMainImage)
+                    {
+                        <div class="absolute top-2 left-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-900 text-white shadow-lg">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                                Ana Resim
+                            </span>
+                        </div>
+                    }
+                    
+                    <!-- Action Buttons -->
+                    <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div class="flex gap-2">
+                            @if (!image.IsMainImage)
+                            {
+                                <form method="post" asp-page-handler="SetMainImage" asp-route-imageId="@image.Id" asp-route-productId="@Model.Product.Id" class="flex-1">
+                                    <button type="submit" class="w-full inline-flex items-center justify-center px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium rounded transition-colors duration-200" data-loading-text="Ana resim yapılıyor...">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                        </svg>
+                                        Ana Yap
+                                    </button>
+                                </form>
+                            }
+                            <form method="post" asp-page-handler="DeleteImage" asp-route-imageId="@image.Id" asp-route-productId="@Model.Product.Id" class="delete-image-form flex-1">
+                                <button type="button" class="delete-image-btn w-full inline-flex items-center justify-center px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded transition-colors duration-200" data-loading-text="Resim siliniyor...">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    Sil
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Edit Form -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Product.Id" />
+        <input type="hidden" asp-for="Product.CreatedAt" />
+
+        <div class="space-y-6">
+            <!-- Category and SubCategory -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Product.CategoryId" class="block text-sm font-medium text-gray-700 mb-2">
+                        Kategori <span class="text-red-500">*</span>
+                    </label>
+                    <select asp-for="Product.CategoryId" id="categoryDropdown" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                        <option value="0">Kategori seçin...</option>
+                        @foreach (var category in Model.Categories)
+                        {
+                            @if (category.Id == Model.Product.CategoryId)
+                            {
+                                <option value="@category.Id" selected>@Html.Raw(category.Name)</option>
+                            }
+                            else
+                            {
+                                <option value="@category.Id">@Html.Raw(category.Name)</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="Product.CategoryId" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Product.SubCategoryId" class="block text-sm font-medium text-gray-700 mb-2">
+                        Alt Kategori <span class="text-red-500">*</span>
+                    </label>
+                    <select asp-for="Product.SubCategoryId" id="subCategoryDropdown" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                        <option value="0">Alt kategori seçin...</option>
+                        @foreach (var subCategory in Model.SubCategories)
+                        {
+                            @if (subCategory.Id == Model.Product.SubCategoryId)
+                            {
+                                <option value="@subCategory.Id" selected>@Html.Raw(subCategory.Name)</option>
+                            }
+                            else
+                            {
+                                <option value="@subCategory.Id">@Html.Raw(subCategory.Name)</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="Product.SubCategoryId" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+            </div>
+
+            <!-- Product Name -->
+            <div>
+                <label asp-for="Product.Name" class="block text-sm font-medium text-gray-700 mb-2">
+                    Ürün Adı <span class="text-red-500">*</span>
+                </label>
+                <input type="text" asp-for="Product.Name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Örn: iPhone 15 Pro">
+                <span asp-validation-for="Product.Name" class="text-red-500 text-sm mt-1 block"></span>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label asp-for="Product.Description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Özet <span class="text-red-500">*</span>
+                </label>
+                <textarea asp-for="Product.Description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Ürün hakkında kısa özet..."></textarea>
+                <span asp-validation-for="Product.Description" class="text-red-500 text-sm mt-1 block"></span>
+            </div>
+
+            <!-- Dimensions -->
+            <div>
+                <label asp-for="Product.Dimensions" class="block text-sm font-medium text-gray-700 mb-2">Ölçü</label>
+                <input type="text" asp-for="Product.Dimensions" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Örn: 2.8x2.8x2.5 m">
+                <small class="text-gray-500 text-sm mt-1 block">Ürünün boyutlarını girin (uzunluk x genişlik x yükseklik)</small>
+            </div>
+
+            <!-- Technical Description -->
+            <div>
+                <label asp-for="Product.TechnicalDescription" class="block text-sm font-medium text-gray-700 mb-2">Teknik Açıklama</label>
+                <textarea asp-for="Product.TechnicalDescription" id="technicalDescription" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Ürünün teknik özellikleri ve detaylı açıklaması..."></textarea>
+            </div>
+
+            <!-- Price and Stock -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Product.Price" class="block text-sm font-medium text-gray-700 mb-2">
+                        Fiyat (₺) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">₺</span>
+                        </div>
+                        <input type="number" asp-for="Product.Price" step="0.01" min="0" class="w-full pl-7 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="0.00">
+                    </div>
+                    <span asp-validation-for="Product.Price" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Product.Stock" class="block text-sm font-medium text-gray-700 mb-2">
+                        Stok <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" asp-for="Product.Stock" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="0">
+                    <span asp-validation-for="Product.Stock" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+            </div>
+
+            <!-- New Images -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <svg class="w-5 h-5 inline-block mr-1 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Yeni Resimler Ekle
+                </label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-400 transition-colors duration-200">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600">
+                            <label class="relative cursor-pointer bg-white rounded-md font-medium text-gray-900 hover:text-gray-800 focus-within:outline-none">
+                                <span>Dosya yükle</span>
+                                <input type="file" name="NewImages" accept="image/*" multiple class="sr-only">
+                            </label>
+                            <p class="pl-1">veya sürükle bırak</p>
+                        </div>
+                        <p class="text-xs text-gray-500">PNG, JPG, GIF - 10MB'a kadar</p>
+                    </div>
+                </div>
+                <small class="text-gray-500 text-sm mt-2 block">Birden fazla resim seçebilirsiniz. (350px, 1000px ve orijinal boyutlarda kaydedilecek)</small>
+            </div>
+
+            <!-- Is Active -->
+            <div class="flex items-center">
+                <input type="checkbox" asp-for="Product.IsActive" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                <label asp-for="Product.IsActive" class="ml-2 block text-sm text-gray-900">
+                    Aktif
+                </label>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="border-t border-gray-200 mt-8 pt-6">
+            <div class="flex items-center gap-3">
+                <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Ürün güncelleniyor...">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Güncelle
+                </button>
+                <a href="/admin/products" class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                    İptal
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <!-- CKEditor CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
+    
+    <script>
+        // CKEditor initialization
+        let editor;
+        ClassicEditor
+            .create(document.querySelector('#technicalDescription'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'underline', 'strikethrough', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'outdent', 'indent', '|',
+                        'link', 'blockQuote', 'insertTable', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                language: 'tr',
+                placeholder: 'Ürünün teknik özellikleri ve detaylı açıklaması...',
+                table: {
+                    contentToolbar: [
+                        'tableColumn',
+                        'tableRow',
+                        'mergeTableCells'
+                    ]
+                }
+            })
+            .then(editorInstance => {
+                editor = editorInstance;
+            })
+            .catch(error => {
+                console.error('CKEditor yüklenirken hata oluştu:', error);
+            });
+
+        // Category change handler - Dinamik alt kategori yükleme
+        $('#categoryDropdown').on('change', function() {
+            const categoryId = $(this).val();
+            const dropdown = $('#subCategoryDropdown');
+            
+            if (categoryId && categoryId != "0") {
+                dropdown.prop('disabled', true).empty().append('<option value="0">Yükleniyor...</option>');
+                
+                $.ajax({
+                    url: '/admin/products/edit?handler=SubCategories&categoryId=' + categoryId,
+                    type: 'GET',
+                    success: function(data) {
+                        dropdown.empty().append('<option value="0">Alt kategori seçin...</option>');
+                        $.each(data, function(i, item) {
+                            dropdown.append($('<option></option>').val(item.id).text(item.name));
+                        });
+                        dropdown.prop('disabled', false);
+                    },
+                    error: function() {
+                        dropdown.empty().append('<option value="0">Hata! Tekrar deneyin</option>');
+                        dropdown.prop('disabled', false);
+                    }
+                });
+            } else {
+                dropdown.empty().append('<option value="0">Önce kategori seçin...</option>');
+            }
+        });
+
+        // Form submit - CKEditor data transfer
+        $('form').on('submit', function() {
+            if (editor) {
+                editor.updateSourceElement();
+            }
+        });
+        
+        // Delete image confirmation
+        $('.delete-image-btn').on('click', function() {
+            const $btn = $(this);
+            const $form = $btn.closest('.delete-image-form');
+            
+            showDeleteConfirm(
+                'Bu resmi silmek istediğinize emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>',
+                function() {
+                    showLoading('Resim siliniyor...');
+                    $form.submit();
+                }
+            );
+        });
+        
+        // Auto-hide messages
+        setTimeout(() => {
+            $('.bg-green-50, .bg-red-50').fadeOut();
+        }, 5000);
+        
+        // File upload preview
+        $('input[type="file"]').on('change', function(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                const fileText = files.length === 1 
+                    ? files[0].name 
+                    : `${files.length} dosya seçildi`;
+                
+                $(this).siblings('label').find('span').text(fileText);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,394 @@
+@page
+@model BalonPark.Pages.Admin.SubCategories.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Alt Kategoriler";
+}
+
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                </svg>
+                Alt Kategori Yönetimi
+            </h1>
+            <p class="text-gray-600 mt-2">Alt kategorileri görüntüle, ekle, düzenle ve sil</p>
+        </div>
+        <div class="mt-4 md:mt-0 flex gap-3">
+            <button id="toggleReorderMode" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                </svg>
+                Sıralamayı Düzenle
+            </button>
+            <button id="saveReorderBtn" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" style="display: none;">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Sıralamayı Kaydet
+            </button>
+            <button id="cancelReorderBtn" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" style="display: none;">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                İptal
+            </button>
+            <a href="/admin/subcategories/create" id="createBtn" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Yeni Alt Kategori
+            </a>
+            
+            <!-- Cache Temizleme Butonu -->
+            <form method="post" asp-page-handler="ClearCache" class="inline">
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" onclick="return confirm('Cache temizlensin mi?')">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Cache Temizle
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-green-800">İşlem Başarılı</p>
+                <p class="text-green-700">@Model.SuccessMessage</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- SubCategories Table -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    @if (!Model.SubCategories.Any())
+    {
+        <div class="text-center py-12">
+            <svg class="mx-auto w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Henüz alt kategori eklenmedi</h3>
+            <p class="text-gray-500 mb-6">İlk alt kategoriyi oluşturmak için aşağıdaki butona tıklayın</p>
+            <a href="/admin/subcategories/create" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Alt Kategori Ekle
+            </a>
+        </div>
+    }
+    else
+    {
+        @foreach (var category in Model.Categories.OrderBy(c => c.DisplayOrder).ThenBy(c => c.Name))
+        {
+            var categorySubCategories = Model.SubCategories.Where(sc => sc.CategoryId == category.Id).OrderBy(sc => sc.DisplayOrder).ThenBy(sc => sc.Name).ToList();
+            
+            <div class="mb-8">
+                <!-- Kategori Başlığı -->
+                <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-t-lg border border-gray-200 mb-0">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <svg class="w-6 h-6 mr-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            @Html.Raw(category.Name)
+                            <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                @categorySubCategories.Count alt kategori
+                            </span>
+                        </h3>
+                    </div>
+                </div>
+                    
+                    <!-- Alt Kategoriler Tablosu -->
+                    <div class="overflow-x-auto border border-gray-200 border-t-0 rounded-b-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider reorder-handle-header" style="display:none;">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                                        </svg>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alt Kategori Adı</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Açıklama</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Oluşturma Tarihi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach (var subCategory in categorySubCategories)
+                                {
+                        <tr class="hover:bg-gray-50 transition-colors duration-150" data-subcategory-id="@subCategory.Id" data-display-order="@subCategory.DisplayOrder">
+                            <td class="px-6 py-4 whitespace-nowrap reorder-handle" style="display:none;">
+                                <svg class="w-6 h-6 text-gray-400 cursor-move" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">@subCategory.Id</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm font-semibold text-gray-900">@Html.Raw(subCategory.Name)</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">@Html.Raw(subCategory.Description ?? "-")</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (subCategory.IsActive)
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Aktif
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Pasif
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">@subCategory.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-2">
+                                    <a href="/admin/subcategories/edit?id=@subCategory.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-200">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                        Düzenle
+                                    </a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@subCategory.Id" class="delete-form inline">
+                                        <button type="button" class="delete-btn inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200" data-subcategory-name="@subCategory.Name" data-loading-text="Alt kategori siliniyor...">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                            Sil
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                
+                @if (!categorySubCategories.Any())
+                {
+                    <div class="text-center py-8 border border-gray-200 border-t-0 rounded-b-lg bg-gray-50">
+                        <p class="text-gray-500 text-sm">Bu kategoride henüz alt kategori bulunmamaktadır.</p>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <!-- Sortable.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
+    <script>
+        let sortable = null;
+        let isReorderMode = false;
+        let originalOrder = [];
+
+        // Auto-hide success messages
+        setTimeout(() => {
+            $('.bg-green-50').fadeOut();
+        }, 5000);
+        
+        // Delete confirmation
+        $('.delete-btn').on('click', function() {
+            const $btn = $(this);
+            const subCategoryName = $btn.data('subcategory-name');
+            const $form = $btn.closest('.delete-form');
+            
+            showDeleteConfirm(
+                `<strong>${subCategoryName}</strong> adlı alt kategoriyi silmek istediğinize emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>`,
+                function() {
+                    showLoading('Alt kategori siliniyor...');
+                    $form.submit();
+                }
+            );
+        });
+
+        // Reorder Mode Toggle
+        $('#toggleReorderMode').on('click', function() {
+            isReorderMode = true;
+            enterReorderMode();
+        });
+
+        $('#cancelReorderBtn').on('click', function() {
+            isReorderMode = false;
+            exitReorderMode();
+            restoreOriginalOrder();
+        });
+
+        $('#saveReorderBtn').on('click', function() {
+            saveNewOrder();
+        });
+
+        function enterReorderMode() {
+            // Save original order for all tables
+            originalOrder = [];
+            $('tbody tr').each(function(index) {
+                originalOrder.push({
+                    element: $(this).clone(true),
+                    id: $(this).data('subcategory-id'),
+                    order: $(this).data('display-order')
+                });
+            });
+
+            // Show reorder UI
+            $('.reorder-handle, .reorder-handle-header').show();
+            $('#toggleReorderMode, #createBtn').hide();
+            $('#saveReorderBtn, #cancelReorderBtn').show();
+            
+            // Disable action buttons
+            $('.delete-btn, a[href*="edit"]').addClass('opacity-50 pointer-events-none');
+
+            // Initialize Sortable for all tables
+            $('tbody').each(function() {
+                const tbody = this;
+                Sortable.create(tbody, {
+                    animation: 150,
+                    handle: '.reorder-handle',
+                    ghostClass: 'bg-blue-100',
+                    dragClass: 'bg-blue-50',
+                    onEnd: function(evt) {
+                        console.log('Moved from', evt.oldIndex, 'to', evt.newIndex);
+                    }
+                });
+            });
+
+            // Show notification
+            showNotification('Sıralama modu aktif. Alt kategorileri sürükleyip bırakın.', 'info');
+        }
+
+        function exitReorderMode() {
+            // Hide reorder UI
+            $('.reorder-handle, .reorder-handle-header').hide();
+            $('#toggleReorderMode, #createBtn').show();
+            $('#saveReorderBtn, #cancelReorderBtn').hide();
+            
+            // Enable action buttons
+            $('.delete-btn, a[href*="edit"]').removeClass('opacity-50 pointer-events-none');
+
+            // Destroy Sortable
+            if (sortable) {
+                sortable.destroy();
+                sortable = null;
+            }
+        }
+
+        function restoreOriginalOrder() {
+            const tbody = $('#subCategoriesTableBody');
+            tbody.empty();
+            
+            originalOrder.forEach(item => {
+                tbody.append(item.element);
+            });
+
+            showNotification('Değişiklikler iptal edildi', 'warning');
+        }
+
+        function saveNewOrder() {
+            const subCategories = [];
+            let displayOrder = 1;
+
+            $('tbody tr').each(function() {
+                const subCategoryId = $(this).data('subcategory-id');
+                if (subCategoryId) {
+                    subCategories.push({
+                        id: subCategoryId,
+                        displayOrder: displayOrder++
+                    });
+                }
+            });
+
+            // Show loading
+            showLoading('Sıralama kaydediliyor...');
+
+            // Send to API
+            fetch('/api/category-order/subcategories/reorder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(subCategories)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    isReorderMode = false;
+                    exitReorderMode();
+                    
+                    // Update data-display-order attributes
+                    $('#subCategoriesTableBody tr').each(function(index) {
+                        $(this).attr('data-display-order', index + 1);
+                    });
+                } else {
+                    showNotification(data.message || 'Sıralama kaydedilemedi', 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                showNotification('Bir hata oluştu: ' + error.message, 'error');
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: 'bg-green-50 border-green-400 text-green-800',
+                error: 'bg-red-50 border-red-400 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                info: 'bg-blue-50 border-blue-400 text-blue-800'
+            };
+
+            const icons = {
+                success: '<svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                error: '<svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                warning: '<svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+                info: '<svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+            };
+
+            const notification = $(`
+                <div class="${colors[type]} border-l-4 p-4 mb-6 rounded-r-lg notification-alert">
+                    <div class="flex items-center">
+                        ${icons[type]}
+                        <p class="font-semibold">${message}</p>
+                    </div>
+                </div>
+            `);
+
+            $('.bg-white.rounded-lg.shadow-md.p-6.mb-6').after(notification);
+            
+            setTimeout(() => {
+                notification.fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+    </script>
+}

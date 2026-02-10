@@ -1,0 +1,311 @@
+@page
+@model BalonPark.Pages.Admin.Products.CreateModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Yeni Ürün";
+}
+
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Yeni Ürün Ekle
+            </h1>
+            <p class="text-gray-600 mt-2">Yeni bir ürün oluşturun</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="/admin/products" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Geri Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Form -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <form method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        
+        <div class="space-y-6">
+            <!-- Category and SubCategory -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Product.CategoryId" class="block text-sm font-medium text-gray-700 mb-2">
+                        Kategori <span class="text-red-500">*</span>
+                    </label>
+                    <select asp-for="Product.CategoryId" id="categoryDropdown" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                        <option value="0">Kategori seçin...</option>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <option value="@category.Id">@Html.Raw(category.Name)</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Product.CategoryId" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Product.SubCategoryId" class="block text-sm font-medium text-gray-700 mb-2">
+                        Alt Kategori <span class="text-red-500">*</span>
+                    </label>
+                    <select asp-for="Product.SubCategoryId" id="subCategoryDropdown" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                        <option value="0">Önce kategori seçin...</option>
+                    </select>
+                    <span asp-validation-for="Product.SubCategoryId" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+            </div>
+
+            <!-- Product Name -->
+            <div>
+                <label asp-for="Product.Name" class="block text-sm font-medium text-gray-700 mb-2">
+                    Ürün Adı <span class="text-red-500">*</span>
+                </label>
+                <input type="text" asp-for="Product.Name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: iPhone 15 Pro">
+                <span asp-validation-for="Product.Name" class="text-red-500 text-sm mt-1 block"></span>
+            </div>
+
+            <!-- Description with AI -->
+            <div>
+                <label asp-for="Product.Description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Özet (En az 140 karakter) <span class="text-red-500">*</span>
+                </label>
+                <div class="flex gap-2">
+                    <textarea asp-for="Product.Description" id="productDescription" rows="3" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Ürün hakkında detaylı özet (en az 140 karakter)..."></textarea>
+                    <button type="button" id="aiGenerateBtn" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors duration-200 whitespace-nowrap flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        AI ile Doldur
+                    </button>
+                </div>
+                <div class="mt-2 text-sm" id="charCountMessage">
+                    <span id="charCount">0</span> / 140 karakter (minimum)
+                </div>
+                <span asp-validation-for="Product.Description" class="text-red-500 text-sm mt-1 block"></span>
+            </div>
+
+            <!-- Dimensions -->
+            <div>
+                <label asp-for="Product.Dimensions" class="block text-sm font-medium text-gray-700 mb-2">Ölçü</label>
+                <input type="text" asp-for="Product.Dimensions" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 14x6x6m">
+                <small class="text-gray-500 text-sm mt-1 block">Ürünün boyutlarını girin (uzunlukxgenişlikxyükseklik formatında)</small>
+            </div>
+
+            <!-- Technical Description -->
+            <div>
+                <label asp-for="Product.TechnicalDescription" class="block text-sm font-medium text-gray-700 mb-2">Teknik Açıklama</label>
+                <textarea asp-for="Product.TechnicalDescription" id="technicalDescriptionEditor" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Ürünün teknik özellikleri ve detaylı açıklaması..."></textarea>
+            </div>
+
+            <!-- Price and Stock -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Product.Price" class="block text-sm font-medium text-gray-700 mb-2">
+                        Fiyat (₺) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" asp-for="Product.Price" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label asp-for="Product.Stock" class="block text-sm font-medium text-gray-700 mb-2">
+                        Stok <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" asp-for="Product.Stock" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="0">
+                </div>
+            </div>
+
+            <!-- Images -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Ürün Resimleri</label>
+                <input type="file" name="Images" accept="image/*" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                <small class="text-gray-500 text-sm mt-1 block">Birden fazla resim seçebilirsiniz. İlk resim ana resim olacaktır. (350px, 1000px ve orijinal boyutlarda kaydedilecek)</small>
+            </div>
+
+            <!-- Is Active -->
+            <div class="flex items-center">
+                <input type="checkbox" asp-for="Product.IsActive" checked class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                <label asp-for="Product.IsActive" class="ml-2 block text-sm text-gray-900">Aktif</label>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="border-t border-gray-200 mt-6 pt-6">
+            <div class="flex items-center gap-3">
+                <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Ürün kaydediliyor...">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                    </svg>
+                    Kaydet
+                </button>
+                <a href="/admin/products" class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                    İptal
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <!-- CKEditor CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
+
+    <script>
+        // Character counter
+        function updateCharCount() {
+            const text = $('#productDescription').val();
+            const count = text.length;
+            $('#charCount').text(count);
+            
+            const message = $('#charCountMessage');
+            if (count < 140) {
+                message.removeClass('text-green-600').addClass('text-red-600');
+            } else {
+                message.removeClass('text-red-600').addClass('text-green-600');
+            }
+        }
+
+        $('#productDescription').on('input', updateCharCount);
+        updateCharCount();
+
+        // CKEditor
+        let editor;
+        ClassicEditor
+            .create(document.querySelector('#technicalDescriptionEditor'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'underline', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'outdent', 'indent', '|',
+                        'link', 'insertTable', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                language: 'tr',
+                placeholder: 'Ürünün teknik özellikleri ve detaylı açıklaması...'
+            })
+            .then(editorInstance => {
+                editor = editorInstance;
+            })
+            .catch(error => {
+                console.error('CKEditor hatası:', error);
+            });
+
+        // Category change
+        $('#categoryDropdown').on('change', function() {
+            const categoryId = $(this).val();
+            if (categoryId && categoryId != "0") {
+                $.ajax({
+                    url: window.location.pathname + '?handler=SubCategories&categoryId=' + categoryId,
+                    type: 'GET',
+                    success: function(data) {
+                        const dropdown = $('#subCategoryDropdown');
+                        dropdown.empty();
+                        dropdown.append('<option value="0">Alt kategori seçin...</option>');
+                        $.each(data, function(i, item) {
+                            dropdown.append('<option value="' + item.id + '">' + item.name + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#subCategoryDropdown').empty().append('<option value="0">Önce kategori seçin...</option>');
+            }
+        });
+
+        // AI Generate
+        $('#aiGenerateBtn').on('click', function() {
+            const productDescription = $('#productDescription').val();
+            const categoryId = $('#categoryDropdown').val();
+            const subCategoryId = $('#subCategoryDropdown').val();
+
+            if (!productDescription || productDescription.trim() === '') {
+                Swal.fire('Uyarı', 'Lütfen önce ürün hakkında bir açıklama yazın!', 'warning');
+                return;
+            }
+
+            if (!categoryId || categoryId == "0") {
+                Swal.fire('Uyarı', 'Lütfen önce kategori seçin!', 'warning');
+                $('#categoryDropdown').focus();
+                return;
+            }
+
+            if (!subCategoryId || subCategoryId == "0") {
+                Swal.fire('Uyarı', 'Lütfen önce alt kategori seçin!', 'warning');
+                $('#subCategoryDropdown').focus();
+                return;
+            }
+
+            const $btn = $(this);
+            const originalHtml = $btn.html();
+            $btn.prop('disabled', true).html('<svg class="w-5 h-5 animate-spin inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> AI Çalışıyor...');
+
+            $.ajax({
+                url: window.location.pathname + '?handler=GenerateAiContent',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ productDescription: productDescription }),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (response.data.name) $('#Product_Name').val(response.data.name);
+                        if (response.data.description) {
+                            $('#productDescription').val(response.data.description);
+                            updateCharCount();
+                        }
+                        if (response.data.technicalDescription) {
+                            if (editor) {
+                                editor.setData(response.data.technicalDescription);
+                            }
+                        }
+                        if (response.data.dimensions) $('#Product_Dimensions').val(response.data.dimensions);
+                        if (response.data.suggestedPrice) $('#Product_Price').val(response.data.suggestedPrice);
+                        if (response.data.suggestedStock) $('#Product_Stock').val(response.data.suggestedStock);
+
+                        Swal.fire('Başarılı!', 'Yapay zeka ile ürün bilgileri başarıyla oluşturuldu!', 'success');
+                    } else {
+                        Swal.fire('Hata', response.message, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire('Hata', 'Yapay zeka ile içerik oluşturulurken hata oluştu: ' + error, 'error');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).html(originalHtml);
+                }
+            });
+        });
+
+        // Form submit
+        $('form').on('submit', function(e) {
+            const categoryId = $('#categoryDropdown').val();
+            const subCategoryId = $('#subCategoryDropdown').val();
+
+            if (!categoryId || categoryId == "0") {
+                e.preventDefault();
+                Swal.fire('Uyarı', 'Lütfen kategori seçin!', 'warning');
+                $('#categoryDropdown').focus();
+                return false;
+            }
+
+            if (!subCategoryId || subCategoryId == "0") {
+                e.preventDefault();
+                Swal.fire('Uyarı', 'Lütfen alt kategori seçin!', 'warning');
+                $('#subCategoryDropdown').focus();
+                return false;
+            }
+
+            if (editor) {
+                editor.updateSourceElement();
+            }
+        });
+    </script>
+}
+

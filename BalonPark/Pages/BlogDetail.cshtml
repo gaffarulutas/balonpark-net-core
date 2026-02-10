@@ -1,0 +1,1036 @@
+@page "/blog/{slug}"
+@model BalonPark.Pages.BlogDetailModel
+@{
+    Layout = "_Layout";
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    ViewData["Title"] = Model.Blog?.MetaTitle ?? $"{Model.Blog?.Title} - {settings?.MetaTitle ?? companyName} Blog";
+    ViewData["Description"] = Model.Blog?.MetaDescription ?? Model.Blog?.Excerpt ?? "";
+    ViewData["Keywords"] = Model.Blog?.MetaKeywords ?? "";
+    ViewData["Image"] = !string.IsNullOrEmpty(Model.Blog?.FeaturedImage) ? 
+        Model.UrlService?.GetImageUrl(Model.Blog.FeaturedImage) : 
+        (settings?.Logo != null ? Model.UrlService?.GetImageUrl(settings.Logo) : Model.UrlService?.GetImageUrl("/assets/images/logo/logo.png"));
+}
+
+<!-- Blog Post Structured Data -->
+@if (Model.Blog != null)
+{
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "BlogPosting",
+        "headline": "@Html.Raw(Model.Blog.Title)",
+        "description": "@Html.Raw(Model.Blog.Excerpt ?? Model.Blog.Title)",
+        "image": "@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(Model.Blog.FeaturedImage ?? "/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{(Model.Blog.FeaturedImage ?? "/assets/images/logo/logo.png")}")",
+        "url": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"/blog/{Model.Blog.Slug}") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/blog/{Model.Blog.Slug}")",
+        "datePublished": "@Model.Blog.CreatedAt.ToString("yyyy-MM-dd")",
+        "dateModified": "@(Model.Blog.UpdatedAt?.ToString("yyyy-MM-dd") ?? Model.Blog.CreatedAt.ToString("yyyy-MM-dd"))",
+        "author": {
+            "@@type": "Organization",
+            "name": "@Html.Raw(Model.SiteSettings?.CompanyName ?? "Balon Park Şişme Oyun Grupları")",
+            "url": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/")"
+        },
+        "publisher": {
+            "@@type": "Organization",
+            "name": "@Html.Raw(Model.SiteSettings?.CompanyName ?? "Balon Park Şişme Oyun Grupları")",
+            "logo": {
+                "@@type": "ImageObject",
+                "url": "@(Model.SiteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(Model.SiteSettings.Logo) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{Model.SiteSettings.Logo}") : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png"))"
+            }
+        },
+        "mainEntityOfPage": {
+            "@@type": "WebPage",
+            "@@id": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"/blog/{Model.Blog.Slug}") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/blog/{Model.Blog.Slug}")"
+        },
+        "articleBody": "@Html.Raw(Model.Blog.Content ?? Model.Blog.Excerpt ?? Model.Blog.Title)",
+        "wordCount": "@(Model.Blog.Content?.Length ?? 0)",
+        "breadcrumb": {
+            "@@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@@type": "ListItem",
+                    "position": 1,
+                    "name": "Ana Sayfa",
+                    "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/")"
+                },
+                {
+                    "@@type": "ListItem",
+                    "position": 2,
+                    "name": "Blog",
+                    "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/blog") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/blog")"
+                },
+                {
+                    "@@type": "ListItem",
+                    "position": 3,
+                    "name": "@Html.Raw(Model.Blog.Title)",
+                    "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"/blog/{Model.Blog.Slug}") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/blog/{Model.Blog.Slug}")"
+                }
+            ]
+        }
+    }
+    </script>
+}
+
+@section Styles {
+<style>
+/* Blog Main Card - Clean & Professional */
+.blog-main-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Category Badge - Small & Subtle at Top */
+.blog-category-section {
+    padding: 2rem 2.5rem 0;
+}
+
+.blog-category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #6262a6, #4a4a8a);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.blog-category-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(98, 98, 166, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.blog-category-badge i {
+    font-size: 0.7rem;
+}
+
+/* Title Section - Large & Prominent */
+.blog-title-section {
+    padding: 1.5rem 2.5rem 1rem;
+}
+
+.blog-main-title {
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 0;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+/* Meta Info - Compact Horizontal Layout (Medium style) */
+.blog-meta-compact {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0 2.5rem 1.5rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.meta-compact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.meta-compact-item i {
+    font-size: 0.85rem;
+    color: #6262a6;
+}
+
+.meta-separator {
+    color: #d1d5db;
+    font-weight: 300;
+}
+
+/* Featured Image - Full Width */
+.blog-featured-image {
+    width: 100%;
+    margin: 0;
+}
+
+.blog-featured-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Excerpt Section - Introduction Paragraph */
+.blog-excerpt-section {
+    padding: 2rem 2.5rem;
+    background: #f9fafb;
+    border-left: 4px solid #6262a6;
+}
+
+.blog-excerpt {
+    color: #4b5563;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    margin-bottom: 0;
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* Content Section - Main Article */
+.blog-content-section {
+    padding: 2.5rem;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    color: #374151;
+}
+
+.blog-content-section h2 {
+    color: #6262a6;
+    margin: 2rem 0 1rem;
+    font-weight: 600;
+    font-size: 1.75rem;
+}
+
+.blog-content-section h3 {
+    color: #333;
+    margin: 1.5rem 0 1rem;
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.blog-content-section h4 {
+    color: #333;
+    margin: 1rem 0 0.5rem;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.blog-content-section p {
+    margin-bottom: 1.5rem;
+    color: #555;
+}
+
+.blog-content-section ul,
+.blog-content-section ol {
+    margin: 1.5rem 0;
+    padding-left: 2rem;
+}
+
+.blog-content-section li {
+    margin-bottom: 0.5rem;
+    color: #555;
+}
+
+.blog-content-section blockquote {
+    border-left: 4px solid #6262a6;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    background: #f8f9fa;
+    border-radius: 0 10px 10px 0;
+    font-style: italic;
+    color: #555;
+}
+
+.blog-content-section img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin: 1.5rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar */
+.blog-detail-sidebar {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.blog-detail-sidebar h3 {
+    color: #6262a6;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #6262a6;
+    font-size: 1.2rem;
+}
+
+        .related-blog-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .related-blog-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .related-blog-image {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            background: var(--secondary-color);
+        }
+
+        .related-blog-content h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .related-blog-content h4 a {
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .related-blog-content h4 a:hover {
+            color: var(--primary-color);
+        }
+
+        .related-blog-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .blog-tags {
+            margin: 2rem 0;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+
+        .blog-tag {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin: 0.25rem 0.5rem 0.25rem 0;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .blog-tag:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .blog-social-share {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .blog-social-share h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .social-share-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .social-share-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+        }
+
+        .social-share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .social-share-btn.facebook {
+            background: linear-gradient(135deg, #1877F2 0%, #0A5BC4 100%);
+            color: white;
+        }
+
+        .social-share-btn.twitter {
+            background: linear-gradient(135deg, #1DA1F2 0%, #0D8BD9 100%);
+            color: white;
+        }
+
+        .social-share-btn.linkedin {
+            background: linear-gradient(135deg, #0077B5 0%, #005885 100%);
+            color: white;
+        }
+
+        .social-share-btn.whatsapp {
+            background: var(--whatsapp-gradient);
+            color: white;
+        }
+
+        .social-share-btn.telegram {
+            background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+            color: white;
+        }
+
+        .related-products {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-light);
+        }
+
+        .related-products h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .product-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .product-card-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background: var(--secondary-color);
+        }
+
+        .product-card-content {
+            padding: 1rem;
+        }
+
+        .product-card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .product-card-title a {
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .product-card-title a:hover {
+            color: var(--primary-color);
+        }
+
+        .product-card-price {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .blog-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 3rem 0;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .blog-nav-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .blog-nav-item:first-child {
+            text-align: left;
+        }
+
+        .blog-nav-item:last-child {
+            text-align: right;
+        }
+
+        .blog-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .blog-nav-link:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .blog-nav-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .blog-author {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+        }
+
+        .blog-author-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 0 auto 1rem auto;
+        }
+
+        .blog-author-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .blog-author-bio {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+        }
+
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border-color: var(--text-light);
+            color: var(--text-light);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--text-light);
+            border-color: var(--text-light);
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background: #4a4a8a;
+            border-color: #4a4a8a;
+        }
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+    .blog-category-section {
+        padding: 1.5rem 1.5rem 0;
+    }
+    
+    .blog-title-section {
+        padding: 1rem 1.5rem 0.75rem;
+    }
+    
+    .blog-main-title {
+        font-size: 2rem;
+        letter-spacing: -0.01em;
+    }
+    
+    .blog-meta-compact {
+        padding: 0 1.5rem 1.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .blog-excerpt-section {
+        padding: 1.5rem;
+    }
+    
+    .blog-excerpt {
+        font-size: 1.05rem;
+    }
+    
+    .blog-content-section {
+        padding: 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .related-blog-item {
+        flex-direction: column;
+    }
+    
+    .related-blog-image {
+        width: 100%;
+        height: 120px;
+    }
+    
+    .blog-navigation {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .blog-nav-item {
+        text-align: center !important;
+        width: 100%;
+    }
+    
+    .blog-nav-link {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .blog-detail-sidebar,
+    .blog-social-share,
+    .blog-tags,
+    .blog-author {
+        margin: 1rem 0;
+    }
+}
+
+@@media (max-width: 576px) {
+    .blog-category-section {
+        padding: 1rem 1rem 0;
+    }
+    
+    .blog-category-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.8rem;
+    }
+    
+    .blog-title-section {
+        padding: 0.75rem 1rem 0.5rem;
+    }
+    
+    .blog-main-title {
+        font-size: 1.5rem;
+    }
+    
+    .blog-meta-compact {
+        padding: 0 1rem 1rem;
+        font-size: 0.8rem;
+        gap: 0.5rem;
+    }
+    
+    .meta-compact-item i {
+        font-size: 0.75rem;
+    }
+    
+    .blog-excerpt-section {
+        padding: 1rem;
+    }
+    
+    .blog-excerpt {
+        font-size: 0.95rem;
+    }
+    
+    .blog-content-section {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+}
+    </style>
+}
+
+@if (Model.Blog != null)
+{
+    <!-- Blog Detail Section Start -->
+    <div class="section-b-space">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb-nav">
+            <div class="breadcrumb-container">
+                <a href="/" class="breadcrumb-item">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/blog" class="breadcrumb-item">
+                    <i class="fas fa-blog"></i>
+                    <span>Blog</span>
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">@Html.Raw(Model.Blog.Title.Length > 50 ? Model.Blog.Title.Substring(0, 50) + "..." : Model.Blog.Title)</span>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Ana İçerik -->
+                <div class="col-lg-8">
+                <!-- Blog Main Card -->
+                <article class="blog-main-card">
+                    <!-- Header: Category Badge -->
+                    @if (!string.IsNullOrEmpty(Model.Blog.Category))
+                    {
+                        <div class="blog-category-section">
+                            <a href="/blog?category=@Uri.EscapeDataString(Model.Blog.Category)" class="blog-category-badge">
+                                <i class="fas fa-tag"></i>
+                                <span>@Html.Raw(Model.Blog.Category)</span>
+                            </a>
+                        </div>
+                    }
+
+                    <!-- Title -->
+                    <div class="blog-title-section">
+                        <h1 class="blog-main-title">@Html.Raw(Model.Blog.Title)</h1>
+                    </div>
+
+                    <!-- Meta Info: Compact horizontal layout -->
+                    <div class="blog-meta-compact">
+                        <div class="meta-compact-item">
+                            <i class="fas fa-user-circle"></i>
+                            <span>@(Model.Blog.AuthorName ?? companyName)</span>
+                        </div>
+                        <span class="meta-separator">•</span>
+                        <div class="meta-compact-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>@(Model.Blog.PublishedAt?.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR")) ?? Model.Blog.CreatedAt.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR")))</span>
+                        </div>
+                        <span class="meta-separator">•</span>
+                        <div class="meta-compact-item">
+                            <i class="fas fa-clock"></i>
+                            <span>@Model.ReadingTime dk okuma</span>
+                        </div>
+                        @if (Model.Blog.ViewCount > 0)
+                        {
+                            <span class="meta-separator">•</span>
+                            <div class="meta-compact-item">
+                                <i class="fas fa-eye"></i>
+                                <span>@Model.Blog.ViewCount görüntülenme</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Featured Image -->
+                    @if (!string.IsNullOrEmpty(Model.Blog.FeaturedImage))
+                    {
+                        <div class="blog-featured-image">
+                            <img src="@Model.UrlService?.GetImageUrl(Model.Blog.FeaturedImage)" 
+                                 alt="@Html.Raw(Model.Blog.Title)" 
+                                 class="img-fluid"
+                                 loading="eager">
+                        </div>
+                    }
+
+                    <!-- Excerpt/Introduction -->
+                    @if (!string.IsNullOrEmpty(Model.Blog.Excerpt))
+                    {
+                        <div class="blog-excerpt-section">
+                            <p class="blog-excerpt">@Html.Raw(Model.Blog.Excerpt)</p>
+                        </div>
+                    }
+
+                    <!-- Main Content -->
+                    <div class="blog-content-section">
+                        @Html.Raw(Model.Blog.Content)
+                    </div>
+                </article>
+
+                <!-- Etiketler -->
+                @if (!string.IsNullOrEmpty(Model.Blog.MetaKeywords))
+                {
+                    <div class="blog-tags">
+                        <h4>Etiketler:</h4>
+                        @{
+                            var tags = Model.Blog.MetaKeywords.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        }
+                        @foreach (var tag in tags)
+                        {
+                            <a href="/blog?tag=@Uri.EscapeDataString(tag.Trim())" class="blog-tag">
+                                #@tag.Trim()
+                            </a>
+                        }
+                    </div>
+                }
+
+                <!-- Sosyal Medya Paylaşım -->
+                <div class="blog-social-share">
+                    <h3>Bu yazıyı paylaşın:</h3>
+                    <div class="social-share-buttons">
+                        @{
+                            var shareUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/blog/{Model.Blog.Slug}";
+                            var shareTitle = Model.Blog.Title;
+                            var shareDescription = Model.Blog.Excerpt;
+                        }
+                        
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=@Uri.EscapeDataString(shareUrl)" 
+                           target="_blank" 
+                           class="social-share-btn facebook"
+                           title="Facebook'ta Paylaş">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        
+                        <a href="https://twitter.com/intent/tweet?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" 
+                           target="_blank" 
+                           class="social-share-btn twitter"
+                           title="Twitter'da Paylaş">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=@Uri.EscapeDataString(shareUrl)" 
+                           target="_blank" 
+                           class="social-share-btn linkedin"
+                           title="LinkedIn'de Paylaş">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        
+                        <a href="https://wa.me/?text=@Uri.EscapeDataString($"{shareTitle} - {shareUrl}")" 
+                           target="_blank" 
+                           class="social-share-btn whatsapp"
+                           title="WhatsApp'ta Paylaş">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        
+                        <a href="https://t.me/share/url?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" 
+                           target="_blank" 
+                           class="social-share-btn telegram"
+                           title="Telegram'da Paylaş">
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- İlgili Ürünler -->
+                @if (Model.Blog.RelatedProducts?.Any() == true)
+                {
+                    <div class="related-products">
+                        <h3>Bu yazıyla ilgili ürünlerimiz:</h3>
+                        <div class="row">
+                            @foreach (var product in Model.Blog.RelatedProducts.Take(3))
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="product-card">
+                                        @if (product.MainImage != null)
+                                        {
+                                            <img src="@Model.UrlService?.GetImageUrl(product.MainImage.ThumbnailPath)" 
+                                                 alt="@Html.Raw(product.Product.Name)" 
+                                                 class="product-card-image"
+                                                 loading="lazy">
+                                        }
+                                        else
+                                        {
+                                            <div class="product-card-image d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        }
+                                        
+                                        <div class="product-card-content">
+                                            <h4 class="product-card-title">
+                                                <a href="/category/@product.Product.CategorySlug/@product.Product.SubCategorySlug/@product.Product.Slug">@Html.Raw(product.Product.Name)</a>
+                                            </h4>
+                                            <div class="product-card-price">
+                                                @if (product.Product.Price <= 0)
+                                                {
+                                                    <span class="price-contact-text">Fiyat için iletişime geçin</span>
+                                                }
+                                                else if (Model.SelectedCurrency == "USD")
+                                                {
+                                                    <span class="price-usd active">$@product.Product.UsdPrice.ToString("N2")</span>
+                                                }
+                                                else if (Model.SelectedCurrency == "EUR")
+                                                {
+                                                    <span class="price-eur active">€@product.Product.EuroPrice.ToString("N2")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="price-tl active">₺@product.Product.Price.ToString("N2")</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Blog Navigasyonu -->
+                @if (Model.PreviousBlog != null || Model.NextBlog != null)
+                {
+                    <div class="blog-navigation">
+                        <div class="blog-nav-item">
+                            @if (Model.PreviousBlog != null)
+                            {
+                                <a href="/blog/@Model.PreviousBlog.Slug" class="blog-nav-link">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Önceki Yazı</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="blog-nav-link disabled">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Önceki Yazı</span>
+                                </span>
+                            }
+                        </div>
+                        
+                        <div class="blog-nav-item">
+                            <a href="/blog" class="btn btn-outline-secondary">
+                                <i class="fas fa-list me-2"></i>Tüm Yazılar
+                            </a>
+                        </div>
+                        
+                        <div class="blog-nav-item">
+                            @if (Model.NextBlog != null)
+                            {
+                                <a href="/blog/@Model.NextBlog.Slug" class="blog-nav-link">
+                                    <span>Sonraki Yazı</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="blog-nav-link disabled">
+                                    <span>Sonraki Yazı</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- İlgili Yazılar -->
+                @if (Model.RelatedBlogs?.Any() == true)
+                {
+                    <div class="blog-detail-sidebar">
+                        <h3>İlgili Yazılar</h3>
+                        @foreach (var relatedBlog in Model.RelatedBlogs)
+                        {
+                            <div class="related-blog-item">
+                                @if (!string.IsNullOrEmpty(relatedBlog.FeaturedImage))
+                                {
+                                    <img src="@Model.UrlService?.GetImageUrl(relatedBlog.FeaturedImage)" 
+                                         alt="@Html.Raw(relatedBlog.Title)" 
+                                         class="related-blog-image"
+                                         loading="lazy">
+                                }
+                                else
+                                {
+                                    <div class="related-blog-image d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                }
+                                
+                                <div class="related-blog-content">
+                                    <h4>
+                                        <a href="/blog/@relatedBlog.Slug">@Html.Raw(relatedBlog.Title)</a>
+                                    </h4>
+                                    <div class="related-blog-date">
+                                        @(relatedBlog.PublishedAt?.ToString("dd.MM.yyyy") ?? relatedBlog.CreatedAt.ToString("dd.MM.yyyy"))
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- RSS Aboneliği -->
+                <div class="blog-detail-sidebar">
+                    <h3>Blog Aboneliği</h3>
+                    <p class="mb-3">Yeni blog yazılarımızdan haberdar olmak için RSS aboneliği yapabilirsiniz.</p>
+                    <a href="/blog/feed" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-rss me-2"></i>RSS Aboneliği
+                    </a>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid mt-5">
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="py-5">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                    <h2 class="mt-3">Blog yazısı bulunamadı</h2>
+                    <p class="text-muted">Aradığınız blog yazısı bulunamadı veya yayından kaldırılmış olabilir.</p>
+                    <a asp-page="/Blog" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Blog'a Dön
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

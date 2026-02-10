@@ -1,0 +1,59 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://balonpark.com/sitemap.xml
+
+# Disallow admin areas
+Disallow: /Admin/
+Disallow: /admin/
+
+# Disallow private areas
+Disallow: /bin/
+Disallow: /obj/
+Disallow: /Properties/
+
+# Allow important pages
+Allow: /
+Allow: /Index
+Allow: /Products
+Allow: /Blog
+Allow: /Category/
+Allow: /ProductDetail/
+Allow: /BlogDetail/
+Allow: /Hakkimizda
+Allow: /Iletisim
+Allow: /Privacy
+Allow: /KullanimKosullari
+Allow: /Search
+
+# Allow static resources
+Allow: /assets/
+Allow: /css/
+Allow: /js/
+Allow: /images/
+Allow: /lib/
+
+# Crawl delay (optional)
+Crawl-delay: 1
+
+# Specific bot instructions
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /

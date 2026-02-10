@@ -1,0 +1,201 @@
+@page "/search"
+@model SearchModel
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    ViewData["Title"] = "Arama Sonuçları";
+    ViewData["Description"] = $"'{Model.Query}' için arama sonuçları - {companyName}";
+    ViewData["Keywords"] = $"arama, {Model.Query}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, ünlü park";
+    ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
+}
+
+<!-- Search Results Page Structured Data -->
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "SearchResultsPage",
+    "name": "Arama Sonuçları - '@Html.Raw(Model.Query)'",
+    "description": "'@Html.Raw(Model.Query)' için arama sonuçları - @Html.Raw(companyName)",
+    "url": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"/search?q={Uri.EscapeDataString(Model.Query)}") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/search?q={Uri.EscapeDataString(Model.Query)}")",
+    "mainEntity": {
+        "@@type": "ItemList",
+        "name": "'@Html.Raw(Model.Query)' Arama Sonuçları",
+        "description": "'@Html.Raw(Model.Query)' için bulunan ürünler ve kategoriler",
+        "numberOfItems": "@Model.Products.Count()",
+        "itemListElement": [
+            @{
+                int itemCount = 0;
+                int maxItems = 20;
+                foreach (var productWithImage in Model.Products.Take(maxItems))
+                {
+                    var product = productWithImage.Product;
+                    @: {
+                    @:     "@@type": "ListItem",
+                    @:     "position": @(itemCount + 1),
+                    @:     "item": {
+                    @:         "@@type": "Product",
+                    @:         "name": "@Html.Raw(product.Name)",
+                    @:         "description": "@Html.Raw(product.Description ?? product.Name)",
+                    @:         "url": "@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(product.CategorySlug ?? "", product.SubCategorySlug ?? "", product.Slug) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{product.CategorySlug}/{product.SubCategorySlug}/{product.Slug}")",
+                    @:         "image": "@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(productWithImage.MainImage?.LargePath ?? "/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{(productWithImage.MainImage?.LargePath ?? "/assets/images/logo/logo.png")}")",
+                    @:         "offers": {
+                    @:             "@@type": "Offer",
+                    @:             "price": "@product.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)",
+                    @:             "priceCurrency": "TRY",
+                    @:             "availability": "@(product.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")"
+                    @:         },
+                    @:         "category": "@Html.Raw(product.CategoryName ?? "")"
+                    @:     }
+                    @: }@(itemCount < maxItems - 1 ? "," : "")
+                    itemCount++;
+                }
+            }
+        ]
+    },
+    "breadcrumb": {
+        "@@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@@type": "ListItem",
+                "position": 1,
+                "name": "Ana Sayfa",
+                "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/")"
+            },
+            {
+                "@@type": "ListItem",
+                "position": 2,
+                "name": "Arama Sonuçları",
+                "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"/search?q={Uri.EscapeDataString(Model.Query)}") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/search?q={Uri.EscapeDataString(Model.Query)}")"
+            }
+        ]
+    }
+}
+</script>
+
+<!-- Search Results Section Start -->
+<div class="section-b-space">
+    <div class="container-fluid-xs">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb-nav">
+            <div class="breadcrumb-container">
+                <a href="/" class="breadcrumb-item">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">Arama Sonuçları</span>
+            </div>
+        </nav>
+
+        <div class="title d-block">
+            <h2 class="text-theme font-sm">Arama Sonuçları</h2>
+            <p>@if (!string.IsNullOrEmpty(Model.Query))
+            {
+                <span>"<strong>@Model.Query</strong>" için @Model.Products.Count() ürün bulundu</span>
+            }
+            else
+            {
+                <span>Lütfen arama yapmak için bir kelime girin</span>
+            }</p>
+            
+        </div>
+
+        @if (Model.Products.Any())
+        {
+            <div class="row row-cols-xxl-6 row-cols-lg-5 row-cols-md-4 row-cols-sm-3 row-cols-2 g-sm-4 g-3 section-b-space">
+                @foreach (var item in Model.Products)
+                {
+                    <div>
+                        <div class="product-box modern-product-card wow fadeIn">
+                            <!-- Product Actions -->
+                            <div class="product-actions">
+                                <button class="favorite-btn" data-product-id="@item.Product.Id">
+                                    <i class="fa-regular fa-heart"></i>
+                                    <span class="btn-text">Favori</span>
+                                </button>
+                                <button class="compare-btn" data-product-id="@item.Product.Id">
+                                    <i class="fa-solid fa-shuffle"></i>
+                                    <span class="btn-text">Karşılaştır</span>
+                                </button>
+                            </div>
+
+                            <div class="product-image">
+                                <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
+                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage?.ThumbnailPath ?? "/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage?.ThumbnailPath ?? "assets/images/no-image.png"}")"
+                                         class="img-fluid blur-up lazyload product-thumbnail" alt="@Html.Raw(item.Product.Name)">
+                                </a>
+                            </div>
+                            <div class="product-detail position-relative">
+                                <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
+                                    <h6 class="name">@Html.Raw(item.Product.Name)</h6>
+                                </a>
+
+                                <h6 class="sold weight text-content fw-normal">@Html.Raw(item.Product.CategoryName)</h6>
+
+                                @if (!string.IsNullOrEmpty(item.Product.Description))
+                                {
+                                    <p class="product-description text-content">
+                                        @Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)
+                                    </p>
+                                }
+
+                                @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                                {
+                                    <div class="product-dimensions">
+                                        <i class="fa-solid fa-ruler-combined"></i>
+                                        <span class="dimensions-text">@Html.Raw(item.Product.Dimensions)</span>
+                                    </div>
+                                }
+
+                                <div class="price-section">
+                                    @if (item.Product.Price <= 0)
+                                    {
+                                        <p class="price-contact-text">Fiyat için iletişime geçin</p>
+                                    }
+                                    else
+                                    {
+                                        <h6 class="price price-tl @(Model.SelectedCurrency == "TL" ? "active" : "")" style="color: #6262a6;">₺@item.Product.Price.ToString("N2")</h6>
+                                        <h6 class="price price-usd @(Model.SelectedCurrency == "USD" ? "active" : "")" style="color: #6262a6;">$@item.Product.UsdPrice.ToString("N2")</h6>
+                                        <h6 class="price price-eur @(Model.SelectedCurrency == "EUR" ? "active" : "")" style="color: #6262a6;">€@item.Product.EuroPrice.ToString("N2")</h6>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.Query))
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fa-solid fa-search fa-3x mb-3"></i>
+                        <h5>"@Model.Query" için ürün bulunamadı</h5>
+                        <p>Farklı anahtar kelimelerle arama yapmayı deneyin veya kategorilerimizi inceleyin.</p>
+                        <a href="/" class="btn btn-animation mt-3">
+                            <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-warning text-center">
+                        <i class="fa-solid fa-exclamation-triangle fa-3x mb-3"></i>
+                        <h5>Arama terimi gerekli</h5>
+                        <p>Lütfen arama yapmak için bir kelime girin.</p>
+                        <a href="/" class="btn btn-animation mt-3">
+                            <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<!-- Search Results Section End -->
+

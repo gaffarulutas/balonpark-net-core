@@ -1,0 +1,350 @@
+@page
+@model BalonPark.Pages.Admin.Categories.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Kategoriler";
+}
+
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Kategori Yönetimi
+            </h1>
+            <p class="text-gray-600 mt-2">Kategorileri görüntüle, ekle, düzenle ve sil</p>
+        </div>
+        <div class="mt-4 md:mt-0 flex gap-3">
+            <button id="toggleReorderMode" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                </svg>
+                Sıralamayı Düzenle
+            </button>
+            <button id="saveReorderBtn" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" style="display: none;">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Sıralamayı Kaydet
+            </button>
+            <button id="cancelReorderBtn" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" style="display: none;">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                İptal
+            </button>
+            <a href="/admin/categories/create" id="createBtn" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Yeni Kategori
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-green-800">İşlem Başarılı</p>
+                <p class="text-green-700">@Model.SuccessMessage</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Categories Table -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    @if (!Model.Categories.Any())
+    {
+        <div class="text-center py-12">
+            <svg class="mx-auto w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Henüz kategori eklenmedi</h3>
+            <p class="text-gray-500 mb-6">İlk kategoriyi oluşturmak için aşağıdaki butona tıklayın</p>
+            <a href="/admin/categories/create" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Kategori Ekle
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider reorder-handle-header" style="display:none;">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                            </svg>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori Adı</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Açıklama</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Oluşturma Tarihi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="categoriesTableBody" class="bg-white divide-y divide-gray-200">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <tr class="hover:bg-gray-50 transition-colors duration-150" data-category-id="@category.Id" data-display-order="@category.DisplayOrder">
+                            <td class="px-6 py-4 whitespace-nowrap reorder-handle" style="display:none;">
+                                <svg class="w-6 h-6 text-gray-400 cursor-move" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">@category.Id</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm font-semibold text-gray-900">@Html.Raw(category.Name)</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">@Html.Raw(category.Description ?? "-")</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (category.IsActive)
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Aktif
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Pasif
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">@category.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-2">
+                                    <a href="/admin/categories/edit?id=@category.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-200">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                        Düzenle
+                                    </a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@category.Id" class="delete-form inline">
+                                        <button type="button" class="delete-btn inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200" data-category-name="@category.Name" data-loading-text="Kategori siliniyor...">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                            Sil
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <!-- Sortable.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
+    <script>
+        let sortable = null;
+        let isReorderMode = false;
+        let originalOrder = [];
+
+        // Auto-hide success messages
+        setTimeout(() => {
+            $('.bg-green-50').fadeOut();
+        }, 5000);
+        
+        // Delete confirmation
+        $('.delete-btn').on('click', function() {
+            const $btn = $(this);
+            const categoryName = $btn.data('category-name');
+            const $form = $btn.closest('.delete-form');
+            
+            showDeleteConfirm(
+                `<strong>${categoryName}</strong> adlı kategoriyi silmek istediğinize emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>`,
+                function() {
+                    showLoading('Kategori siliniyor...');
+                    $form.submit();
+                }
+            );
+        });
+
+        // Reorder Mode Toggle
+        $('#toggleReorderMode').on('click', function() {
+            isReorderMode = true;
+            enterReorderMode();
+        });
+
+        $('#cancelReorderBtn').on('click', function() {
+            isReorderMode = false;
+            exitReorderMode();
+            restoreOriginalOrder();
+        });
+
+        $('#saveReorderBtn').on('click', function() {
+            saveNewOrder();
+        });
+
+        function enterReorderMode() {
+            // Save original order
+            originalOrder = [];
+            $('#categoriesTableBody tr').each(function(index) {
+                originalOrder.push({
+                    element: $(this).clone(true),
+                    id: $(this).data('category-id'),
+                    order: $(this).data('display-order')
+                });
+            });
+
+            // Show reorder UI
+            $('.reorder-handle, .reorder-handle-header').show();
+            $('#toggleReorderMode, #createBtn').hide();
+            $('#saveReorderBtn, #cancelReorderBtn').show();
+            
+            // Disable action buttons
+            $('.delete-btn, a[href*="edit"]').addClass('opacity-50 pointer-events-none');
+
+            // Initialize Sortable
+            const tbody = document.getElementById('categoriesTableBody');
+            sortable = Sortable.create(tbody, {
+                animation: 150,
+                handle: '.reorder-handle',
+                ghostClass: 'bg-blue-100',
+                dragClass: 'bg-blue-50',
+                onEnd: function(evt) {
+                    console.log('Moved from', evt.oldIndex, 'to', evt.newIndex);
+                }
+            });
+
+            // Show notification
+            showNotification('Sıralama modu aktif. Kategorileri sürükleyip bırakın.', 'info');
+        }
+
+        function exitReorderMode() {
+            // Hide reorder UI
+            $('.reorder-handle, .reorder-handle-header').hide();
+            $('#toggleReorderMode, #createBtn').show();
+            $('#saveReorderBtn, #cancelReorderBtn').hide();
+            
+            // Enable action buttons
+            $('.delete-btn, a[href*="edit"]').removeClass('opacity-50 pointer-events-none');
+
+            // Destroy Sortable
+            if (sortable) {
+                sortable.destroy();
+                sortable = null;
+            }
+        }
+
+        function restoreOriginalOrder() {
+            const tbody = $('#categoriesTableBody');
+            tbody.empty();
+            
+            originalOrder.forEach(item => {
+                tbody.append(item.element);
+            });
+
+            showNotification('Değişiklikler iptal edildi', 'warning');
+        }
+
+        function saveNewOrder() {
+            const categories = [];
+            let displayOrder = 1;
+
+            $('#categoriesTableBody tr').each(function() {
+                const categoryId = $(this).data('category-id');
+                categories.push({
+                    id: categoryId,
+                    displayOrder: displayOrder++
+                });
+            });
+
+            // Show loading
+            showLoading('Sıralama kaydediliyor...');
+
+            // Send to API
+            fetch('/api/category-order/categories/reorder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(categories)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    isReorderMode = false;
+                    exitReorderMode();
+                    
+                    // Update data-display-order attributes
+                    $('#categoriesTableBody tr').each(function(index) {
+                        $(this).attr('data-display-order', index + 1);
+                    });
+                } else {
+                    showNotification(data.message || 'Sıralama kaydedilemedi', 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                showNotification('Bir hata oluştu: ' + error.message, 'error');
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: 'bg-green-50 border-green-400 text-green-800',
+                error: 'bg-red-50 border-red-400 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                info: 'bg-blue-50 border-blue-400 text-blue-800'
+            };
+
+            const icons = {
+                success: '<svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                error: '<svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                warning: '<svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+                info: '<svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+            };
+
+            const notification = $(`
+                <div class="${colors[type]} border-l-4 p-4 mb-6 rounded-r-lg notification-alert">
+                    <div class="flex items-center">
+                        ${icons[type]}
+                        <p class="font-semibold">${message}</p>
+                    </div>
+                </div>
+            `);
+
+            $('.bg-white.rounded-lg.shadow-md.p-6.mb-6').after(notification);
+            
+            setTimeout(() => {
+                notification.fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+    </script>
+}

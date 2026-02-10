@@ -1,0 +1,167 @@
+using BalonPark.Data;
+using BalonPark.Services;
+using BalonPark.Pages.Admin;
+using BalonPark.Middleware;
+using Serilog;
+using System.Threading.Tasks;
+
+// Serilog Yapılandırması - appsettings.json'dan okuyacak ama önce basic config
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information() // Development için Information seviyesi
+    .WriteTo.Console() // Console'a yaz
+    .WriteTo.File(
+        path: "logs/error-.txt",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}",
+        retainedFileCountLimit: 30,
+        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error) // Dosyaya sadece Error
+    .CreateLogger();
+
+try
+{
+    Log.Information("Serilog yapılandırması başlatılıyor...");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Serilog'u ASP.NET Core'a entegre et ve appsettings.json'dan yapılandırmayı oku
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.File(
+            path: "logs/error-.txt",
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}",
+            retainedFileCountLimit: 30,
+            restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error));
+
+    // Add services to the container.
+    builder.Services.AddRazorPages();
+    builder.Services.AddControllers();
+    builder.Services.AddHttpContextAccessor();
+
+    // Session Configuration
+    builder.Services.AddDistributedMemoryCache();
+    builder.Services.AddSession(options =>
+    {
+        options.IdleTimeout = TimeSpan.FromMinutes(30);
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.Name = ".BalonPark.Session";
+    });
+
+    // Memory Cache Configuration
+    builder.Services.AddMemoryCache();
+
+    // Dapper Context
+    builder.Services.AddSingleton<DapperContext>();
+
+    // Repositories (Örnek)
+    builder.Services.AddScoped<ExampleRepository>();
+    builder.Services.AddScoped<SettingsRepository>();
+    builder.Services.AddScoped<CategoryRepository>();
+    builder.Services.AddScoped<SubCategoryRepository>();
+    builder.Services.AddScoped<ProductRepository>();
+    builder.Services.AddScoped<ProductImageRepository>();
+    builder.Services.AddScoped<BlogRepository>();
+
+    // Services
+    builder.Services.AddHttpClient<CurrencyService>();
+    builder.Services.AddScoped<CurrencyService>();
+    builder.Services.AddScoped<ICurrencyCookieService, CurrencyCookieService>();
+    builder.Services.AddScoped<ICacheService, CacheService>();
+    builder.Services.AddScoped<IUrlService, UrlService>();
+    builder.Services.AddScoped<IEmailService, EmailService>();
+    
+    // Mail Service - Singleton (connection pooling için)
+    builder.Services.AddSingleton<IMailService, MailService>();
+
+    // PDF Generation Service
+    builder.Services.AddScoped<PdfService>();
+
+    // Excel Generation Service
+    builder.Services.AddScoped<ExcelService>();
+
+    // Google Shopping Service
+    builder.Services.AddScoped<IGoogleShoppingService, GoogleShoppingService>();
+
+    // Blog Service
+    builder.Services.AddScoped<IBlogService, BlogService>();
+
+    // AI Service
+    builder.Services.AddHttpClient<AiService>();
+    builder.Services.AddScoped<IAiService, AiService>();
+
+    var app = builder.Build();
+
+    // BaseAdminPage için SettingsRepository'yi set et (cache'den Settings yükleme için)
+    Log.Information("SettingsRepository yükleniyor...");
+    using (var scope = app.Services.CreateScope())
+    {
+        var settingsRepository = scope.ServiceProvider.GetRequiredService<SettingsRepository>();
+        BaseAdminPage.SetSettingsRepository(settingsRepository);
+    }
+    Log.Information("SettingsRepository yüklendi.");
+
+    // Global Exception Handling Middleware - Tüm hataları yakala
+    app.UseGlobalExceptionHandling();
+
+    // Serilog Request Logging - Sadece Error ve üzeri
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+        options.GetLevel = (httpContext, elapsed, ex) =>
+        {
+            // Sadece hatalı istekleri logla
+            if (ex != null || httpContext.Response.StatusCode >= 500)
+                return Serilog.Events.LogEventLevel.Error;
+            if (httpContext.Response.StatusCode >= 400)
+                return Serilog.Events.LogEventLevel.Warning;
+            return Serilog.Events.LogEventLevel.Debug; // Normal istekler loglanmaz (min level Error)
+        };
+    });
+
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+    else
+    {
+        app.UseDeveloperExceptionPage();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
+
+    app.UseRouting();
+
+    app.UseSession();
+    app.UseAuthorization();
+
+    app.MapRazorPages();
+    app.MapControllers();
+
+    Log.Information("Middleware yapılandırması tamamlandı.");
+    
+    // URL'leri logla
+    var urls = app.Urls.Any() ? string.Join(", ", app.Urls) : "Yapılandırılmış URL yok (launchSettings.json kullanılıyor)";
+    Log.Information("Uygulama başlatılıyor...");
+    Log.Information("Dinlenen adresler: {Urls}", urls);
+    Log.Information("Tarayıcınızda şu adrese gidin: http://localhost:5152/");
+    
+    await app.RunAsync();
+    Log.Information("Uygulama durduruldu.");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Uygulama başlatılırken kritik hata oluştu!");
+    throw;
+}
+finally
+{
+    Log.Information("Uygulama kapatılıyor...");
+    Log.CloseAndFlush();
+}

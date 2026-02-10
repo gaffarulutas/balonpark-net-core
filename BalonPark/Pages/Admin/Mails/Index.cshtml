@@ -1,0 +1,1174 @@
+@page
+@model BalonPark.Pages.Admin.Mails.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "E-posta Yönetimi";
+    ViewData["AdminUserName"] = Model.AdminUserName;
+    ViewData["AdminEmail"] = Model.AdminEmail;
+}
+
+<!-- Modern E-posta Arayüzü -->
+<div class="email-interface">
+    <!-- Header -->
+    <div class="email-header">
+        <div class="email-header-left">
+            <h1 class="email-title">E-posta Yönetimi</h1>
+            <div class="email-stats">
+                <span class="stat-item">
+                    <span class="stat-number">@Model.Stats.UnreadCount</span>
+                    <span class="stat-label">Okunmamış</span>
+                </span>
+                <span class="stat-divider">•</span>
+                <span class="stat-item">
+                    <span class="stat-number">@Model.Stats.TotalInbox</span>
+                    <span class="stat-label">Toplam</span>
+                </span>
+            </div>
+        </div>
+        <div class="email-header-right">
+            <button class="btn-compose" onclick="location.href='/admin/mails/compose'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Yeni E-posta
+            </button>
+        </div>
+    </div>
+
+    <!-- Error/Success Messages -->
+    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+    {
+        <div class="alert alert-error">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+    {
+        <div class="alert alert-success">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <!-- Main Content -->
+    <div class="email-main">
+        <!-- Sidebar -->
+        <div class="email-sidebar">
+            <!-- Search -->
+            <div class="email-search">
+                <form method="get" class="search-form">
+                    <input type="hidden" name="Folder" value="@Model.Folder" />
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input type="text" name="SearchQuery" value="@Model.SearchQuery"
+                            placeholder="E-postalarda ara..." class="search-input">
+                        @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                        {
+                            <button type="button" onclick="location.href='/admin/mails?folder=@Model.Folder'"
+                                class="search-clear">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        }
+                    </div>
+                </form>
+            </div>
+
+            <!-- Folders -->
+            <div class="email-folders">
+                <div class="folder-section">
+                    <h3 class="folder-section-title">Klasörler</h3>
+                    <div class="folder-list" id="folderListContainer">
+                        <!-- Klasörler AJAX ile yüklenecek -->
+                        <div class="folder-loading" id="folderLoadingState">
+                            <div class="folder-spinner">
+                                <div class="spinner-circle"></div>
+                            </div>
+                            <span class="loading-text">Yükleniyor...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- E-posta Listesi -->
+        <div class="email-content">
+            <!-- İçerik Başlığı -->
+            <div class="email-content-header">
+                <div class="email-content-title">
+                    <h2 class="folder-current-name">@Model.FolderDisplayName</h2>
+                    <span class="email-count">@Model.Messages.Count e-posta</span>
+                </div>
+                <div class="email-actions">
+                    <button class="action-btn" onclick="refreshEmails()" title="Yenile">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                    <button class="action-btn" onclick="selectAllEmails()" title="Tümünü Seç">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- E-posta Listesi -->
+            <div class="email-list">
+                <!-- Loading State - Varsayılan olarak gösteriliyor -->
+                <div id="emailLoadingState" class="email-loading-state">
+                    <div class="loading-content">
+                        <div class="email-spinner">
+                            <div class="spinner-circle"></div>
+                        </div>
+                        <p class="loading-text">E-postalar yükleniyor...</p>
+                    </div>
+                </div>
+
+                <!-- Email List Container - Başlangıçta gizli -->
+                <div id="emailListContainer" class="email-list-container hidden">
+                    <!-- Buraya AJAX ile mesajlar eklenecek -->
+                </div>
+
+                <!-- Empty State - Başlangıçta gizli, sadece loading bittikten sonra gösterilecek -->
+                <div id="emptyState" class="email-list-empty hidden">
+                    <div class="empty-content">
+                        <div class="empty-icon">
+                            <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                        </div>
+                        <h3 class="empty-title">Bu klasörde e-posta yok</h3>
+                        <p class="empty-message">Bu klasörde henüz e-posta bulunmuyor.</p>
+                        <button class="btn-primary" onclick="location.href='/admin/mails/compose'">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                            İlk E-postayı Gönder
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Eski server-side rendered içerik kaldırıldı - Artık tamamen AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Modern Email Interface Styles */
+        .email-interface {
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+        }
+
+        /* Header */
+        .email-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .email-header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .email-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .email-stats {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-number {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .stat-divider {
+            color: #cbd5e1;
+        }
+
+        .btn-compose {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-compose:hover {
+            background: #2563eb;
+        }
+
+        /* Main Content */
+        .email-main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .email-sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .email-search {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .search-form {
+            width: 100%;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            width: 1rem;
+            height: 1rem;
+            color: #94a3b8;
+            z-index: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            background: #f9fafb;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+        }
+
+        .search-clear:hover {
+            color: #64748b;
+            background: #f1f5f9;
+        }
+
+        /* Folders */
+        .email-folders {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        .folder-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .folder-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0 0 0.5rem 1rem;
+        }
+
+        .folder-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .folder-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-radius: 0;
+        }
+
+        .folder-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .folder-item.active {
+            background: #eff6ff;
+            color: #3b82f6;
+            font-weight: 500;
+            border-right: 3px solid #3b82f6;
+        }
+
+        .folder-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .folder-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .folder-name {
+            font-size: 0.875rem;
+        }
+
+        .folder-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.75rem;
+            min-width: 1.25rem;
+            text-align: center;
+        }
+
+        .folder-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            gap: 0.75rem;
+        }
+
+        .folder-spinner {
+            width: 32px;
+            height: 32px;
+        }
+
+        .spinner-circle {
+            width: 100%;
+            height: 100%;
+            border: 3px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .folder-empty {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        /* Email Loading State */
+        .email-loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+        }
+
+        .loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .email-spinner {
+            width: 48px;
+            height: 48px;
+        }
+
+        /* Content Area */
+        .email-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .email-content-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .email-content-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .folder-current-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .email-count {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .email-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f1f5f9;
+            color: #374151;
+        }
+
+        /* Email List */
+        .email-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .email-list-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .email-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .email-item:hover {
+            background: #f8fafc;
+        }
+
+        .email-item.unread {
+            background: #fef7ff;
+            border-left: 3px solid #8b5cf6;
+        }
+
+        .email-item-checkbox {
+            display: flex;
+            align-items: center;
+        }
+
+        .email-checkbox {
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .email-item-star {
+            display: flex;
+            align-items: center;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            color: #d1d5db;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .star-btn:hover {
+            color: #fbbf24;
+        }
+
+        .star-btn.starred {
+            color: #fbbf24;
+        }
+
+        .email-item-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: inherit;
+            min-width: 0;
+        }
+
+        .email-sender {
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sender-name {
+            font-size: 0.875rem;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sender-email {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .email-subject {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .subject-text {
+            font-size: 0.875rem;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .subject-preview {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 0.125rem;
+        }
+
+        .email-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 120px;
+            justify-content: flex-end;
+        }
+
+        .email-attachments {
+            display: flex;
+            align-items: center;
+        }
+
+        .email-time {
+            display: flex;
+            align-items: center;
+        }
+
+        .time-text {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+
+        .email-item-actions {
+            display: flex;
+            gap: 0.25rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .email-item:hover .email-item-actions {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            color: #ef4444;
+        }
+
+         /* Empty State */
+         .email-list-empty {
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             min-height: 400px;
+             padding: 3rem;
+         }
+
+         .empty-content {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             text-align: center;
+             max-width: 400px;
+         }
+
+         .email-empty {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             justify-content: center;
+             height: 100%;
+             padding: 3rem;
+             text-align: center;
+         }
+
+        .empty-icon {
+            margin-bottom: 1.5rem;
+            color: #9ca3af;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .empty-message {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin: 0 0 2rem 0;
+            line-height: 1.5;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+         /* Alerts */
+         .alert {
+             display: flex;
+             align-items: center;
+             gap: 0.75rem;
+             padding: 1rem 1.5rem;
+             margin: 0 1.5rem 1rem 1.5rem;
+             border-radius: 0.5rem;
+             font-weight: 500;
+         }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+         .alert-success {
+             background: #f0fdf4;
+             color: #16a34a;
+             border: 1px solid #bbf7d0;
+         }
+
+         /* Utility Classes */
+         #emailLoadingState.hidden,
+         #emailListContainer.hidden,
+         #emptyState.hidden {
+             display: none !important;
+         }
+
+        /* Responsive Design */
+        @@media (max-width: 1024px) {
+            .email-sidebar {
+                width: 240px;
+            }
+
+            .email-sender {
+                min-width: 150px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .email-main {
+                flex-direction: column;
+            }
+
+            .email-sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .email-folders {
+                display: flex;
+                overflow-x: auto;
+                padding: 0.5rem 0;
+            }
+
+            .folder-list {
+                flex-direction: row;
+                gap: 0.5rem;
+                padding: 0 1rem;
+            }
+
+            .folder-item {
+                white-space: nowrap;
+                border-radius: 0.5rem;
+                border-right: none;
+            }
+
+            .folder-item.active {
+                border-right: none;
+                border-bottom: 3px solid #3b82f6;
+            }
+
+            .email-item-content {
+                gap: 0.5rem;
+            }
+
+            .email-sender {
+                min-width: 120px;
+            }
+
+            .email-meta {
+                min-width: 80px;
+            }
+        }
+
+        @@media (max-width: 640px) {
+            .email-header {
+                padding: 1rem;
+            }
+
+            .email-header-left {
+                gap: 1rem;
+            }
+
+            .email-stats {
+                display: none;
+            }
+
+            .email-content-header {
+                padding: 1rem;
+            }
+
+            .email-item {
+                padding: 0.75rem 1rem;
+            }
+
+            .email-sender {
+                min-width: 100px;
+            }
+
+            .subject-preview {
+                display: none;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        let currentFolder = '@Model.Folder';
+        let currentPage = @Model.Page;
+        let isLoading = false;
+
+        // Sayfa yüklendiğinde verileri fetch et
+        document.addEventListener('DOMContentLoaded', function () {
+            loadEmailData();
+        });
+
+         // Email verilerini yükle - Tek endpoint ile optimize edilmiş
+         async function loadEmailData() {
+             if (isLoading) return;
+             isLoading = true;
+
+             // Loading state göster, diğerlerini gizle
+             const loadingState = document.getElementById('emailLoadingState');
+             const listContainer = document.getElementById('emailListContainer');
+             const emptyState = document.getElementById('emptyState');
+
+             if (loadingState) loadingState.classList.remove('hidden');
+             if (listContainer) listContainer.classList.add('hidden');
+             if (emptyState) emptyState.classList.add('hidden');
+
+            try {
+                // Tek API çağrısı ile tüm verileri al (paralel IMAP bağlantısı yok)
+                const response = await fetch(`/api/mails/dashboard?folder=${currentFolder}&page=${currentPage}`);
+                const result = await response.json();
+
+                 if (result.success && result.data) {
+                     updateFolderList(result.data.folders);
+                     updateStats(result.data.stats);
+                     updateMessageList(result.data.messages);
+                 } else {
+                     // Loading'i gizle, empty state göster
+                     if (loadingState) loadingState.classList.add('hidden');
+                     if (emptyState) emptyState.classList.remove('hidden');
+                     showErrorAlert('Veriler yüklenemedi');
+                 }
+             } catch (error) {
+                 console.error('Error loading email data:', error);
+                 // Loading'i gizle, empty state göster
+                 if (loadingState) loadingState.classList.add('hidden');
+                 if (emptyState) emptyState.classList.remove('hidden');
+                 showErrorAlert('Veriler yüklenirken hata oluştu');
+             } finally {
+                 isLoading = false;
+             }
+         }
+
+        // Klasör listesini güncelle
+        function updateFolderList(folders) {
+            const folderContainer = document.getElementById('folderListContainer');
+            if (!folderContainer) return;
+
+            if (!folders || folders.length === 0) {
+                folderContainer.innerHTML = '<div class="folder-empty">Klasör bulunamadı</div>';
+                return;
+            }
+
+            // Klasör listesini tamamen yeniden oluştur
+            folderContainer.innerHTML = folders.map(folder => {
+                const isActive = folder.name === currentFolder;
+                const iconPath = getFolderIcon(folder.type);
+
+                return `
+                    <a href="javascript:void(0)" 
+                       onclick="changeFolder('${folder.name}')" 
+                       class="folder-item ${isActive ? "active" : ""}" 
+                       data-folder="${folder.name}">
+                        <div class="folder-icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}" />
+                            </svg>
+                        </div>
+                        <div class="folder-info">
+                            <span class="folder-name">${getTurkishFolderName(folder.name)}</span>
+                            ${folder.messageCount > 0 ? `<span class="folder-badge">${folder.messageCount}</span>` : ''}
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // Klasör tipine göre icon path döndür
+        function getFolderIcon(type) {
+            const iconMap = {
+                '0': "M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4", // Inbox
+                '1': "M12 19l9 2-9-18-9 18 9-2zm0 0v-8", // Sent
+                '2': "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z", // Drafts
+                '3': "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z", // Spam
+                '4': "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" // Trash
+            };
+            return iconMap[type.toString()] || "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z";
+        }
+
+
+        // İstatistikleri güncelle
+        function updateStats(stats) {
+            const unreadEl = document.querySelector('.stat-number');
+            if (unreadEl) {
+                unreadEl.textContent = stats.unreadCount || 0;
+            }
+        }
+
+         // Mesaj listesini güncelle
+         function updateMessageList(messages) {
+             const loadingState = document.getElementById('emailLoadingState');
+             const listContainer = document.getElementById('emailListContainer');
+             const emptyState = document.getElementById('emptyState');
+
+             // Loading'i gizle
+             if (loadingState) loadingState.classList.add('hidden');
+
+             // Mesaj yoksa empty state göster
+             if (!messages || messages.length === 0) {
+                 if (listContainer) listContainer.classList.add('hidden');
+                 if (emptyState) emptyState.classList.remove('hidden');
+                 return;
+             }
+
+            // Email sayısını güncelle
+            const emailCount = document.querySelector('.email-count');
+            if (emailCount) {
+                emailCount.textContent = `${messages.length} e-posta`;
+            }
+
+            // Mesaj listesini oluştur
+            listContainer.innerHTML = messages.map(msg => `
+                <div class="email-item ${msg.isSeen ? '' : 'unread'}" onclick="location.href='/admin/mails/view?folder=${currentFolder}&uid=${msg.uid}'">
+                    <div class="email-item-checkbox">
+                        <input type="checkbox" class="email-checkbox" data-uid="${msg.uid}" onclick="event.stopPropagation()">
+                    </div>
+                    <button class="star-btn ${msg.isFlagged ? 'starred' : ''}" onclick="toggleFlag('${currentFolder}', ${msg.uid}, event)">
+                        <svg class="w-5 h-5" fill="${msg.isFlagged ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </button>
+                    <div class="sender-info">
+                        <div class="sender-avatar">${msg.fromName ? msg.fromName.charAt(0).toUpperCase() : 'U'}</div>
+                        <span class="sender-name">${msg.fromName || msg.from}</span>
+                    </div>
+                    <div class="email-content-preview">
+                        <div class="email-subject">${msg.subject || '(Konu yok)'}</div>
+                    </div>
+                    <div class="email-meta">
+                        ${msg.hasAttachments ? '<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>' : ''}
+                        <span class="email-date">${formatDate(msg.date)}</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteMessage('${currentFolder}', ${msg.uid}, event)">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+
+             // Liste varsa göster, empty state gizle
+             if (listContainer) listContainer.classList.remove('hidden');
+             if (emptyState) emptyState.classList.add('hidden');
+         }
+
+        // Tarih formatlama
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (days === 0) {
+                return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            } else if (days === 1) {
+                return 'Dün';
+            } else if (days < 7) {
+                return date.toLocaleDateString('tr-TR', { weekday: 'short' });
+            } else {
+                return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' });
+            }
+        }
+
+        // Klasör değiştir
+        function changeFolder(folder) {
+            currentFolder = folder;
+            currentPage = 1;
+
+            // URL'yi güncelle (sayfa yenilenmeden)
+            const url = new URL(window.location);
+            url.searchParams.set('folder', folder);
+            window.history.pushState({}, '', url);
+
+            // Aktif klasörü güncelle
+            document.querySelectorAll('.folder-item').forEach(item => {
+                if (item.dataset.folder === folder) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Klasör başlığını güncelle
+            const folderTitle = document.querySelector('.folder-current-name');
+            if (folderTitle) {
+                folderTitle.textContent = getTurkishFolderName(folder);
+            }
+
+            // Verileri yükle
+            loadEmailData();
+        }
+
+        // Klasör ismini Türkçe'ye çevir
+        function getTurkishFolderName(folder) {
+            const folderLower = (folder || '').toLowerCase();
+            const folderMap = {
+                'inbox': 'Gelen Kutusu',
+                'sent': 'Gönderilenler',
+                'sent items': 'Gönderilenler',
+                'sent mail': 'Gönderilenler',
+                'drafts': 'Taslaklar',
+                'spam': 'Gereksiz',
+                'junk': 'Gereksiz',
+                'trash': 'Çöp Kutusu',
+                'deleted': 'Çöp Kutusu',
+                'deleted items': 'Çöp Kutusu'
+            };
+            return folderMap[folderLower] || folder;
+        }
+
+        async function toggleFlag(folder, uid, event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            try {
+                showLoading('İşleniyor...');
+                const response = await fetch('/api/mails/toggle-flag', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folder: folder, uid: uid })
+                });
+
+                const result = await response.json();
+                hideLoading();
+
+                if (result.success) {
+                    showSuccessAlert(result.message || 'İşaretleme güncellendi');
+                    setTimeout(() => loadEmailData(), 500);
+                } else {
+                    showErrorAlert(result.message || 'İşlem başarısız oldu');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error:', error);
+                showErrorAlert('Bir hata oluştu');
+            }
+        }
+
+        async function deleteMessage(folder, uid, event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            showDeleteConfirm('Bu mesajı silmek istediğinize emin misiniz?', async function () {
+                try {
+                    showLoading('Mesaj siliniyor...');
+                    const response = await fetch('/api/mails/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ folder: folder, uid: uid })
+                    });
+
+                    const result = await response.json();
+                    hideLoading();
+
+                    if (result.success) {
+                        showSuccessAlert('Mesaj silindi');
+                        setTimeout(() => loadEmailData(), 500);
+                    } else {
+                        showErrorAlert(result.message || 'İşlem başarısız oldu');
+                    }
+                } catch (error) {
+                    hideLoading();
+                    console.error('Error:', error);
+                    showErrorAlert('Bir hata oluştu');
+                }
+            });
+        }
+
+        function refreshEmails() {
+            loadEmailData();
+        }
+
+        function selectAllEmails() {
+            const checkboxes = document.querySelectorAll('.email-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+        }
+
+        // Auto-submit search form
+        document.querySelector('.search-input').addEventListener('input', function () {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        });
+    </script>
+}

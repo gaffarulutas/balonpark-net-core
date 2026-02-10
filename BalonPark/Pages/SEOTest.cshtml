@@ -1,0 +1,276 @@
+@page
+@model BalonPark.Pages.SEOTestModel
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    ViewData["Title"] = $"SEO Test ve Optimizasyon Sayfası | {settings?.MetaTitle ?? companyName}";
+    ViewData["Description"] = $"{companyName} web sitesi SEO optimizasyonu test sayfası. Google Search Console, sitemap, robots.txt ve structured data testleri.";
+    ViewData["Keywords"] = "seo test, google search console, sitemap, robots.txt, structured data, web optimizasyonu, ünlü park";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">
+                        <i class="fas fa-search"></i>
+                        SEO Test ve Optimizasyon Sayfası
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h2>SEO Kontrol Listesi</h2>
+                            <div class="seo-checklist">
+                                <div class="checklist-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <strong>Meta Tags:</strong> Title, Description, Keywords optimize edildi
+                                </div>
+                                <div class="checklist-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <strong>Structured Data:</strong> JSON-LD ile Organization ve WebSite schema eklendi
+                                </div>
+                                <div class="checklist-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <strong>Sitemap:</strong> XML sitemap oluşturuldu (/sitemap.xml)
+                                </div>
+                                <div class="checklist-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <strong>Robots.txt:</strong> Arama motorları için robots.txt dosyası eklendi
+                                </div>
+                                <div class="checklist-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <strong>Canonical URLs:</strong> Duplicate content için canonical tag'ler eklendi
+                                </div>
+                                <div class="checklist-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <strong>Image Optimization:</strong> Alt tag'ler ve boyutlar optimize edildi
+                                </div>
+                                <div class="checklist-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <strong>Performance:</strong> JavaScript defer/async ve font preload eklendi
+                                </div>
+                                <div class="checklist-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <strong>Mobile-First:</strong> Viewport ve responsive optimizasyonları yapıldı
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h2>SEO Test Linkleri</h2>
+                            <div class="seo-links">
+                                <div class="link-group">
+                                    <h5>Google Araçları</h5>
+                                    <ul class="list-unstyled">
+                                        <li><a href="https://search.google.com/search-console" target="_blank" class="btn btn-outline-primary btn-sm mb-2">
+                                            <i class="fas fa-external-link-alt"></i> Google Search Console
+                                        </a></li>
+                                        <li><a href="https://pagespeed.web.dev/" target="_blank" class="btn btn-outline-primary btn-sm mb-2">
+                                            <i class="fas fa-tachometer-alt"></i> PageSpeed Insights
+                                        </a></li>
+                                        <li><a href="https://search.google.com/test/rich-results" target="_blank" class="btn btn-outline-primary btn-sm mb-2">
+                                            <i class="fas fa-code"></i> Rich Results Test
+                                        </a></li>
+                                        <li><a href="https://validator.w3.org/" target="_blank" class="btn btn-outline-primary btn-sm mb-2">
+                                            <i class="fas fa-check-double"></i> HTML Validator
+                                        </a></li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="link-group">
+                                    <h5>Site Dosyaları</h5>
+                                    <ul class="list-unstyled">
+                                        <li><a href="/sitemap.xml" target="_blank" class="btn btn-outline-success btn-sm mb-2">
+                                            <i class="fas fa-sitemap"></i> XML Sitemap
+                                        </a></li>
+                                        <li><a href="/robots.txt" target="_blank" class="btn btn-outline-success btn-sm mb-2">
+                                            <i class="fas fa-robot"></i> Robots.txt
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h2>Structured Data Test</h2>
+                            <div class="structured-data-test">
+                                <div class="alert alert-info">
+                                    <h5>Organization Schema</h5>
+                                    <p>Ana sayfada Organization structured data eklendi. Google Search Console'da "Enhancements" bölümünden kontrol edebilirsiniz.</p>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <h5>WebSite Schema</h5>
+                                    <p>Ana sayfada WebSite structured data eklendi. Bu, Google'ın sitenizi daha iyi anlamasını sağlar.</p>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <h5>Product Schema (Gelecek)</h5>
+                                    <p>Ürün sayfalarında Product structured data eklenmesi planlanıyor. Bu, ürünlerin Google'da daha iyi görünmesini sağlayacak.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h2>SEO Best Practices</h2>
+                            <div class="best-practices">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="practice-card">
+                                            <h5><i class="fas fa-tags"></i> Meta Tags</h5>
+                                            <ul>
+                                                <li>Title: 50-60 karakter</li>
+                                                <li>Description: 150-160 karakter</li>
+                                                <li>Keywords: İlgili anahtar kelimeler</li>
+                                                <li>Robots: index, follow</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="practice-card">
+                                            <h5><i class="fas fa-image"></i> Images</h5>
+                                            <ul>
+                                                <li>Alt tag'ler eklendi</li>
+                                                <li>Width/height belirtildi</li>
+                                                <li>Loading="lazy" eklendi</li>
+                                                <li>WebP formatı önerilir</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="practice-card">
+                                            <h5><i class="fas fa-mobile-alt"></i> Mobile</h5>
+                                            <ul>
+                                                <li>Responsive tasarım</li>
+                                                <li>Touch-friendly buttons</li>
+                                                <li>Fast loading</li>
+                                                <li>Mobile-first indexing</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h2>Monitoring ve Takip</h2>
+                            <div class="monitoring">
+                                <div class="alert alert-success">
+                                    <h5>Google Search Console</h5>
+                                    <p>Sitenizi Google Search Console'a ekleyerek SEO performansınızı takip edebilirsiniz:</p>
+                                    <ol>
+                                        <li>Google Search Console'a gidin</li>
+                                        <li>Property ekleyin (https://balonpark.com)</li>
+                                        <li>HTML tag ile doğrulama yapın</li>
+                                        <li>Sitemap'i gönderin (/sitemap.xml)</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <h5>Takip Edilecek Metrikler</h5>
+                                    <ul>
+                                        <li><strong>Impressions:</strong> Sitenizin arama sonuçlarında kaç kez görüntülendiği</li>
+                                        <li><strong>Clicks:</strong> Arama sonuçlarından sitenize kaç tıklama geldiği</li>
+                                        <li><strong>CTR:</strong> Click-through rate (tıklama oranı)</li>
+                                        <li><strong>Position:</strong> Ortalama sıralama pozisyonu</li>
+                                        <li><strong>Core Web Vitals:</strong> Sayfa hızı ve kullanıcı deneyimi metrikleri</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.seo-checklist {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+}
+
+.checklist-item i {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.seo-links {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+}
+
+.link-group {
+    margin-bottom: 20px;
+}
+
+.link-group h5 {
+    color: #6262a6;
+    margin-bottom: 15px;
+}
+
+.practice-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+    height: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.practice-card h5 {
+    color: #6262a6;
+    margin-bottom: 15px;
+}
+
+.practice-card ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.practice-card li {
+    margin-bottom: 8px;
+    color: #6b7280;
+}
+
+.monitoring .alert {
+    margin-bottom: 20px;
+}
+
+.monitoring ol, .monitoring ul {
+    margin-top: 10px;
+}
+
+.monitoring li {
+    margin-bottom: 5px;
+}
+
+@@media (max-width: 768px) {
+    .practice-card {
+        margin-bottom: 20px;
+    }
+}
+</style>
