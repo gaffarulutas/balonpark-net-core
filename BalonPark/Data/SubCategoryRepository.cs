@@ -41,7 +41,16 @@ public class SubCategoryRepository(DapperContext context, ICacheService cacheSer
         }
 
         var query = @"
-            SELECT sc.*, c.Name as CategoryName 
+            SELECT sc.*, 
+                   c.Name as CategoryName,
+                   (SELECT TOP 1 pi.ThumbnailPath
+                    FROM Products p
+                    INNER JOIN ProductImages pi ON p.Id = pi.ProductId
+                    WHERE p.SubCategoryId = sc.Id AND p.IsActive = 1
+                    ORDER BY NEWID()) as FirstProductImage,
+                   (SELECT COUNT(*)
+                    FROM Products p
+                    WHERE p.SubCategoryId = sc.Id AND p.IsActive = 1) as ProductCount
             FROM SubCategories sc
             INNER JOIN Categories c ON sc.CategoryId = c.Id
             WHERE sc.CategoryId = @CategoryId AND sc.IsActive = 1

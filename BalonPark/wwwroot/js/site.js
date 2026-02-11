@@ -5,6 +5,7 @@
         initCategorySwiper();
         fetchCurrentCurrency();
         initializeLazyImages();
+        initCategoryHoverPopover();
     });
 
     if (window.jQuery) {
@@ -146,6 +147,120 @@
         }
 
         return parent;
+    }
+
+    /**
+     * Kategori mega menü (2026 UX): hover ile sağda tek panel açılır.
+     * Panel soldaki liste ile aynı yükseklikte, bitişik görünüm; içerik grid.
+     * Açılış/kapanış gecikmesi ile yanıp sönme önlenir; panel hover'da açık kalır.
+     */
+    function initCategoryHoverPopover() {
+        var nav = document.querySelector('.js-category-popover-nav');
+        if (!nav) {
+            return;
+        }
+        var isDesktop = window.matchMedia && window.matchMedia('(min-width: 768px)').matches;
+        if (!isDesktop) {
+            return;
+        }
+        var triggers = nav.querySelectorAll('.category-popover-trigger');
+        var panel = nav.querySelector('.mega-menu-panel') || nav.querySelector('.category-popover-panel');
+        var contents = panel ? panel.querySelectorAll('.mega-panel-content') : [];
+        if (!triggers.length || !panel) {
+            return;
+        }
+        var openDelay = 60;
+        var closeDelay = 120;
+        var openTimer = null;
+        var closeTimer = null;
+        var activeTrigger = null;
+
+        function openPanel(trigger) {
+            if (closeTimer) {
+                clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+            var categoryId = trigger.getAttribute('data-category-id');
+            if (activeTrigger) {
+                activeTrigger.setAttribute('aria-expanded', 'false');
+                activeTrigger.classList.remove('is-dropdown-open');
+            }
+            activeTrigger = trigger;
+            trigger.setAttribute('aria-expanded', 'true');
+            trigger.classList.add('is-dropdown-open');
+            contents.forEach(function (el) {
+                if (el.getAttribute('data-category-id') === categoryId) {
+                    el.classList.remove('hidden');
+                    el.setAttribute('aria-hidden', 'false');
+                } else {
+                    el.classList.add('hidden');
+                    el.setAttribute('aria-hidden', 'true');
+                }
+            });
+            panel.style.opacity = '1';
+            panel.style.visibility = 'visible';
+            panel.style.pointerEvents = 'auto';
+            nav.classList.add('mega-menu-open');
+        }
+
+        function closePanel() {
+            if (openTimer) {
+                clearTimeout(openTimer);
+                openTimer = null;
+            }
+            if (activeTrigger) {
+                activeTrigger.setAttribute('aria-expanded', 'false');
+                activeTrigger.classList.remove('is-dropdown-open');
+                activeTrigger = null;
+            }
+            contents.forEach(function (el) {
+                el.classList.add('hidden');
+                el.setAttribute('aria-hidden', 'true');
+            });
+            panel.style.opacity = '0';
+            panel.style.visibility = 'hidden';
+            panel.style.pointerEvents = 'none';
+            nav.classList.remove('mega-menu-open');
+        }
+
+        triggers.forEach(function (trigger) {
+            trigger.addEventListener('mouseenter', function () {
+                if (closeTimer) {
+                    clearTimeout(closeTimer);
+                    closeTimer = null;
+                }
+                if (openTimer) {
+                    clearTimeout(openTimer);
+                    openTimer = null;
+                }
+                openTimer = setTimeout(function () {
+                    openTimer = null;
+                    openPanel(trigger);
+                }, openDelay);
+            });
+
+            trigger.addEventListener('mouseleave', function () {
+                closeTimer = setTimeout(function () {
+                    closeTimer = null;
+                    closePanel();
+                }, closeDelay);
+            });
+        });
+
+        if (panel) {
+            panel.addEventListener('mouseenter', function () {
+                if (closeTimer) {
+                    clearTimeout(closeTimer);
+                    closeTimer = null;
+                }
+            });
+            panel.addEventListener('mouseleave', function () {
+                closeTimer = setTimeout(function () {
+                    closeTimer = null;
+                    closePanel();
+                }, closeDelay);
+            });
+        }
     }
 
     function initCategorySwiper() {
