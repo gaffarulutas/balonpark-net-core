@@ -19,6 +19,7 @@ public class Product
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? UpdatedAt { get; set; }
+    public int ViewCount { get; set; } = 0;
 
     // Ürün Teknik Bilgiler - Şişmiş ürün (Inflated product)
     public string? InflatedLength { get; set; }

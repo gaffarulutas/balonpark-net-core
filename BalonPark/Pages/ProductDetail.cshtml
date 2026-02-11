@@ -15,6 +15,14 @@
     ViewData["ProductCondition"] = "new";
     ViewData["ProductBrand"] = companyName;
     ViewData["ProductSku"] = $"U-{Model.Product?.Id}";
+
+    var productCategorySlug = Model.Product?.CategorySlug ?? string.Empty;
+    var productSubCategorySlug = Model.Product?.SubCategorySlug ?? string.Empty;
+    var productSlug = Model.Product?.Slug ?? string.Empty;
+    var productShareUrl = ((IUrlService?)ViewData["UrlService"])?.GetProductUrl(productCategorySlug, productSubCategorySlug, productSlug)
+        ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{productCategorySlug}/{productSubCategorySlug}/{productSlug}";
+    var productShareTitle = Uri.EscapeDataString(Model.Product?.Name ?? string.Empty);
+    var whatsAppDigits = string.IsNullOrEmpty(settings?.WhatsApp) ? "" : new string(settings.WhatsApp.Where(c => char.IsDigit(c)).ToArray());
 }
 
 
@@ -32,11 +40,37 @@
     </nav>
 
     <!-- Product Header -->
-    <div class="flex flex-wrap items-start justify-between gap-3">
-        <h1 class="text-ink text-xl font-medium">@Html.Raw(Model.Product?.Name)</h1>
-        <div class="flex items-center gap-1">
-            <button type="button" class="favorite-btn-detail w-9 h-9 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 transition text-sm" data-product-id="@Model.Product?.Id" title="Favorilere Ekle"><i data-lucide="heart" class="w-4 h-4"></i></button>
-            <button type="button" class="compare-btn-detail w-9 h-9 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 transition text-sm" data-product-id="@Model.Product?.Id" data-product-url="/category/@Model.Product?.CategorySlug/@Model.Product?.SubCategorySlug/@Model.Product?.Slug" data-product-slug="@Model.Product?.Slug" title="Karşılaştır"><i data-lucide="shuffle" class="w-4 h-4"></i></button>
+    <div class="flex flex-col gap-2">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="space-y-1">
+                <h1 class="text-ink text-xl font-medium">@Html.Raw(Model.Product?.Name)</h1>
+            </div>
+            <div class="flex items-center gap-1">
+                <button type="button" class="favorite-btn-detail w-9 h-9 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 transition text-sm" data-product-id="@Model.Product?.Id" title="Favorilere Ekle"><i data-lucide="heart" class="w-4 h-4"></i></button>
+                <button type="button" class="compare-btn-detail w-9 h-9 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 transition text-sm" data-product-id="@Model.Product?.Id" data-product-url="/category/@Model.Product?.CategorySlug/@Model.Product?.SubCategorySlug/@Model.Product?.Slug" data-product-slug="@Model.Product?.Slug" title="Karşılaştır"><i data-lucide="shuffle" class="w-4 h-4"></i></button>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
+            <div class="flex items-center gap-3">
+                @if ((Model.Product?.ViewCount ?? 0) > 0)
+                {
+                    <span class="flex items-center gap-1">
+                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                        <span>@Model.Product!.ViewCount görüntülenme</span>
+                    </span>
+                }
+                <span class="flex items-center gap-1 text-gray-500">
+                    <span class="font-medium text-ink">Ürün Kodu:</span>
+                    <span>U-@Model.Product?.Id</span>
+                </span>
+            </div>
+            <div class="flex items-center gap-1 text-gray-400">
+                <span class="uppercase tracking-wide text-[10px] text-gray-400">Paylaş</span>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=@productShareUrl" target="_blank" class="w-7 h-7 rounded-full flex items-center justify-center hover:text-[#1877f2] hover:bg-gray-100 transition" title="Facebook" aria-label="Facebook"><i data-lucide="facebook" class="w-3.5 h-3.5"></i></a>
+                <a href="https://twitter.com/intent/tweet?url=@productShareUrl&text=@productShareTitle" target="_blank" class="w-7 h-7 rounded-full flex items-center justify-center hover:text-[#1da1f2] hover:bg-gray-100 transition" title="Twitter" aria-label="Twitter"><i data-lucide="twitter" class="w-3.5 h-3.5"></i></a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=@productShareUrl" target="_blank" class="w-7 h-7 rounded-full flex items-center justify-center hover:text-[#0077b5] hover:bg-gray-100 transition" title="LinkedIn" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-3.5 h-3.5"></i></a>
+                <a href="https://wa.me/?text=@productShareTitle%20@productShareUrl" target="_blank" class="w-7 h-7 rounded-full flex items-center justify-center hover:text-[#25d366] hover:bg-gray-100 transition" title="WhatsApp" aria-label="WhatsApp"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i></a>
+            </div>
         </div>
     </div>
 
@@ -95,13 +129,13 @@
 
                         @if (Model.ProductImages.Count > 1)
                         {
-                            <!-- Thumbnail Swiper (büyük resimle aynı boşluk: 10px) -->
+                            <!-- Thumbnail Swiper: daha büyük thumblar, az boşluk -->
                             <div class="swiper productThumbsSwiper product-gallery-thumbs">
                                 <div class="swiper-wrapper">
                                     @foreach (var image in Model.ProductImages)
                                     {
                                         <div class="swiper-slide">
-                                            <div class="thumbnail-item flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 overflow-hidden border-2 border-transparent cursor-pointer" role="button" tabindex="0" aria-label="View image">
+                                            <div class="thumbnail-item flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 overflow-hidden border border-transparent cursor-pointer rounded-sm" role="button" tabindex="0" aria-label="View image">
                                                 <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.ThumbnailPath}")" 
                                                      class="lazy-image w-full h-full object-cover" 
                                                      alt="@Html.Raw(Model.Product?.Name)"
@@ -134,24 +168,21 @@
                         <div class="price-main price-eur text-primary text-2xl font-semibold @(selectedCurrency == "EUR" ? "block" : "hidden")">€@Model.Product?.EuroPrice.ToString("N2")</div>
                     }
                 </div>
-                <div class="flex items-center gap-1">
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-[#1877f2] hover:bg-gray-100 transition" title="Facebook" aria-label="Facebook"><i data-lucide="facebook" class="w-4 h-4"></i></a>
-                    <a href="https://twitter.com/intent/tweet?url=@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")&text=@(Uri.EscapeDataString(Model.Product?.Name ?? ""))" target="_blank" class="w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-[#1da1f2] hover:bg-gray-100 transition" title="Twitter" aria-label="Twitter"><i data-lucide="twitter" class="w-4 h-4"></i></a>
-                    <a href="https://www.linkedin.com/sharing/share-offsite/?url=@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-[#0077b5] hover:bg-gray-100 transition" title="LinkedIn" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
-                    <a href="https://wa.me/?text=@(Uri.EscapeDataString(Model.Product?.Name ?? ""))%20@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-[#25d366] hover:bg-gray-100 transition" title="WhatsApp" aria-label="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
-                </div>
             </div>
 
             <!-- Product Code & WhatsApp -->
             <div class="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-gray-100">
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="text-gray-500 font-medium">Ürün Kodu:</span>
-                    <span class="text-ink font-medium">U-@Model.Product?.Id</span>
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                    <span class="font-medium text-ink">Ürün Kodu:</span>
+                    <span>U-@Model.Product?.Id</span>
                 </div>
-                <a href="https://wa.me/905336355039?text=@(Uri.EscapeDataString($"Bu ürün hakkında bilgi almak istiyorum: {Model.Product?.Name}"))%20@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="inline-flex items-center gap-2 py-2 px-3 rounded bg-[#25d366] text-white text-sm font-medium hover:opacity-90 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                    <span>WhatsApp</span>
-                </a>
+                @if (!string.IsNullOrEmpty(whatsAppDigits))
+                {
+                    <a href="https://wa.me/@whatsAppDigits?text=@(Uri.EscapeDataString($"Bu ürün hakkında bilgi almak istiyorum: {Model.Product?.Name}"))%20@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="inline-flex items-center gap-2 py-2 px-3 rounded bg-[#25d366] text-white text-sm font-medium hover:opacity-90 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                        <span>WhatsApp</span>
+                    </a>
+                }
             </div>
 
             <!-- Stock -->
@@ -174,24 +205,30 @@
             </div>
 
             <!-- CTA -->
-            <div>
+            <div class="flex flex-wrap gap-2">
                 @if (Model.Product?.Stock > 0 && Model.Product?.Price > 0)
                 {
-                    <a href="https://wa.me/905336355039?text=@(Uri.EscapeDataString($"Bu ürünü satın almak istiyorum: {Model.Product?.Name} (Ürün Kodu: U-{Model.Product?.Id})"))%20@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="inline-flex items-center gap-2 w-full justify-center py-3 px-4 rounded bg-primary text-white font-medium text-sm hover:bg-primary-dark transition" id="buy-now-button" aria-label="Satın Al">
-                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                        <span>Satın Al</span>
-                    </a>
+                    @if (!string.IsNullOrEmpty(whatsAppDigits))
+                    {
+                        <a href="https://wa.me/@whatsAppDigits?text=@(Uri.EscapeDataString($"Bu ürünü satın almak istiyorum: {Model.Product?.Name} (Ürün Kodu: U-{Model.Product?.Id})"))%20@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="inline-flex items-center gap-2 justify-center min-w-[220px] max-w-full py-3 px-4 rounded bg-primary text-white font-medium text-sm hover:bg-primary-dark transition" id="buy-now-button" aria-label="Satın Al">
+                            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                            <span>Satın Al</span>
+                        </a>
+                    }
                 }
                 else if (Model.Product?.Price <= 0)
                 {
-                    <a href="https://wa.me/905336355039?text=@(Uri.EscapeDataString($"Bu ürün hakkında fiyat bilgisi almak istiyorum: {Model.Product?.Name}"))%20@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="inline-flex items-center gap-2 w-full justify-center py-3 px-4 rounded border border-gray-200 text-ink font-medium text-sm hover:bg-gray-50 transition" id="buy-now-button" aria-label="Fiyat Sor">
-                        <i data-lucide="info" class="w-5 h-5"></i>
-                        <span>Fiyat İçin İletişime Geçin</span>
-                    </a>
+                    @if (!string.IsNullOrEmpty(whatsAppDigits))
+                    {
+                        <a href="https://wa.me/@whatsAppDigits?text=@(Uri.EscapeDataString($"Bu ürün hakkında fiyat bilgisi almak istiyorum: {Model.Product?.Name}"))%20@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" class="inline-flex items-center gap-2 justify-center min-w-[220px] max-w-full py-3 px-4 rounded border border-gray-200 text-ink font-medium text-sm hover:bg-gray-50 transition" id="buy-now-button" aria-label="Fiyat Sor">
+                            <i data-lucide="info" class="w-5 h-5"></i>
+                            <span>Fiyat İçin İletişime Geçin</span>
+                        </a>
+                    }
                 }
                 else
                 {
-                    <button type="button" class="inline-flex items-center gap-2 w-full justify-center py-3 px-4 rounded border border-gray-200 text-gray-400 font-medium text-sm cursor-not-allowed" id="buy-now-button" disabled aria-label="Stokta Yok">
+                    <button type="button" class="inline-flex items-center gap-2 justify-center min-w-[220px] max-w-full py-3 px-4 rounded border border-gray-200 text-gray-400 font-medium text-sm cursor-not-allowed" id="buy-now-button" disabled aria-label="Stokta Yok">
                         <i data-lucide="x-circle" class="w-5 h-5"></i>
                         <span>Stokta Yok</span>
                     </button>
@@ -312,18 +349,18 @@
         const thumbsSwiperElement = document.querySelector('.productThumbsSwiper');
         if (!mainSwiperElement) return;
 
-        // Thumbnail swiper first (if exists) - eşit boşluk (spaceBetween: 10 her yerde)
+        // Thumbnail swiper: büyük thumblar, küçük aralık (spaceBetween: 6)
         if (thumbsSwiperElement) {
             productThumbsSwiper = new window.Swiper('.productThumbsSwiper', {
-                spaceBetween: 10,
+                spaceBetween: 6,
                 slidesPerView: 'auto',
                 freeMode: true,
                 watchSlidesProgress: true,
                 breakpoints: {
-                    320: { slidesPerView: 3 },
-                    640: { slidesPerView: 4 },
-                    768: { slidesPerView: 5 },
-                    1024: { slidesPerView: 6 },
+                    320: { slidesPerView: 3, spaceBetween: 6 },
+                    640: { slidesPerView: 4, spaceBetween: 6 },
+                    768: { slidesPerView: 5, spaceBetween: 6 },
+                    1024: { slidesPerView: 6, spaceBetween: 6 },
                 },
             });
         }
@@ -489,17 +526,49 @@
 <!-- lightGallery CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.2/css/lightgallery-bundle.min.css">
 <style>
-    /* Swiper/lightGallery overrides only - layout uses Tailwind */
+    /* Product gallery: Swiper + lightGallery - sadece bu sayfa */
+    .product-gallery { padding: 0; }
     .productMainSwiper .swiper-button-next,
     .productMainSwiper .swiper-button-prev { color: #222; }
     .productMainSwiper .swiper-pagination-fraction { color: #222; }
-    .productThumbsSwiper .swiper-slide-thumb-active .thumbnail-item { border-color: #00A8E8; }
-    .product-gallery-thumbs { margin-top: 5px; }
+
+    /* Thumbnail strip: büyük thumblar, az boşluk */
+    .product-gallery-thumbs {
+        margin-top: 8px;
+        padding: 4px 0;
+        overflow: hidden;
+    }
+    .productThumbsSwiper .swiper-slide {
+        width: auto !important;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+    .productThumbsSwiper .thumbnail-item {
+        width: 64px;
+        height: 64px;
+        border: 2px solid transparent;
+        transition: border-color 0.2s ease;
+    }
+    .productThumbsSwiper .thumbnail-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    @@media (min-width: 640px) {
+        .productThumbsSwiper .thumbnail-item {
+            width: 80px;
+            height: 80px;
+        }
+    }
+    .productThumbsSwiper .swiper-slide-thumb-active .thumbnail-item {
+        border-color: #00A8E8;
+    }
     .product-gallery .image-wrapper,
     .product-gallery .image-wrapper a,
     .product-gallery .swiper-slide,
-    .productMainSwiper .swiper-slide,
-    .productThumbsSwiper .thumbnail-item { border-radius: 0; }
+    .productMainSwiper .swiper-slide { border-radius: 0; }
+    .productThumbsSwiper .thumbnail-item { border-radius: 4px; }
     .image-wrapper { overflow: hidden; }
 </style>
 }

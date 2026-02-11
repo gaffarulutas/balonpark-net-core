@@ -135,14 +135,22 @@
                                 <h3 class="contact-title">İletişim</h3>
                                 <p class="contact-text">Gizlilik politikası hakkında sorularınız veya kişisel verilerinizle ilgili talepleriniz için bizimle iletişime geçebilirsiniz.</p>
                                 <div class="contact-buttons">
-                                    <a href="https://wa.me/905336355039" target="_blank" class="contact-btn whatsapp-btn">
-                                        <i data-lucide="message-circle" class="w-5 h-5"></i>
-                                        <span>WhatsApp</span>
-                                    </a>
-                                    <a href="tel:+905336355039" class="contact-btn phone-btn">
-                                        <i data-lucide="phone" class="w-5 h-5"></i>
-                                        <span>Telefon</span>
-                                    </a>
+                                    @if (!string.IsNullOrEmpty(settings?.WhatsApp))
+                                    {
+                                        var whatsAppDigits = new string(settings.WhatsApp.Where(c => char.IsDigit(c)).ToArray());
+                                        <a href="https://wa.me/@whatsAppDigits" target="_blank" class="contact-btn whatsapp-btn">
+                                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                                            <span>WhatsApp</span>
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(settings?.PhoneNumber))
+                                    {
+                                        var telHref = "tel:" + new string(settings.PhoneNumber.Where(c => char.IsDigit(c) || c == '+').ToArray());
+                                        <a href="@telHref" class="contact-btn phone-btn">
+                                            <i data-lucide="phone" class="w-5 h-5"></i>
+                                            <span>Telefon</span>
+                                        </a>
+                                    }
                                     <a asp-page="/Iletisim" class="contact-btn contact-page-btn">
                                         <i data-lucide="mail" class="w-5 h-5"></i>
                                         <span>İletişim Sayfası</span>

@@ -315,6 +315,20 @@ public class CacheService(IMemoryCache cache) : ICacheService
         await Task.CompletedTask;
     }
 
+    public async Task InvalidateProductsByCategorySlugAsync(string categorySlug)
+    {
+        var key = string.Format(PRODUCTS_BY_CATEGORY_KEY, categorySlug);
+        cache.Remove(key);
+        await Task.CompletedTask;
+    }
+
+    public async Task InvalidateProductsBySubCategorySlugAsync(string subCategorySlug)
+    {
+        var key = string.Format(PRODUCTS_BY_SUBCATEGORY_KEY, subCategorySlug);
+        cache.Remove(key);
+        await Task.CompletedTask;
+    }
+
     public async Task InvalidateCategoriesAsync()
     {
         cache.Remove(CATEGORIES_KEY);

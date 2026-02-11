@@ -338,6 +338,38 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
         return result;
     }
 
+    public async Task<int> IncrementViewCountAsync(int productId, string? productSlug = null, string? categorySlug = null, string? subCategorySlug = null)
+    {
+        var query = @"
+            UPDATE Products
+            SET ViewCount = ViewCount + 1
+            WHERE Id = @Id;
+
+            SELECT ViewCount
+            FROM Products
+            WHERE Id = @Id;";
+
+        using var connection = context.CreateConnection();
+        var newCount = await connection.ExecuteScalarAsync<int>(query, new { Id = productId });
+
+        await cacheService.InvalidateProductAsync(productId);
+        if (!string.IsNullOrEmpty(productSlug))
+        {
+            await cacheService.InvalidateProductBySlugAsync(productSlug);
+        }
+        if (!string.IsNullOrEmpty(categorySlug))
+        {
+            await cacheService.InvalidateProductsByCategorySlugAsync(categorySlug);
+        }
+        if (!string.IsNullOrEmpty(subCategorySlug))
+        {
+            await cacheService.InvalidateProductsBySubCategorySlugAsync(subCategorySlug);
+        }
+        await cacheService.InvalidateProductsAsync();
+
+        return newCount;
+    }
+
     private async Task<IEnumerable<Product>> GetAllProductsFromDatabaseAsync()
     {
         var query = @"

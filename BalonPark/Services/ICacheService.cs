@@ -51,6 +51,8 @@ public interface ICacheService
     Task InvalidateProductsAsync();
     Task InvalidateProductAsync(int id);
     Task InvalidateProductBySlugAsync(string slug);
+    Task InvalidateProductsByCategorySlugAsync(string categorySlug);
+    Task InvalidateProductsBySubCategorySlugAsync(string subCategorySlug);
     Task InvalidateCategoriesAsync();
     Task InvalidateCategoryAsync(int id);
     Task InvalidateCategoryBySlugAsync(string slug);

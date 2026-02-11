@@ -57,6 +57,14 @@ public class ProductDetailModel : BasePage
             });
         }
 
+        // Görüntülenme sayısını artır
+        var updatedViewCount = await _productRepository.IncrementViewCountAsync(
+            Product.Id,
+            Product.Slug,
+            Product.CategorySlug,
+            Product.SubCategorySlug);
+        Product.ViewCount = updatedViewCount;
+
         // Ürün resimlerini al
         var images = await _productImageRepository.GetByProductIdAsync(Product.Id);
         ProductImages = images.ToList();
