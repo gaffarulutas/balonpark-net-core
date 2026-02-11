@@ -97,474 +97,187 @@
 }
 </script>
 
-<!-- Contact Section Start -->
-<div class="iletisim-contact-section py-5">
-    <!-- Breadcrumb Navigation -->
-    <nav class="breadcrumb-nav">
-        <div class="breadcrumb-container">
-            <a href="/" class="breadcrumb-item">
-                <i data-lucide="home" class="w-4 h-4"></i>
-                <span>Ana Sayfa</span>
-            </a>
-            <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-item active">İletişim</span>
-        </div>
+<!-- Contact Section - Ana sayfa ile aynı Tailwind tasarım dili -->
+<div class="space-y-4 sm:space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-gray-500" aria-label="Breadcrumb">
+        <a asp-page="/Index" class="inline-flex items-center gap-1.5 text-gray-500 hover:text-primary transition">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            Ana Sayfa
+        </a>
+        <span aria-hidden="true">/</span>
+        <span class="text-ink font-medium">İletişim</span>
     </nav>
 
-    <div class="row">
-        <!-- Contact Information - Left Side -->
-        <div class="col-lg-8 mb-4">
-            <div class="iletisim-contact-info-card">
-                <div class="row">
-                    <!-- Address Card -->
-                    <div class="col-md-6 mb-4">
-                        <div class="iletisim-contact-card h-100">
-                            <div class="iletisim-contact-icon">
-                                <i data-lucide="map-pin" class="w-5 h-5"></i>
-                            </div>
-                            <div class="iletisim-contact-content">
-                                <h4>Adresimiz</h4>
-                                @if (!string.IsNullOrEmpty(settings?.Address))
-                                {
-                                    <p>@Html.Raw(settings.Address)
-                                        @if (!string.IsNullOrEmpty(settings.District) || !string.IsNullOrEmpty(settings.City))
-                                        {
-                                            <br>
-                                            @Html.Raw(settings.PostalCode)
-                                            @Html.Raw(settings.District)
-                                            @Html.Raw(settings.City)
-                                        }
-                                    </p>
-                                }
-                                else
-                                {
-                                    <p>Türkiye</p>
-                                }
-                            </div>
-                        </div>
-                    </div>
+    <!-- Section header (Index ile aynı stil) -->
+    <div class="pt-1 pb-2.5 border-b border-gray-100">
+        <h2 class="text-ink text-base font-medium">İletişim</h2>
+        <p class="text-gray-400 text-xs mt-0.5">Bizimle iletişime geçin; sorularınız için aşağıdaki bilgileri kullanın veya formu doldurun.</p>
+    </div>
 
-                    <!-- Email Card -->
-                    <div class="col-md-6 mb-4">
-                        <div class="iletisim-contact-card h-100">
-                            <div class="iletisim-contact-icon">
-                                <i data-lucide="mail" class="w-5 h-5"></i>
-                            </div>
-                            <div class="iletisim-contact-content">
-                                <h4>E-posta</h4>
-                                <p><a href="mailto:@settings?.Email">@Html.Raw(settings?.Email)</a></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Phone Card -->
-                    <div class="col-md-6 mb-4">
-                        <div class="iletisim-contact-card h-100">
-                            <div class="iletisim-contact-icon">
-                                <i data-lucide="phone" class="w-5 h-5"></i>
-                            </div>
-                            <div class="iletisim-contact-content">
-                                <h4>Telefon</h4>
-                                <p>
-                                    @if (!string.IsNullOrEmpty(settings?.PhoneNumber))
-                                    {
-                                        <a href="tel:@settings.PhoneNumber.Replace(" ", "")">@Html.Raw(settings.PhoneNumber)</a>
-                                    }
-                                    @if (!string.IsNullOrEmpty(settings?.PhoneNumber2))
-                                    {
-                                        <br>
-                                        <a href="tel:@settings.PhoneNumber2.Replace(" ", "")">@Html.Raw(settings.PhoneNumber2)</a>
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- WhatsApp Card -->
-                    <div class="col-md-6 mb-4">
-                        <div class="iletisim-contact-card h-100">
-                            <div class="iletisim-contact-icon">
-                                <i data-lucide="message-circle" class="w-5 h-5"></i>
-                            </div>
-                            <div class="iletisim-contact-content">
-                                <h4>WhatsApp</h4>
-                                <p><a href="https://wa.me/@(settings?.WhatsApp?.Replace("+", "").Replace(" ", ""))"
-                                      target="_blank">@Html.Raw(settings?.WhatsApp)</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Contact info cards (Index ürün kartları gibi: bg-white rounded border border-gray-100) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Adres -->
+        <div class="bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col p-4 text-center">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white mx-auto mb-3">
+                <i data-lucide="map-pin" class="w-5 h-5"></i>
             </div>
-
+            <h3 class="font-medium text-sm text-ink mb-1">Adresimiz</h3>
+            @if (!string.IsNullOrEmpty(settings?.Address))
+            {
+                <p class="text-xs text-gray-500 line-clamp-3">
+                    @Html.Raw(settings.Address)
+                    @if (!string.IsNullOrEmpty(settings.District) || !string.IsNullOrEmpty(settings.City))
+                    {
+                        <br>
+                        @Html.Raw(settings.PostalCode)
+                        @Html.Raw(settings.District)
+                        @Html.Raw(settings.City)
+                    }
+                </p>
+            }
+            else
+            {
+                <p class="text-xs text-gray-500">Türkiye</p>
+            }
         </div>
 
-        <!-- Working Hours - Right Side -->
-        <div class="col-lg-4 mb-4">
-            <div class="iletisim-working-hours-card text-center">
-                <h4>Çalışma Saatleri</h4>
-                <div class="hours-list">
-                    @if (!string.IsNullOrEmpty(settings?.WorkingHours))
-                    {
-                        <p class="text-center">@Html.Raw(settings.WorkingHours)</p>
-                    }
-                    else
-                    {
-                        <div class="iletisim-hours-item">
-                            <span class="iletisim-day">Pazartesi - Cuma:</span>
-                            <span class="iletisim-time">09:00 - 18:00</span>
-                        </div>
-                        <div class="iletisim-hours-item">
-                            <span class="iletisim-day">Cumartesi:</span>
-                            <span class="iletisim-time">09:00 - 16:00</span>
-                        </div>
-                        <div class="iletisim-hours-item">
-                            <span class="iletisim-day">Pazar:</span>
-                            <span class="iletisim-time">Kapalı</span>
-                        </div>
-                    }
-                </div>
+        <!-- E-posta -->
+        <div class="bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col p-4 text-center">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white mx-auto mb-3">
+                <i data-lucide="mail" class="w-5 h-5"></i>
             </div>
+            <h3 class="font-medium text-sm text-ink mb-1">E-posta</h3>
+            <p class="text-xs">
+                <a href="mailto:@settings?.Email" class="text-primary hover:text-primary-dark hover:underline transition">@Html.Raw(settings?.Email)</a>
+            </p>
         </div>
-        <div class="col-12">
-            <div class="row justify-content-center">
-                <div class="col-lg-12">
-                    @if (Model.IsEmailSent)
-                    {
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i data-lucide="check-circle" class="w-5 h-5 me-2"></i>
-                            @TempData["SuccessMessage"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    }
 
-                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i data-lucide="circle-alert" class="w-5 h-5 me-2"></i>
-                            @Model.ErrorMessage
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    }
+        <!-- Telefon -->
+        <div class="bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col p-4 text-center">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white mx-auto mb-3">
+                <i data-lucide="phone" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-medium text-sm text-ink mb-1">Telefon</h3>
+            <p class="text-xs">
+                @if (!string.IsNullOrEmpty(settings?.PhoneNumber))
+                {
+                    <a href="tel:@settings.PhoneNumber.Replace(" ", "")" class="text-primary hover:text-primary-dark hover:underline transition">@Html.Raw(settings.PhoneNumber)</a>
+                }
+                @if (!string.IsNullOrEmpty(settings?.PhoneNumber2))
+                {
+                    <br>
+                    <a href="tel:@settings.PhoneNumber2.Replace(" ", "")" class="text-primary hover:text-primary-dark hover:underline transition">@Html.Raw(settings.PhoneNumber2)</a>
+                }
+            </p>
+        </div>
 
-                    <!-- Contact Form -->
-                    <div class="iletisim-form-card">
-                        <form method="post" asp-page-handler="OnPostAsync">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="ContactForm.Name" class="form-label">Ad Soyad <span
-                                            class="text-danger">*</span></label>
-                                    <input asp-for="ContactForm.Name" class="form-control"
-                                           placeholder="Adınız ve soyadınız">
-                                    <span asp-validation-for="ContactForm.Name" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="ContactForm.Email" class="form-label">E-posta <span
-                                            class="text-danger">*</span></label>
-                                    <input asp-for="ContactForm.Email" class="form-control"
-                                           placeholder="ornek@email.com">
-                                    <span asp-validation-for="ContactForm.Email" class="text-danger"></span>
-                                </div>
-                            </div>
+        <!-- WhatsApp -->
+        <div class="bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col p-4 text-center">
+            <div class="w-10 h-10 rounded-full bg-[#25d366] flex items-center justify-center text-white mx-auto mb-3">
+                <i data-lucide="message-circle" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-medium text-sm text-ink mb-1">WhatsApp</h3>
+            <p class="text-xs">
+                <a href="https://wa.me/@(settings?.WhatsApp?.Replace("+", "").Replace(" ", ""))" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary-dark hover:underline transition">@Html.Raw(settings?.WhatsApp)</a>
+            </p>
+        </div>
+    </div>
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="ContactForm.Phone" class="form-label">Telefon</label>
-                                    <input asp-for="ContactForm.Phone" class="form-control"
-                                           placeholder="+90 5XX XXX XX XX">
-                                    <span asp-validation-for="ContactForm.Phone" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="ContactForm.Subject" class="form-label">Konu <span
-                                            class="text-danger">*</span></label>
-                                    <input asp-for="ContactForm.Subject" class="form-control"
-                                           placeholder="Mesajınızın konusu">
-                                    <span asp-validation-for="ContactForm.Subject" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label asp-for="ContactForm.Message" class="form-label">Mesaj <span class="text-danger">*</span></label>
-                                <textarea asp-for="ContactForm.Message" class="form-control" rows="6"
-                                          placeholder="Mesajınızı buraya yazın..."></textarea>
-                                <span asp-validation-for="ContactForm.Message" class="text-danger"></span>
-                            </div>
-
-                            <div class="text-center">
-                                <button type="submit" class="btn iletisim-submit-btn">
-                                    <i data-lucide="send" class="w-5 h-5 me-2"></i>
-                                    Mesajı Gönder
-                                </button>
-                            </div>
-                        </form>
+    <!-- Çalışma saatleri + Form -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Çalışma saatleri kartı -->
+        <div class="bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 transition-all duration-200 p-4 lg:col-span-1">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0">
+                    <i data-lucide="clock" class="w-4 h-4"></i>
+                </div>
+                <h3 class="text-ink text-base font-medium">Çalışma Saatleri</h3>
+            </div>
+            @if (!string.IsNullOrEmpty(settings?.WorkingHours))
+            {
+                <p class="text-sm text-gray-500">@Html.Raw(settings.WorkingHours)</p>
+            }
+            else
+            {
+                <div class="space-y-1.5 text-sm">
+                    <div class="flex justify-between text-gray-500">
+                        <span>Pazartesi - Cuma</span>
+                        <span class="font-medium text-ink">09:00 - 18:00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                        <span>Cumartesi</span>
+                        <span class="font-medium text-ink">09:00 - 16:00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                        <span>Pazar</span>
+                        <span class="font-medium text-ink">Kapalı</span>
                     </div>
                 </div>
+            }
+        </div>
+
+        <!-- Form alanı -->
+        <div class="lg:col-span-2 space-y-4">
+            @if (Model.IsEmailSent)
+            {
+                <div class="flex items-center gap-2 p-3 rounded border border-green-200 bg-green-50 text-green-800 text-sm" role="alert">
+                    <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="flex items-center gap-2 p-3 rounded border border-red-200 bg-red-50 text-red-800 text-sm" role="alert">
+                    <i data-lucide="circle-alert" class="w-5 h-5 flex-shrink-0"></i>
+                    <span>@Model.ErrorMessage</span>
+                </div>
+            }
+
+            <div class="bg-white rounded border border-gray-100 overflow-hidden p-4 sm:p-5">
+                <h3 class="text-ink text-base font-medium mb-4">Mesaj Gönderin</h3>
+                <form method="post" asp-page-handler="OnPostAsync" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label asp-for="ContactForm.Name" class="block text-sm font-medium text-ink mb-1">Ad Soyad <span class="text-red-500">*</span></label>
+                            <input asp-for="ContactForm.Name" class="w-full rounded border border-gray-200 px-3.5 py-2 text-sm text-ink placeholder-gray-400 transition focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary hover:border-gray-300" placeholder="Adınız ve soyadınız">
+                            <span asp-validation-for="ContactForm.Name" class="text-red-500 text-xs"></span>
+                        </div>
+                        <div>
+                            <label asp-for="ContactForm.Email" class="block text-sm font-medium text-ink mb-1">E-posta <span class="text-red-500">*</span></label>
+                            <input asp-for="ContactForm.Email" class="w-full rounded border border-gray-200 px-3.5 py-2 text-sm text-ink placeholder-gray-400 transition focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary hover:border-gray-300" placeholder="ornek@email.com">
+                            <span asp-validation-for="ContactForm.Email" class="text-red-500 text-xs"></span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label asp-for="ContactForm.Phone" class="block text-sm font-medium text-ink mb-1">Telefon</label>
+                            <input asp-for="ContactForm.Phone" class="w-full rounded border border-gray-200 px-3.5 py-2 text-sm text-ink placeholder-gray-400 transition focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary hover:border-gray-300" placeholder="+90 5XX XXX XX XX">
+                            <span asp-validation-for="ContactForm.Phone" class="text-red-500 text-xs"></span>
+                        </div>
+                        <div>
+                            <label asp-for="ContactForm.Subject" class="block text-sm font-medium text-ink mb-1">Konu <span class="text-red-500">*</span></label>
+                            <input asp-for="ContactForm.Subject" class="w-full rounded border border-gray-200 px-3.5 py-2 text-sm text-ink placeholder-gray-400 transition focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary hover:border-gray-300" placeholder="Mesajınızın konusu">
+                            <span asp-validation-for="ContactForm.Subject" class="text-red-500 text-xs"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label asp-for="ContactForm.Message" class="block text-sm font-medium text-ink mb-1">Mesaj <span class="text-red-500">*</span></label>
+                        <textarea asp-for="ContactForm.Message" rows="4" class="w-full rounded border border-gray-200 px-3.5 py-2 text-sm text-ink placeholder-gray-400 transition focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary hover:border-gray-300 resize-y min-h-[100px]" placeholder="Mesajınızı buraya yazın..."></textarea>
+                        <span asp-validation-for="ContactForm.Message" class="text-red-500 text-xs"></span>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            Mesajı Gönder
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-<!-- Contact Section End -->
-
-
-@section Styles {
-    <style>
-        /* Contact Page Specific Styles */
-        .iletisim-contact-section {
-            background-color: #f8f9fa;
-        }
-
-        .iletisim-contact-info-card {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .iletisim-contact-card {
-            background: #fff;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .iletisim-contact-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-
-        .iletisim-contact-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #6c757d, #495057);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .iletisim-contact-content h4 {
-            color: #333;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .iletisim-contact-content p {
-            color: #666;
-            margin-bottom: 0;
-        }
-
-        .iletisim-contact-content a {
-            color: #6c757d;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .iletisim-contact-content a:hover {
-            color: #495057;
-            text-decoration: underline;
-        }
-
-        .iletisim-working-hours-card {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .iletisim-working-hours-card h4 {
-            color: #333;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-        }
-
-        .iletisim-hours-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .iletisim-hours-item:last-child {
-            border-bottom: none;
-        }
-
-        .iletisim-day {
-            font-weight: 500;
-            color: #333;
-        }
-
-        .iletisim-time {
-            color: #6c757d;
-            font-weight: 600;
-        }
-
-        .iletisim-section-title h2 {
-            color: #333;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .iletisim-section-subtitle {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .iletisim-breadcrumb-section {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            padding: 2rem 0;
-            color: white;
-        }
-
-        .iletisim-breadcrumb-title {
-            color: white;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .iletisim-breadcrumb {
-            margin-bottom: 0;
-        }
-
-        .iletisim-breadcrumb-item a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-        }
-
-        .iletisim-breadcrumb-item a:hover {
-            color: white;
-        }
-
-        .iletisim-breadcrumb-item.active {
-            color: white;
-        }
-
-        /* Contact Form Styles */
-        .iletisim-form-section {
-            background-color: #ffffff;
-        }
-
-        .iletisim-form-title h2 {
-            color: #333;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .iletisim-form-subtitle {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .iletisim-form-card {
-            background: white;
-            border-radius: 15px;
-            padding: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
-        }
-
-        .iletisim-form-card .form-label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-
-        .iletisim-form-card .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .iletisim-form-card .form-control:focus {
-            border-color: #6c757d;
-            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
-        }
-
-        .iletisim-form-card textarea.form-control {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .iletisim-submit-btn {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            border: none;
-            color: white;
-            padding: 0.75rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .iletisim-submit-btn:hover {
-            background: linear-gradient(135deg, #495057, #343a40);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            color: white;
-        }
-
-        .iletisim-submit-btn:active {
-            transform: translateY(0);
-        }
-
-        .alert {
-            border-radius: 8px;
-            border: none;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background-color: #d1edff;
-            color: #0c5460;
-            border-left: 4px solid #28a745;
-        }
-
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-        }
-
-        /* Responsive Design */
-        @@media (max-width: 768px) {
-            .iletisim-contact-info-card {
-                padding: 1.5rem;
-            }
-
-            .iletisim-working-hours-card {
-                padding: 1.5rem;
-                margin-top: 2rem;
-            }
-
-            .iletisim-contact-card {
-                margin-bottom: 1rem;
-            }
-
-            .iletisim-form-card {
-                padding: 1.5rem;
-            }
-
-            .iletisim-submit-btn {
-                width: 100%;
-                padding: 1rem;
-            }
-
-        }
-    </style>
-}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial"/>

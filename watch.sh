@@ -25,4 +25,4 @@ npm run build:css
 echo ""
 
 echo "=== 4. dotnet watch başlatılıyor ==="
-dotnet watch
+dotnet watch run --launch-profile https

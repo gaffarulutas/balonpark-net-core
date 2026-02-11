@@ -1,0 +1,50 @@
+@model BalonPark.Models.ProductCardViewModel
+@inject BalonPark.Services.IUrlService UrlService
+@{
+    var item = Model.Item;
+    var product = item.Product;
+    var productUrl = Model.ProductUrl ?? $"/category/{product.CategorySlug}/{product.SubCategorySlug}/{product.Slug}";
+    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var imageUrl = item.MainImage != null
+        ? (UrlService.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{baseUrl}/{item.MainImage.ThumbnailPath}")
+        : (UrlService.GetImageUrl("/assets/images/no-image.png") ?? $"{baseUrl}/assets/images/no-image.png");
+    var descriptionSnippet = !string.IsNullOrEmpty(product.Description) && product.Description.Length > 60
+        ? product.Description.Substring(0, 60) + "..."
+        : product.Description ?? "";
+}
+
+<article class="product-card group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
+    <div class="relative aspect-square bg-gray-50 overflow-hidden">
+        <div class="product-card-actions absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button type="button" class="favorite-btn flex items-center justify-center transition" data-product-id="@product.Id" title="Favorilere Ekle"><i data-lucide="heart"></i></button>
+            <button type="button" class="compare-btn flex items-center justify-center transition" data-product-id="@product.Id" data-product-url="@productUrl" data-product-slug="@product.Slug" title="Karşılaştır"><i data-lucide="shuffle"></i></button>
+        </div>
+        <a href="@productUrl" class="block w-full h-full">
+            <img src="@imageUrl" class="lazy-image w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" alt="@Html.Raw(product.Name)" loading="lazy">
+        </a>
+    </div>
+    <div class="p-3 flex flex-col flex-1 border-t border-gray-100">
+        <a href="@productUrl" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(product.Name)</a>
+        <p class="text-xs text-gray-400 mt-0.5">@Html.Raw(product.CategoryName)</p>
+        @if (!string.IsNullOrEmpty(product.Description))
+        {
+            <p class="text-xs text-gray-500 mt-1 line-clamp-2">@Html.Raw(descriptionSnippet)</p>
+        }
+        @if (!string.IsNullOrEmpty(product.Summary))
+        {
+            <p class="text-[11px] text-gray-500 mt-1 line-clamp-2">@Html.Raw(product.Summary)</p>
+        }
+        <div class="mt-auto pt-2.5">
+            @if (product.Price <= 0)
+            {
+                <p class="text-xs text-gray-500">Fiyat için iletişime geçin</p>
+            }
+            else
+            {
+                <p class="price-tl text-sm font-medium text-primary @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@product.Price.ToString("N2")</p>
+                <p class="price-usd text-sm font-medium text-primary @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@product.UsdPrice.ToString("N2")</p>
+                <p class="price-eur text-sm font-medium text-primary @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@product.EuroPrice.ToString("N2")</p>
+            }
+        </div>
+    </div>
+</article>

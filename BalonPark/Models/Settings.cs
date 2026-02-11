@@ -45,6 +45,14 @@ public class Settings
     public string? MetaDescription { get; set; }
     public string? MetaKeywords { get; set; }
     
+    // Google & Doğrulama
+    /// <summary>Google Analytics / gtag.js Ölçüm ID (örn: G-XXXXXXXXXX)</summary>
+    public string? GoogleTag { get; set; }
+    /// <summary>Google Tag Manager Container ID (örn: GTM-XXXXXXX)</summary>
+    public string? GoogleTagManager { get; set; }
+    /// <summary>Google Site Verification meta content değeri</summary>
+    public string? GoogleSiteVerification { get; set; }
+    
     // Tarihler
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

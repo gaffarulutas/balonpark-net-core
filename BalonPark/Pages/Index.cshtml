@@ -73,48 +73,7 @@
     {
         @foreach (var item in Model.Products)
         {
-            <article class="product-card group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
-                <div class="relative aspect-square bg-gray-50 overflow-hidden">
-                    <div class="product-card-actions absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button type="button" class="favorite-btn flex items-center justify-center transition" data-product-id="@item.Product.Id" title="Favorilere Ekle"><i data-lucide="heart"></i></button>
-                        <button type="button" class="compare-btn flex items-center justify-center transition" data-product-id="@item.Product.Id" data-product-url="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" data-product-slug="@item.Product.Slug" title="Karşılaştır"><i data-lucide="shuffle"></i></button>
-                    </div>
-                    <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="block w-full h-full">
-                        @if (item.MainImage != null)
-                        {
-                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}")" class="lazy-image w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" alt="@Html.Raw(item.Product.Name)" loading="lazy">
-                        }
-                        else
-                        {
-                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" class="lazy-image w-full h-full object-cover" alt="@Html.Raw(item.Product.Name)" loading="lazy">
-                        }
-                    </a>
-                </div>
-                <div class="p-3 flex flex-col flex-1 border-t border-gray-100">
-                    <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(item.Product.Name)</a>
-                    <p class="text-xs text-gray-400 mt-0.5">@Html.Raw(item.Product.CategoryName)</p>
-                    @if (!string.IsNullOrEmpty(item.Product.Description))
-                    {
-                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">@Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)</p>
-                    }
-                    @if (!string.IsNullOrEmpty(item.Product.Summary))
-                    {
-                        <p class="text-[11px] text-gray-500 mt-1 line-clamp-2">@Html.Raw(item.Product.Summary)</p>
-                    }
-                    <div class="mt-auto pt-2.5">
-                        @if (item.Product.Price <= 0)
-                        {
-                            <p class="text-xs text-gray-500">Fiyat için iletişime geçin</p>
-                        }
-                        else
-                        {
-                            <p class="price-tl text-sm font-medium text-primary @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N2")</p>
-                            <p class="price-usd text-sm font-medium text-primary @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N2")</p>
-                            <p class="price-eur text-sm font-medium text-primary @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N2")</p>
-                        }
-                    </div>
-                </div>
-            </article>
+            @await Html.PartialAsync("Shared/_ProductCard", new ProductCardViewModel { Item = item, SelectedCurrency = Model.SelectedCurrency })
         }
     }
     else

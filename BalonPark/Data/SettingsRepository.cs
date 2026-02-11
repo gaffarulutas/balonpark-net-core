@@ -102,6 +102,9 @@ public class SettingsRepository(DapperContext context, ICacheService cacheServic
                 MetaTitle = @MetaTitle,
                 MetaDescription = @MetaDescription,
                 MetaKeywords = @MetaKeywords,
+                GoogleTag = @GoogleTag,
+                GoogleTagManager = @GoogleTagManager,
+                GoogleSiteVerification = @GoogleSiteVerification,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id";
         
@@ -124,12 +127,12 @@ public class SettingsRepository(DapperContext context, ICacheService cacheServic
             (UserName, Password, CompanyName, About, Logo, Email, PhoneNumber, PhoneNumber2, 
              Fax, WhatsApp, Address, City, District, PostalCode, Country, 
              Facebook, Instagram, Twitter, LinkedIn, YouTube, WorkingHours, 
-             MetaTitle, MetaDescription, MetaKeywords, CreatedAt)
+             MetaTitle, MetaDescription, MetaKeywords, GoogleTag, GoogleTagManager, GoogleSiteVerification, CreatedAt)
             VALUES 
             (@UserName, @Password, @CompanyName, @About, @Logo, @Email, @PhoneNumber, @PhoneNumber2, 
              @Fax, @WhatsApp, @Address, @City, @District, @PostalCode, @Country, 
              @Facebook, @Instagram, @Twitter, @LinkedIn, @YouTube, @WorkingHours, 
-             @MetaTitle, @MetaDescription, @MetaKeywords, @CreatedAt);
+             @MetaTitle, @MetaDescription, @MetaKeywords, @GoogleTag, @GoogleTagManager, @GoogleSiteVerification, @CreatedAt);
             SELECT CAST(SCOPE_IDENTITY() as int)";
         
         using var connection = context.CreateConnection();

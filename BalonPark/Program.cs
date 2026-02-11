@@ -1,9 +1,10 @@
+using System.Diagnostics;
+using System.Threading.Tasks;
 using BalonPark.Data;
 using BalonPark.Services;
 using BalonPark.Pages.Admin;
 using BalonPark.Middleware;
 using Serilog;
-using System.Threading.Tasks;
 
 // Serilog Yapılandırması - appsettings.json'dan okuyacak ama önce basic config
 Log.Logger = new LoggerConfiguration()
@@ -75,7 +76,7 @@ try
     builder.Services.AddScoped<ICacheService, CacheService>();
     builder.Services.AddScoped<IUrlService, UrlService>();
     builder.Services.AddScoped<IEmailService, EmailService>();
-    
+
     // Mail Service - Singleton (connection pooling için)
     builder.Services.AddSingleton<IMailService, MailService>();
 
@@ -161,14 +162,43 @@ try
     app.MapRazorPages();
     app.MapControllers();
 
-    Log.Information("Middleware yapılandırması tamamlandı.");
-    
-    // URL'leri logla
-    var urls = app.Urls.Any() ? string.Join(", ", app.Urls) : "Yapılandırılmış URL yok (launchSettings.json kullanılıyor)";
-    Log.Information("Uygulama başlatılıyor...");
-    Log.Information("Dinlenen adresler: {Urls}", urls);
-    Log.Information("Tarayıcınızda şu adrese gidin: http://localhost:5152/");
-    
+    // Tarayıcıyı açacak URL (launchSettings / ASPNETCORE_URLS veya varsayılan)
+    var urls = app.Urls.ToList();
+    var openUrl = urls.FirstOrDefault()
+        ?? app.Configuration["ASPNETCORE_URLS"]?.Split(';', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim()
+        ?? "http://localhost:5152";
+    if (!openUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        openUrl = "http://" + openUrl;
+    if (!openUrl.EndsWith("/"))
+        openUrl += "/";
+
+    // Development ortamında sunucu ayağa kalktıktan sonra tarayıcıyı otomatik aç
+    // Not: dotnet run/dotnet watch CLI'da launchBrowser güvenilir çalışmıyor; bu yöntem her ortamda çalışır.
+    if (app.Environment.IsDevelopment())
+    {
+        app.Lifetime.ApplicationStarted.Register(() =>
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(1500);
+                try
+                {
+                    if (OperatingSystem.IsWindows())
+                        Process.Start(new ProcessStartInfo { FileName = openUrl, UseShellExecute = true });
+                    else if (OperatingSystem.IsMacOS())
+                        Process.Start("open", openUrl);
+                    else
+                        Process.Start("xdg-open", openUrl);
+                    Log.Information("Tarayıcı açıldı: {Url}", openUrl);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Tarayıcı otomatik açılamadı. Adresi manuel açın: {Url}", openUrl);
+                }
+            });
+        });
+    }
+
     await app.RunAsync();
     Log.Information("Uygulama durduruldu.");
 }
