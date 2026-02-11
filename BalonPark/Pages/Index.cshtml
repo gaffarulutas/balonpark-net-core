@@ -35,30 +35,85 @@
 }
 </script>
 
-<!-- Hero + Product Section -->
+<!-- Hero + Kategoriler (solda) + Product Section -->
 
 <div class="space-y-4 sm:space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="md:col-span-2 relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] min-h-[200px]">
-            <img src="~/assets/images/1.png" class="absolute inset-0 w-full h-full object-cover" alt="Şişme Oyun Parkları ve Çocuk Oyun Grupları - Balon Park Eğlence Merkezi" loading="eager" width="800" height="400">
-            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center p-6 sm:p-8">
-                <span class="text-primary font-medium text-sm sm:text-base">Hazır Olun</span>
-                <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">EĞLENCEYE!</h2>
-                <p class="text-white/90 text-sm mt-2 max-w-md hidden sm:block">Çocuklarınız için güvenli ve eğlenceli şişme oyun grupları ile unutulmaz anlar yaşayın.</p>
-                <a href="/category/siseme-parklar/sisme-kaydirak" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
-                    Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4 inline-block align-middle"></i>
-                </a>
+    <div class="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4">
+        <!-- Kategoriler hero içinde solda -->
+        <nav class="rounded-xl bg-white/95 backdrop-blur border border-gray-100 p-4 order-2 md:order-1 shadow-sm" aria-label="Kategoriler">
+            <p class="text-xs font-medium tracking-wider text-gray-400 uppercase pb-2.5 border-b border-gray-100 mb-2.5">Kategoriler</p>
+            <ul class="list-none p-0 m-0">
+                @if (Model.Categories != null && Model.Categories.Count > 0)
+                {
+                    @foreach (var category in Model.Categories)
+                    {
+                        var hasSubCategories = category.SubCategories != null && category.SubCategories.Count > 0;
+                        <li class="category-item border-b border-gray-50 last:border-b-0" data-category-id="@category.Id">
+                            <div class="flex items-center min-h-0">
+                                <a href="/category/@category.Slug" class="category-link flex-1 min-w-0 flex items-center gap-2 py-2 px-1.5 rounded hover:bg-gray-50 transition text-sm" data-category-slug="@category.Slug">
+                                    @if (!string.IsNullOrEmpty(category.FirstProductImage))
+                                    {
+                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="" class="lazy-image w-7 h-7 rounded object-cover flex-shrink-0" loading="lazy">
+                                    }
+                                    else
+                                    {
+                                        <span class="w-7 h-7 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400"><i data-lucide="folder" class="w-3.5 h-3.5"></i></span>
+                                    }
+                                    <span class="category-name font-medium text-ink truncate hover:text-primary">@Html.Raw(category.Name)</span>
+                                </a>
+                                @if (hasSubCategories)
+                                {
+                                    <button class="category-toggle w-7 h-7 flex-shrink-0 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-primary transition text-xs" type="button" data-category-id="@category.Id" onclick="toggleSubCategories(event, @category.Id)" aria-expanded="false">
+                                        <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200"></i>
+                                    </button>
+                                }
+                            </div>
+                            @if (hasSubCategories)
+                            {
+                                <ul class="subcategory-list list-none p-0 m-0 max-h-0 overflow-hidden transition-all duration-200 opacity-0 bg-gray-50/50 rounded" id="subcategories-@category.Id">
+                                    @foreach (var subCategory in category.SubCategories)
+                                    {
+                                        <li>
+                                            <a href="/category/@category.Slug/@subCategory.Slug" class="subcategory-link flex items-center py-1.5 pl-5 pr-2 text-xs text-gray-600 no-underline rounded hover:bg-gray-100 hover:text-primary transition" data-category-slug="@category.Slug" data-subcategory-slug="@subCategory.Slug">
+                                                @Html.Raw(subCategory.Name)
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="py-2 text-xs text-gray-500">Kategoriler yükleniyor...</li>
+                }
+            </ul>
+        </nav>
+
+        <!-- Hero alanı (resimler) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 order-1 md:order-2">
+            <div class="md:col-span-2 relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] min-h-[200px]">
+                <img src="~/assets/images/1.png" class="absolute inset-0 w-full h-full object-cover" alt="Şişme Oyun Parkları ve Çocuk Oyun Grupları - Balon Park Eğlence Merkezi" loading="eager" width="800" height="400">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center p-6 sm:p-8">
+                    <span class="text-primary font-medium text-sm sm:text-base">Hazır Olun</span>
+                    <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">EĞLENCEYE!</h2>
+                    <p class="text-white/90 text-sm mt-2 max-w-md hidden sm:block">Çocuklarınız için güvenli ve eğlenceli şişme oyun grupları ile unutulmaz anlar yaşayın.</p>
+                    <a href="/category/siseme-parklar/sisme-kaydirak" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
+                        Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4 inline-block align-middle"></i>
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] md:aspect-auto min-h-[200px]">
-            <img src="~/assets/images/2.png" class="absolute inset-0 w-full h-full object-cover" alt="" loading="eager">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
-                <span class="text-primary font-medium text-sm">Kaliteli</span>
-                <h2 class="text-white text-xl font-bold mt-1">Güvenli</h2>
-                <p class="text-white/90 text-sm mt-1">En İyi Fiyatlarla Sizlerle</p>
-                <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition w-fit">
-                    Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4 inline-block align-middle"></i>
-                </a>
+            <div class="relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] md:aspect-auto min-h-[200px]">
+                <img src="~/assets/images/2.png" class="absolute inset-0 w-full h-full object-cover" alt="" loading="eager">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
+                    <span class="text-primary font-medium text-sm">Kaliteli</span>
+                    <h2 class="text-white text-xl font-bold mt-1">Güvenli</h2>
+                    <p class="text-white/90 text-sm mt-1">En İyi Fiyatlarla Sizlerle</p>
+                    <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition w-fit">
+                        Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4 inline-block align-middle"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

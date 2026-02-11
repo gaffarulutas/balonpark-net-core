@@ -218,8 +218,8 @@
 <div class="main-wrapper flex flex-col min-h-screen flex-1">
 
     <!-- Top bar: promo + telefon, favori, karşılaştır -->
-    <div id="header-promo-bar" class="bg-ink text-white py-2 px-4 text-xs sm:text-sm font-medium" role="banner">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
+    <div id="header-promo-bar" class="bg-ink text-white py-2 text-xs sm:text-sm font-medium" role="banner">
+        <div class="max-w-[96rem] mx-auto flex items-center justify-between gap-3 flex-wrap px-3 sm:px-4">
             <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <span class="inline-flex items-center gap-1.5">
                     <i data-lucide="truck" class="w-4 h-4 flex-shrink-0 text-primary"></i>
@@ -254,7 +254,7 @@
 
     <!-- Main header (2026 ecommerce: logo, nav, search, CTAs) -->
     <header class="bg-white border-b border-gray-100 sticky top-0 z-[60] shadow-sm" id="main-header">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4">
+        <div class="max-w-[96rem] mx-auto px-3 sm:px-4">
             <!-- Row 1: Logo + Search + Actions -->
             <div class="flex items-center justify-between gap-3 py-3">
                 <div class="flex items-center gap-3 min-w-0 flex-shrink-0">
@@ -306,96 +306,12 @@
         </div>
     </header>
 
-    <div class="flex flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 py-4 gap-6">
-                <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-[55] xl:hidden hidden" onclick="toggleCategoryMenu()" aria-hidden="true"></div>
-                <aside id="sidebar-col" class="sidebar-col w-72 xl:w-60 flex-shrink-0 bg-white border-r border-gray-100 xl:border-r xl:shadow-none shadow-xl overflow-y-auto fixed inset-y-0 left-0 z-[50] xl:static xl:inset-auto transition-transform duration-300 -translate-x-full xl:translate-x-0" aria-label="Kategoriler">
-                    <div class="relative pt-14 xl:pt-4 pb-5 px-4 xl:px-0 xl:pr-4 h-full overflow-y-auto overflow-x-hidden">
-                        <button type="button" class="xl:hidden absolute top-3 right-3 w-9 h-9 rounded-full bg-gray-100 text-ink flex items-center justify-center hover:bg-gray-200 transition" onclick="toggleCategoryMenu()" aria-label="Kapat">
-                            <i data-lucide="x" class="w-4 h-4"></i>
-                        </button>
-                        <!-- Mobile: Sayfalar -->
-                        <div class="xl:hidden mb-4 mt-4">
-                            <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Sayfalar</p>
-                            <ul class="space-y-1">
-                                <li><a asp-page="/Index" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i data-lucide="home" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Ana Sayfa</a></li>
-                                <li><a asp-page="/Hakkimizda" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i data-lucide="info" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Hakkımızda</a></li>
-                                <li><a asp-page="/Blog" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i data-lucide="book-open" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Blog</a></li>
-                                <li><a asp-page="/Iletisim" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i data-lucide="mail" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>İletişim</a></li>
-                            </ul>
-                        </div>
-
-                        <!-- Kategoriler başlık -->
-                        <p class="text-xs font-medium tracking-wider text-gray-400 uppercase pt-1 xl:pt-0 pb-2.5 border-b border-gray-100 mb-2.5">Kategoriler</p>
-                        <ul class="list-none p-0 m-0">
-                            @if (Model.Categories != null && Model.Categories.Count > 0)
-                            {
-                                @foreach (var category in Model.Categories)
-                                {
-                                    var hasSubCategories = category.SubCategories != null && category.SubCategories.Count > 0;
-                                    <li class="category-item border-b border-gray-50 last:border-b-0" data-category-id="@category.Id">
-                                        <div class="flex items-center min-h-0">
-                                            <a href="/category/@category.Slug" class="category-link flex-1 min-w-0 flex items-center gap-2.5 py-2.5 px-2 rounded hover:bg-gray-50 transition" data-category-slug="@category.Slug">
-                                                @if (!string.IsNullOrEmpty(category.FirstProductImage))
-                                                {
-                                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="" class="lazy-image w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
-                                                }
-                                                else
-                                                {
-                                                    <span class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400"><i data-lucide="folder" class="w-4 h-4"></i></span>
-                                                }
-                                                <span class="category-name text-sm font-medium text-ink truncate hover:text-primary">@Html.Raw(category.Name)</span>
-                                            </a>
-                                            @if (hasSubCategories)
-                                            {
-                                                <button class="category-toggle w-8 h-8 flex-shrink-0 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-primary transition text-xs" type="button" data-category-id="@category.Id" onclick="toggleSubCategories(event, @category.Id)" aria-expanded="false">
-                                                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200"></i>
-                                                </button>
-                                            }
-                                        </div>
-                                        @if (hasSubCategories)
-                                        {
-                                            <ul class="subcategory-list list-none p-0 m-0 max-h-0 overflow-hidden transition-all duration-200 opacity-0 bg-gray-50/50" id="subcategories-@category.Id">
-                                                @foreach (var subCategory in category.SubCategories)
-                                                {
-                                                    <li>
-                                                        <a href="/category/@category.Slug/@subCategory.Slug" class="subcategory-link flex items-center py-2 pl-7 pr-2.5 text-sm text-gray-600 no-underline rounded hover:bg-gray-100 hover:text-primary transition" data-category-slug="@category.Slug" data-subcategory-slug="@subCategory.Slug">
-                                                            @Html.Raw(subCategory.Name)
-                                                        </a>
-                                                    </li>
-                                                }
-                                            </ul>
-                                        }
-                                    </li>
-                                }
-                            }
-                            else
-                            {
-                                <li class="py-3 text-sm text-gray-500">Kategoriler yükleniyor...</li>
-                            }
-                        </ul>
-
-                        <!-- Mobile: Hızlı Erişim & Para Birimi -->
-                        <div class="xl:hidden mt-4 pt-4 border-t border-gray-100">
-                            <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Hızlı Erişim</p>
-                            <ul class="space-y-1 mb-4">
-                                <li><a href="#" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:bg-gray-50 rounded" onclick="showFavorites(); return false;"><i data-lucide="heart" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Favoriler <span class="favorites-count-text text-gray-400">0</span></a></li>
-                                <li><a href="#" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:bg-gray-50 rounded" onclick="showCompare(); return false;"><i data-lucide="shuffle" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Karşılaştır <span class="compare-count-text text-gray-400">0</span></a></li>
-                            </ul>
-                            <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Para Birimi</p>
-                            <div class="flex gap-2">
-                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="TL" onclick="setCurrency('TL')"><i data-lucide="badge-turkish-lira" class="w-4 h-4"></i> TL</button>
-                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="USD" onclick="setCurrency('USD')"><i data-lucide="dollar-sign" class="w-4 h-4"></i> USD</button>
-                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="EUR" onclick="setCurrency('EUR')"><i data-lucide="euro" class="w-4 h-4"></i> EUR</button>
-                            </div>
-                        </div>
-                    </div>
-                </aside>
-
-                <main class="content-col flex-1 min-w-0">
-                    <div class="main-content">
-                        @RenderBody()
-                    </div>
-                </main>
+    <div class="flex flex-1 w-full max-w-[96rem] mx-auto px-3 sm:px-4 py-4">
+        <main class="content-col flex-1 min-w-0">
+            <div class="main-content">
+                @RenderBody()
+            </div>
+        </main>
     </div>
 
     @if (!string.IsNullOrEmpty(siteSettings?.WhatsApp))
@@ -411,7 +327,7 @@
     }
 
     <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="max-w-[96rem] mx-auto px-3 sm:px-4 py-6">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <p class="text-sm text-gray-600">© @DateTime.Now.Year @Html.Raw(companyName). Tüm hakları saklıdır.</p>
                 <nav class="flex flex-wrap gap-4 text-sm">
