@@ -977,6 +977,14 @@ header.fixed-header {
     color: #111827;
 }
 
+/* Modal kapatma butonu (sağ üst X) – tüm modallarda */
+.modal-close-btn {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
 .close-btn {
     background: none;
     border: none;

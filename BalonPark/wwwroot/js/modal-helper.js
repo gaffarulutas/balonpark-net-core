@@ -71,7 +71,7 @@
             '<div class="' + contentClassName + ' modal-panel-enter" tabindex="-1">' +
             '  <div class="flex justify-between items-center px-4 py-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">' +
             '    <h2 id="' + titleId + '" class="text-lg font-semibold text-gray-900">' + escapeHtml(title) + '</h2>' +
-            '    <button type="button" class="modal-close-btn w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors" aria-label="' + escapeHtml(closeLabel) + '">&times;</button>' +
+            '    <button type="button" class="modal-close-btn w-10 h-10 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors text-2xl leading-none" aria-label="' + escapeHtml(closeLabel) + '">&times;</button>' +
             '  </div>' +
             '  <div class="modal-content-body flex-1 min-h-0 overflow-y-auto p-4">' + content + '</div>' +
             '</div>';
