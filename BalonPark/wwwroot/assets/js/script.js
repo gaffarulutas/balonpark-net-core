@@ -273,11 +273,7 @@ $(window).on("load resize", function () {
    13. Wishlist Js
    ==========================*/
 $(".notifi-wishlist").on("click", function () {
-    if (typeof showSnackbar === "function") {
-        showSnackbar("Ürün favori listesine eklendi.", "success");
-    } else if (typeof Snackbar !== "undefined") {
-        Snackbar.show({ text: "Ürün favori listesine eklendi.", pos: "bottom-right", duration: 5000 });
-    }
+    if (typeof showSnackbar === "function") showSnackbar("Ürün favori listesine eklendi.", "success");
 });
 
 /*=====================

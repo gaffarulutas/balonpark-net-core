@@ -802,6 +802,11 @@ header.fixed-header {
     animation: fadeInUp 0.3s ease;
 }
 
+/* Modal overlay: header ve kategorilerin (sidebar) üstünde kalması için */
+.modal-overlay {
+    z-index: 99999 !important;
+}
+
 /* Modal Styles */
 .favorites-modal-overlay,
 .compare-modal-overlay {
@@ -811,7 +816,7 @@ header.fixed-header {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 10000;
+    z-index: 99999 !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -877,7 +882,7 @@ header.fixed-header {
     min-width: 600px;
 }
 
-/* SweetAlert2 Custom Styles */
+/* Compare / modal popup */
 .compare-popup {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
@@ -1252,4 +1257,32 @@ header.fixed-header {
         border-color: #6b7280;
         color: #d1d5db;
     }
+}
+
+/* Snackbar fallback (toast değil; favori/karşılaştırma bildirimleri) */
+.snackbar-fallback {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100000;
+    min-width: 280px;
+    max-width: 400px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    animation: snackbar-fallback-in 0.3s ease;
+}
+@keyframes snackbar-fallback-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes snackbar-fallback-out {
+    to { opacity: 0; transform: translateY(-6px); }
+}
+.snackbar-fallback.snackbar-fallback-out {
+    animation: snackbar-fallback-out 0.25s ease forwards;
 }

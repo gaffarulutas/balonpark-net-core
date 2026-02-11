@@ -226,7 +226,6 @@
             
             if (!excerpt || excerpt.trim() === '') {
                 if (typeof showSnackbar === 'function') showSnackbar('Lütfen önce blog özeti yazın! AI bu özetten yola çıkarak tam blog içeriği oluşturacak.', 'warning');
-                else if (typeof showErrorAlert === 'function') showErrorAlert('Lütfen önce blog özeti yazın!');
                 return;
             }
             
@@ -254,18 +253,15 @@
                         if (response.data.metaKeywords) $('#Blog_MetaKeywords').val(response.data.metaKeywords);
                         if (response.data.tags) $('#Blog_Tags').val(response.data.tags);
                         if (typeof hideLoading === 'function') hideLoading();
-                        if (typeof showSuccessAlert === 'function') showSuccessAlert('Yapay zeka ile kapsamlı blog içeriği oluşturuldu!');
-                        else if (typeof showSnackbar === 'function') showSnackbar('Yapay zeka ile kapsamlı blog içeriği oluşturuldu!', 'success');
+                        if (typeof showSnackbar === 'function') showSnackbar('Yapay zeka ile kapsamlı blog içeriği oluşturuldu!', 'success');
                     } else {
                         if (typeof hideLoading === 'function') hideLoading();
-                        if (typeof showErrorAlert === 'function') showErrorAlert(response.message);
-                        else if (typeof showSnackbar === 'function') showSnackbar(response.message, 'error');
+                        if (typeof showSnackbar === 'function') showSnackbar(response.message, 'error');
                     }
                 },
                 error: function(xhr, status, error) {
                     if (typeof hideLoading === 'function') hideLoading();
-                    if (typeof showErrorAlert === 'function') showErrorAlert('AI içerik oluşturulurken hata: ' + error);
-                    else if (typeof showSnackbar === 'function') showSnackbar('AI içerik oluşturulurken hata: ' + error, 'error');
+                    if (typeof showSnackbar === 'function') showSnackbar('AI içerik oluşturulurken hata: ' + error, 'error');
                 },
                 complete: function() {
                     $btn.prop('disabled', false).html(originalHtml);

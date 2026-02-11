@@ -370,29 +370,15 @@
             $('#loadingOverlay').removeClass('flex').addClass('hidden');
         }
 
-        // Snackbar + native confirm (tek bildirim sistemi)
+        // Snackbar: tek toast/bildirim sistemi (showSnackbar msg, 'success'|'error'|'warning'|'info')
         function showDeleteConfirm(message, callback) {
             var text = (typeof message === 'string') ? message : (message || 'Emin misiniz?');
             if (confirm(text)) {
                 if (typeof callback === 'function') callback();
             }
         }
-        
-        function showSuccessAlert(message) {
-            if (typeof showSnackbar === 'function') {
-                showSnackbar(message, 'success');
-            } else if (typeof Snackbar !== 'undefined') {
-                Snackbar.show({ text: message, pos: 'bottom-right', backgroundColor: '#059669' });
-            }
-        }
-        
-        function showErrorAlert(message) {
-            if (typeof showSnackbar === 'function') {
-                showSnackbar(message, 'error');
-            } else if (typeof Snackbar !== 'undefined') {
-                Snackbar.show({ text: message, pos: 'bottom-right', backgroundColor: '#dc2626' });
-            }
-        }
+        function showSuccessAlert(message) { if (typeof showSnackbar === 'function') showSnackbar(message, 'success'); }
+        function showErrorAlert(message) { if (typeof showSnackbar === 'function') showSnackbar(message, 'error'); }
 
         function showConfirm(options) {
             var msg = options.html || options.text || options.title || 'Emin misiniz?';

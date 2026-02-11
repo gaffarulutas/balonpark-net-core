@@ -401,7 +401,6 @@ else
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(function() {
                 if (typeof showSnackbar === 'function') showSnackbar('Link panoya kopyalandı', 'success');
-                else if (typeof showSuccessAlert === 'function') showSuccessAlert('Link panoya kopyalandı');
             });
         }
 
@@ -420,15 +419,15 @@ else
             .then(data => {
                 hideLoading();
                 if (data.success) {
-                    if (typeof showSuccessAlert === 'function') showSuccessAlert('Ürün başarıyla silindi!');
+                    if (typeof showSnackbar === 'function') showSnackbar('Ürün başarıyla silindi!', 'success');
                     window.location.href = '/admin/googleshopping';
                 } else {
-                    if (typeof showErrorAlert === 'function') showErrorAlert('Ürün silinemedi: ' + data.message);
+                    if (typeof showSnackbar === 'function') showSnackbar('Ürün silinemedi: ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 hideLoading();
-                if (typeof showErrorAlert === 'function') showErrorAlert('Bir hata oluştu: ' + error.message);
+                if (typeof showSnackbar === 'function') showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             });
         }
     </script>

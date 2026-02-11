@@ -93,6 +93,31 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
         return product;
     }
 
+    /// <summary>
+    /// Slug listesine göre ürünleri tek sorguda getirir (karşılaştırma sayfası N+1 önlemi).
+    /// Dönen sıra slug listesi sırasına göredir.
+    /// </summary>
+    public async Task<IEnumerable<Product>> GetBySlugsAsync(IReadOnlyList<string> slugs)
+    {
+        if (slugs == null || slugs.Count == 0)
+            return Enumerable.Empty<Product>();
+
+        var slugList = slugs.Distinct().ToList();
+        var query = @"
+            SELECT p.*, c.Name as CategoryName, c.Slug as CategorySlug,
+                   sc.Name as SubCategoryName, sc.Slug as SubCategorySlug
+            FROM Products p
+            INNER JOIN Categories c ON p.CategoryId = c.Id
+            INNER JOIN SubCategories sc ON p.SubCategoryId = sc.Id
+            WHERE p.Slug IN @Slugs AND p.IsActive = 1";
+
+        using var connection = context.CreateConnection();
+        var products = (await connection.QueryAsync<Product>(query, new { Slugs = slugList })).ToList();
+        // URL sırasını koru
+        var order = slugList.Select((s, i) => new { s, i }).ToDictionary(x => x.s, x => x.i);
+        return products.OrderBy(p => order.TryGetValue(p.Slug, out var idx) ? idx : int.MaxValue);
+    }
+
     public async Task<IEnumerable<Product>> GetBySubCategorySlugAsync(string subCategorySlug)
     {
         try

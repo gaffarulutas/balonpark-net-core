@@ -383,13 +383,13 @@ else
                 const result = await response.json();
                 
                 if (result.success) {
-                    showSuccessAlert('Google Shopping API bağlantısı başarılı!');
+                    showSnackbar('Google Shopping API bağlantısı başarılı!', 'success');
                     location.reload();
                 } else {
-                    showErrorAlert('Bağlantı başarısız: ' + result.message);
+                    showSnackbar('Bağlantı başarısız: ' + result.message, 'error');
                 }
             } catch (error) {
-                showErrorAlert('Bir hata oluştu: ' + error.message);
+                showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }
@@ -415,13 +415,13 @@ else
 
                 const result = await response.json();
                 if (result.success) {
-                    showSuccessAlert('Senkronizasyon başarılı! ' + result.message);
+                    showSnackbar('Senkronizasyon başarılı! ' + result.message, 'success');
                     location.reload();
                 } else {
-                    showErrorAlert('Senkronizasyon başarısız: ' + result.message);
+                    showSnackbar('Senkronizasyon başarısız: ' + result.message, 'error');
                 }
             } catch (error) {
-                showErrorAlert('Bir hata oluştu: ' + error.message);
+                showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }
@@ -440,13 +440,13 @@ else
 
                 const result = await response.json();
                 if (result.success) {
-                    showSuccessAlert('Google ürünleri başarıyla yüklendi!');
+                    showSnackbar('Google ürünleri başarıyla yüklendi!', 'success');
                     location.reload();
                 } else {
-                    showErrorAlert('Google ürünleri yüklenemedi: ' + result.message);
+                    showSnackbar('Google ürünleri yüklenemedi: ' + result.message, 'error');
                 }
             } catch (error) {
-                showErrorAlert('Bir hata oluştu: ' + error.message);
+                showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }
@@ -505,7 +505,7 @@ else
             const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
             
             if (selectedIds.length === 0) {
-                showErrorAlert('Lütfen silinecek ürünleri seçin!');
+                showSnackbar('Lütfen silinecek ürünleri seçin!', 'warning');
                 return;
             }
             const result = await showConfirm({ html: 'Seçilen ' + selectedIds.length + ' ürünü Google Shopping\'dan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!' });
@@ -523,16 +523,16 @@ else
                     if (response.ok) {
                         const result = await response.json();
                         if (result.success) {
-                            showSuccessAlert(result.message);
+                            showSnackbar(result.message, 'success');
                             location.reload();
                         } else {
-                            showErrorAlert(result.message);
+                            showSnackbar(result.message, 'error');
                         }
                     } else {
-                        showErrorAlert('Sunucu hatası oluştu!');
+                        showSnackbar('Sunucu hatası oluştu!', 'error');
                     }
                 } catch (error) {
-                    showErrorAlert(error.message);
+                    showSnackbar(error.message, 'error');
                 } finally {
                     hideLoading();
                 }
@@ -561,13 +561,13 @@ else
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
                     
-                    showSuccessAlert('Ürünler başarıyla dışa aktarıldı!');
+                    showSnackbar('Ürünler başarıyla dışa aktarıldı!', 'success');
                 } else {
                     const result = await response.json();
-                    showErrorAlert('Dışa aktarma başarısız: ' + result.message);
+                    showSnackbar('Dışa aktarma başarısız: ' + result.message, 'error');
                 }
             } catch (error) {
-                showErrorAlert('Bir hata oluştu: ' + error.message);
+                showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }
@@ -601,13 +601,13 @@ else
 
                 const result = await response.json();
                 if (result.success) {
-                    showSuccessAlert(result.message);
+                    showSnackbar(result.message, 'success');
                     location.reload();
                 } else {
-                    showErrorAlert('Onaya gönderme başarısız: ' + result.message);
+                    showSnackbar('Onaya gönderme başarısız: ' + result.message, 'error');
                 }
             } catch (error) {
-                showErrorAlert('Bir hata oluştu: ' + error.message);
+                showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }
@@ -627,13 +627,13 @@ else
                 const result = await response.json();
                 
                 if (result.success) {
-                    showSuccessAlert(result.message);
+                    showSnackbar(result.message, 'success');
                     location.reload();
                 } else {
-                    showErrorAlert('Ürün listesi yenilenemedi: ' + result.message);
+                    showSnackbar('Ürün listesi yenilenemedi: ' + result.message, 'error');
                 }
             } catch (error) {
-                showErrorAlert('Bir hata oluştu: ' + error.message);
+                showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }
@@ -657,13 +657,13 @@ else
                     if (result.status) {
                         statusText += Object.entries(result.status).map(([k, v]) => k + ': ' + v).join('; ');
                     }
-                    showSuccessAlert(statusText);
+                    showSnackbar(statusText, 'success');
                     location.reload();
                 } else {
-                    showErrorAlert('Durum kontrolü başarısız: ' + result.message);
+                    showSnackbar('Durum kontrolü başarısız: ' + result.message, 'error');
                 }
             } catch (error) {
-                showErrorAlert('Bir hata oluştu: ' + error.message);
+                showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }
@@ -689,13 +689,13 @@ else
 
                 const result = await response.json();
                 if (result.success) {
-                    showSuccessAlert('Ürün başarıyla silindi!');
+                    showSnackbar('Ürün başarıyla silindi!', 'success');
                     location.reload();
                 } else {
-                    showErrorAlert('Ürün silinemedi: ' + result.message);
+                    showSnackbar('Ürün silinemedi: ' + result.message, 'error');
                 }
             } catch (error) {
-                showErrorAlert('Bir hata oluştu: ' + error.message);
+                showSnackbar('Bir hata oluştu: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }

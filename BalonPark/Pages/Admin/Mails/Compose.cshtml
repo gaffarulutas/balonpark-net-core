@@ -517,7 +517,7 @@
             const subject = document.getElementById('EmailModel_Subject').value;
             
             if (!to || !subject || !body) {
-                showErrorAlert('Lütfen tüm zorunlu alanları doldurun');
+                showSnackbar('Lütfen tüm zorunlu alanları doldurun', 'warning');
                 return false;
             }
             
@@ -546,17 +546,17 @@
                 hideLoading();
                 
                 if (result.success) {
-                    showSuccessAlert(result.message || 'E-posta başarıyla gönderildi');
+                    showSnackbar(result.message || 'E-posta başarıyla gönderildi', 'success');
                     setTimeout(() => {
                         window.location.href = '/admin/mails';
                     }, 1500);
                 } else {
-                    showErrorAlert(result.message || 'E-posta gönderilemedi');
+                    showSnackbar(result.message || 'E-posta gönderilemedi', 'error');
                 }
             } catch (error) {
                 hideLoading();
                 console.error('Error:', error);
-                showErrorAlert('E-posta gönderilirken hata oluştu');
+                showSnackbar('E-posta gönderilirken hata oluştu', 'error');
             }
             
             return false;

@@ -259,21 +259,49 @@ class FavoritesAndCompare {
         return { name, price, image, url };
     }
 
-    // Bildirim göster (Snackbar kullanır; Swal kullanılmaz)
+    // Bildirim göster (yalnızca Snackbar – toast kullanılmaz)
     showNotification(message, type = 'info') {
+        const colors = { success: '#059669', error: '#dc2626', warning: '#d97706', info: '#2563eb' };
+        const bg = colors[type] || colors.info;
+
         if (typeof showSnackbar === 'function') {
             showSnackbar(message, type);
-        } else if (typeof Snackbar !== 'undefined') {
-            const colors = { success: '#059669', error: '#dc2626', warning: '#d97706', info: '#2563eb' };
+            return;
+        }
+        if (typeof Snackbar !== 'undefined') {
             Snackbar.show({
                 text: message,
                 pos: 'bottom-right',
                 duration: 5000,
-                backgroundColor: colors[type] || colors.info
+                backgroundColor: bg
             });
-        } else {
-            try { console.info('[Favoriler]', message); } catch (_) {}
+            return;
         }
+
+        // Fallback: Snackbar kütüphanesi yoksa snackbar tarzı DOM bildirimi
+        this.showSnackbarFallback(message, bg);
+    }
+
+    // Snackbar kütüphanesi yoksa kullanılan snackbar tarzı fallback (toast değil)
+    showSnackbarFallback(message, backgroundColor) {
+        var wrap = document.createElement('div');
+        wrap.setAttribute('role', 'status');
+        wrap.setAttribute('aria-live', 'polite');
+        wrap.className = 'snackbar-fallback';
+        wrap.style.backgroundColor = backgroundColor;
+        wrap.textContent = message;
+
+        document.body.appendChild(wrap);
+        var duration = 5000;
+        var t = setTimeout(function () {
+            wrap.classList.add('snackbar-fallback-out');
+            setTimeout(function () { wrap.remove(); }, 260);
+        }, duration);
+        wrap.addEventListener('click', function () {
+            clearTimeout(t);
+            wrap.classList.add('snackbar-fallback-out');
+            setTimeout(function () { wrap.remove(); }, 260);
+        });
     }
 
     // Favori listesini al
@@ -306,42 +334,30 @@ class FavoritesAndCompare {
         return slugs ? `/Compare/${slugs}` : '/Compare';
     }
 
-    // URL'i localStorage ile senkronize et
+    // URL'i localStorage ile senkronize et (Compare sayfasında header sayacı doğru görünsün)
     syncUrlWithStorage() {
-        // Eğer Compare sayfasındaysak, URL'den slug'ları al ve localStorage'ı güncelle
-        if (window.location.pathname.startsWith('/Compare/')) {
-            const pathParts = window.location.pathname.split('/');
-            const slugsParam = pathParts[2]; // Compare/slugs:slugs:slugs
-            
-            if (slugsParam) {
-                const slugs = slugsParam.split(':');
-                
-                // Mevcut compareList'teki slug'ları kontrol et
-                const currentSlugs = this.compareList.map(p => p.slug);
-                
-                // Eğer farklıysa, URL'deki slug'ları kullan
-                if (JSON.stringify(currentSlugs.sort()) !== JSON.stringify(slugs.sort())) {
-                    // URL'deki slug'lar öncelikli
-                    console.log('URL\'den slug\'lar alındı:', slugs);
-                }
-            }
-        }
+        if (!window.location.pathname.startsWith('/Compare/')) return;
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        const slugsParam = pathParts[1]; // Compare sonrası ilk segment (slugs:slugs:slugs)
+        if (!slugsParam) return;
+        const slugs = slugsParam.split(':').filter(function(s) { return s && s.length > 0; });
+        if (slugs.length === 0) return;
+        var currentSlugs = this.compareList.map(function(p) { return p.slug; }).filter(function(s) { return s; });
+        var same = currentSlugs.length === slugs.length && slugs.every(function(s, i) { return currentSlugs[i] === s; });
+        if (same) return;
+        // URL'deki slug'ları compareList'e yaz (id/name/url boş kalabilir; sayfa zaten sunucudan dolduruyor)
+        this.compareList = slugs.map(function(slug) { return { slug: slug, id: null, name: '', price: '', image: '', url: '', addedAt: new Date().toISOString() }; });
+        this.saveToStorage();
+        this.updateUI();
     }
 
-    // Favorileri göster (Tailwind modal – best practices: fixed overlay, z-index, backdrop, focus)
+    // Favorileri göster (generic Tailwind modal – focus trap, Escape, backdrop, aria)
     showFavorites() {
         if (this.favorites.length === 0) {
             this.showNotification('Henüz favori ürün eklememişsiniz.', 'info');
             return;
         }
 
-        const overlay = document.createElement('div');
-        overlay.setAttribute('role', 'dialog');
-        overlay.setAttribute('aria-modal', 'true');
-        overlay.setAttribute('aria-labelledby', 'favorites-modal-title');
-        overlay.setAttribute('aria-label', 'Favori ürünler');
-        // Tailwind: fixed full viewport, high z-index, flex center, backdrop
-        overlay.className = 'fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50';
         const escHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         const safeUrl = (s) => {
             const u = String(s ?? '').trim();
@@ -355,57 +371,45 @@ class FavoritesAndCompare {
             image: safeUrl(p.image),
             url: safeUrl(p.url)
         });
-        overlay.innerHTML = `
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col focus:outline-none" tabindex="-1">
-                <div class="flex justify-between items-center px-4 py-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-                    <h2 id="favorites-modal-title" class="text-lg font-semibold text-gray-900">Favorilerim (${this.favorites.length})</h2>
-                    <button type="button" class="close-favorites-modal w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors" aria-label="Kapat">&times;</button>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 overflow-y-auto flex-1 min-h-0">
-                    ${this.favorites.map(function (item) {
-                        const d = escProduct(item);
-                        return `
-                            <div class="favorites-item border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">
-                                <img src="${d.image}" alt="${d.name}" class="w-full h-40 object-cover bg-gray-100">
-                                <div class="p-3">
-                                    <div class="product-name font-medium text-gray-900 text-sm line-clamp-2">${d.name}</div>
-                                    <div class="product-price text-primary font-semibold mt-1">${d.price}</div>
-                                    <div class="flex gap-2 mt-2 flex-wrap">
-                                        <a href="${d.url}" class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 transition">Ürüne Git</a>
-                                        <button type="button" class="remove-fav-btn inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50 transition" data-id="${item.id}">Kaldır</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
 
-        const close = () => {
-            overlay.remove();
-            document.body.style.overflow = '';
-        };
-        overlay.querySelector('.close-favorites-modal').addEventListener('click', close);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-        overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-        overlay.querySelectorAll('.remove-fav-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.getAttribute('data-id'), 10);
-                const product = this.favorites.find(p => p.id === id);
-                if (product) this.toggleFavorite(id, product);
-                close();
-            });
-        });
-        document.body.style.overflow = 'hidden';
-        document.body.appendChild(overlay);
-        overlay.tabIndex = -1;
-        const firstFocusable = overlay.querySelector('.close-favorites-modal');
-        if (firstFocusable && typeof firstFocusable.focus === 'function') {
-            firstFocusable.focus();
-        } else {
-            overlay.focus();
+        const contentHtml = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">' +
+            this.favorites.map(function (item) {
+                const d = escProduct(item);
+                return '<div class="favorites-item border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">' +
+                    '<img src="' + d.image + '" alt="' + d.name + '" class="w-full h-40 object-cover bg-gray-100">' +
+                    '<div class="p-3">' +
+                    '<div class="product-name font-medium text-gray-900 text-sm line-clamp-2">' + d.name + '</div>' +
+                    '<div class="product-price text-primary font-semibold mt-1">' + d.price + '</div>' +
+                    '<div class="flex gap-2 mt-2 flex-wrap">' +
+                    '<a href="' + d.url + '" class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 transition">Ürüne Git</a>' +
+                    '<button type="button" class="remove-fav-btn inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50 transition" data-id="' + escHtml(String(item.id)) + '">Kaldır</button>' +
+                    '</div></div></div>';
+            }).join('') +
+            '</div>';
+
+        const self = this;
+        if (typeof window.openModal !== 'function') {
+            this.showNotification('Modal yardımcısı yüklenmedi.', 'error');
+            return;
         }
+
+        const { close } = window.openModal({
+            title: 'Favorilerim (' + this.favorites.length + ')',
+            titleId: 'favorites-modal-title',
+            content: contentHtml,
+            closeLabel: 'Kapat',
+            onContentReady: function (contentEl) {
+                if (!contentEl) return;
+                contentEl.querySelectorAll('.remove-fav-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        const id = parseInt(btn.getAttribute('data-id'), 10);
+                        const product = self.favorites.find(function (p) { return p.id === id; });
+                        if (product) self.toggleFavorite(id, product);
+                        close();
+                    });
+                });
+            }
+        });
     }
 
     // Karşılaştırma sayfasına yönlendir

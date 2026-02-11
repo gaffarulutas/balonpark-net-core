@@ -1057,15 +1057,15 @@ else
             hideLoading();
             
             if (result.success) {
-                showSuccessAlert('İşaretleme güncellendi');
+                showSnackbar('İşaretleme güncellendi', 'success');
                 setTimeout(() => location.reload(), 800);
             } else {
-                showErrorAlert(result.message || 'İşlem başarısız oldu');
+                showSnackbar(result.message || 'İşlem başarısız oldu', 'error');
             }
         } catch (error) {
             hideLoading();
             console.error('Error:', error);
-            showErrorAlert('Bir hata oluştu');
+            showSnackbar('Bir hata oluştu', 'error');
         }
     }
 
@@ -1089,17 +1089,17 @@ else
                 hideLoading();
                 
                 if (data.success) {
-                    showSuccessAlert('Mesaj spam klasörüne taşındı');
+                    showSnackbar('Mesaj spam klasörüne taşındı', 'success');
                     setTimeout(() => {
                         window.location.href = '/admin/mails?folder=@Model.Folder';
                     }, 1000);
                 } else {
-                    showErrorAlert(data.message || 'İşlem başarısız oldu');
+                    showSnackbar(data.message || 'İşlem başarısız oldu', 'error');
                 }
             } catch (error) {
                 hideLoading();
                 console.error('Error:', error);
-                showErrorAlert('Bir hata oluştu');
+                showSnackbar('Bir hata oluştu', 'error');
             }
         }
     }
@@ -1118,17 +1118,17 @@ else
                 hideLoading();
                 
                 if (result.success) {
-                    showSuccessAlert('Mesaj silindi');
+                    showSnackbar('Mesaj silindi', 'success');
                     setTimeout(() => {
                         window.location.href = '/admin/mails?folder=@Model.Folder';
                     }, 1000);
                 } else {
-                    showErrorAlert(result.message || 'İşlem başarısız oldu');
+                    showSnackbar(result.message || 'İşlem başarısız oldu', 'error');
                 }
             } catch (error) {
                 hideLoading();
                 console.error('Error:', error);
-                showErrorAlert('Bir hata oluştu');
+                showSnackbar('Bir hata oluştu', 'error');
             }
         });
     }

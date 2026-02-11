@@ -31,38 +31,29 @@ public class CompareModel : BasePage
 
     public async Task OnGetAsync(string? slugs)
     {
-
         if (string.IsNullOrWhiteSpace(slugs))
-        {
-            // Slug yoksa boş liste
             return;
-        }
 
         ProductSlugs = slugs;
-
-        // Slug'ları ayır (: ile ayrılmış)
         var slugList = slugs.Split(':', StringSplitOptions.RemoveEmptyEntries).ToList();
+        if (slugList.Count == 0)
+            return;
 
-        // Her slug için ürünü getir
-        foreach (var slug in slugList)
+        // Tek sorguda ürünleri getir (N+1 önlemi)
+        var productsBySlug = (await _productRepository.GetBySlugsAsync(slugList)).ToList();
+        if (productsBySlug.Count == 0)
+            return;
+
+        var productIds = productsBySlug.Select(p => p.Id).ToList();
+        var mainImages = await _productImageRepository.GetMainImagesByProductIdsAsync(productIds);
+
+        foreach (var product in productsBySlug)
         {
-            var product = await _productRepository.GetBySlugAsync(slug);
-            if (product == null) continue;
-
-            var mainImage = await _productImageRepository.GetMainImageAsync(product.Id);
-
-            // USD ve Euro fiyatlarını hesapla
             var (usdPrice, euroPrice) = await _currencyService.CalculatePricesAsync(product.Price);
-            
-            // Ürünün fiyat bilgilerini güncelle
             product.UsdPrice = Math.Round(usdPrice, 2);
             product.EuroPrice = Math.Round(euroPrice, 2);
-
-            Products.Add(new ProductWithImage
-            {
-                Product = product,
-                MainImage = mainImage
-            });
+            mainImages.TryGetValue(product.Id, out var mainImage);
+            Products.Add(new ProductWithImage { Product = product, MainImage = mainImage });
         }
     }
 

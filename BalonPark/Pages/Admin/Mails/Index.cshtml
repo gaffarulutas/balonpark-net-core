@@ -902,14 +902,14 @@
                      // Loading'i gizle, empty state göster
                      if (loadingState) loadingState.classList.add('hidden');
                      if (emptyState) emptyState.classList.remove('hidden');
-                     showErrorAlert('Veriler yüklenemedi');
+                     showSnackbar('Veriler yüklenemedi', 'error');
                  }
              } catch (error) {
                  console.error('Error loading email data:', error);
                  // Loading'i gizle, empty state göster
                  if (loadingState) loadingState.classList.add('hidden');
                  if (emptyState) emptyState.classList.remove('hidden');
-                 showErrorAlert('Veriler yüklenirken hata oluştu');
+                 showSnackbar('Veriler yüklenirken hata oluştu', 'error');
              } finally {
                  isLoading = false;
              }
@@ -1108,15 +1108,15 @@
                 hideLoading();
 
                 if (result.success) {
-                    showSuccessAlert(result.message || 'İşaretleme güncellendi');
+                    showSnackbar(result.message || 'İşaretleme güncellendi', 'success');
                     setTimeout(() => loadEmailData(), 500);
                 } else {
-                    showErrorAlert(result.message || 'İşlem başarısız oldu');
+                    showSnackbar(result.message || 'İşlem başarısız oldu', 'error');
                 }
             } catch (error) {
                 hideLoading();
                 console.error('Error:', error);
-                showErrorAlert('Bir hata oluştu');
+                showSnackbar('Bir hata oluştu', 'error');
             }
         }
 
@@ -1137,15 +1137,15 @@
                     hideLoading();
 
                     if (result.success) {
-                        showSuccessAlert('Mesaj silindi');
+                        showSnackbar('Mesaj silindi', 'success');
                         setTimeout(() => loadEmailData(), 500);
                     } else {
-                        showErrorAlert(result.message || 'İşlem başarısız oldu');
+                        showSnackbar(result.message || 'İşlem başarısız oldu', 'error');
                     }
                 } catch (error) {
                     hideLoading();
                     console.error('Error:', error);
-                    showErrorAlert('Bir hata oluştu');
+                    showSnackbar('Bir hata oluştu', 'error');
                 }
             });
         }

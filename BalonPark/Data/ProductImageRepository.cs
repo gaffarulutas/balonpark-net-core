@@ -22,6 +22,21 @@ public class ProductImageRepository(DapperContext context, IWebHostEnvironment e
         return await connection.QueryFirstOrDefaultAsync<ProductImage>(query, new { ProductId = productId });
     }
 
+    /// <summary>
+    /// Verilen ürün ID'leri için ana resimleri tek sorguda getirir (karşılaştırma sayfası N+1 önlemi).
+    /// </summary>
+    public async Task<Dictionary<int, ProductImage>> GetMainImagesByProductIdsAsync(IEnumerable<int> productIds)
+    {
+        var idList = productIds?.Distinct().ToList() ?? new List<int>();
+        if (idList.Count == 0)
+            return new Dictionary<int, ProductImage>();
+
+        var query = @"SELECT * FROM ProductImages WHERE ProductId IN @ProductIds AND IsMainImage = 1";
+        using var connection = context.CreateConnection();
+        var images = await connection.QueryAsync<ProductImage>(query, new { ProductIds = idList });
+        return images.ToDictionary(i => i.ProductId, i => i);
+    }
+
     public async Task<int> CreateAsync(ProductImage image)
     {
         var query = @"

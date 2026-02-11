@@ -318,20 +318,17 @@
 
             if (!productDescription || productDescription.trim() === '') {
                 if (typeof showSnackbar === 'function') showSnackbar('Lütfen önce ürün hakkında bir açıklama yazın!', 'warning');
-                else if (typeof showErrorAlert === 'function') showErrorAlert('Lütfen önce ürün hakkında bir açıklama yazın!');
                 return;
             }
 
             if (!categoryId || categoryId == "0") {
                 if (typeof showSnackbar === 'function') showSnackbar('Lütfen önce kategori seçin!', 'warning');
-                else if (typeof showErrorAlert === 'function') showErrorAlert('Lütfen önce kategori seçin!');
                 $('#categoryDropdown').focus();
                 return;
             }
 
             if (!subCategoryId || subCategoryId == "0") {
                 if (typeof showSnackbar === 'function') showSnackbar('Lütfen önce alt kategori seçin!', 'warning');
-                else if (typeof showErrorAlert === 'function') showErrorAlert('Lütfen önce alt kategori seçin!');
                 $('#subCategoryDropdown').focus();
                 return;
             }
@@ -349,7 +346,7 @@
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function(response) {
-                    if (response.success) {
+                        if (response.success) {
                         if (response.data.name) $('#Product_Name').val(response.data.name);
                         if (response.data.description) {
                             $('#productDescription').val(response.data.description);
@@ -364,16 +361,13 @@
                         if (response.data.suggestedPrice) $('#Product_Price').val(response.data.suggestedPrice);
                         if (response.data.suggestedStock) $('#Product_Stock').val(response.data.suggestedStock);
 
-                        if (typeof showSuccessAlert === 'function') showSuccessAlert('Yapay zeka ile ürün bilgileri başarıyla oluşturuldu!');
-                        else if (typeof showSnackbar === 'function') showSnackbar('Yapay zeka ile ürün bilgileri başarıyla oluşturuldu!', 'success');
+                        if (typeof showSnackbar === 'function') showSnackbar('Yapay zeka ile ürün bilgileri başarıyla oluşturuldu!', 'success');
                     } else {
-                        if (typeof showErrorAlert === 'function') showErrorAlert(response.message);
-                        else if (typeof showSnackbar === 'function') showSnackbar(response.message, 'error');
+                        if (typeof showSnackbar === 'function') showSnackbar(response.message, 'error');
                     }
                 },
                 error: function(xhr, status, error) {
-                    if (typeof showErrorAlert === 'function') showErrorAlert('Yapay zeka ile içerik oluşturulurken hata oluştu: ' + error);
-                    else if (typeof showSnackbar === 'function') showSnackbar('Yapay zeka ile içerik oluşturulurken hata oluştu: ' + error, 'error');
+                    if (typeof showSnackbar === 'function') showSnackbar('Yapay zeka ile içerik oluşturulurken hata oluştu: ' + error, 'error');
                 },
                 complete: function() {
                     $btn.prop('disabled', false).html(originalHtml);
@@ -389,7 +383,6 @@
             if (!categoryId || categoryId == "0") {
                 e.preventDefault();
                 if (typeof showSnackbar === 'function') showSnackbar('Lütfen kategori seçin!', 'warning');
-                else if (typeof showErrorAlert === 'function') showErrorAlert('Lütfen kategori seçin!');
                 $('#categoryDropdown').focus();
                 return false;
             }
@@ -397,7 +390,6 @@
             if (!subCategoryId || subCategoryId == "0") {
                 e.preventDefault();
                 if (typeof showSnackbar === 'function') showSnackbar('Lütfen alt kategori seçin!', 'warning');
-                else if (typeof showErrorAlert === 'function') showErrorAlert('Lütfen alt kategori seçin!');
                 $('#subCategoryDropdown').focus();
                 return false;
             }
