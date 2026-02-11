@@ -383,57 +383,26 @@ else
                 const result = await response.json();
                 
                 if (result.success) {
-                    Swal.fire({
-                        title: 'Başarılı!',
-                        text: 'Google Shopping API bağlantısı başarılı!',
-                        icon: 'success',
-                        confirmButtonColor: '#1f2937',
-                        confirmButtonText: 'Tamam'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    showSuccessAlert('Google Shopping API bağlantısı başarılı!');
+                    location.reload();
                 } else {
-                    Swal.fire({
-                        title: 'Hata!',
-                        text: 'Bağlantı başarısız: ' + result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937',
-                        confirmButtonText: 'Tamam'
-                    });
+                    showErrorAlert('Bağlantı başarısız: ' + result.message);
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Hata!',
-                    text: 'Bir hata oluştu: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#1f2937',
-                    confirmButtonText: 'Tamam'
-                });
+                showErrorAlert('Bir hata oluştu: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
         async function syncAllProducts() {
-            const result = await Swal.fire({
-                title: 'Onay Gerekli',
-                text: 'Tüm ürünleri Google Shopping\'a senkronize etmek istediğinizden emin misiniz?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#1f2937',
-                cancelButtonColor: '#9ca3af',
-                confirmButtonText: 'Evet, Senkronize Et',
-                cancelButtonText: 'İptal',
-                reverseButtons: true
-            });
-            
+            const result = await showConfirm({ title: 'Onay Gerekli', text: 'Tüm ürünleri Google Shopping\'a senkronize etmek istediğinizden emin misiniz?' });
             if (result.isConfirmed) {
                 await performSync();
             }
         }
 
         async function performSync() {
-
             showLoading();
             try {
                 const response = await fetch('/admin/googleshopping?handler=SyncAllProducts', {
@@ -445,34 +414,14 @@ else
                 });
 
                 const result = await response.json();
-                
                 if (result.success) {
-                    Swal.fire({
-                        title: 'Başarılı!',
-                        text: 'Senkronizasyon başarılı! ' + result.message,
-                        icon: 'success',
-                        confirmButtonColor: '#1f2937',
-                        confirmButtonText: 'Tamam'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    showSuccessAlert('Senkronizasyon başarılı! ' + result.message);
+                    location.reload();
                 } else {
-                    Swal.fire({
-                        title: 'Hata!',
-                        text: 'Senkronizasyon başarısız: ' + result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937',
-                        confirmButtonText: 'Tamam'
-                    });
+                    showErrorAlert('Senkronizasyon başarısız: ' + result.message);
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Hata!',
-                    text: 'Bir hata oluştu: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#1f2937',
-                    confirmButtonText: 'Tamam'
-                });
+                showErrorAlert('Bir hata oluştu: ' + error.message);
             } finally {
                 hideLoading();
             }
@@ -490,97 +439,16 @@ else
                 });
 
                 const result = await response.json();
-                
                 if (result.success) {
-                    Swal.fire({
-                        title: 'Başarılı!',
-                        text: 'Google ürünleri başarıyla yüklendi!',
-                        icon: 'success',
-                        confirmButtonColor: '#1f2937'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    showSuccessAlert('Google ürünleri başarıyla yüklendi!');
+                    location.reload();
                 } else {
-                    Swal.fire({
-                        title: 'Hata!',
-                        text: 'Google ürünleri yüklenemedi: ' + result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937'
-                    });
+                    showErrorAlert('Google ürünleri yüklenemedi: ' + result.message);
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Hata!',
-                    text: 'Bir hata oluştu: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#1f2937'
-                });
+                showErrorAlert('Bir hata oluştu: ' + error.message);
             } finally {
                 hideLoading();
-            }
-        }
-
-        async function syncAllProducts() {
-            const result = await Swal.fire({
-                title: 'Onay Gerekli',
-                html: 'Tüm ürünleri Google Shopping ile senkronize etmek istediğinizden emin misiniz?<br><br>Bu işlem tüm ürünleri güncelleyecek ve biraz zaman alabilir.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#1f2937',
-                cancelButtonColor: '#9ca3af',
-                confirmButtonText: 'Evet, Senkronize Et',
-                cancelButtonText: 'İptal',
-                reverseButtons: true
-            });
-            
-            if (result.isConfirmed) {
-                showLoading();
-                try {
-                    const response = await fetch('/admin/googleshopping?handler=SyncAllProducts', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.success) {
-                            Swal.fire({
-                                title: 'Başarılı!',
-                                text: result.message,
-                                icon: 'success',
-                                confirmButtonColor: '#1f2937'
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Hata',
-                                text: result.message,
-                                icon: 'error',
-                                confirmButtonColor: '#1f2937'
-                            });
-                        }
-                    } else {
-                        Swal.fire({
-                            title: 'Hata',
-                            text: 'Sunucu hatası oluştu!',
-                            icon: 'error',
-                            confirmButtonColor: '#1f2937'
-                        });
-                    }
-                } catch (error) {
-                    Swal.fire({
-                        title: 'Hata',
-                        text: error.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937'
-                    });
-                } finally {
-                    hideLoading();
-                }
             }
         }
 
@@ -637,27 +505,10 @@ else
             const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
             
             if (selectedIds.length === 0) {
-                Swal.fire({
-                    title: 'Uyarı',
-                    text: 'Lütfen silinecek ürünleri seçin!',
-                    icon: 'warning',
-                    confirmButtonColor: '#1f2937'
-                });
+                showErrorAlert('Lütfen silinecek ürünleri seçin!');
                 return;
             }
-            
-            const result = await Swal.fire({
-                title: 'Onay Gerekli',
-                html: `Seçilen ${selectedIds.length} ürünü Google Shopping'dan silmek istediğinizden emin misiniz?<br><br><strong>Bu işlem geri alınamaz!</strong>`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#9ca3af',
-                confirmButtonText: 'Evet, Sil',
-                cancelButtonText: 'İptal',
-                reverseButtons: true
-            });
-            
+            const result = await showConfirm({ html: 'Seçilen ' + selectedIds.length + ' ürünü Google Shopping\'dan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!' });
             if (result.isConfirmed) {
                 showLoading();
                 try {
@@ -669,41 +520,19 @@ else
                         },
                         body: JSON.stringify(selectedIds)
                     });
-                    
                     if (response.ok) {
                         const result = await response.json();
                         if (result.success) {
-                            Swal.fire({
-                                title: 'Başarılı!',
-                                text: result.message,
-                                icon: 'success',
-                                confirmButtonColor: '#1f2937'
-                            }).then(() => {
-                                location.reload();
-                            });
+                            showSuccessAlert(result.message);
+                            location.reload();
                         } else {
-                            Swal.fire({
-                                title: 'Hata',
-                                text: result.message,
-                                icon: 'error',
-                                confirmButtonColor: '#1f2937'
-                            });
+                            showErrorAlert(result.message);
                         }
                     } else {
-                        Swal.fire({
-                            title: 'Hata',
-                            text: 'Sunucu hatası oluştu!',
-                            icon: 'error',
-                            confirmButtonColor: '#1f2937'
-                        });
+                        showErrorAlert('Sunucu hatası oluştu!');
                     }
                 } catch (error) {
-                    Swal.fire({
-                        title: 'Hata',
-                        text: error.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937'
-                    });
+                    showErrorAlert(error.message);
                 } finally {
                     hideLoading();
                 }
@@ -732,28 +561,13 @@ else
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
                     
-                    Swal.fire({
-                        title: 'Başarılı!',
-                        text: 'Ürünler başarıyla dışa aktarıldı!',
-                        icon: 'success',
-                        confirmButtonColor: '#1f2937'
-                    });
+                    showSuccessAlert('Ürünler başarıyla dışa aktarıldı!');
                 } else {
                     const result = await response.json();
-                    Swal.fire({
-                        title: 'Hata!',
-                        text: 'Dışa aktarma başarısız: ' + result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937'
-                    });
+                    showErrorAlert('Dışa aktarma başarısız: ' + result.message);
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Hata!',
-                    text: 'Bir hata oluştu: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#1f2937'
-                });
+                showErrorAlert('Bir hata oluştu: ' + error.message);
             } finally {
                 hideLoading();
             }
@@ -768,18 +582,7 @@ else
         }
 
         async function submitForApproval() {
-            const result = await Swal.fire({
-                title: 'Onaya Gönder',
-                html: 'Tüm ürünleri Google Shopping onayına göndermek istediğinizden emin misiniz?<br><br><strong>Google 24-48 saat içinde işleyecek.</strong>',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#16a34a',
-                cancelButtonColor: '#9ca3af',
-                confirmButtonText: 'Evet, Onaya Gönder',
-                cancelButtonText: 'İptal',
-                reverseButtons: true
-            });
-            
+            const result = await showConfirm({ html: 'Tüm ürünleri Google Shopping onayına göndermek istediğinizden emin misiniz? Google 24-48 saat içinde işleyecek.' });
             if (result.isConfirmed) {
                 await performSubmitForApproval();
             }
@@ -797,31 +600,14 @@ else
                 });
 
                 const result = await response.json();
-                
                 if (result.success) {
-                    Swal.fire({
-                        title: 'Başarılı!',
-                        html: result.message + '<br><br><strong>Sonraki Adımlar:</strong><br>• Google Merchant Center\'ı kontrol edin<br>• 24-48 saat içinde onay durumunu kontrol edin<br>• Ürünler Google Shopping\'da görünmeye başlayacak',
-                        icon: 'success',
-                        confirmButtonColor: '#1f2937'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    showSuccessAlert(result.message);
+                    location.reload();
                 } else {
-                    Swal.fire({
-                        title: 'Hata!',
-                        text: 'Onaya gönderme başarısız: ' + result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937'
-                    });
+                    showErrorAlert('Onaya gönderme başarısız: ' + result.message);
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Hata!',
-                    text: 'Bir hata oluştu: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#1f2937'
-                });
+                showErrorAlert('Bir hata oluştu: ' + error.message);
             } finally {
                 hideLoading();
             }
@@ -841,29 +627,13 @@ else
                 const result = await response.json();
                 
                 if (result.success) {
-                    Swal.fire({
-                        title: 'Başarılı!',
-                        text: result.message,
-                        icon: 'success',
-                        confirmButtonColor: '#1f2937'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    showSuccessAlert(result.message);
+                    location.reload();
                 } else {
-                    Swal.fire({
-                        title: 'Hata!',
-                        text: 'Ürün listesi yenilenemedi: ' + result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937'
-                    });
+                    showErrorAlert('Ürün listesi yenilenemedi: ' + result.message);
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Hata!',
-                    text: 'Bir hata oluştu: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#1f2937'
-                });
+                showErrorAlert('Bir hata oluştu: ' + error.message);
             } finally {
                 hideLoading();
             }
@@ -883,61 +653,30 @@ else
                 const result = await response.json();
                 
                 if (result.success) {
-                    let statusHtml = '<strong>Durum Raporu:</strong><br><br>';
+                    let statusText = 'Durum Raporu: ';
                     if (result.status) {
-                        for (const [key, value] of Object.entries(result.status)) {
-                            statusHtml += `<strong>${key}:</strong> ${value}<br>`;
-                        }
+                        statusText += Object.entries(result.status).map(([k, v]) => k + ': ' + v).join('; ');
                     }
-                    
-                    Swal.fire({
-                        title: 'Durum Raporu',
-                        html: statusHtml,
-                        icon: 'info',
-                        confirmButtonColor: '#1f2937'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    showSuccessAlert(statusText);
+                    location.reload();
                 } else {
-                    Swal.fire({
-                        title: 'Hata!',
-                        text: 'Durum kontrolü başarısız: ' + result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937'
-                    });
+                    showErrorAlert('Durum kontrolü başarısız: ' + result.message);
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Hata!',
-                    text: 'Bir hata oluştu: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#1f2937'
-                });
+                showErrorAlert('Bir hata oluştu: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
         async function deleteProduct(productId) {
-            const result = await Swal.fire({
-                title: 'Ürün Silme Onayı',
-                html: 'Bu ürünü Google Shopping\'dan silmek istediğinizden emin misiniz?<br><br><strong>Bu işlem geri alınamaz!</strong>',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#9ca3af',
-                confirmButtonText: 'Evet, Sil',
-                cancelButtonText: 'İptal',
-                reverseButtons: true
-            });
-            
+            const result = await showConfirm({ html: 'Bu ürünü Google Shopping\'dan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!' });
             if (result.isConfirmed) {
                 await performDelete(productId);
             }
         }
 
         async function performDelete(productId) {
-
             showLoading();
             try {
                 const response = await fetch('/admin/googleshopping?handler=DeleteProduct&productId=' + productId, {
@@ -949,31 +688,14 @@ else
                 });
 
                 const result = await response.json();
-                
                 if (result.success) {
-                    Swal.fire({
-                        title: 'Başarılı!',
-                        text: 'Ürün başarıyla silindi!',
-                        icon: 'success',
-                        confirmButtonColor: '#1f2937'
-                    }).then(() => {
-                        location.reload();
-                    });
+                    showSuccessAlert('Ürün başarıyla silindi!');
+                    location.reload();
                 } else {
-                    Swal.fire({
-                        title: 'Hata!',
-                        text: 'Ürün silinemedi: ' + result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#1f2937'
-                    });
+                    showErrorAlert('Ürün silinemedi: ' + result.message);
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Hata!',
-                    text: 'Bir hata oluştu: ' + error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#1f2937'
-                });
+                showErrorAlert('Bir hata oluştu: ' + error.message);
             } finally {
                 hideLoading();
             }

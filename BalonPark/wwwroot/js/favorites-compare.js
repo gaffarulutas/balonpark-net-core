@@ -18,10 +18,20 @@ class FavoritesAndCompare {
         this.bindEvents();
     }
 
-    // Local Storage'dan verileri yükle
+    // Local Storage'dan verileri yükle (hatalı veriye karşı dayanıklı)
     loadFromStorage() {
-        this.favorites = JSON.parse(localStorage.getItem(this.favoritesKey) || '[]');
-        this.compareList = JSON.parse(localStorage.getItem(this.compareKey) || '[]');
+        try {
+            this.favorites = JSON.parse(localStorage.getItem(this.favoritesKey) || '[]');
+            if (!Array.isArray(this.favorites)) this.favorites = [];
+        } catch {
+            this.favorites = [];
+        }
+        try {
+            this.compareList = JSON.parse(localStorage.getItem(this.compareKey) || '[]');
+            if (!Array.isArray(this.compareList)) this.compareList = [];
+        } catch {
+            this.compareList = [];
+        }
     }
 
     // Local Storage'a verileri kaydet
@@ -249,52 +259,21 @@ class FavoritesAndCompare {
         return { name, price, image, url };
     }
 
-    // Bildirim göster
+    // Bildirim göster (Snackbar kullanır; Swal kullanılmaz)
     showNotification(message, type = 'info') {
-        // Mevcut bildirimleri temizle
-        const existing = document.querySelector('.favorites-notification');
-        if (existing) existing.remove();
-
-        // Yeni bildirim oluştur
-        const notification = document.createElement('div');
-        notification.className = `favorites-notification favorites-notification-${type}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fa-solid fa-${type === 'success' ? 'check' : type === 'warning' ? 'exclamation' : 'info'}"></i>
-                <span>${message}</span>
-            </div>
-        `;
-
-        // Stil ekle
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            font-size: 14px;
-            font-weight: 500;
-            max-width: 300px;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        `;
-
-        document.body.appendChild(notification);
-
-        // Animasyon
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-
-        // 3 saniye sonra kaldır
-        setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
+        if (typeof showSnackbar === 'function') {
+            showSnackbar(message, type);
+        } else if (typeof Snackbar !== 'undefined') {
+            const colors = { success: '#059669', error: '#dc2626', warning: '#d97706', info: '#2563eb' };
+            Snackbar.show({
+                text: message,
+                pos: 'bottom-right',
+                duration: 5000,
+                backgroundColor: colors[type] || colors.info
+            });
+        } else {
+            try { console.info('[Favoriler]', message); } catch (_) {}
+        }
     }
 
     // Favori listesini al
@@ -349,71 +328,99 @@ class FavoritesAndCompare {
         }
     }
 
-    // Favorileri göster (SweetAlert2 ile)
-    async showFavorites() {
+    // Favorileri göster (Tailwind modal – best practices: fixed overlay, z-index, backdrop, focus)
+    showFavorites() {
         if (this.favorites.length === 0) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Favori Listeniz Boş',
-                text: 'Henüz favori ürün eklememişsiniz.',
-                confirmButtonText: 'Tamam',
-                confirmButtonColor: '#6262a6'
-            });
+            this.showNotification('Henüz favori ürün eklememişsiniz.', 'info');
             return;
         }
 
-        const productsHtml = this.favorites.map(product => `
-            <div class="compare-product-card">
-                <img src="${product.image}" alt="${product.name}" class="compare-product-img">
-                <div class="compare-product-info">
-                    <h4>${product.name}</h4>
-                    <p class="compare-product-price">${product.price}</p>
-                    <a href="${product.url}" class="btn btn-sm btn-primary">Ürünü Gör</a>
-                    <button onclick="window.favoritesAndCompare.toggleFavorite(${product.id}, ${JSON.stringify(product).replace(/"/g, '&quot;')})" class="btn btn-sm btn-danger mt-2">Kaldır</button>
+        const overlay = document.createElement('div');
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-labelledby', 'favorites-modal-title');
+        overlay.setAttribute('aria-label', 'Favori ürünler');
+        // Tailwind: fixed full viewport, high z-index, flex center, backdrop
+        overlay.className = 'fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50';
+        const escHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const safeUrl = (s) => {
+            const u = String(s ?? '').trim();
+            if (!u || u === '#') return '#';
+            if (/^\s*javascript:/i.test(u)) return '#';
+            return u.replace(/"/g, '&quot;');
+        };
+        const escProduct = (p) => ({
+            name: escHtml(p.name),
+            price: escHtml(p.price != null ? String(p.price) : ''),
+            image: safeUrl(p.image),
+            url: safeUrl(p.url)
+        });
+        overlay.innerHTML = `
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col focus:outline-none" tabindex="-1">
+                <div class="flex justify-between items-center px-4 py-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                    <h2 id="favorites-modal-title" class="text-lg font-semibold text-gray-900">Favorilerim (${this.favorites.length})</h2>
+                    <button type="button" class="close-favorites-modal w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors" aria-label="Kapat">&times;</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 overflow-y-auto flex-1 min-h-0">
+                    ${this.favorites.map(function (item) {
+                        const d = escProduct(item);
+                        return `
+                            <div class="favorites-item border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">
+                                <img src="${d.image}" alt="${d.name}" class="w-full h-40 object-cover bg-gray-100">
+                                <div class="p-3">
+                                    <div class="product-name font-medium text-gray-900 text-sm line-clamp-2">${d.name}</div>
+                                    <div class="product-price text-primary font-semibold mt-1">${d.price}</div>
+                                    <div class="flex gap-2 mt-2 flex-wrap">
+                                        <a href="${d.url}" class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 transition">Ürüne Git</a>
+                                        <button type="button" class="remove-fav-btn inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50 transition" data-id="${item.id}">Kaldır</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             </div>
-        `).join('');
+        `;
 
-        Swal.fire({
-            title: `Favorilerim (${this.favorites.length})`,
-            html: `<div class="compare-products-grid">${productsHtml}</div>`,
-            width: '800px',
-            showCloseButton: true,
-            showConfirmButton: false,
-            customClass: {
-                popup: 'compare-popup'
-            }
+        const close = () => {
+            overlay.remove();
+            document.body.style.overflow = '';
+        };
+        overlay.querySelector('.close-favorites-modal').addEventListener('click', close);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+        overlay.querySelectorAll('.remove-fav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.getAttribute('data-id'), 10);
+                const product = this.favorites.find(p => p.id === id);
+                if (product) this.toggleFavorite(id, product);
+                close();
+            });
         });
+        document.body.style.overflow = 'hidden';
+        document.body.appendChild(overlay);
+        overlay.tabIndex = -1;
+        const firstFocusable = overlay.querySelector('.close-favorites-modal');
+        if (firstFocusable && typeof firstFocusable.focus === 'function') {
+            firstFocusable.focus();
+        } else {
+            overlay.focus();
+        }
     }
 
     // Karşılaştırma sayfasına yönlendir
     async showCompare() {
         if (this.compareList.length === 0) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Karşılaştırma Listeniz Boş',
-                text: 'Henüz karşılaştırmak için ürün eklememişsiniz.',
-                confirmButtonText: 'Tamam',
-                confirmButtonColor: '#6262a6'
-            });
+            this.showNotification('Henüz karşılaştırmak için ürün eklememişsiniz.', 'info');
             return;
         }
 
-        // Slug'ları : ile birleştir
         const slugs = this.compareList.map(p => p.slug).filter(s => s).join(':');
-        
         if (!slugs) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Hata',
-                text: 'Ürün bilgileri eksik. Lütfen tekrar deneyin.',
-                confirmButtonText: 'Tamam',
-                confirmButtonColor: '#6262a6'
-            });
+            this.showNotification('Ürün bilgileri eksik. Lütfen tekrar deneyin.', 'error');
             return;
         }
 
-        // Karşılaştırma sayfasına yönlendir
         window.location.href = `/Compare/${slugs}`;
     }
 

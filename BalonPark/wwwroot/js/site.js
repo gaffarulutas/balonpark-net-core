@@ -4,6 +4,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         initCategorySwiper();
         fetchCurrentCurrency();
+        initializeLazyImages();
     });
 
     if (window.jQuery) {
@@ -89,133 +90,62 @@
             });
     };
 
-    window.showFavorites = function showFavorites() {
-        if (!window.favoritesAndCompare) {
-            console.error('favoritesAndCompare modülü bulunamadı.');
-            return;
-        }
-        const favorites = window.favoritesAndCompare.getFavorites();
-        if (!favorites.length) {
-            alert('Favori listesi boş');
+    /* showFavorites, showCompare, removeFromFavorites, removeFromCompare are defined in favorites-compare.js */
+
+    function initializeLazyImages() {
+        const lazyImages = document.querySelectorAll('img.lazy-image');
+        if (!lazyImages.length) {
             return;
         }
 
-        const modal = document.createElement('div');
-        modal.className = 'favorites-modal-overlay';
-        modal.innerHTML = `
-            <div class="favorites-modal-content">
-                <div class="modal-header">
-                    <h3>Favori Ürünlerim (${favorites.length})</h3>
-                    <button onclick="this.closest('.favorites-modal-overlay').remove()" class="close-btn">&times;</button>
-                </div>
-                <div class="favorites-grid">
-                    ${favorites.map(function (item) {
-                        return `
-                            <div class="favorites-item">
-                                <img src="${item.image}" alt="${item.name}" class="product-image">
-                                <div class="product-info">
-                                    <div class="product-name">${item.name}</div>
-                                    <div class="product-price">${item.price}</div>
-                                    <div class="product-actions">
-                                        <a href="${item.url}" class="btn btn-primary btn-sm">Ürüne Git</a>
-                                        <button class="btn btn-outline-danger btn-sm" onclick="removeFromFavorites(${item.id}); this.closest('.favorites-modal-overlay').remove();">Kaldır</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    };
+        lazyImages.forEach(function (image) {
+            if (image.getAttribute('loading') === 'eager') {
+                return;
+            }
 
-    window.showCompare = function showCompare() {
-        if (!window.favoritesAndCompare) {
-            console.error('favoritesAndCompare modülü bulunamadı.');
-            return;
-        }
-        const compareList = window.favoritesAndCompare.getCompareList();
-        if (!compareList.length) {
-            alert('Karşılaştırma listesi boş');
-            return;
-        }
-        if (compareList.length === 1) {
-            alert('En az 2 ürün karşılaştırmanız gerekiyor');
-            return;
+            image.setAttribute('loading', 'lazy');
+            const container = ensureLazyContainer(image);
+
+            const handleLoad = function () {
+                container.classList.add('lazy-loaded');
+                container.classList.remove('lazy-error');
+            };
+
+            const handleError = function () {
+                container.classList.add('lazy-error');
+            };
+
+            if (image.complete) {
+                // naturalWidth === 0 indicates a failed load
+                if (image.naturalWidth === 0) {
+                    handleError();
+                } else {
+                    handleLoad();
+                }
+            } else {
+                image.addEventListener('load', handleLoad, { once: true });
+                image.addEventListener('error', handleError, { once: true });
+            }
+        });
+    }
+
+    function ensureLazyContainer(image) {
+        const parent = image.parentElement;
+        if (!parent) {
+            return document.body;
         }
 
-        const modal = document.createElement('div');
-        modal.className = 'compare-modal-overlay';
-        modal.innerHTML = `
-            <div class="compare-modal-content">
-                <div class="modal-header">
-                    <h3>Ürün Karşılaştırması (${compareList.length})</h3>
-                    <button onclick="this.closest('.compare-modal-overlay').remove()" class="close-btn">&times;</button>
-                </div>
-                <div class="compare-table-container">
-                    <table class="compare-table">
-                        <thead>
-                            <tr>
-                                <th>Özellik</th>
-                                ${compareList.map(function (item) { return `<th class="product-cell">${item.name}</th>`; }).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Resim</td>
-                                ${compareList.map(function (item) {
-                                    return `
-                                        <td class="product-cell">
-                                            <img src="${item.image}" alt="${item.name}" class="product-image">
-                                        </td>
-                                    `;
-                                }).join('')}
-                            </tr>
-                            <tr>
-                                <td>Fiyat</td>
-                                ${compareList.map(function (item) { return `<td class="product-price">${item.price}</td>`; }).join('')}
-                            </tr>
-                            <tr>
-                                <td>İşlemler</td>
-                                ${compareList.map(function (item) {
-                                    return `
-                                        <td>
-                                            <a href="${item.url}" class="btn btn-primary btn-sm">Ürüne Git</a>
-                                            <button class="btn btn-outline-danger btn-sm" onclick="removeFromCompare(${item.id}); this.closest('.compare-modal-overlay').remove();">Kaldır</button>
-                                        </td>
-                                    `;
-                                }).join('')}
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    };
+        parent.classList.add('lazy-image-container');
 
-    window.removeFromFavorites = function removeFromFavorites(productId) {
-        if (!window.favoritesAndCompare) {
-            return;
+        if (!parent.querySelector('.lazy-spinner')) {
+            const spinner = document.createElement('span');
+            spinner.className = 'lazy-spinner';
+            spinner.setAttribute('aria-hidden', 'true');
+            parent.appendChild(spinner);
         }
-        const favorites = window.favoritesAndCompare.getFavorites();
-        const product = favorites.find(function (item) { return item.id === productId; });
-        if (product) {
-            window.favoritesAndCompare.toggleFavorite(productId, product);
-        }
-    };
 
-    window.removeFromCompare = function removeFromCompare(productId) {
-        if (!window.favoritesAndCompare) {
-            return;
-        }
-        const compareList = window.favoritesAndCompare.getCompareList();
-        const product = compareList.find(function (item) { return item.id === productId; });
-        if (product) {
-            window.favoritesAndCompare.toggleCompare(productId, product);
-        }
-    };
+        return parent;
+    }
 
     function initCategorySwiper() {
         if (typeof window.Swiper === 'undefined' || !document.querySelector('.categorySwiper')) {

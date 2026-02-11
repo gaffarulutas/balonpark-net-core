@@ -72,130 +72,97 @@
 }
 </script>
 
-<!-- Search Results Section Start -->
-<div class="section-b-space">
-    <div class="container-fluid-xs">
-        <!-- Breadcrumb Navigation -->
-        <nav class="breadcrumb-nav">
-            <div class="breadcrumb-container">
-                <a href="/" class="breadcrumb-item">
-                    <i class="fas fa-home"></i>
-                    <span>Ana Sayfa</span>
-                </a>
-                <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-item active">Arama Sonuçları</span>
-            </div>
-        </nav>
+<div class="space-y-4 sm:space-y-6">
+    <nav class="flex items-center gap-1.5 text-sm text-gray-500" aria-label="Breadcrumb">
+        <a href="/" class="text-ink hover:text-primary transition">Ana Sayfa</a>
+        <span>/</span>
+        <span class="text-ink font-medium">Arama Sonuçları</span>
+    </nav>
 
-        <div class="title d-block">
-            <h2 class="text-theme font-sm">Arama Sonuçları</h2>
-            <p>@if (!string.IsNullOrEmpty(Model.Query))
+    <div class="pt-1 pb-2.5 border-b border-gray-100">
+        <h2 class="text-ink text-base font-medium">Arama Sonuçları</h2>
+        <p class="text-gray-400 text-xs mt-0.5">
+            @if (!string.IsNullOrEmpty(Model.Query))
             {
-                <span>"<strong>@Model.Query</strong>" için @Model.Products.Count() ürün bulundu</span>
+                <span>"<strong class="text-ink">@Model.Query</strong>" için @Model.Products.Count() ürün bulundu</span>
             }
             else
             {
                 <span>Lütfen arama yapmak için bir kelime girin</span>
-            }</p>
-            
-        </div>
+            }
+        </p>
+    </div>
 
-        @if (Model.Products.Any())
-        {
-            <div class="row row-cols-xxl-6 row-cols-lg-5 row-cols-md-4 row-cols-sm-3 row-cols-2 g-sm-4 g-3 section-b-space">
-                @foreach (var item in Model.Products)
-                {
-                    <div>
-                        <div class="product-box modern-product-card wow fadeIn">
-                            <!-- Product Actions -->
-                            <div class="product-actions">
-                                <button class="favorite-btn" data-product-id="@item.Product.Id">
-                                    <i class="fa-regular fa-heart"></i>
-                                    <span class="btn-text">Favori</span>
-                                </button>
-                                <button class="compare-btn" data-product-id="@item.Product.Id">
-                                    <i class="fa-solid fa-shuffle"></i>
-                                    <span class="btn-text">Karşılaştır</span>
-                                </button>
-                            </div>
-
-                            <div class="product-image">
-                                <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
-                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage?.ThumbnailPath ?? "/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage?.ThumbnailPath ?? "assets/images/no-image.png"}")"
-                                         class="img-fluid blur-up lazyload product-thumbnail" alt="@Html.Raw(item.Product.Name)">
-                                </a>
-                            </div>
-                            <div class="product-detail position-relative">
-                                <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
-                                    <h6 class="name">@Html.Raw(item.Product.Name)</h6>
-                                </a>
-
-                                <h6 class="sold weight text-content fw-normal">@Html.Raw(item.Product.CategoryName)</h6>
-
-                                @if (!string.IsNullOrEmpty(item.Product.Description))
-                                {
-                                    <p class="product-description text-content">
-                                        @Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)
-                                    </p>
-                                }
-
-                                @if (!string.IsNullOrEmpty(item.Product.Dimensions))
-                                {
-                                    <div class="product-dimensions">
-                                        <i class="fa-solid fa-ruler-combined"></i>
-                                        <span class="dimensions-text">@Html.Raw(item.Product.Dimensions)</span>
-                                    </div>
-                                }
-
-                                <div class="price-section">
-                                    @if (item.Product.Price <= 0)
-                                    {
-                                        <p class="price-contact-text">Fiyat için iletişime geçin</p>
-                                    }
-                                    else
-                                    {
-                                        <h6 class="price price-tl text-primary font-semibold @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N2")</h6>
-                                        <h6 class="price price-usd text-primary font-semibold @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N2")</h6>
-                                        <h6 class="price price-eur text-primary font-semibold @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N2")</h6>
-                                    }
-                                </div>
-                            </div>
+    @if (Model.Products.Any())
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            @foreach (var item in Model.Products)
+            {
+                <article class="group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
+                    <div class="relative aspect-square bg-gray-50 overflow-hidden">
+                        <div class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button type="button" class="favorite-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-white/90 hover:shadow text-sm transition" data-product-id="@item.Product.Id" title="Favori"><i class="fa-regular fa-heart"></i></button>
+                            <button type="button" class="compare-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-white/90 hover:shadow text-sm transition" data-product-id="@item.Product.Id" title="Karşılaştır"><i class="fa-solid fa-shuffle"></i></button>
+                        </div>
+                        <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="block w-full h-full">
+                            @if (item.MainImage != null)
+                            {
+                                <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}")" class="lazy-image w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" alt="@Html.Raw(item.Product.Name)" loading="lazy">
+                            }
+                            else
+                            {
+                                <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" class="lazy-image w-full h-full object-cover" alt="@Html.Raw(item.Product.Name)" loading="lazy">
+                            }
+                        </a>
+                    </div>
+                    <div class="p-3 flex flex-col flex-1 border-t border-gray-100">
+                        <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(item.Product.Name)</a>
+                        <p class="text-xs text-gray-400 mt-0.5">@Html.Raw(item.Product.CategoryName)</p>
+                        @if (!string.IsNullOrEmpty(item.Product.Description))
+                        {
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">@Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)</p>
+                        }
+                        @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                        {
+                            <p class="text-[11px] text-gray-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-ruler-combined w-3.5"></i> @Html.Raw(item.Product.Dimensions)</p>
+                        }
+                        <div class="mt-auto pt-2.5">
+                            @if (item.Product.Price <= 0)
+                            {
+                                <p class="text-xs text-gray-500">Fiyat için iletişime geçin</p>
+                            }
+                            else
+                            {
+                                <p class="price-tl text-sm font-medium text-primary @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N2")</p>
+                                <p class="price-usd text-sm font-medium text-primary @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N2")</p>
+                                <p class="price-eur text-sm font-medium text-primary @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N2")</p>
+                            }
                         </div>
                     </div>
-                }
-            </div>
-        }
-        else if (!string.IsNullOrEmpty(Model.Query))
-        {
-            <div class="row">
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <i class="fa-solid fa-search fa-3x mb-3"></i>
-                        <h5>"@Model.Query" için ürün bulunamadı</h5>
-                        <p>Farklı anahtar kelimelerle arama yapmayı deneyin veya kategorilerimizi inceleyin.</p>
-                        <a href="/" class="btn btn-animation mt-3">
-                            <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
-                        </a>
-                    </div>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="row">
-                <div class="col-12">
-                    <div class="alert alert-warning text-center">
-                        <i class="fa-solid fa-exclamation-triangle fa-3x mb-3"></i>
-                        <h5>Arama terimi gerekli</h5>
-                        <p>Lütfen arama yapmak için bir kelime girin.</p>
-                        <a href="/" class="btn btn-animation mt-3">
-                            <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
-                        </a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+                </article>
+            }
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.Query))
+    {
+        <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
+            <i class="fa-solid fa-search text-4xl text-gray-300 mb-3"></i>
+            <h3 class="text-base font-medium text-ink">"@Model.Query" için ürün bulunamadı</h3>
+            <p class="text-sm text-gray-500 mt-1">Farklı anahtar kelimelerle arama yapmayı deneyin veya kategorilerimizi inceleyin.</p>
+            <a href="/" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
+                <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
+            <i class="fa-solid fa-exclamation-triangle text-4xl text-gray-300 mb-3"></i>
+            <h3 class="text-base font-medium text-ink">Arama terimi gerekli</h3>
+            <p class="text-sm text-gray-500 mt-1">Lütfen arama yapmak için bir kelime girin.</p>
+            <a href="/" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
+                <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
+            </a>
+        </div>
+    }
 </div>
-<!-- Search Results Section End -->
-

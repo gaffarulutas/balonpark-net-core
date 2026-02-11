@@ -74,570 +74,186 @@
 }
 </script>
 
-<!-- Blog Section Start -->
-<div class="section-b-space"></div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-4 sm:space-y-6">
+        <nav class="flex items-center gap-1.5 text-sm text-gray-500" aria-label="Breadcrumb">
+            <a href="/" class="text-ink hover:text-primary transition">Ana Sayfa</a>
+            <span>/</span>
+            <span class="text-ink font-medium">Blog</span>
+        </nav>
 
-    @section Styles {
-        <style>
-            .section-title h2 {
-                color: #333;
-                font-weight: 700;
-                margin-bottom: 1rem;
-            }
+        <div class="pt-1 pb-2.5 border-b border-gray-100">
+            <h2 class="text-ink text-base font-medium">Blog</h2>
+            <p class="text-gray-400 text-xs mt-0.5">Şişme oyun parkları ve çocuk eğlence alanları hakkında yazılar</p>
+        </div>
 
-            .section-subtitle {
-                color: #666;
-                font-size: 1.1rem;
-            }
+        <form method="get" asp-page="/Blog" class="flex flex-col sm:flex-row gap-2 sm:gap-3 p-4 rounded-xl border border-gray-100 bg-white">
+            <input type="text" name="q" value="@Model.SearchQuery" placeholder="Blog yazılarında ara..." class="flex-1 rounded border border-gray-200 pl-3.5 pr-3 py-2.5 text-sm text-ink placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary">
+            <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded bg-primary text-white font-medium text-sm hover:bg-primary-dark transition">
+                <i class="fas fa-search"></i> Ara
+            </button>
+        </form>
 
-            .blog-card {
-                border: 1px solid #e1e5e9;
-                border-radius: 15px;
-                overflow: hidden;
-                transition: all 0.3s ease;
-                background: white;
-                margin-bottom: 2rem;
-                box-shadow: var(--shadow-light);
-            }
-
-            .blog-card:hover {
-                transform: translateY(-4px);
-                box-shadow: var(--shadow-medium);
-            }
-
-            .blog-card-image {
-                width: 100%;
-                height: 250px;
-                object-fit: cover;
-                background: var(--secondary-color);
-            }
-
-            .blog-card-content {
-                padding: 1.5rem;
-            }
-
-            .blog-card-title {
-                font-size: 1.3rem;
-                font-weight: 600;
-                margin-bottom: 0.75rem;
-                line-height: 1.4;
-            }
-
-            .blog-card-title a {
-                color: #333;
-                text-decoration: none;
-                transition: color 0.3s ease;
-            }
-
-            .blog-card-title a:hover {
-                color: #007bff;
-            }
-
-            .blog-card-excerpt {
-                color: var(--text-light);
-                line-height: 1.6;
-                margin-bottom: 1rem;
-            }
-
-            .blog-card-meta {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                font-size: 0.9rem;
-                color: var(--text-light);
-                margin-bottom: 1rem;
-            }
-
-            .blog-card-meta span {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .blog-card-meta i {
-                font-size: 1rem;
-            }
-
-            .blog-card-category {
-                display: inline-block;
-                background: var(--primary-color);
-                color: white;
-                padding: 0.25rem 0.75rem;
-                border-radius: 20px;
-                font-size: 0.8rem;
-                font-weight: 500;
-                text-decoration: none;
-                transition: all 0.3s ease;
-            }
-
-            .blog-card-category:hover {
-                background: #4a4a8a;
-                color: white;
-                transform: translateY(-2px);
-                box-shadow: var(--shadow-light);
-            }
-
-            .blog-sidebar {
-                background: white;
-                border-radius: var(--border-radius);
-                padding: 1.5rem;
-                margin-bottom: 2rem;
-                box-shadow: var(--shadow-light);
-                border: 1px solid var(--border-color);
-            }
-
-            .blog-sidebar h3 {
-                font-size: 1.2rem;
-                font-weight: 600;
-                margin-bottom: 1rem;
-                color: var(--text-dark);
-            }
-
-            .featured-blog-item {
-                display: flex;
-                gap: 1rem;
-                margin-bottom: 1rem;
-                padding-bottom: 1rem;
-                border-bottom: 1px solid var(--border-color);
-            }
-
-            .featured-blog-item:last-child {
-                border-bottom: none;
-                margin-bottom: 0;
-                padding-bottom: 0;
-            }
-
-            .featured-blog-image {
-                width: 80px;
-                height: 60px;
-                object-fit: cover;
-                border-radius: var(--border-radius);
-                background: var(--secondary-color);
-            }
-
-            .featured-blog-content h4 {
-                font-size: 0.9rem;
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-                line-height: 1.3;
-            }
-
-            .featured-blog-content h4 a {
-                color: var(--text-dark);
-                text-decoration: none;
-                transition: color 0.3s ease;
-            }
-
-            .featured-blog-content h4 a:hover {
-                color: var(--primary-color);
-            }
-
-            .featured-blog-date {
-                font-size: 0.8rem;
-                color: var(--text-light);
-            }
-
-            .pagination {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 0.5rem;
-                margin-top: 3rem;
-            }
-
-            .pagination .page-link {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 40px;
-                height: 40px;
-                border: 1px solid #e1e5e9;
-                border-radius: 8px;
-                color: #666;
-                text-decoration: none;
-                font-weight: 500;
-                transition: all 0.3s ease;
-                background: white;
-            }
-
-            .pagination .page-link:hover {
-                background: #007bff;
-                color: white;
-                border-color: #007bff;
-                transform: translateY(-2px);
-                box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
-            }
-
-            .pagination .page-link.active {
-                background: #007bff;
-                color: white;
-                border-color: #007bff;
-            }
-
-            .pagination .page-link.disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-
-            .blog-search {
-                margin-bottom: 2rem;
-                background: white;
-                padding: 1.5rem;
-                border-radius: 15px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                border: 1px solid #e1e5e9;
-            }
-
-            .blog-search .form-control {
-                border-radius: 8px;
-                border: 2px solid #e1e5e9;
-                padding: 0.75rem 1rem;
-                font-size: 1rem;
-                transition: all 0.3s ease;
-            }
-
-            .blog-search .form-control:focus {
-                border-color: #007bff;
-                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-            }
-
-            .blog-search .btn {
-                background: #007bff;
-                border: none;
-                border-radius: 8px;
-                padding: 0.75rem 1.5rem;
-                color: white;
-                font-weight: 500;
-                transition: all 0.3s ease;
-            }
-
-            .blog-search .btn:hover {
-                background: #0056b3;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-            }
-
-            .no-blogs {
-                text-align: center;
-                padding: 3rem 1rem;
-                color: #666;
-                background: white;
-                border-radius: 15px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                border: 1px solid #e1e5e9;
-            }
-
-            .no-blogs i {
-                font-size: 3rem;
-                margin-bottom: 1rem;
-                opacity: 0.5;
-            }
-
-            .blog-categories {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-                margin-bottom: 2rem;
-                background: white;
-                padding: 1.5rem;
-                border-radius: 15px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                border: 1px solid #e1e5e9;
-            }
-
-            .category-tag {
-                background: #f8f9fa;
-                border: 1px solid #e1e5e9;
-                color: #666;
-                padding: 0.5rem 1rem;
-                border-radius: 20px;
-                text-decoration: none;
-                font-size: 0.9rem;
-                transition: all 0.3s ease;
-            }
-
-            .category-tag:hover,
-            .category-tag.active {
-                background: #007bff;
-                color: white;
-                border-color: #007bff;
-                transform: translateY(-2px);
-                box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
-            }
-
-            .btn-outline-primary {
-                border-color: #007bff;
-                color: #007bff;
-            }
-
-            .btn-outline-primary:hover {
-                background-color: #007bff;
-                border-color: #007bff;
-                color: white;
-            }
-
-            @@media (max-width: 768px) {
-                .blog-hero h1 {
-                    font-size: 2rem;
+        @if (Model.BlogCategories?.Any() == true)
+        {
+            <div class="flex flex-wrap gap-2 p-4 rounded-xl border border-gray-100 bg-white">
+                <a href="/blog" class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition @(string.IsNullOrEmpty(Model.SelectedCategory) ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">
+                    Tümü
+                </a>
+                @foreach (var category in Model.BlogCategories)
+                {
+                    <a href="/blog?category=@Uri.EscapeDataString(category)" class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition @(Model.SelectedCategory == category ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-ink")">
+                        @category
+                    </a>
                 }
+            </div>
+        }
 
-                .blog-hero p {
-                    font-size: 1rem;
-                }
-
-                .featured-blog-item {
-                    flex-direction: column;
-                }
-
-                .featured-blog-image {
-                    width: 100%;
-                    height: 120px;
-                }
-
-                .blog-card-image {
-                    height: 200px;
-                }
-
-                .blog-search,
-                .blog-categories,
-                .blog-sidebar {
-                    margin: 1rem 0;
-                }
-            }
-        </style>
-    }
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <!-- Ana İçerik -->
-            <div class="col-lg-8">
-                <!-- Blog Arama -->
-                <div class="blog-search">
-                    <form method="get" asp-page="/Blog">
-                        <div class="row">
-                            <div class="col-md-9">
-                                <input type="text" name="q" class="form-control" placeholder="Blog yazılarında ara..."
-                                       value="@Model.SearchQuery">
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn w-100">
-                                    <i class="fas fa-search me-2"></i>Ara
-                                </button>
+        @if (Model.Blogs?.Any() == true)
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @foreach (var blog in Model.Blogs)
+                {
+                    <article class="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-gray-200 hover:shadow-md transition-all duration-200 flex flex-col">
+                        <a href="/blog/@blog.Slug" class="block aspect-[16/10] bg-gray-100 overflow-hidden">
+                            @if (!string.IsNullOrEmpty(blog.FeaturedImage))
+                            {
+                                <img src="@Model.UrlService?.GetImageUrl(blog.FeaturedImage)" alt="@Html.Raw(blog.Title)" class="lazy-image w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" loading="lazy">
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                    <i class="fas fa-image text-3xl text-gray-300"></i>
+                                </div>
+                            }
+                        </a>
+                        <div class="p-4 flex flex-col flex-1">
+                            @if (!string.IsNullOrEmpty(blog.Category))
+                            {
+                                <a href="/blog?category=@Uri.EscapeDataString(blog.Category)" class="inline-flex w-fit mb-2 px-2.5 py-1 rounded-full bg-primary text-white text-xs font-medium hover:bg-primary-dark transition">
+                                    @Html.Raw(blog.Category)
+                                </a>
+                            }
+                            <h2 class="text-ink text-base font-semibold leading-snug mb-1.5">
+                                <a href="/blog/@blog.Slug" class="hover:text-primary transition">@Html.Raw(blog.Title)</a>
+                            </h2>
+                            @if (!string.IsNullOrEmpty(blog.Excerpt))
+                            {
+                                <p class="text-gray-500 text-sm line-clamp-2 mb-3">@Html.Raw(blog.Excerpt)</p>
+                            }
+                            <div class="flex flex-wrap items-center gap-3 text-xs text-gray-400 mt-auto">
+                                <span class="flex items-center gap-1"><i class="fas fa-user w-3.5 text-center"></i> @(blog.AuthorName ?? companyName)</span>
+                                <span class="flex items-center gap-1"><i class="fas fa-calendar w-3.5 text-center"></i> @(blog.PublishedAt?.ToString("dd.MM.yyyy") ?? blog.CreatedAt.ToString("dd.MM.yyyy"))</span>
+                                @if (blog.ViewCount > 0)
+                                {
+                                    <span class="flex items-center gap-1"><i class="fas fa-eye w-3.5 text-center"></i> @blog.ViewCount görüntüleme</span>
+                                }
                             </div>
                         </div>
-                    </form>
-                </div>
-
-                <!-- Kategori Filtreleri -->
-                @if (Model.BlogCategories?.Any() == true)
-                {
-                    <div class="blog-categories">
-                        <a href="/blog"
-                           class="category-tag @(string.IsNullOrEmpty(Model.SelectedCategory) ? "active" : "")">
-                            Tümü
-                        </a>
-                        @foreach (var category in Model.BlogCategories)
-                        {
-                            <a href="/blog?category=@Uri.EscapeDataString(category)"
-                               class="category-tag @(Model.SelectedCategory == category ? "active" : "")">
-                                @category
-                            </a>
-                        }
-                    </div>
-                }
-
-                <!-- Blog Listesi -->
-                @if (Model.Blogs?.Any() == true)
-                {
-                    <div class="row">
-                        @foreach (var blog in Model.Blogs)
-                        {
-                            <div class="col-md-6 mb-4">
-                                <article class="blog-card">
-                                    <div class="blog-card-image-container">
-                                        @if (!string.IsNullOrEmpty(blog.FeaturedImage))
-                                        {
-                                            <img src="@Model.UrlService?.GetImageUrl(blog.FeaturedImage)"
-                                                 alt="@Html.Raw(blog.Title)"
-                                                 class="blog-card-image"
-                                                 loading="lazy">
-                                        }
-                                        else
-                                        {
-                                            <div
-                                                class="blog-card-image d-flex align-items-center justify-content-center">
-                                                <i class="fas fa-image text-muted" style="font-size: 3rem;"></i>
-                                            </div>
-                                        }
-                                    </div>
-
-                                    <div class="blog-card-content">
-                                        @if (!string.IsNullOrEmpty(blog.Category))
-                                        {
-                                            <a href="/blog?category=@Uri.EscapeDataString(blog.Category)"
-                                               class="blog-card-category">
-                                                @Html.Raw(blog.Category)
-                                            </a>
-                                        }
-
-                                        <h2 class="blog-card-title">
-                                            <a href="/blog/@blog.Slug">@Html.Raw(blog.Title)</a>
-                                        </h2>
-
-                                        @if (!string.IsNullOrEmpty(blog.Excerpt))
-                                        {
-                                            <p class="blog-card-excerpt">@Html.Raw(blog.Excerpt)</p>
-                                        }
-
-                                        <div class="blog-card-meta">
-                                            <span>
-                                                <i class="fas fa-user"></i>
-                                                @(blog.AuthorName ?? companyName)
-                                            </span>
-                                            <span>
-                                                <i class="fas fa-calendar"></i>
-                                                @(blog.PublishedAt?.ToString("dd.MM.yyyy") ?? blog.CreatedAt.ToString("dd.MM.yyyy"))
-                                            </span>
-                                            @if (blog.ViewCount > 0)
-                                            {
-                                                <span>
-                                                    <i class="fas fa-eye"></i>
-                                                    @blog.ViewCount görüntüleme
-                                                </span>
-                                            }
-                                        </div>
-                                    </div>
-                                </article>
-                            </div>
-                        }
-                    </div>
-
-                    <!-- Sayfalama -->
-                    @if (Model.TotalPages > 1)
-                    {
-                        <nav class="pagination">
-                            @if (Model.CurrentPage > 1)
-                            {
-                                <a href="/blog?page=@(Model.CurrentPage - 1)@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&q={Uri.EscapeDataString(Model.SearchQuery)}")@(string.IsNullOrEmpty(Model.SelectedCategory) ? "" : $"&category={Uri.EscapeDataString(Model.SelectedCategory)}")"
-                                   class="page-link">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            }
-
-                            @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
-                            {
-                                @if (i == Model.CurrentPage)
-                                {
-                                    <span class="page-link active">@i</span>
-                                }
-                                else
-                                {
-                                    <a href="/blog?page=@i@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&q={Uri.EscapeDataString(Model.SearchQuery)}")@(string.IsNullOrEmpty(Model.SelectedCategory) ? "" : $"&category={Uri.EscapeDataString(Model.SelectedCategory)}")"
-                                       class="page-link">
-                                        @i
-                                    </a>
-                                }
-                            }
-
-                            @if (Model.CurrentPage < Model.TotalPages)
-                            {
-                                <a href="/blog?page=@(Model.CurrentPage + 1)@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&q={Uri.EscapeDataString(Model.SearchQuery)}")@(string.IsNullOrEmpty(Model.SelectedCategory) ? "" : $"&category={Uri.EscapeDataString(Model.SelectedCategory)}")"
-                                   class="page-link">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            }
-                        </nav>
-                    }
-                }
-                else
-                {
-                    <div class="no-blogs">
-                        <i class="fas fa-newspaper"></i>
-                        <h3>Henüz blog yazısı bulunmuyor</h3>
-                        <p>Yakında güncel blog yazılarımızı paylaşacağız.</p>
-                    </div>
+                    </article>
                 }
             </div>
 
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <!-- Öne Çıkan Yazılar -->
-                @if (Model.FeaturedBlogs?.Any() == true)
-                {
-                    <div class="blog-sidebar">
-                        <h3>Öne Çıkan Yazılar</h3>
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="flex justify-center items-center gap-1.5 flex-wrap mt-6" aria-label="Sayfa navigasyonu">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <a href="/blog?page=@(Model.CurrentPage - 1)@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&q={Uri.EscapeDataString(Model.SearchQuery)}")@(string.IsNullOrEmpty(Model.SelectedCategory) ? "" : $"&category={Uri.EscapeDataString(Model.SelectedCategory)}")" class="inline-flex items-center justify-center w-9 h-9 rounded border border-gray-200 text-ink text-sm hover:bg-gray-50 transition" aria-label="Önceki">&laquo;</a>
+                    }
+                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                    {
+                        @if (i == Model.CurrentPage)
+                        {
+                            <span class="inline-flex items-center justify-center w-9 h-9 rounded bg-primary text-white text-sm font-medium">@i</span>
+                        }
+                        else
+                        {
+                            <a href="/blog?page=@i@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&q={Uri.EscapeDataString(Model.SearchQuery)}")@(string.IsNullOrEmpty(Model.SelectedCategory) ? "" : $"&category={Uri.EscapeDataString(Model.SelectedCategory)}")" class="inline-flex items-center justify-center w-9 h-9 rounded border border-gray-200 text-ink text-sm hover:bg-gray-50 transition">@i</a>
+                        }
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <a href="/blog?page=@(Model.CurrentPage + 1)@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&q={Uri.EscapeDataString(Model.SearchQuery)}")@(string.IsNullOrEmpty(Model.SelectedCategory) ? "" : $"&category={Uri.EscapeDataString(Model.SelectedCategory)}")" class="inline-flex items-center justify-center w-9 h-9 rounded border border-gray-200 text-ink text-sm hover:bg-gray-50 transition" aria-label="Sonraki">&raquo;</a>
+                    }
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="text-center py-12 px-4 bg-gray-50 rounded-xl border border-gray-100">
+                <i class="fas fa-newspaper text-4xl text-gray-300 mb-3"></i>
+                <h3 class="text-base font-medium text-ink">Henüz blog yazısı bulunmuyor</h3>
+                <p class="text-sm text-gray-500 mt-1">Yakında güncel blog yazılarımızı paylaşacağız.</p>
+            </div>
+        }
+    </div>
+
+    <aside class="space-y-6 lg:col-span-1">
+            @if (Model.FeaturedBlogs?.Any() == true)
+            {
+                <div class="rounded-xl border border-gray-100 bg-white p-4">
+                    <h3 class="text-ink text-sm font-semibold mb-3 pb-2 border-b border-gray-100">Öne Çıkan Yazılar</h3>
+                    <ul class="space-y-3">
                         @foreach (var featuredBlog in Model.FeaturedBlogs)
                         {
-                            <div class="featured-blog-item">
+                            <li class="flex gap-3 pb-3 border-b border-gray-50 last:border-0 last:pb-0">
                                 @if (!string.IsNullOrEmpty(featuredBlog.FeaturedImage))
                                 {
-                                    <img src="@Model.UrlService?.GetImageUrl(featuredBlog.FeaturedImage)"
-                                         alt="@Html.Raw(featuredBlog.Title)"
-                                         class="featured-blog-image"
-                                         loading="lazy">
+                                    <a href="/blog/@featuredBlog.Slug" class="flex-shrink-0 w-20 h-14 rounded overflow-hidden bg-gray-100">
+                                        <img src="@Model.UrlService?.GetImageUrl(featuredBlog.FeaturedImage)" alt="@Html.Raw(featuredBlog.Title)" class="lazy-image w-full h-full object-cover" loading="lazy">
+                                    </a>
                                 }
                                 else
                                 {
-                                    <div class="featured-blog-image d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-image text-muted"></i>
-                                    </div>
+                                    <a href="/blog/@featuredBlog.Slug" class="flex-shrink-0 w-20 h-14 rounded bg-gray-100 flex items-center justify-center">
+                                        <i class="fas fa-image text-gray-300 text-sm"></i>
+                                    </a>
                                 }
-
-                                <div class="featured-blog-content">
-                                    <h4>
-                                        <a href="/blog/@featuredBlog.Slug">@Html.Raw(featuredBlog.Title)</a>
-                                    </h4>
-                                    <div class="featured-blog-date">
-                                        @(featuredBlog.PublishedAt?.ToString("dd.MM.yyyy") ?? featuredBlog.CreatedAt.ToString("dd.MM.yyyy"))
-                                    </div>
+                                <div class="min-w-0 flex-1">
+                                    <a href="/blog/@featuredBlog.Slug" class="text-sm font-medium text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(featuredBlog.Title)</a>
+                                    <p class="text-xs text-gray-400 mt-0.5">@(featuredBlog.PublishedAt?.ToString("dd.MM.yyyy") ?? featuredBlog.CreatedAt.ToString("dd.MM.yyyy"))</p>
                                 </div>
-                            </div>
+                            </li>
                         }
-                    </div>
-                }
-
-                <!-- Son Yazılar -->
-                @if (Model.LatestBlogs?.Any() == true)
-                {
-                    <div class="blog-sidebar">
-                        <h3>Son Yazılar</h3>
+                    </ul>
+                </div>
+            }
+            @if (Model.LatestBlogs?.Any() == true)
+            {
+                <div class="rounded-xl border border-gray-100 bg-white p-4">
+                    <h3 class="text-ink text-sm font-semibold mb-3 pb-2 border-b border-gray-100">Son Yazılar</h3>
+                    <ul class="space-y-3">
                         @foreach (var latestBlog in Model.LatestBlogs)
                         {
-                            <div class="featured-blog-item">
+                            <li class="flex gap-3 pb-3 border-b border-gray-50 last:border-0 last:pb-0">
                                 @if (!string.IsNullOrEmpty(latestBlog.FeaturedImage))
                                 {
-                                    <img src="@Model.UrlService?.GetImageUrl(latestBlog.FeaturedImage)"
-                                         alt="@Html.Raw(latestBlog.Title)"
-                                         class="featured-blog-image"
-                                         loading="lazy">
+                                    <a href="/blog/@latestBlog.Slug" class="flex-shrink-0 w-20 h-14 rounded overflow-hidden bg-gray-100">
+                                        <img src="@Model.UrlService?.GetImageUrl(latestBlog.FeaturedImage)" alt="@Html.Raw(latestBlog.Title)" class="lazy-image w-full h-full object-cover" loading="lazy">
+                                    </a>
                                 }
                                 else
                                 {
-                                    <div class="featured-blog-image d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-image text-muted"></i>
-                                    </div>
+                                    <a href="/blog/@latestBlog.Slug" class="flex-shrink-0 w-20 h-14 rounded bg-gray-100 flex items-center justify-center">
+                                        <i class="fas fa-image text-gray-300 text-sm"></i>
+                                    </a>
                                 }
-
-                                <div class="featured-blog-content">
-                                    <h4>
-                                        <a href="/blog/@latestBlog.Slug">@Html.Raw(latestBlog.Title)</a>
-                                    </h4>
-                                    <div class="featured-blog-date">
-                                        @(latestBlog.PublishedAt?.ToString("dd.MM.yyyy") ?? latestBlog.CreatedAt.ToString("dd.MM.yyyy"))
-                                    </div>
+                                <div class="min-w-0 flex-1">
+                                    <a href="/blog/@latestBlog.Slug" class="text-sm font-medium text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(latestBlog.Title)</a>
+                                    <p class="text-xs text-gray-400 mt-0.5">@(latestBlog.PublishedAt?.ToString("dd.MM.yyyy") ?? latestBlog.CreatedAt.ToString("dd.MM.yyyy"))</p>
                                 </div>
-                            </div>
+                            </li>
                         }
-                    </div>
-                }
-
-                <!-- RSS Feed -->
-                <div class="blog-sidebar">
-                    <h3>Blog Aboneliği</h3>
-                    <p class="mb-3">Blog yazılarımızı kaçırmamak için RSS aboneliği yapabilirsiniz.</p>
-                    <a href="/blog/feed" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-rss me-2"></i>RSS Aboneliği
-                    </a>
+                    </ul>
                 </div>
+            }
+            <div class="rounded-xl border border-gray-100 bg-white p-4">
+                <h3 class="text-ink text-sm font-semibold mb-2 pb-2 border-b border-gray-100">Blog Aboneliği</h3>
+                <p class="text-sm text-gray-500 mb-3">Blog yazılarımızı kaçırmamak için RSS aboneliği yapabilirsiniz.</p>
+                <a href="/blog/feed" class="inline-flex items-center gap-2 w-full justify-center py-2.5 px-4 rounded border border-primary text-primary font-medium text-sm hover:bg-primary hover:text-white transition">
+                    <i class="fas fa-rss"></i> RSS Aboneliği
+                </a>
             </div>
-        </div>
-    </div>
+        </aside>
+</div>

@@ -126,7 +126,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if (!string.IsNullOrEmpty(blog.FeaturedImage))
                                 {
-                                    <img src="@blog.FeaturedImage" class="w-16 h-16 object-cover rounded-lg" alt="@Html.Raw(blog.Title)" />
+                                    <img src="@blog.FeaturedImage" class="lazy-image w-16 h-16 object-cover rounded-lg" alt="@Html.Raw(blog.Title)" loading="lazy" />
                                 }
                                 else
                                 {

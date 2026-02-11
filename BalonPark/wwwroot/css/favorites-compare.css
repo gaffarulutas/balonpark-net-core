@@ -149,7 +149,7 @@ header.fixed-header {
     font-size: 14px;
 }
 
-/* Modern Product Card için özel ayarlar */
+/* Modern Product Card: Favori/Karşılaştır resmin üstünde sağ üst, hover'da görünür */
 .modern-product-card {
     position: relative;
     display: flex;
@@ -166,6 +166,16 @@ header.fixed-header {
     position: relative;
     z-index: 0;
     flex-shrink: 0;
+    overflow: visible;
+}
+
+/* product-actions resim alanının içinde: sağ üstte, hover'da görünür */
+.modern-product-card .product-image .product-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    flex-direction: row;
+    gap: 4px;
 }
 
 .modern-product-card .product-detail {
@@ -379,19 +389,32 @@ header.fixed-header {
         order: 2;
     }
 
-    .product-box .product-actions {
+    /* Resim dışındaki actions (eski yapı) – artık kullanılmıyor; yine de koruyoruz */
+    .product-box > .product-actions {
         position: static;
         opacity: 1;
         flex-direction: row;
         justify-content: space-between;
         margin-top: 8px;
         padding: 0;
-        background: transparent;
-        border-radius: 0;
         gap: 6px;
         width: 100%;
         box-sizing: border-box;
         order: 3;
+    }
+
+    /* Resim içindeki actions: sağ üstte kalsın, hover/touch'da görünsün */
+    .product-box .product-image .product-actions {
+        position: absolute !important;
+        top: 8px;
+        right: 8px;
+        opacity: 1;
+        flex-direction: row;
+        margin-top: 0;
+        padding: 0;
+        gap: 4px;
+        width: auto;
+        order: unset;
     }
     
     .product-box .product-actions .btn-text {
@@ -468,10 +491,15 @@ header.fixed-header {
 
 /* Extra small screens */
 @media (max-width: 480px) {
-    .product-box .product-actions {
+    .product-box > .product-actions {
         padding: 0;
         gap: 4px;
         margin-top: 6px;
+    }
+
+    .product-box .product-image .product-actions {
+        padding: 0;
+        gap: 4px;
     }
 
     .product-box .product-actions .favorite-btn,
@@ -482,6 +510,11 @@ header.fixed-header {
         white-space: nowrap;
         overflow: hidden;
         box-sizing: border-box;
+    }
+
+    .product-box .product-image .product-actions .favorite-btn,
+    .product-box .product-image .product-actions .compare-btn {
+        max-width: none;
     }
 
     .product-box .product-actions .btn-text {

@@ -173,8 +173,12 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
     public async Task<int> CreateAsync(Product product)
     {
         var query = @"
-            INSERT INTO Products (CategoryId, SubCategoryId, Name, Slug, Description, TechnicalDescription, Dimensions, Price, Stock, DisplayOrder, IsActive, CreatedAt)
-            VALUES (@CategoryId, @SubCategoryId, @Name, @Slug, @Description, @TechnicalDescription, @Dimensions, @Price, @Stock, @DisplayOrder, @IsActive, @CreatedAt);
+            INSERT INTO Products (CategoryId, SubCategoryId, Name, Slug, Description, TechnicalDescription, Dimensions, Price, Stock, DisplayOrder, IsActive, CreatedAt,
+                InflatedLength, InflatedWidth, InflatedHeight, UserCount, AssemblyTime, RequiredPersonCount, FanDescription, FanWeightKg,
+                PackagedLength, PackagedDepth, PackagedWeightKg, PackagePalletCount, HasCertificate, WarrantyDescription, AfterSalesService)
+            VALUES (@CategoryId, @SubCategoryId, @Name, @Slug, @Description, @TechnicalDescription, @Dimensions, @Price, @Stock, @DisplayOrder, @IsActive, @CreatedAt,
+                @InflatedLength, @InflatedWidth, @InflatedHeight, @UserCount, @AssemblyTime, @RequiredPersonCount, @FanDescription, @FanWeightKg,
+                @PackagedLength, @PackagedDepth, @PackagedWeightKg, @PackagePalletCount, @HasCertificate, @WarrantyDescription, @AfterSalesService);
             SELECT CAST(SCOPE_IDENTITY() as int)";
         
         using var connection = context.CreateConnection();
@@ -209,7 +213,22 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
                 Stock = @Stock,
                 DisplayOrder = @DisplayOrder,
                 IsActive = @IsActive,
-                UpdatedAt = @UpdatedAt
+                UpdatedAt = @UpdatedAt,
+                InflatedLength = @InflatedLength,
+                InflatedWidth = @InflatedWidth,
+                InflatedHeight = @InflatedHeight,
+                UserCount = @UserCount,
+                AssemblyTime = @AssemblyTime,
+                RequiredPersonCount = @RequiredPersonCount,
+                FanDescription = @FanDescription,
+                FanWeightKg = @FanWeightKg,
+                PackagedLength = @PackagedLength,
+                PackagedDepth = @PackagedDepth,
+                PackagedWeightKg = @PackagedWeightKg,
+                PackagePalletCount = @PackagePalletCount,
+                HasCertificate = @HasCertificate,
+                WarrantyDescription = @WarrantyDescription,
+                AfterSalesService = @AfterSalesService
             WHERE Id = @Id";
         
         using var connection = context.CreateConnection();

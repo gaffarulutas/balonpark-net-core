@@ -164,6 +164,7 @@
 
     <!-- Tailwind CSS (built; run "npm run build:css" in BalonPark to rebuild) -->
     <link href="~/css/tailwind.css" rel="stylesheet">
+    <link href="~/css/favorites-compare.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
     <!-- Inter font -->
@@ -201,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </button>
 
                 <a asp-page="/Index" class="xl:hidden flex-shrink-0">
-                    <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-9 w-auto" width="120" height="48" loading="eager">
+                    <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-auto w-auto" loading="eager">
                 </a>
 
                 <div class="flex-1 flex items-center gap-2.5 min-w-0 max-w-2xl">
@@ -248,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <i class="fas fa-times text-sm"></i>
                         </button>
                         <a asp-page="/Index" class="hidden xl:block mb-4">
-                            <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-9 w-auto" loading="eager">
+                            <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-auto w-auto" loading="eager">
                         </a>
 
                         <!-- Mobile: Sayfalar -->
@@ -275,7 +276,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                             <a href="/category/@category.Slug" class="category-link flex-1 min-w-0 flex items-center gap-2.5 py-2.5 px-2 rounded hover:bg-gray-50 transition" data-category-slug="@category.Slug">
                                                 @if (!string.IsNullOrEmpty(category.FirstProductImage))
                                                 {
-                                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="" class="w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
+                                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="" class="lazy-image w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
                                                 }
                                                 else
                                                 {
@@ -374,7 +375,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <script src="~/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
 
     <!-- Non-critical JavaScript (loaded asynchronously) -->
-    <script src="~/assets/js/bootstrap/bootstrap-notify.min.js" defer></script>
     <script src="~/assets/js/bootstrap/popper.min.js" defer></script>
     <script src="~/assets/js/feather/feather.min.js" defer></script>
     <script src="~/assets/js/feather/feather-icon.js" defer></script>
@@ -392,13 +392,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <script src="~/assets/semantic-ui/semantic.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
 
-    <script src="~/js/site.js" defer></script>
+    <!-- Snackbar (Material Design notifications) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.js"></script>
+    <script src="~/js/snackbar-helper.js"></script>
 
-    <!-- SweetAlert2 JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <!-- SweetAlert2: define Swal for any cached/legacy script that may reference it -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
-    <!-- Favorites & Compare JavaScript -->
+    <!-- Favorites & Compare: load first so showFavorites/showCompare are defined -->
     <script src="~/js/favorites-compare.js"></script>
+    <script src="~/js/site.js" defer></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

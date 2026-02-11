@@ -225,7 +225,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if (Model.MainImages.ContainsKey(product.Id) && Model.MainImages[product.Id] != null)
                                 {
-                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(Model.MainImages[product.Id]!.ThumbnailPath) ?? $"/{Model.MainImages[product.Id]!.ThumbnailPath}")" class="w-16 h-16 object-cover rounded-lg" alt="@Html.Raw(product.Name)" />
+                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(Model.MainImages[product.Id]!.ThumbnailPath) ?? $"/{Model.MainImages[product.Id]!.ThumbnailPath}")" class="lazy-image w-16 h-16 object-cover rounded-lg" alt="@Html.Raw(product.Name)" loading="lazy" />
                                 }
                                 else
                                 {

@@ -288,7 +288,7 @@
                 <h4 class="text-lg font-medium text-gray-700 mb-3">Ana Resim</h4>
                 <div class="bg-gray-50 rounded-lg p-6 text-center">
                     <img src="@Model.Product.ImageLink" alt="@Model.Product.Title" 
-                         class="max-w-md max-h-96 mx-auto rounded-lg shadow-lg object-contain">
+                         class="lazy-image max-w-md max-h-96 mx-auto rounded-lg shadow-lg object-contain" loading="lazy">
                 </div>
             </div>
             
@@ -302,7 +302,7 @@
                         {
                             <div class="bg-gray-50 rounded-lg p-3 hover:shadow-md transition-shadow duration-200">
                                 <img src="@imageUrl" alt="@Model.Product.Title" 
-                                     class="w-full h-48 object-cover rounded-md">
+                                     class="lazy-image w-full h-48 object-cover rounded-md" loading="lazy">
                             </div>
                         }
                     </div>
@@ -400,59 +400,35 @@ else
         
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(function() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Kopyalandı!',
-                    text: 'Link panoya kopyalandı',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                if (typeof showSnackbar === 'function') showSnackbar('Link panoya kopyalandı', 'success');
+                else if (typeof showSuccessAlert === 'function') showSuccessAlert('Link panoya kopyalandı');
             });
         }
 
         function deleteProduct() {
-            Swal.fire({
-                title: 'Emin misiniz?',
-                html: 'Bu ürünü Google Shopping\'dan silmek istediğinizden emin misiniz?<br><br><strong>Bu işlem geri alınamaz!</strong>',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Evet, Sil',
-                cancelButtonText: 'İptal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    showLoading('Ürün siliniyor...');
-                    
-                    fetch('/admin/googleshopping?handler=DeleteProduct&productId=@Model.ProductId', {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        hideLoading();
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Başarılı!',
-                                text: 'Ürün başarıyla silindi!',
-                                confirmButtonColor: '#3b82f6'
-                            }).then(() => {
-                                window.location.href = '/admin/googleshopping';
-                            });
-                        } else {
-                            Swal.fire('Hata', 'Ürün silinemedi: ' + data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        hideLoading();
-                        Swal.fire('Hata', 'Bir hata oluştu: ' + error.message, 'error');
-                    });
+            if (!confirm('Bu ürünü Google Shopping\'dan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) return;
+
+            showLoading('Ürün siliniyor...');
+            fetch('/admin/googleshopping?handler=DeleteProduct&productId=@Model.ProductId', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    if (typeof showSuccessAlert === 'function') showSuccessAlert('Ürün başarıyla silindi!');
+                    window.location.href = '/admin/googleshopping';
+                } else {
+                    if (typeof showErrorAlert === 'function') showErrorAlert('Ürün silinemedi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                if (typeof showErrorAlert === 'function') showErrorAlert('Bir hata oluştu: ' + error.message);
             });
         }
     </script>

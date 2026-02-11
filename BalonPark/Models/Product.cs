@@ -18,6 +18,29 @@ public class Product
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? UpdatedAt { get; set; }
+
+    // Ürün Teknik Bilgiler - Şişmiş ürün (Inflated product)
+    public string? InflatedLength { get; set; }
+    public string? InflatedWidth { get; set; }
+    public string? InflatedHeight { get; set; }
+    public int? UserCount { get; set; }
+
+    // Montaj / demontaj (Assembly / disassembly)
+    public string? AssemblyTime { get; set; }
+    public string? RequiredPersonCount { get; set; }
+    public string? FanDescription { get; set; }
+    public decimal? FanWeightKg { get; set; }
+
+    // Paketlenmiş ürünün özellikleri (Packaged product features)
+    public string? PackagedLength { get; set; }
+    public string? PackagedDepth { get; set; }
+    public decimal? PackagedWeightKg { get; set; }
+    public int? PackagePalletCount { get; set; }
+
+    // Genel (General)
+    public bool? HasCertificate { get; set; }
+    public string? WarrantyDescription { get; set; }
+    public string? AfterSalesService { get; set; }
     
     // Navigation properties
     public string? CategoryName { get; set; }
