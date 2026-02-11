@@ -217,9 +217,9 @@
                                                 }
                                                 else
                                                 {
-                                                    <h6 class="price price-tl @(Model.SelectedCurrency == "TL" ? "active" : "")" style="color: #6262a6;">₺@item.Product.Price.ToString("N2")</h6>
-                                                    <h6 class="price price-usd @(Model.SelectedCurrency == "USD" ? "active" : "")" style="color: #6262a6;">$@item.Product.UsdPrice.ToString("N2")</h6>
-                                                    <h6 class="price price-eur @(Model.SelectedCurrency == "EUR" ? "active" : "")" style="color: #6262a6;">€@item.Product.EuroPrice.ToString("N2")</h6>
+                                                    <h6 class="price price-tl text-primary font-semibold @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N2")</h6>
+                                                    <h6 class="price price-usd text-primary font-semibold @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N2")</h6>
+                                                    <h6 class="price price-eur text-primary font-semibold @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N2")</h6>
                                                 }
                                             </div>
                                         </div>

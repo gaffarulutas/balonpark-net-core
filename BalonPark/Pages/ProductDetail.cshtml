@@ -147,9 +147,9 @@
                                     }
                                     else
                                     {
-                                        <div class="price-main price-tl @(selectedCurrency == "TL" ? "active" : "")">₺@Model.Product?.Price.ToString("N2")</div>
-                                        <div class="price-main price-usd @(selectedCurrency == "USD" ? "active" : "")">$@Model.Product?.UsdPrice.ToString("N2")</div>
-                                        <div class="price-main price-eur @(selectedCurrency == "EUR" ? "active" : "")">€@Model.Product?.EuroPrice.ToString("N2")</div>
+                                        <div class="price-main price-tl text-primary font-extrabold text-4xl mb-2 leading-tight @(selectedCurrency == "TL" ? "block" : "hidden")">₺@Model.Product?.Price.ToString("N2")</div>
+                                        <div class="price-main price-usd text-primary font-extrabold text-4xl mb-2 leading-tight @(selectedCurrency == "USD" ? "block" : "hidden")">$@Model.Product?.UsdPrice.ToString("N2")</div>
+                                        <div class="price-main price-eur text-primary font-extrabold text-4xl mb-2 leading-tight @(selectedCurrency == "EUR" ? "block" : "hidden")">€@Model.Product?.EuroPrice.ToString("N2")</div>
                                     }
                                 </div>
                                 <div class="social-share-mini">
@@ -987,27 +987,6 @@
         padding-bottom: 25px;
         border-bottom: 2px solid var(--border-color);
     }
-
-    .price-main {
-        font-size: 42px;
-        font-weight: 800;
-        color: var(--primary-color);
-        margin-bottom: 10px;
-        line-height: 1;
-    }
-
-    .price-tl,
-    .price-usd,
-    .price-eur {
-        display: none;
-    }
-
-    .price-tl.active,
-    .price-usd.active,
-    .price-eur.active {
-        display: block;
-    }
-
 
     /* Stock Section */
     .stock-section {

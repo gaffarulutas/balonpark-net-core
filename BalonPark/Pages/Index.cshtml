@@ -35,207 +35,134 @@
 }
 </script>
 
-<!-- Product Section Start -->
+<!-- Hero + Product Section -->
 
-<div class="section-b-space">
-
-    <div class="row g-md-4 g-3">
-        <div class="col-xxl-8 col-xl-12 col-md-7">
-            <div class="banner-contain">
-                <img src="~/assets/images/1.png" class="bg-img blur-up lazyload" alt="Şişme Oyun Parkları ve Çocuk Oyun Grupları - Balon Park Eğlence Merkezi" loading="lazy" width="800" height="400">
-                <div class="banner-details p-center-left p-sm-5 p-4">
-                    <div>
-                        <h2 class="text-kaushan fw-normal" style="color: #6262a6;">Hazır Olun</h2>
-                        <h3 class="mt-2 mb-3 text-danger">EĞLENCEYE!</h3>
-                        <p class="text-content banner-text text-kaushan opacity-75 d-md-block d-none">
-                            Çocuklarınız için güvenli ve eğlenceli şişme oyun grupları ile 
-                            unutulmaz anlar yaşayın.</p>
-                        <button onclick="location.href = '/category/sisme-parklar/sisme-kaydirak';" class="btn modern-cta-btn btn-sm mend-auto">Ürünleri Gör
-                            <i class="fa-solid fa-arrow-right icon"></i></button>
-                    </div>
-                </div>
+<div class="space-y-4 sm:space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2 relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] min-h-[200px]">
+            <img src="~/assets/images/1.png" class="absolute inset-0 w-full h-full object-cover" alt="Şişme Oyun Parkları ve Çocuk Oyun Grupları - Balon Park Eğlence Merkezi" loading="lazy" width="800" height="400">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center p-6 sm:p-8">
+                <span class="text-primary font-medium text-sm sm:text-base">Hazır Olun</span>
+                <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">EĞLENCEYE!</h2>
+                <p class="text-white/90 text-sm mt-2 max-w-md hidden sm:block">Çocuklarınız için güvenli ve eğlenceli şişme oyun grupları ile unutulmaz anlar yaşayın.</p>
+                <a href="/category/siseme-parklar/sisme-kaydirak" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
+                    Ürünleri Gör <i class="fa-solid fa-arrow-right"></i>
+                </a>
             </div>
         </div>
-
-        <div class="col-xxl-4 col-xl-12 col-md-5">
-            <div class="banner-contain h-100">
-                <img src="~/assets/images/2.png" class="bg-img blur-up lazyload" alt="">
-                <div class="banner-details p-center-left p-4 h-100">
-                    <div>
-                        <h2 class="text-kaushan fw-normal" style="color: #6262a6;">Kaliteli</h2>
-                        <h3 class="mt-2 mb-3 text-dark">Güvenli</h3>
-                        <p class="text-content banner-text w-100">En İyi Fiyatlarla
-                            Sizlerle</p>
-                        <button onclick="location.href = '/category/sisme-parklar/sisme-oyun-parki';" class="btn modern-cta-btn btn-sm mend-auto">Ürünleri Gör
-                            <i class="fa-solid fa-arrow-right icon"></i></button>
-                    </div>
-                </div>
+        <div class="relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] md:aspect-auto min-h-[200px]">
+            <img src="~/assets/images/2.png" class="absolute inset-0 w-full h-full object-cover" alt="" loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
+                <span class="text-primary font-medium text-sm">Kaliteli</span>
+                <h2 class="text-white text-xl font-bold mt-1">Güvenli</h2>
+                <p class="text-white/90 text-sm mt-1">En İyi Fiyatlarla Sizlerle</p>
+                <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition w-fit">
+                    Ürünleri Gör <i class="fa-solid fa-arrow-right"></i>
+                </a>
             </div>
         </div>
     </div>
-</div>
-<div class="title d-block ">
-    <h2 class="font-sm" style="color: #6262a6;">Öne Çıkan Ürünler</h2>
-    <p style="color: #6b7280;">Tüm kategorilerden seçilmiş harika ürünlerimizi keşfedin</p>
-</div>
 
-<div class="row row-cols-xxl-6 row-cols-lg-5 row-cols-md-4 row-cols-sm-3 row-cols-2 g-sm-4 g-3 mb-5">
+    <div class="pt-2">
+        <h2 class="text-primary text-lg font-semibold">Öne Çıkan Ürünler</h2>
+        <p class="text-gray-500 text-sm mt-0.5">Tüm kategorilerden seçilmiş harika ürünlerimizi keşfedin</p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
     @if (Model.Products.Any())
     {
         @foreach (var item in Model.Products)
         {
-            <div>
-                <div class="product-box modern-product-card wow fadeIn">
-                    <!-- Product Actions -->
-                    <div class="product-actions">
-                        <button class="favorite-btn" data-product-id="@item.Product.Id">
-                            <i class="fa-regular fa-heart"></i>
-                            <span class="btn-text">Favori</span>
-                        </button>
-                        <button class="compare-btn" data-product-id="@item.Product.Id">
-                            <i class="fa-solid fa-shuffle"></i>
-                            <span class="btn-text">Karşılaştır</span>
-                        </button>
-                    </div>
-
-                    <div class="product-image">
-                        <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
-                            @if (item.MainImage != null)
-                            {
-                                <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}")" class="img-fluid blur-up lazyload product-thumbnail"
-                                    alt="@Html.Raw(item.Product.Name)">
-                            }
-                            else
-                            {
-                                <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" class="img-fluid blur-up lazyload product-thumbnail" alt="@Html.Raw(item.Product.Name)">
-                            }
-                        </a>
-                    </div>
-                    <div class="product-detail position-relative">
-                        <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
-                            <h6 class="name">@Html.Raw(item.Product.Name)</h6>
-                        </a>
-
-                        <h6 class="sold weight text-content fw-normal">@Html.Raw(item.Product.CategoryName)</h6>
-
-                        @if (!string.IsNullOrEmpty(item.Product.Description))
+            <article class="group bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 flex flex-col">
+                <div class="relative flex items-center justify-end gap-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90">
+                    <button type="button" class="favorite-btn p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50" data-product-id="@item.Product.Id" title="Favori"><i class="fa-regular fa-heart"></i></button>
+                    <button type="button" class="compare-btn p-2 rounded-lg text-gray-500 hover:text-primary hover:bg-primary/10" data-product-id="@item.Product.Id" title="Karşılaştır"><i class="fa-solid fa-shuffle"></i></button>
+                </div>
+                <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="block aspect-square bg-gray-100 overflow-hidden">
+                    @if (item.MainImage != null)
+                    {
+                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}")" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="@Html.Raw(item.Product.Name)" loading="lazy">
+                    }
+                    else
+                    {
+                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" class="w-full h-full object-cover" alt="@Html.Raw(item.Product.Name)">
+                    }
+                </a>
+                <div class="p-4 flex flex-col flex-1">
+                    <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="font-semibold text-gray-800 hover:text-primary line-clamp-2 transition">@Html.Raw(item.Product.Name)</a>
+                    <p class="text-xs text-gray-500 mt-0.5">@Html.Raw(item.Product.CategoryName)</p>
+                    @if (!string.IsNullOrEmpty(item.Product.Description))
+                    {
+                        <p class="text-sm text-gray-600 mt-1 line-clamp-2">@Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)</p>
+                    }
+                    @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                    {
+                        <p class="text-xs text-gray-500 mt-1 flex items-center gap-1"><i class="fa-solid fa-ruler-combined"></i> @Html.Raw(item.Product.Dimensions)</p>
+                    }
+                    <div class="mt-auto pt-3">
+                        @if (item.Product.Price <= 0)
                         {
-                            <p class="product-description text-content">
-                                @Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)
-                            </p>
+                            <p class="text-sm text-gray-500">Fiyat için iletişime geçin</p>
                         }
-
-                        @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                        else
                         {
-                            <div class="product-dimensions">
-                                <i class="fa-solid fa-ruler-combined"></i>
-                                <span class="dimensions-text">@Html.Raw(item.Product.Dimensions)</span>
-                            </div>
+                            <p class="price-tl text-primary font-semibold @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N2")</p>
+                            <p class="price-usd text-primary font-semibold @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N2")</p>
+                            <p class="price-eur text-primary font-semibold @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N2")</p>
                         }
-
-                        <div class="price-section">
-                            @if (item.Product.Price <= 0)
-                            {
-                                <p class="price-contact-text">Fiyat için iletişime geçin</p>
-                            }
-                            else
-                            {
-                                <h6 class="price price-tl @(Model.SelectedCurrency == "TL" ? "active" : "")" style="color: #6262a6;">₺@item.Product.Price.ToString("N2")</h6>
-                                <h6 class="price price-usd @(Model.SelectedCurrency == "USD" ? "active" : "")" style="color: #6262a6;">$@item.Product.UsdPrice.ToString("N2")</h6>
-                                <h6 class="price price-eur @(Model.SelectedCurrency == "EUR" ? "active" : "")" style="color: #6262a6;">€@item.Product.EuroPrice.ToString("N2")</h6>
-                            }
-                        </div>
                     </div>
                 </div>
-            </div>
+            </article>
         }
     }
     else
     {
-            <div class="alert alert-info text-center" style="margin-top: 20px;width: 100%;">
-                <h5>Şu anda ürün bulunmamaktadır</h5>
-                <p>Lütfen daha sonra tekrar kontrol edin veya daha fazla bilgi için bizimle iletişime geçin.</p>
-            </div>
+        <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded-xl border border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-700">Şu anda ürün bulunmamaktadır</h3>
+            <p class="text-gray-500 mt-2">Lütfen daha sonra tekrar kontrol edin veya bizimle iletişime geçin.</p>
+        </div>
     }
+    </div>
 </div>
 
 @if (Model.TotalPages > 1)
 {
-    <div class="pagination-container text-center mt-4">
-        <nav aria-label="Sayfa navigasyonu">
-            <ul class="pagination justify-content-center">
-                @if (Model.CurrentPage > 1)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="?PageNumber=@(Model.CurrentPage - 1)" aria-label="Önceki">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                }
-                
-                @{
-                    int startPage = Math.Max(1, Model.CurrentPage - 2);
-                    int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
-                }
-                
-                @if (startPage > 1)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="?PageNumber=1">1</a>
-                    </li>
-                    @if (startPage > 2)
-                    {
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                    }
-                }
-                
-                @for (int i = startPage; i <= endPage; i++)
-                {
-                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                        @if (i == Model.CurrentPage)
-                        {
-                            <span class="page-link active">@i</span>
-                        }
-                        else
-                        {
-                            <a class="page-link" href="?PageNumber=@i">@i</a>
-                        }
-                    </li>
-                }
-                
-                @if (endPage < Model.TotalPages)
-                {
-                    @if (endPage < Model.TotalPages - 1)
-                    {
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                    }
-                    <li class="page-item">
-                        <a class="page-link" href="?PageNumber=@Model.TotalPages">@Model.TotalPages</a>
-                    </li>
-                }
-                
-                @if (Model.CurrentPage < Model.TotalPages)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="?PageNumber=@(Model.CurrentPage + 1)" aria-label="Sonraki">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                }
-            </ul>
-        </nav>
-        
-        <div class="pagination-info mt-2">
-            <small class="text-muted">
-                Sayfa @Model.CurrentPage / @Model.TotalPages 
-                (@Model.TotalProducts ürün)
-            </small>
-        </div>
-    </div>
+    <nav class="flex justify-center items-center gap-2 flex-wrap mt-8" aria-label="Sayfa navigasyonu">
+        @if (Model.CurrentPage > 1)
+        {
+            <a href="?PageNumber=@(Model.CurrentPage - 1)" class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100" aria-label="Önceki">&laquo;</a>
+        }
+        @{
+            int startPage = Math.Max(1, Model.CurrentPage - 2);
+            int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+        }
+        @if (startPage > 1)
+        {
+            <a href="?PageNumber=1" class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100">1</a>
+            @if (startPage > 2) { <span class="px-2 text-gray-400">...</span> }
+        }
+        @for (int i = startPage; i <= endPage; i++)
+        {
+            @if (i == Model.CurrentPage)
+            {
+                <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-white font-medium">@i</span>
+            }
+            else
+            {
+                <a href="?PageNumber=@i" class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100">@i</a>
+            }
+        }
+        @if (endPage < Model.TotalPages)
+        {
+            @if (endPage < Model.TotalPages - 1) { <span class="px-2 text-gray-400">...</span> }
+            <a href="?PageNumber=@Model.TotalPages" class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100">@Model.TotalPages</a>
+        }
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <a href="?PageNumber=@(Model.CurrentPage + 1)" class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100" aria-label="Sonraki">&raquo;</a>
+        }
+        <span class="text-sm text-gray-500 ml-4">Sayfa @Model.CurrentPage / @Model.TotalPages (@Model.TotalProducts ürün)</span>
+    </nav>
 }
 <!-- Product Section End -->
 
@@ -243,20 +170,7 @@
 <script>
     // Pagination Debug
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('═══════════════════════════════════════');
-        console.log('🏠 Index Page - Pagination Debug');
-        console.log('═══════════════════════════════════════');
-        console.log('CurrentPage (Model):', @Model.CurrentPage);
-        console.log('TotalPages:', @Model.TotalPages);
-        console.log('TotalProducts:', @Model.TotalProducts);
-        console.log('PageSize:', @Model.PageSize);
-        console.log('Products Count:', @Model.Products.Count);
-        console.log('URL:', window.location.href);
-        console.log('Query String:', window.location.search);
-        
         const urlParams = new URLSearchParams(window.location.search);
-        console.log('PageNumber param from URL:', urlParams.get('PageNumber'));
-        console.log('═══════════════════════════════════════');
     });
 </script>
 }
