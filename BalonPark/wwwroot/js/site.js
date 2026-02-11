@@ -35,7 +35,7 @@
         if (!subcategoryList) {
             return;
         }
-        const icon = button.querySelector('i');
+        const icon = button.querySelector('svg') || button.querySelector('i');
         const isOpen = subcategoryList.classList.contains('max-h-[1000px]');
 
         if (isOpen) {
@@ -63,7 +63,8 @@
                 return;
             }
             btn.classList.remove('bg-primary/10', 'text-primary');
-            btn.querySelector('i')?.classList.remove('rotate-180');
+            var otherIcon = btn.querySelector('svg') || btn.querySelector('i');
+            if (otherIcon) otherIcon.classList.remove('rotate-180');
         });
     };
 

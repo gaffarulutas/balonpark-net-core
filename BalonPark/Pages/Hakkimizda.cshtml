@@ -129,7 +129,7 @@
                         <div class="col-lg-6 mb-4">
                             <div class="info-card">
                                 <div class="info-icon">
-                                    <i class="fas fa-building"></i>
+                                    <i data-lucide="building" class="w-5 h-5"></i>
                                 </div>
                                 <div class="info-content">
                                     <h3>Şirketimiz Hakkında</h3>
@@ -140,7 +140,7 @@
                         <div class="col-lg-6 mb-4">
                             <div class="info-card">
                                 <div class="info-icon">
-                                    <i class="fas fa-bullseye"></i>
+                                    <i data-lucide="target" class="w-5 h-5"></i>
                                 </div>
                                 <div class="info-content">
                                     <h3>Misyonumuz</h3>
@@ -155,7 +155,7 @@
                         <div class="col-12">
                             <div class="vision-card">
                                 <div class="vision-icon">
-                                    <i class="fas fa-eye"></i>
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
                                 </div>
                                 <div class="vision-content">
                                     <h3>Vizyonumuz</h3>
@@ -174,7 +174,7 @@
                                     <div class="col-lg-3 col-md-6 mb-4">
                                         <div class="feature-card">
                                             <div class="feature-icon">
-                                                <i class="fas fa-shield-check"></i>
+                                                <i data-lucide="shield-check" class="w-5 h-5"></i>
                                             </div>
                                             <h4>Güvenlik Önceliği</h4>
                                             <p>Tüm ürünlerimiz uluslararası güvenlik standartlarına uygun olarak üretilir.</p>
@@ -183,7 +183,7 @@
                                     <div class="col-lg-3 col-md-6 mb-4">
                                         <div class="feature-card">
                                             <div class="feature-icon">
-                                                <i class="fas fa-medal"></i>
+                                                <i data-lucide="medal" class="w-5 h-5"></i>
                                             </div>
                                             <h4>Kalite Garantisi</h4>
                                             <p>Premium malzemeler kullanarak uzun ömürlü ve dayanıklı ürünler üretiriz.</p>
@@ -192,7 +192,7 @@
                                     <div class="col-lg-3 col-md-6 mb-4">
                                         <div class="feature-card">
                                             <div class="feature-icon">
-                                                <i class="fas fa-users"></i>
+                                                <i data-lucide="users" class="w-5 h-5"></i>
                                             </div>
                                             <h4>Uzman Ekip</h4>
                                             <p>Deneyimli ve uzman ekibimizle size en iyi hizmeti sunarız.</p>
@@ -201,7 +201,7 @@
                                     <div class="col-lg-3 col-md-6 mb-4">
                                         <div class="feature-card">
                                             <div class="feature-icon">
-                                                <i class="fas fa-headset"></i>
+                                                <i data-lucide="headset" class="w-5 h-5"></i>
                                             </div>
                                             <h4>7/24 Destek</h4>
                                             <p>Müşteri memnuniyeti için her zaman yanınızdayız.</p>
@@ -222,19 +222,19 @@
                                     @if (!string.IsNullOrEmpty(settings?.WhatsApp))
                                     {
                                         <a href="https://wa.me/@(settings.WhatsApp.Replace("+", "").Replace(" ", ""))" target="_blank" class="contact-btn whatsapp-btn">
-                                            <i class="fab fa-whatsapp"></i>
+                                            <i data-lucide="message-circle" class="w-5 h-5"></i>
                                             <span>WhatsApp</span>
                                         </a>
                                     }
                                     @if (!string.IsNullOrEmpty(settings?.PhoneNumber))
                                     {
                                         <a href="tel:@settings.PhoneNumber.Replace(" ", "")" class="contact-btn phone-btn">
-                                            <i class="fas fa-phone"></i>
+                                            <i data-lucide="phone" class="w-5 h-5"></i>
                                             <span>Telefon</span>
                                         </a>
                                     }
                                     <a asp-page="/Iletisim" class="contact-btn contact-page-btn">
-                                        <i class="fas fa-envelope"></i>
+                                        <i data-lucide="mail" class="w-5 h-5"></i>
                                         <span>İletişim Sayfası</span>
                                     </a>
                                 </div>

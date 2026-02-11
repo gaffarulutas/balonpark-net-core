@@ -98,11 +98,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @foreach (var item in Model.Products)
             {
-                <article class="group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
+                <article class="product-card group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
                     <div class="relative aspect-square bg-gray-50 overflow-hidden">
-                        <div class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button type="button" class="favorite-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-white/90 hover:shadow text-sm transition" data-product-id="@item.Product.Id" title="Favori"><i class="fa-regular fa-heart"></i></button>
-                            <button type="button" class="compare-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-white/90 hover:shadow text-sm transition" data-product-id="@item.Product.Id" title="Karşılaştır"><i class="fa-solid fa-shuffle"></i></button>
+                        <div class="product-card-actions absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button type="button" class="favorite-btn flex items-center justify-center transition" data-product-id="@item.Product.Id" title="Favorilere Ekle"><i data-lucide="heart"></i></button>
+                            <button type="button" class="compare-btn flex items-center justify-center transition" data-product-id="@item.Product.Id" data-product-url="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" data-product-slug="@item.Product.Slug" title="Karşılaştır"><i data-lucide="shuffle"></i></button>
                         </div>
                         <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="block w-full h-full">
                             @if (item.MainImage != null)
@@ -122,9 +122,9 @@
                         {
                             <p class="text-xs text-gray-500 mt-1 line-clamp-2">@Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)</p>
                         }
-                        @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                        @if (!string.IsNullOrEmpty(item.Product.Summary))
                         {
-                            <p class="text-[11px] text-gray-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-ruler-combined w-3.5"></i> @Html.Raw(item.Product.Dimensions)</p>
+                            <p class="text-[11px] text-gray-500 mt-1 line-clamp-2">@Html.Raw(item.Product.Summary)</p>
                         }
                         <div class="mt-auto pt-2.5">
                             @if (item.Product.Price <= 0)
@@ -146,22 +146,22 @@
     else if (!string.IsNullOrEmpty(Model.Query))
     {
         <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
-            <i class="fa-solid fa-search text-4xl text-gray-300 mb-3"></i>
+            <i data-lucide="search" class="w-12 h-12 text-gray-300 mb-3"></i>
             <h3 class="text-base font-medium text-ink">"@Model.Query" için ürün bulunamadı</h3>
             <p class="text-sm text-gray-500 mt-1">Farklı anahtar kelimelerle arama yapmayı deneyin veya kategorilerimizi inceleyin.</p>
             <a href="/" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
-                <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
+                <i data-lucide="home" class="w-4 h-4 inline-block align-middle"></i> Ana Sayfaya Dön
             </a>
         </div>
     }
     else
     {
         <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
-            <i class="fa-solid fa-exclamation-triangle text-4xl text-gray-300 mb-3"></i>
+            <i data-lucide="alert-triangle" class="w-12 h-12 text-gray-300 mb-3"></i>
             <h3 class="text-base font-medium text-ink">Arama terimi gerekli</h3>
             <p class="text-sm text-gray-500 mt-1">Lütfen arama yapmak için bir kelime girin.</p>
             <a href="/" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
-                <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
+                <i data-lucide="home" class="w-4 h-4 inline-block align-middle"></i> Ana Sayfaya Dön
             </a>
         </div>
     }

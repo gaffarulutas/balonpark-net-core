@@ -394,7 +394,7 @@ namespace BalonPark.Services
                         CustomLabel0 = product.CategoryName,
                         CustomLabel1 = product.SubCategoryName,
                         CustomLabel2 = $"Stok: {product.Stock}",
-                        CustomLabel3 = !string.IsNullOrEmpty(product.Dimensions) ? $"Boyut: {product.Dimensions}" : null,
+                        CustomLabel3 = !string.IsNullOrEmpty(product.Summary) ? product.Summary : null,
                         // Kargo bilgileri - Kargo para birimi Currency ile aynı olacak (TRY)
                         ShippingCountry = "TR",
                         ShippingService = "Standart Kargo",
@@ -604,7 +604,7 @@ namespace BalonPark.Services
                         CustomLabel0 = product.CategoryName,
                         CustomLabel1 = product.SubCategoryName,
                         CustomLabel2 = $"Stok: {product.Stock}",
-                        CustomLabel3 = !string.IsNullOrEmpty(product.Dimensions) ? $"Boyut: {product.Dimensions}" : null,
+                        CustomLabel3 = !string.IsNullOrEmpty(product.Summary) ? product.Summary : null,
                         // Kargo bilgileri - Kargo para birimi Currency ile aynı olacak (TRY)
                         ShippingCountry = "TR",
                         ShippingService = "Standart Kargo",

@@ -71,7 +71,7 @@ public class CreateModel : BaseAdminPage
 
             if (string.IsNullOrWhiteSpace(Product.Description) || Product.Description.Length < 140)
             {
-                ModelState.AddModelError("Product.Description", "Özet en az 140 karakter olmalıdır.");
+                ModelState.AddModelError("Product.Description", "Açıklama en az 140 karakter olmalıdır.");
                 Categories = (await _categoryRepository.GetAllAsync()).ToList();
                 SubCategories = (await _subCategoryRepository.GetAllAsync()).ToList();
                 return Page();
@@ -191,7 +191,7 @@ public class CreateModel : BaseAdminPage
                     name = aiResponse.Name,
                     description = aiResponse.Description,
                     technicalDescription = aiResponse.TechnicalDescription,
-                    dimensions = aiResponse.Dimensions,
+                    summary = aiResponse.Summary,
                     suggestedPrice = aiResponse.SuggestedPrice,
                     suggestedStock = aiResponse.SuggestedStock
                 }

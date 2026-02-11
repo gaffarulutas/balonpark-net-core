@@ -13,7 +13,7 @@ public class ProductAiResponse
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string TechnicalDescription { get; set; } = string.Empty;
-    public string Dimensions { get; set; } = string.Empty;
+    public string Summary { get; set; } = string.Empty;
     public decimal SuggestedPrice { get; set; }
     public int SuggestedStock { get; set; }
 }

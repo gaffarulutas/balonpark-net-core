@@ -36,7 +36,7 @@ namespace BalonPark.Controllers
                         Name = product.Name,
                         Description = product.Description,
                         TechnicalDescription = product.TechnicalDescription,
-                        Dimensions = product.Dimensions,
+                        Summary = product.Summary,
                         Price = product.Price,
                         UsdPrice = product.UsdPrice,
                         EuroPrice = product.EuroPrice,
@@ -71,7 +71,7 @@ namespace BalonPark.Controllers
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? TechnicalDescription { get; set; }
-        public string? Dimensions { get; set; }
+        public string? Summary { get; set; }
         public decimal Price { get; set; }
         public decimal UsdPrice { get; set; }
         public decimal EuroPrice { get; set; }

@@ -49,13 +49,16 @@ class FavoritesAndCompare {
             this.favorites.splice(index, 1);
             this.showNotification('Ürün favorilerden çıkarıldı', 'info');
         } else {
-            // Favorilere ekle
+            // Favorilere ekle (ana sayfa kartıyla aynı alanlar: kategori, açıklama, boyut)
             this.favorites.push({
                 id: productId,
                 name: productData.name,
                 price: productData.price,
                 image: productData.image,
                 url: productData.url,
+                categoryName: productData.categoryName || '',
+                description: productData.description || '',
+                dimensions: productData.dimensions || '',
                 addedAt: new Date().toISOString()
             });
             this.showNotification('Ürün favorilere eklendi', 'success');
@@ -80,9 +83,11 @@ class FavoritesAndCompare {
                 return;
             }
             
-            // Slug'ı URL'den veya data attribute'dan al
-            const slug = this.getProductSlug(productData.url);
-            
+            const slug = (productData.slug && String(productData.slug).trim()) || this.getProductSlug(productData.url || '');
+            if (!slug) {
+                this.showNotification('Ürün bilgileri eksik. Lütfen tekrar deneyin.', 'error');
+                return;
+            }
             this.compareList.push({
                 id: productId,
                 name: productData.name,
@@ -99,12 +104,13 @@ class FavoritesAndCompare {
         this.updateUI();
     }
 
-    // URL'den slug çıkar
+    // URL veya path'ten ürün slug'ını çıkar (/category/.../productSlug)
     getProductSlug(url) {
+        if (!url || !String(url).trim()) return '';
         try {
-            const urlObj = new URL(url);
+            const urlObj = new URL(url, window.location.origin);
             const parts = urlObj.pathname.split('/').filter(p => p);
-            // URL formatı: /category/{categorySlug}/{subCategorySlug}/{productSlug}
+            if (parts.length < 4) return ''; // en az category/sub/productSlug
             return parts[parts.length - 1] || '';
         } catch {
             return '';
@@ -137,17 +143,22 @@ class FavoritesAndCompare {
         document.querySelectorAll('.favorite-btn, .favorite-btn-detail').forEach(btn => {
             const productId = parseInt(btn.dataset.productId);
             const isFav = this.isFavorite(productId);
-            
-            const icon = btn.querySelector('i');
+            const icon = btn.querySelector('svg') || btn.querySelector('i');
             const text = btn.querySelector('.btn-text');
-            
+
             if (isFav) {
                 btn.classList.add('active');
-                if (icon) icon.className = 'fa-solid fa-heart';
+                if (icon) {
+                    if (icon.tagName === 'svg') icon.setAttribute('fill', 'currentColor');
+                    else if (icon.setAttribute) icon.setAttribute('data-lucide', 'heart');
+                }
                 if (text) text.textContent = 'Favorilerden Çıkar';
             } else {
                 btn.classList.remove('active');
-                if (icon) icon.className = 'fa-regular fa-heart';
+                if (icon) {
+                    if (icon.tagName === 'svg') icon.setAttribute('fill', 'none');
+                    else if (icon.setAttribute) icon.setAttribute('data-lucide', 'heart');
+                }
                 if (text) text.textContent = 'Favorilere Ekle';
             }
         });
@@ -166,16 +177,13 @@ class FavoritesAndCompare {
                 btn.title = isInCompare ? 'Karşılaştırmadan Çıkar' : 'Karşılaştırmaya Ekle';
             }
             
-            const icon = btn.querySelector('i');
+            const icon = btn.querySelector('svg') || btn.querySelector('i');
             const text = btn.querySelector('.btn-text');
-            
             if (isInCompare) {
                 btn.classList.add('active');
-                if (icon) icon.className = 'fa-solid fa-shuffle';
                 if (text) text.textContent = 'Karşılaştırmadan Çıkar';
             } else {
                 btn.classList.remove('active');
-                if (icon) icon.className = 'fa-solid fa-shuffle';
                 if (text) text.textContent = 'Karşılaştırmaya Ekle';
             }
         });
@@ -186,31 +194,29 @@ class FavoritesAndCompare {
 
     // Header'daki sayaçları güncelle
     updateHeaderCounters() {
-        // Eski badge sayaçları (eğer varsa)
         const favoritesCount = document.querySelector('.favorites-count');
         const compareCount = document.querySelector('.compare-count');
-        
         if (favoritesCount) {
             favoritesCount.textContent = this.favorites.length;
             favoritesCount.style.display = this.favorites.length > 0 ? 'inline' : 'none';
         }
-        
         if (compareCount) {
             compareCount.textContent = this.compareList.length;
             compareCount.style.display = this.compareList.length > 0 ? 'inline' : 'none';
         }
-
-        // Yeni contact-box stili sayaçları
         const favoritesCountText = document.querySelector('.favorites-count-text');
         const compareCountText = document.querySelector('.compare-count-text');
-        
         if (favoritesCountText) {
             favoritesCountText.textContent = `${this.favorites.length} Ürün`;
         }
-        
         if (compareCountText) {
             compareCountText.textContent = `${this.compareList.length} Ürün`;
         }
+        // Header favori kalp ikonu: dolu/boş (Lucide SVG)
+        document.querySelectorAll('.lucide-fav-header').forEach(function (el) {
+            var svg = el.tagName === 'svg' ? el : el.querySelector('svg');
+            if (svg) svg.setAttribute('fill', this.favorites.length > 0 ? 'currentColor' : 'none');
+        }.bind(this));
     }
 
     // Event'leri bağla
@@ -238,25 +244,23 @@ class FavoritesAndCompare {
         });
     }
 
-    // Ürün verilerini al
+    // Ürün verilerini al (ana sayfa / liste kartıyla uyumlu; kategori, açıklama, boyut da toplanır)
     getProductData(btn) {
-        // Önce ürün kartını bul (liste veya detay sayfası)
-        const card = btn.closest('.product-box, .product-card, .modern-product-card, .product-info');
-        
-        // Başlık/isim için birden fazla seçici dene
-        const name = card?.querySelector('.name, .product-title, h1.product-title')?.textContent?.trim() || '';
-        
-        // Fiyat için aktif fiyatı al
-        const priceElement = card?.querySelector('.price.active, .price-main.active, .price');
+        const dataUrl = btn.dataset.productUrl;
+        const dataSlug = btn.dataset.productSlug;
+        const card = btn.closest('article, .product-box, .product-card, .modern-product-card, .product-info');
+        const name = card?.querySelector('.name, .product-title, h1.product-title, a[href*="/category/"]')?.textContent?.trim() || '';
+        const priceElement = card?.querySelector('.price.active, .price-main.active, .price-tl, .price-usd, .price-eur, .price');
         const price = priceElement?.textContent?.trim() || '';
-        
-        // Resim için
         const image = card?.querySelector('img')?.src || '';
-        
-        // URL için önce link bul, yoksa mevcut sayfayı kullan
-        const url = card?.querySelector('a')?.href || window.location.href;
-        
-        return { name, price, image, url };
+        const productLink = card?.querySelector('a[href*="/category/"]');
+        const url = (dataUrl && dataSlug) ? dataUrl : ((productLink?.href && productLink.href.split('/').filter(Boolean).length >= 4) ? productLink.href : window.location.href);
+        const slug = dataSlug || (url ? url.split('/').filter(Boolean).pop() : '');
+        const paragraphs = card ? Array.from(card.querySelectorAll('.p-3 > p')) : [];
+        const categoryName = paragraphs[0]?.textContent?.trim() || '';
+        const description = paragraphs.find(function (p) { return p.classList.contains('text-gray-500'); })?.textContent?.trim() || '';
+        const dimensions = paragraphs.find(function (p) { return p.classList.contains('flex'); })?.textContent?.trim() || '';
+        return { name, price, image, url, slug, categoryName, description, dimensions };
     }
 
     // Bildirim göster (yalnızca Snackbar – toast kullanılmaz)
@@ -351,13 +355,9 @@ class FavoritesAndCompare {
         this.updateUI();
     }
 
-    // Favorileri göster (generic Tailwind modal – focus trap, Escape, backdrop, aria)
-    showFavorites() {
-        if (this.favorites.length === 0) {
-            this.showNotification('Henüz favori ürün eklememişsiniz.', 'info');
-            return;
-        }
-
+    // Favori modal içeriği – ana sayfa (Index) ürün kartıyla birebir aynı yapı
+    buildFavoritesModalContent() {
+        const noImageUrl = '/assets/images/no-image.png';
         const escHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         const safeUrl = (s) => {
             const u = String(s ?? '').trim();
@@ -365,27 +365,57 @@ class FavoritesAndCompare {
             if (/^\s*javascript:/i.test(u)) return '#';
             return u.replace(/"/g, '&quot;');
         };
-        const escProduct = (p) => ({
-            name: escHtml(p.name),
-            price: escHtml(p.price != null ? String(p.price) : ''),
-            image: safeUrl(p.image),
-            url: safeUrl(p.url)
-        });
+        const escProduct = (p) => {
+            const rawImage = safeUrl(p.image);
+            const imageUrl = (rawImage && rawImage !== '#') ? rawImage : noImageUrl;
+            return {
+                name: escHtml(p.name),
+                price: escHtml(p.price != null ? String(p.price) : ''),
+                priceEmpty: !p.price || String(p.price).trim() === '' || /fiyat\s*için\s*iletişim/i.test(String(p.price)),
+                image: imageUrl,
+                url: safeUrl(p.url),
+                categoryName: escHtml(p.categoryName || ''),
+                description: escHtml((p.description || '').substring(0, 60)) + ((p.description || '').length > 60 ? '...' : ''),
+                dimensions: escHtml(p.dimensions || '')
+            };
+        };
 
-        const contentHtml = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">' +
+        if (this.favorites.length === 0) {
+            return '<div class="empty-state py-12 text-center text-gray-500">' +
+                '<p class="text-sm">Henüz favori ürün yok.</p>' +
+                '<p class="text-xs mt-1">Ürün sayfalarından favorilere ekleyebilirsiniz.</p>' +
+                '</div>';
+        }
+
+        return '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">' +
             this.favorites.map(function (item) {
                 const d = escProduct(item);
-                return '<div class="favorites-item border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">' +
-                    '<img src="' + d.image + '" alt="' + d.name + '" class="w-full h-40 object-cover bg-gray-100">' +
-                    '<div class="p-3">' +
-                    '<div class="product-name font-medium text-gray-900 text-sm line-clamp-2">' + d.name + '</div>' +
-                    '<div class="product-price text-primary font-semibold mt-1">' + d.price + '</div>' +
-                    '<div class="flex gap-2 mt-2 flex-wrap">' +
-                    '<a href="' + d.url + '" class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 transition">Ürüne Git</a>' +
-                    '<button type="button" class="remove-fav-btn inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50 transition" data-id="' + escHtml(String(item.id)) + '">Kaldır</button>' +
-                    '</div></div></div>';
+                return '<article class="group favorites-item bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">' +
+                    '<div class="relative aspect-square bg-gray-50 overflow-hidden">' +
+                    '<a href="' + d.url + '" class="block w-full h-full">' +
+                    '<img src="' + d.image + '" alt="' + d.name + '" class="lazy-image w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" loading="lazy" onerror="this.onerror=null;this.src=\'' + noImageUrl + '\'">' +
+                    '</a></div>' +
+                    '<div class="p-3 flex flex-col flex-1 border-t border-gray-100">' +
+                    '<a href="' + d.url + '" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 transition">' + d.name + '</a>' +
+                    (d.categoryName ? '<p class="text-xs text-gray-400 mt-0.5">' + d.categoryName + '</p>' : '') +
+                    (d.description ? '<p class="text-xs text-gray-500 mt-1 line-clamp-2">' + d.description + '</p>' : '') +
+                    (d.dimensions ? '<p class="text-[11px] text-gray-400 mt-1 flex items-center gap-1"><i data-lucide="ruler" class="w-3.5 h-3.5 flex-shrink-0"></i> ' + d.dimensions + '</p>' : '') +
+                    '<div class="mt-auto pt-2.5">' +
+                    (d.priceEmpty ? '<p class="text-xs text-gray-500">Fiyat için iletişime geçin</p>' : '<p class="price-tl text-sm font-medium text-primary">' + d.price + '</p>') +
+                    '</div>' +
+                    '<div class="flex gap-2 flex-wrap mt-2">' +
+                    '<button type="button" class="remove-fav-btn inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition" data-id="' + escHtml(String(item.id)) + '">Kaldır</button>' +
+                    '</div></div></article>';
             }).join('') +
             '</div>';
+    }
+
+    // Favorileri göster (modal açık kalır; Kaldır tıklanınca sadece içerik güncellenir)
+    showFavorites() {
+        if (this.favorites.length === 0) {
+            this.showNotification('Henüz favori ürün eklememişsiniz.', 'info');
+            return;
+        }
 
         const self = this;
         if (typeof window.openModal !== 'function') {
@@ -393,22 +423,52 @@ class FavoritesAndCompare {
             return;
         }
 
-        const { close } = window.openModal({
+        const titleId = 'favorites-modal-title';
+        window.openModal({
             title: 'Favorilerim (' + this.favorites.length + ')',
-            titleId: 'favorites-modal-title',
-            content: contentHtml,
+            titleId: titleId,
+            contentClassName: 'bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col focus:outline-none modal-panel',
+            content: this.buildFavoritesModalContent(),
             closeLabel: 'Kapat',
-            onContentReady: function (contentEl) {
+            onContentReady: function (contentEl, overlayEl, closeFn) {
                 if (!contentEl) return;
-                contentEl.querySelectorAll('.remove-fav-btn').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        const id = parseInt(btn.getAttribute('data-id'), 10);
-                        const product = self.favorites.find(function (p) { return p.id === id; });
-                        if (product) self.toggleFavorite(id, product);
-                        close();
-                    });
-                });
+                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                    lucide.createIcons({ root: contentEl });
+                }
+                self.bindFavoritesModalRemoveButtons(contentEl, overlayEl, titleId, closeFn);
             }
+        });
+    }
+
+    // Modal içindeki "Kaldır" butonlarını bağla; tıklanınca sadece içeriği güncelle, modalı kapatma
+    bindFavoritesModalRemoveButtons(contentEl, overlay, titleId, closeModal) {
+        const self = this;
+        const titleEl = overlay ? overlay.querySelector('#' + titleId) : null;
+
+        function refreshContent() {
+            if (!contentEl) return;
+            contentEl.innerHTML = self.buildFavoritesModalContent();
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons({ root: contentEl });
+            }
+            if (titleEl) titleEl.textContent = 'Favorilerim (' + self.favorites.length + ')';
+            self.updateUI();
+            if (self.favorites.length === 0) {
+                return;
+            }
+            self.bindFavoritesModalRemoveButtons(contentEl, overlay, titleId, closeModal);
+        }
+
+        contentEl.querySelectorAll('.remove-fav-btn').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const id = parseInt(btn.getAttribute('data-id'), 10);
+                const product = self.favorites.find(function (p) { return p.id === id; });
+                if (product) {
+                    self.toggleFavorite(id, product);
+                    refreshContent();
+                }
+            });
         });
     }
 
@@ -418,14 +478,15 @@ class FavoritesAndCompare {
             this.showNotification('Henüz karşılaştırmak için ürün eklememişsiniz.', 'info');
             return;
         }
-
-        const slugs = this.compareList.map(p => p.slug).filter(s => s).join(':');
-        if (!slugs) {
+        // Slug yoksa URL'den türet (eski kayıtlar veya eksik data için)
+        const slugs = this.compareList
+            .map(p => (p.slug && String(p.slug).trim()) || this.getProductSlug(p.url || ''))
+            .filter(s => s);
+        if (slugs.length === 0) {
             this.showNotification('Ürün bilgileri eksik. Lütfen tekrar deneyin.', 'error');
             return;
         }
-
-        window.location.href = `/Compare/${slugs}`;
+        window.location.href = `/Compare/${slugs.join(':')}`;
     }
 
     // Karşılaştırma tablosunu oluştur

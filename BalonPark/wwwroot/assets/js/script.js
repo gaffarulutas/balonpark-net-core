@@ -98,30 +98,33 @@
 var contentwidth = $(window).width();
 if (contentwidth < "576") {
     $(".footer-title h4").append(
-        '<span class="according-menu float-end"><i class="fa-solid fa-angle-down"></i></span>'
+        '<span class="according-menu float-end"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>'
     );
+    if (typeof lucide !== "undefined" && lucide.createIcons) {
+        lucide.createIcons({ root: document.body });
+    }
     $(".footer-title").on("click", function () {
+        var $this = $(this);
         $(".footer-title")
             .removeClass("active")
             .find("span")
             .replaceWith(
-                '<span class="according-menu float-end"><i class="fa-solid fa-angle-down"></i></span>'
+                '<span class="according-menu float-end"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>'
             );
         $(".footer-contact, .footer-contain").slideUp("normal");
-        if ($(this).next().is(":hidden") == true) {
-            $(this).addClass("active");
-            $(this)
-                .find("span")
-                .replaceWith(
-                    '<span class="according-menu float-end"><i class="fas fa-chevron-up"></i></span>'
-                );
-            $(this).next().slideDown("normal");
+        if ($this.next().is(":hidden") == true) {
+            $this.addClass("active");
+            $this.find("span").replaceWith(
+                '<span class="according-menu float-end"><i data-lucide="chevron-up" class="w-4 h-4"></i></span>'
+            );
+            $this.next().slideDown("normal");
         } else {
-            $(this)
-                .find("span")
-                .replaceWith(
-                    '<span class="according-menu float-end"><i class="fa-solid fa-angle-down"></i></span>'
-                );
+            $this.find("span").replaceWith(
+                '<span class="according-menu float-end"><i data-lucide="chevron-down" class="w-4 h-4"></i></span>'
+            );
+        }
+        if (typeof lucide !== "undefined" && lucide.createIcons) {
+            lucide.createIcons({ root: $this[0] });
         }
     });
     $(".footer-contact, .footer-contain").hide();

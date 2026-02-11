@@ -28,7 +28,7 @@ public class ExcelService(ILogger<ExcelService> logger)
             worksheet.Cell(1, 3).Value = "Ürün Adı";
             worksheet.Cell(1, 4).Value = "Kategori";
             worksheet.Cell(1, 5).Value = "Alt Kategori";
-            worksheet.Cell(1, 6).Value = "Ölçü";
+            worksheet.Cell(1, 6).Value = "Özet";
             worksheet.Cell(1, 7).Value = "Fiyat (₺)";
             worksheet.Cell(1, 8).Value = "Fiyat ($)";
             worksheet.Cell(1, 9).Value = "Fiyat (€)";
@@ -39,7 +39,7 @@ public class ExcelService(ILogger<ExcelService> logger)
             worksheet.Column(3).Width = 30; // Ürün Adı
             worksheet.Column(4).Width = 20; // Kategori
             worksheet.Column(5).Width = 20; // Alt Kategori
-            worksheet.Column(6).Width = 15; // Ölçü
+            worksheet.Column(6).Width = 25; // Özet
             worksheet.Column(7).Width = 12; // Fiyat TL
             worksheet.Column(8).Width = 12; // Fiyat USD
             worksheet.Column(9).Width = 12; // Fiyat EUR
@@ -85,7 +85,7 @@ public class ExcelService(ILogger<ExcelService> logger)
                 worksheet.Cell(row, 3).Value = product.Name;
                 worksheet.Cell(row, 4).Value = product.CategoryName;
                 worksheet.Cell(row, 5).Value = product.SubCategoryName;
-                worksheet.Cell(row, 6).Value = product.Dimensions ?? "Belirtilmemiş";
+                worksheet.Cell(row, 6).Value = product.Summary ?? "-";
 
                 // Fiyatlar - sayısal format
                 worksheet.Cell(row, 7).Value = product.Price;
@@ -163,7 +163,7 @@ public class ExcelService(ILogger<ExcelService> logger)
             worksheet.Cell(1, 1).Value = "Resim";
             worksheet.Cell(1, 2).Value = "Kod";
             worksheet.Cell(1, 3).Value = "Ürün Adı";
-            worksheet.Cell(1, 4).Value = "Ölçü";
+            worksheet.Cell(1, 4).Value = "Özet";
             worksheet.Cell(1, 5).Value = "Fiyat (₺)";
             worksheet.Cell(1, 6).Value = "Fiyat ($)";
             worksheet.Cell(1, 7).Value = "Fiyat (€)";
@@ -172,7 +172,7 @@ public class ExcelService(ILogger<ExcelService> logger)
             worksheet.Column(1).Width = 15; // Resim
             worksheet.Column(2).Width = 10; // Kod
             worksheet.Column(3).Width = 30; // Ürün Adı
-            worksheet.Column(4).Width = 15; // Ölçü
+            worksheet.Column(4).Width = 25; // Özet
             worksheet.Column(5).Width = 12; // Fiyat TL
             worksheet.Column(6).Width = 12; // Fiyat USD
             worksheet.Column(7).Width = 12; // Fiyat EUR
@@ -205,7 +205,7 @@ public class ExcelService(ILogger<ExcelService> logger)
                 // Diğer hücreler
                 worksheet.Cell(row, 2).Value = $"U-{product.Id}";
                 worksheet.Cell(row, 3).Value = product.Name;
-                worksheet.Cell(row, 4).Value = product.Dimensions ?? "Belirtilmemiş";
+                worksheet.Cell(row, 4).Value = product.Summary ?? "-";
 
                 // Fiyatlar - sayısal format
                 worksheet.Cell(row, 5).Value = product.Price;
@@ -275,7 +275,7 @@ public class ExcelService(ILogger<ExcelService> logger)
                 foreach (var row in tableRows)
                 {
                     var cells = row.SelectNodes("td");
-                    if (cells != null && cells.Count >= 7) // Resim, Kod, Ad, Ölçü, TL, USD, EUR
+                    if (cells != null && cells.Count >= 7) // Resim, Kod, Ad, Özet, TL, USD, EUR
                     {
                         var product = new ProductInfo();
                         
@@ -305,8 +305,8 @@ public class ExcelService(ILogger<ExcelService> logger)
                         // Ürün adı (3. hücre)
                         product.Name = cells[2].InnerText.Trim();
                         
-                        // Ölçü (4. hücre)
-                        product.Dimensions = cells[3].InnerText.Trim();
+                        // Özet (4. hücre)
+                        product.Summary = cells[3].InnerText.Trim();
                         
                         // Fiyat TL (5. hücre)
                         var priceText = cells[4].InnerText.Trim();
@@ -348,7 +348,7 @@ public class ExcelService(ILogger<ExcelService> logger)
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string? Dimensions { get; set; }
+        public string? Summary { get; set; }
         public decimal Price { get; set; }
         public decimal UsdPrice { get; set; }
         public decimal EuroPrice { get; set; }

@@ -293,7 +293,7 @@ public class IndexModel(
                         <th>Resim</th>
                         <th>Ürün Kodu</th>
                         <th>Ürün Adı</th>
-                        <th>Ölçü</th>
+                        <th>Özet</th>
                         <th>Fiyat (₺)</th>
                         <th>Fiyat ($)</th>
                         <th>Fiyat (€)</th>
@@ -330,7 +330,7 @@ public class IndexModel(
                         </td>
                         <td class='code-cell'>U-{product.Id}</td>
                         <td class='name-cell'>{product.Name?.Replace("'", "&#39;")}</td>
-                        <td class='dimension-cell'>{(product.Dimensions ?? "Belirtilmemiş").Replace("'", "&#39;")}</td>
+                        <td class='summary-cell'>{(product.Summary ?? "-").Replace("'", "&#39;")}</td>
                         <td class='price-cell'>{product.Price:N2}</td>
                         <td class='price-cell'>{product.UsdPrice:N2}</td>
                         <td class='price-cell'>{product.EuroPrice:N2}</td>

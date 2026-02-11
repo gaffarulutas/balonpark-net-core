@@ -104,12 +104,13 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @foreach (var item in Model.Products)
             {
-                <article class="group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
-                    <div class="relative flex items-center justify-end gap-1 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button type="button" class="favorite-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 text-sm transition" data-product-id="@item.Product.Id" title="Favori"><i class="fa-regular fa-heart"></i></button>
-                        <button type="button" class="compare-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 text-sm transition" data-product-id="@item.Product.Id" title="Karşılaştır"><i class="fa-solid fa-shuffle"></i></button>
-                    </div>
-                    <a href="/category/@Model.CategorySlug/@Model.SubCategory?.Slug/@item.Product.Slug" class="block aspect-square bg-gray-50 overflow-hidden">
+                <article class="product-card group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
+                    <div class="relative aspect-square bg-gray-50 overflow-hidden">
+                        <div class="product-card-actions absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button type="button" class="favorite-btn flex items-center justify-center transition" data-product-id="@item.Product.Id" title="Favorilere Ekle"><i data-lucide="heart"></i></button>
+                            <button type="button" class="compare-btn flex items-center justify-center transition" data-product-id="@item.Product.Id" data-product-url="/category/@Model.CategorySlug/@Model.SubCategory?.Slug/@item.Product.Slug" data-product-slug="@item.Product.Slug" title="Karşılaştır"><i data-lucide="shuffle"></i></button>
+                        </div>
+                        <a href="/category/@Model.CategorySlug/@Model.SubCategory?.Slug/@item.Product.Slug" class="block w-full h-full">
                         @if (item.MainImage != null)
                         {
                             <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}")" class="lazy-image w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" alt="@Html.Raw(item.Product.Name)" loading="lazy">
@@ -118,7 +119,8 @@
                         {
                             <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" class="lazy-image w-full h-full object-cover" alt="@Html.Raw(item.Product.Name)" loading="lazy">
                         }
-                    </a>
+                        </a>
+                    </div>
                     <div class="p-3 flex flex-col flex-1 border-t border-gray-100">
                         <a href="/category/@Model.CategorySlug/@Model.SubCategory?.Slug/@item.Product.Slug" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(item.Product.Name)</a>
                         <p class="text-xs text-gray-400 mt-0.5">@Html.Raw(item.Product.CategoryName)</p>
@@ -126,9 +128,9 @@
                         {
                             <p class="text-xs text-gray-500 mt-1 line-clamp-2">@Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)</p>
                         }
-                        @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                        @if (!string.IsNullOrEmpty(item.Product.Summary))
                         {
-                            <p class="text-[11px] text-gray-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-ruler-combined w-3.5"></i> @Html.Raw(item.Product.Dimensions)</p>
+                            <p class="text-[11px] text-gray-500 mt-1 line-clamp-2">@Html.Raw(item.Product.Summary)</p>
                         }
                         <div class="mt-auto pt-2.5">
                             @if (item.Product.Price <= 0)
@@ -150,11 +152,11 @@
     else
     {
         <div class="text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
-            <i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
+            <i data-lucide="package-open" class="w-12 h-12 text-gray-300 mb-3"></i>
             <h3 class="text-base font-medium text-ink">Ürün bulunmamaktadır</h3>
             <p class="text-sm text-gray-500 mt-1">Bu kategoride henüz ürün bulunmamaktadır. Lütfen daha sonra tekrar kontrol edin.</p>
             <a href="/category/@Model.CategorySlug" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 border border-gray-200 text-ink font-medium text-sm rounded-lg hover:bg-gray-50 transition w-fit">
-                <i class="fa-solid fa-arrow-left"></i> @Model.SubCategory?.CategoryName'e Dön
+                <i data-lucide="arrow-left" class="w-4 h-4 inline-block align-middle"></i> @Model.SubCategory?.CategoryName'e Dön
             </a>
         </div>
     }

@@ -15,7 +15,7 @@
     <nav class="breadcrumb-nav">
         <div class="breadcrumb-container">
             <a href="/" class="breadcrumb-item">
-                <i class="fas fa-home"></i>
+                <i data-lucide="home" class="w-4 h-4"></i>
                 <span>Ana Sayfa</span>
             </a>
             <span class="breadcrumb-separator">/</span>
@@ -29,16 +29,16 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="sitemap-card">
                     <div class="sitemap-card-header">
-                        <i class="fas fa-home"></i>
+                        <i data-lucide="home" class="w-4 h-4"></i>
                         <h3>Ana Sayfalar</h3>
                     </div>
                     <ul class="sitemap-list">
-                        <li><a asp-page="/Index"><i class="fas fa-chevron-right"></i> Ana Sayfa</a></li>
-                        <li><a asp-page="/Hakkimizda"><i class="fas fa-chevron-right"></i> Hakkımızda</a></li>
-                        <li><a asp-page="/Iletisim"><i class="fas fa-chevron-right"></i> İletişim</a></li>
-                        <li><a asp-page="/Blog"><i class="fas fa-chevron-right"></i> Blog</a></li>
-                        <li><a asp-page="/Privacy"><i class="fas fa-chevron-right"></i> Gizlilik Politikası</a></li>
-                        <li><a asp-page="/KullanimKosullari"><i class="fas fa-chevron-right"></i> Kullanım Koşulları</a></li>
+                        <li><a asp-page="/Index"><i data-lucide="chevron-right" class="w-4 h-4"></i> Ana Sayfa</a></li>
+                        <li><a asp-page="/Hakkimizda"><i data-lucide="chevron-right" class="w-4 h-4"></i> Hakkımızda</a></li>
+                        <li><a asp-page="/Iletisim"><i data-lucide="chevron-right" class="w-4 h-4"></i> İletişim</a></li>
+                        <li><a asp-page="/Blog"><i data-lucide="chevron-right" class="w-4 h-4"></i> Blog</a></li>
+                        <li><a asp-page="/Privacy"><i data-lucide="chevron-right" class="w-4 h-4"></i> Gizlilik Politikası</a></li>
+                        <li><a asp-page="/KullanimKosullari"><i data-lucide="chevron-right" class="w-4 h-4"></i> Kullanım Koşulları</a></li>
                     </ul>
                 </div>
             </div>
@@ -47,7 +47,7 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="sitemap-card">
                     <div class="sitemap-card-header">
-                        <i class="fas fa-folder-open"></i>
+                        <i data-lucide="folder-open" class="w-5 h-5"></i>
                         <h3>Kategoriler</h3>
                         <span class="badge">@Model.Categories.Count</span>
                     </div>
@@ -56,7 +56,7 @@
                         {
                             <li>
                                 <a href="/category/@category.Slug">
-                                    <i class="fas fa-chevron-right"></i> @Html.Raw(category.Name)
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i> @Html.Raw(category.Name)
                                 </a>
                             </li>
                         }
@@ -68,7 +68,7 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="sitemap-card">
                     <div class="sitemap-card-header">
-                        <i class="fas fa-folder"></i>
+                        <i data-lucide="folder" class="w-5 h-5"></i>
                         <h3>Alt Kategoriler</h3>
                         <span class="badge">@Model.SubCategories.Count</span>
                     </div>
@@ -77,7 +77,7 @@
                         {
                             <li>
                                 <a href="/category/@subCategory.CategorySlug/@subCategory.Slug">
-                                    <i class="fas fa-chevron-right"></i> @Html.Raw(subCategory.Name)
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i> @Html.Raw(subCategory.Name)
                                 </a>
                             </li>
                         }
@@ -89,7 +89,7 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="sitemap-card">
                     <div class="sitemap-card-header">
-                        <i class="fas fa-blog"></i>
+                        <i data-lucide="book-open" class="w-5 h-5"></i>
                         <h3>Blog Yazıları</h3>
                         <span class="badge">@Model.Blogs.Count</span>
                     </div>
@@ -98,7 +98,7 @@
                         {
                             <li>
                                 <a href="/blog/@blog.Slug">
-                                    <i class="fas fa-chevron-right"></i> @Html.Raw(blog.Title)
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i> @Html.Raw(blog.Title)
                                 </a>
                             </li>
                         }
@@ -106,7 +106,7 @@
                         {
                             <li class="more-link">
                                 <a asp-page="/Blog">
-                                    <i class="fas fa-plus-circle"></i> Tüm Blog Yazıları (@Model.Blogs.Count)
+                                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Tüm Blog Yazıları (@Model.Blogs.Count)
                                 </a>
                             </li>
                         }
@@ -122,7 +122,7 @@
                 <div class="col-12">
                     <div class="sitemap-card sitemap-card-full">
                         <div class="sitemap-card-header">
-                            <i class="fas fa-box-open"></i>
+                            <i data-lucide="package-open" class="w-5 h-5"></i>
                             <h3>Ürünlerimiz</h3>
                             <span class="badge">@Model.Products.Count</span>
                         </div>
@@ -132,7 +132,7 @@
                         {
                             <div class="product-category-group">
                                 <h4 class="category-group-title">
-                                    <i class="fas fa-tag"></i> @Html.Raw(categoryGroup.Key)
+                                    <i data-lucide="tag" class="w-4 h-4"></i> @Html.Raw(categoryGroup.Key)
                                     <span class="count">(@categoryGroup.Count())</span>
                                 </h4>
                                 <div class="row">
@@ -140,7 +140,7 @@
                                     {
                                         <div class="col-lg-3 col-md-4 col-sm-6 mb-2">
                                             <a href="/category/@product.CategorySlug/@product.SubCategorySlug/@product.Slug" class="product-link">
-                                                <i class="fas fa-chevron-right"></i> @Html.Raw(product.Name)
+                                                <i data-lucide="chevron-right" class="w-4 h-4"></i> @Html.Raw(product.Name)
                                             </a>
                                         </div>
                                     }
@@ -148,7 +148,7 @@
                                     {
                                         <div class="col-12">
                                             <a href="/category/@categoryGroup.First().CategorySlug" class="more-products-link">
-                                                <i class="fas fa-plus-circle"></i> @categoryGroup.Key kategorisindeki tüm ürünleri gör (+@(categoryGroup.Count() - 20))
+                                                <i data-lucide="plus-circle" class="w-4 h-4"></i> @categoryGroup.Key kategorisindeki tüm ürünleri gör (+@(categoryGroup.Count() - 20))
                                             </a>
                                         </div>
                                     }
@@ -165,7 +165,7 @@
             <div class="col-12">
                 <div class="seo-info-box">
                     <div class="seo-icon">
-                        <i class="fas fa-search"></i>
+                        <i data-lucide="search" class="w-5 h-5"></i>
                     </div>
                     <div class="seo-content">
                         <h3>Site Haritası Hakkında</h3>

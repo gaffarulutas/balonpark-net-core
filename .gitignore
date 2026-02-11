@@ -432,8 +432,9 @@ appsettings.Production.json
 **/appsettings.*.json
 !**/appsettings.json
 
-# Uploaded files (optional - uncomment if you don't want to commit uploads)
-wwwroot/uploads/**/*
+# Uploaded files – do not push user uploads
+wwwroot/uploads/
+BalonPark/wwwroot/uploads/
 
 # Database files
 *.db

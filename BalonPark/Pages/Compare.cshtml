@@ -18,7 +18,7 @@
         <h2 class="text-ink text-base font-medium">Ürünleri Karşılaştır</h2>
         <p class="text-gray-400 text-xs mt-0.5">Seçtiğiniz ürünlerin özelliklerini yan yana görün ve en uygun olanı seçin</p>
         <p class="text-gray-500 text-xs mt-1.5 flex items-center gap-1">
-            <i class="fa-solid fa-info-circle w-3.5"></i>
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
             Fiyatlar <strong class="text-ink">@Model.SelectedCurrency</strong> cinsinden gösteriliyor
             @if (Model.SelectedCurrency == "TL") { <span>(₺)</span> }
             else if (Model.SelectedCurrency == "USD") { <span>($)</span> }
@@ -30,12 +30,12 @@
     {
         <div class="text-center py-12 px-4 bg-gray-50 rounded-xl border border-gray-100">
             <div class="w-20 h-20 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
-                <i class="fa-solid fa-shuffle text-2xl text-white"></i>
+                <i data-lucide="shuffle" class="w-8 h-8 text-white"></i>
             </div>
             <h3 class="text-base font-medium text-ink mb-2">Karşılaştırma Listeniz Boş</h3>
             <p class="text-sm text-gray-500 mb-4">Ürünleri karşılaştırmak için ürün sayfalarından "Karşılaştır" butonuna tıklayın.</p>
             <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded bg-primary text-white font-medium text-sm hover:bg-primary-dark transition">
-                <i class="fa-solid fa-home"></i> Ana Sayfaya Dön
+                <i data-lucide="home" class="w-4 h-4 inline-block align-middle"></i> Ana Sayfaya Dön
             </a>
         </div>
     }
@@ -121,15 +121,13 @@
                             }
                         </tr>
                         <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
-                            <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Boyutlar</th>
+                            <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Özet</th>
                             @foreach (var item in Model.Products)
                             {
                                 <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top">
-                                    @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                                    @if (!string.IsNullOrEmpty(item.Product.Summary))
                                     {
-                                        <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-xs text-ink font-medium">
-                                            <i class="fa-solid fa-ruler-combined w-3.5"></i> @Html.Raw(item.Product.Dimensions)
-                                        </span>
+                                        <span class="text-xs text-ink">@Html.Raw(item.Product.Summary)</span>
                                     }
                                     else
                                     {
@@ -146,13 +144,13 @@
                                     @if (item.Product.Stock > 0)
                                     {
                                         <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                                            <i class="fa-solid fa-check w-3"></i> Stokta (@item.Product.Stock adet)
+                                            <i data-lucide="check" class="w-3 h-3 flex-shrink-0"></i> Stokta (@item.Product.Stock adet)
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
-                                            <i class="fa-solid fa-times w-3"></i> Stokta Yok
+                                            <i data-lucide="x" class="w-3 h-3 flex-shrink-0"></i> Stokta Yok
                                         </span>
                                     }
                                 </td>
@@ -170,13 +168,163 @@
                                 }
                             </tr>
                         }
+                        @if (Model.Products.Any(p => !string.IsNullOrEmpty(p.Product.TechnicalDescription)))
+                        {
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Teknik Açıklama</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top">
+                                        <div class="max-h-36 overflow-y-auto text-sm text-gray-500 pr-1">@Html.Raw(item.Product.TechnicalDescription ?? "<span class=\"text-gray-400\">-</span>")</div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                        @{
+                            var hasAnyTechnical = Model.Products.Any(p =>
+                                !string.IsNullOrEmpty(p.Product.InflatedLength) || !string.IsNullOrEmpty(p.Product.InflatedWidth) || !string.IsNullOrEmpty(p.Product.InflatedHeight) || p.Product.UserCount != null
+                                || p.Product.AssemblyTime != null || p.Product.RequiredPersonCount != null || !string.IsNullOrEmpty(p.Product.FanDescription) || p.Product.FanWeightKg != null
+                                || !string.IsNullOrEmpty(p.Product.PackagedLength) || !string.IsNullOrEmpty(p.Product.PackagedDepth) || p.Product.PackagedWeightKg != null || p.Product.PackagePalletCount != null
+                                || p.Product.HasCertificate == true || !string.IsNullOrEmpty(p.Product.WarrantyDescription) || !string.IsNullOrEmpty(p.Product.AfterSalesService));
+                        }
+                        @if (hasAnyTechnical)
+                        {
+                            <tr class="border-b border-gray-100 bg-primary/5">
+                                <th colspan="1" class="sticky left-0 z-10 bg-primary/10 border-r border-gray-200 px-4 py-3 text-left font-semibold text-ink text-sm">Ürün Teknik Bilgileri</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-2 min-w-[200px] max-w-[320px] align-top bg-primary/5"></td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-gray-50/50">
+                                <th class="sticky left-0 z-10 bg-gray-100 border-r border-gray-200 px-4 py-2 w-36 min-w-[140px] text-left font-medium text-gray-700 text-xs">Şişmiş ürün</th>
+                                @foreach (var item in Model.Products) { <td class="px-4 py-2 min-w-[200px] max-w-[320px] align-top bg-gray-50/30"></td> }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Uzunluk (şişmiş)</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.InflatedLength ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Genişlik (şişmiş)</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.InflatedWidth ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Yükseklik (şişmiş)</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.InflatedHeight ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Kullanıcı Sayısı</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.UserCount?.ToString() ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-gray-50/50">
+                                <th class="sticky left-0 z-10 bg-gray-100 border-r border-gray-200 px-4 py-2 w-36 min-w-[140px] text-left font-medium text-gray-700 text-xs">Montaj / demontaj</th>
+                                @foreach (var item in Model.Products) { <td class="px-4 py-2 min-w-[200px] max-w-[320px] align-top bg-gray-50/30"></td> }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Montaj ve demontaj süresi</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.AssemblyTime != null ? $"{item.Product.AssemblyTime} saat" : "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Gerekli kişi sayısı</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.RequiredPersonCount != null ? $"{item.Product.RequiredPersonCount} kişi" : "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Fan</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.FanDescription ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Fan ağırlığı (kg)</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.FanWeightKg?.ToString("N1") ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-gray-50/50">
+                                <th class="sticky left-0 z-10 bg-gray-100 border-r border-gray-200 px-4 py-2 w-36 min-w-[140px] text-left font-medium text-gray-700 text-xs">Paketlenmiş ürünün özellikleri</th>
+                                @foreach (var item in Model.Products) { <td class="px-4 py-2 min-w-[200px] max-w-[320px] align-top bg-gray-50/30"></td> }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Uzunluk (paket)</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.PackagedLength ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Derinlik (paket)</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.PackagedDepth ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Ağırlık (paket, kg)</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.PackagedWeightKg?.ToString("N1") ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Paket / palet sayısı</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.PackagePalletCount?.ToString() ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-gray-50/50">
+                                <th class="sticky left-0 z-10 bg-gray-100 border-r border-gray-200 px-4 py-2 w-36 min-w-[140px] text-left font-medium text-gray-700 text-xs">Genel</th>
+                                @foreach (var item in Model.Products) { <td class="px-4 py-2 min-w-[200px] max-w-[320px] align-top bg-gray-50/30"></td> }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Sertifika</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.HasCertificate == true ? "Sertifika var" : "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Garanti</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.WarrantyDescription ?? "-")</td>
+                                }
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                                <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">Garanti Sonrası Hizmet</th>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-sm text-ink">@(item.Product.AfterSalesService ?? "-")</td>
+                                }
+                            </tr>
+                        }
                         <tr class="border-b border-gray-100 print:hidden">
                             <th class="sticky left-0 z-10 bg-gray-50 border-r border-gray-200 px-4 py-3 w-36 min-w-[140px] text-left font-semibold text-ink text-xs">İşlem</th>
                             @foreach (var item in Model.Products)
                             {
                                 <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top text-center">
-                                    <button type="button" onclick="removeFromCompare('@item.Product.Slug')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded font-medium text-sm bg-red-600 text-white hover:bg-red-700 transition">
-                                        <i class="fa-solid fa-times"></i> Listeden Çıkar
+                                    <button type="button" class="compare-remove-btn inline-flex items-center gap-1.5 px-3 py-2 rounded font-medium text-sm bg-red-600 text-white hover:bg-red-700 transition" data-slug="@item.Product.Slug">
+                                        <i data-lucide="x" class="w-4 h-4"></i> Listeden Çıkar
                                     </button>
                                 </td>
                             }
@@ -188,10 +336,10 @@
 
         <div class="flex justify-center gap-3 flex-wrap p-4 bg-white rounded-xl border border-gray-100 print:hidden">
             <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded font-medium text-sm bg-blue-600 text-white hover:bg-blue-700 transition">
-                <i class="fa-solid fa-print"></i> Yazdır
+                <i data-lucide="printer" class="w-4 h-4"></i> Yazdır
             </button>
             <button type="button" onclick="clearAllCompare()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded font-medium text-sm bg-red-600 text-white hover:bg-red-700 transition">
-                <i class="fa-solid fa-trash"></i> Tümünü Temizle
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Tümünü Temizle
             </button>
         </div>
 
@@ -199,7 +347,7 @@
         {
             <div class="flex gap-4 p-4 bg-white rounded-xl border border-gray-100">
                 <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white">
-                    <i class="fas fa-info-circle text-lg"></i>
+                    <i data-lucide="info" class="w-5 h-5"></i>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-ink mb-1">Daha Fazla Ürün Ekleyebilirsiniz</h3>
@@ -212,31 +360,41 @@
 
 @section Scripts {
 <script>
-    function removeFromCompare(slug) {
-        if (!window.favoritesAndCompare) return;
-        if (!confirm('Bu ürünü karşılaştırmadan kaldırmak istediğinize emin misiniz?')) return;
-        window.favoritesAndCompare.removeFromCompareBySlug(slug);
-        var compareList = window.favoritesAndCompare.getCompareList();
-        if (compareList.length === 0) {
+    (function() {
+        function removeFromCompare(slug) {
+            if (!window.favoritesAndCompare) return;
+            if (!confirm('Bu ürünü karşılaştırmadan kaldırmak istediğinize emin misiniz?')) return;
+            window.favoritesAndCompare.removeFromCompareBySlug(slug);
+            var compareList = window.favoritesAndCompare.getCompareList();
+            if (compareList.length === 0) {
+                window.location.href = '/';
+            } else {
+                var newSlugs = compareList.map(function(p) { return p.slug; }).filter(function(s) { return s; }).join(':');
+                window.location.href = '/Compare/' + newSlugs;
+            }
+        }
+        function clearAllCompare() {
+            if (!window.favoritesAndCompare) {
+                window.location.href = '/';
+                return;
+            }
+            if (!confirm('Tüm karşılaştırma listesini temizlemek istediğinize emin misiniz?')) return;
+            window.favoritesAndCompare.clearCompare();
             window.location.href = '/';
-        } else {
-            var newSlugs = compareList.map(function(p) { return p.slug; }).filter(function(s) { return s; }).join(':');
-            window.location.href = '/Compare/' + newSlugs;
         }
-    }
-    function clearAllCompare() {
-        if (!window.favoritesAndCompare) {
-            window.location.href = '/';
-            return;
-        }
-        if (!confirm('Tüm karşılaştırma listesini temizlemek istediğinize emin misiniz?')) return;
-        window.favoritesAndCompare.clearCompare();
-        window.location.href = '/';
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.favoritesAndCompare) {
-            window.favoritesAndCompare.syncUrlWithStorage();
-        }
-    });
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.favoritesAndCompare) {
+                window.favoritesAndCompare.syncUrlWithStorage();
+            }
+            document.querySelectorAll('.compare-remove-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var slug = btn.getAttribute('data-slug');
+                    if (slug) removeFromCompare(slug);
+                });
+            });
+        });
+        window.removeFromCompare = removeFromCompare;
+        window.clearAllCompare = clearAllCompare;
+    })();
 </script>
 }

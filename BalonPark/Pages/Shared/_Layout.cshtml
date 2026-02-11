@@ -165,8 +165,10 @@
     <!-- Tailwind CSS (built; run "npm run build:css" in BalonPark to rebuild) -->
     <link href="~/css/tailwind.css" rel="stylesheet">
     <link href="~/css/favorites-compare.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+    <!-- Swiper (carousel) - required for ProductDetail gallery and category slider -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <!-- Lucide Icons (best practice: fixed version, tree-shake via data-lucide) -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.526.0/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
     <!-- Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -198,7 +200,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="max-w-7xl mx-auto px-4 py-2.5">
             <div class="flex flex-wrap items-center justify-between gap-2.5">
                 <button type="button" class="xl:hidden inline-flex items-center justify-center w-9 h-9 rounded bg-gray-100 text-ink hover:bg-gray-200 transition" onclick="toggleCategoryMenu()" aria-label="Menü">
-                    <i class="fas fa-bars text-sm"></i>
+                    <i data-lucide="menu" class="w-4 h-4"></i>
                 </button>
 
                 <a asp-page="/Index" class="xl:hidden flex-shrink-0">
@@ -207,33 +209,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <div class="flex-1 flex items-center gap-2.5 min-w-0 max-w-2xl">
                     <div class="hidden xl:flex items-center gap-1 rounded bg-gray-50 p-1">
-                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="TL" onclick="setCurrency('TL')"><i class="fa-solid fa-turkish-lira-sign"></i></button>
-                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="USD" onclick="setCurrency('USD')"><i class="fa-solid fa-dollar-sign"></i></button>
-                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="EUR" onclick="setCurrency('EUR')"><i class="fa-solid fa-euro-sign"></i></button>
+                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="TL" onclick="setCurrency('TL')"><i data-lucide="badge-turkish-lira" class="w-4 h-4"></i></button>
+                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="USD" onclick="setCurrency('USD')"><i data-lucide="dollar-sign" class="w-4 h-4"></i></button>
+                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="EUR" onclick="setCurrency('EUR')"><i data-lucide="euro" class="w-4 h-4"></i></button>
                     </div>
                     <form action="/Search" method="get" class="flex-1 min-w-0">
                         <div class="relative">
                             <input type="search" name="q" placeholder="Ürün veya kategori ara..." class="w-full rounded border border-gray-200 pl-3.5 pr-9 py-2 text-sm text-ink placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary">
-                            <button type="submit" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition"><i class="fas fa-search text-sm"></i></button>
+                            <button type="submit" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition"><i data-lucide="search" class="w-4 h-4"></i></button>
                         </div>
                     </form>
                 </div>
 
                 <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <a href="#" onclick="showFavorites(); return false;" class="hidden sm:flex items-center gap-1.5 py-2 px-2.5 rounded hover:bg-gray-50 text-ink hover:text-primary transition text-sm">
-                        <i class="fa-regular fa-heart text-base"></i>
+                        <i data-lucide="heart" class="w-4 h-4 lucide-fav-header"></i>
                         <span class="favorites-count-text text-gray-500">0</span>
                     </a>
                     <a href="#" onclick="showCompare(); return false;" class="hidden sm:flex items-center gap-1.5 py-2 px-2.5 rounded hover:bg-gray-50 text-ink hover:text-primary transition text-sm">
-                        <i class="fa-solid fa-shuffle text-base"></i>
+                        <i data-lucide="shuffle" class="w-4 h-4"></i>
                         <span class="compare-count-text text-gray-500">0</span>
                     </a>
                     <a href="tel:+905336355039" class="flex items-center gap-1.5 py-2 px-2.5 rounded hover:bg-gray-50 text-ink transition text-sm">
-                        <i class="fas fa-phone text-base"></i>
+                        <i data-lucide="phone" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">+90 533 635 50 39</span>
                     </a>
                     <a asp-page="/Iletisim" class="flex items-center gap-1.5 py-2 px-2.5 rounded bg-primary text-white hover:bg-primary-dark transition font-medium text-sm">
-                        <i class="fas fa-envelope text-sm"></i>
+                        <i data-lucide="mail" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">İletişim</span>
                     </a>
                 </div>
@@ -246,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <aside id="sidebar-col" class="sidebar-col w-72 xl:w-60 flex-shrink-0 bg-white border-r border-gray-100 xl:border-r xl:shadow-none shadow-xl overflow-y-auto fixed inset-y-0 left-0 z-[50] xl:static xl:inset-auto transition-transform duration-300 -translate-x-full xl:translate-x-0" aria-label="Kategoriler">
                     <div class="relative pt-14 xl:pt-4 pb-5 px-4 xl:px-0 xl:pr-4 h-full overflow-y-auto overflow-x-hidden">
                         <button type="button" class="xl:hidden absolute top-3 right-3 w-9 h-9 rounded-full bg-gray-100 text-ink flex items-center justify-center hover:bg-gray-200 transition" onclick="toggleCategoryMenu()" aria-label="Kapat">
-                            <i class="fas fa-times text-sm"></i>
+                            <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                         <a asp-page="/Index" class="hidden xl:block mb-4">
                             <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-auto w-auto" loading="eager">
@@ -256,10 +258,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <div class="xl:hidden mb-4 mt-4">
                             <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Sayfalar</p>
                             <ul class="space-y-1">
-                                <li><a asp-page="/Index" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i class="fas fa-home w-5 text-center text-gray-400"></i>Ana Sayfa</a></li>
-                                <li><a asp-page="/Hakkimizda" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i class="fas fa-info-circle w-5 text-center text-gray-400"></i>Hakkımızda</a></li>
-                                <li><a asp-page="/Blog" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i class="fas fa-blog w-5 text-center text-gray-400"></i>Blog</a></li>
-                                <li><a asp-page="/Iletisim" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i class="fas fa-envelope w-5 text-center text-gray-400"></i>İletişim</a></li>
+                                <li><a asp-page="/Index" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i data-lucide="home" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Ana Sayfa</a></li>
+                                <li><a asp-page="/Hakkimizda" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i data-lucide="info" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Hakkımızda</a></li>
+                                <li><a asp-page="/Blog" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i data-lucide="book-open" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Blog</a></li>
+                                <li><a asp-page="/Iletisim" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i data-lucide="mail" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>İletişim</a></li>
                             </ul>
                         </div>
 
@@ -280,14 +282,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                                 }
                                                 else
                                                 {
-                                                    <span class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400 text-xs"><i class="fas fa-folder"></i></span>
+                                                    <span class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400"><i data-lucide="folder" class="w-4 h-4"></i></span>
                                                 }
                                                 <span class="category-name text-sm font-medium text-ink truncate hover:text-primary">@Html.Raw(category.Name)</span>
                                             </a>
                                             @if (hasSubCategories)
                                             {
                                                 <button class="category-toggle w-8 h-8 flex-shrink-0 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-primary transition text-xs" type="button" data-category-id="@category.Id" onclick="toggleSubCategories(event, @category.Id)" aria-expanded="false">
-                                                    <i class="fas fa-chevron-down transition-transform duration-200"></i>
+                                                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200"></i>
                                                 </button>
                                             }
                                         </div>
@@ -317,14 +319,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <div class="xl:hidden mt-4 pt-4 border-t border-gray-100">
                             <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Hızlı Erişim</p>
                             <ul class="space-y-1 mb-4">
-                                <li><a href="#" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:bg-gray-50 rounded" onclick="showFavorites(); return false;"><i class="fa-regular fa-heart w-5 text-center text-gray-400"></i>Favoriler <span class="favorites-count-text text-gray-400">0</span></a></li>
-                                <li><a href="#" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:bg-gray-50 rounded" onclick="showCompare(); return false;"><i class="fa-solid fa-shuffle w-5 text-center text-gray-400"></i>Karşılaştır <span class="compare-count-text text-gray-400">0</span></a></li>
+                                <li><a href="#" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:bg-gray-50 rounded" onclick="showFavorites(); return false;"><i data-lucide="heart" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Favoriler <span class="favorites-count-text text-gray-400">0</span></a></li>
+                                <li><a href="#" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:bg-gray-50 rounded" onclick="showCompare(); return false;"><i data-lucide="shuffle" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>Karşılaştır <span class="compare-count-text text-gray-400">0</span></a></li>
                             </ul>
                             <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Para Birimi</p>
                             <div class="flex gap-2">
-                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="TL" onclick="setCurrency('TL')"><i class="fa-solid fa-turkish-lira-sign"></i> TL</button>
-                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="USD" onclick="setCurrency('USD')"><i class="fa-solid fa-dollar-sign"></i> USD</button>
-                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="EUR" onclick="setCurrency('EUR')"><i class="fa-solid fa-euro-sign"></i> EUR</button>
+                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="TL" onclick="setCurrency('TL')"><i data-lucide="badge-turkish-lira" class="w-4 h-4"></i> TL</button>
+                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="USD" onclick="setCurrency('USD')"><i data-lucide="dollar-sign" class="w-4 h-4"></i> USD</button>
+                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="EUR" onclick="setCurrency('EUR')"><i data-lucide="euro" class="w-4 h-4"></i> EUR</button>
                             </div>
                         </div>
                     </div>
@@ -357,11 +359,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 @if (!string.IsNullOrEmpty(siteSettings?.Facebook) || !string.IsNullOrEmpty(siteSettings?.Instagram) || !string.IsNullOrEmpty(siteSettings?.Twitter) || !string.IsNullOrEmpty(siteSettings?.LinkedIn) || !string.IsNullOrEmpty(siteSettings?.YouTube))
                 {
                     <div class="flex gap-4 text-gray-500">
-                        @if (!string.IsNullOrEmpty(siteSettings?.Facebook)) { <a href="@siteSettings.Facebook" target="_blank" rel="noopener" class="hover:text-primary"><i class="fab fa-facebook text-lg"></i></a> }
-                        @if (!string.IsNullOrEmpty(siteSettings?.Instagram)) { <a href="@siteSettings.Instagram" target="_blank" rel="noopener" class="hover:text-primary"><i class="fab fa-instagram text-lg"></i></a> }
-                        @if (!string.IsNullOrEmpty(siteSettings?.Twitter)) { <a href="@siteSettings.Twitter" target="_blank" rel="noopener" class="hover:text-primary"><i class="fab fa-twitter text-lg"></i></a> }
-                        @if (!string.IsNullOrEmpty(siteSettings?.LinkedIn)) { <a href="@siteSettings.LinkedIn" target="_blank" rel="noopener" class="hover:text-primary"><i class="fab fa-linkedin text-lg"></i></a> }
-                        @if (!string.IsNullOrEmpty(siteSettings?.YouTube)) { <a href="@siteSettings.YouTube" target="_blank" rel="noopener" class="hover:text-primary"><i class="fab fa-youtube text-lg"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.Facebook)) { <a href="@siteSettings.Facebook" target="_blank" rel="noopener" class="hover:text-primary" aria-label="Facebook"><i data-lucide="facebook" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.Instagram)) { <a href="@siteSettings.Instagram" target="_blank" rel="noopener" class="hover:text-primary" aria-label="Instagram"><i data-lucide="instagram" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.Twitter)) { <a href="@siteSettings.Twitter" target="_blank" rel="noopener" class="hover:text-primary" aria-label="Twitter"><i data-lucide="twitter" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.LinkedIn)) { <a href="@siteSettings.LinkedIn" target="_blank" rel="noopener" class="hover:text-primary" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.YouTube)) { <a href="@siteSettings.YouTube" target="_blank" rel="noopener" class="hover:text-primary" aria-label="YouTube"><i data-lucide="youtube" class="w-5 h-5"></i></a> }
                     </div>
                 }
             </div>
@@ -403,7 +405,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- Favorites & Compare: load first so showFavorites/showCompare are defined -->
     <script src="~/js/favorites-compare.js"></script>
     <script src="~/js/site.js" defer></script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) { lucide.createIcons(); }
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

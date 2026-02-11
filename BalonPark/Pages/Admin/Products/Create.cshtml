@@ -33,79 +33,70 @@
     <form method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
         
-        <div class="space-y-6">
-            <!-- Category and SubCategory -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label asp-for="Product.CategoryId" class="block text-sm font-medium text-gray-700 mb-2">
-                        Kategori <span class="text-red-500">*</span>
-                    </label>
-                    <select asp-for="Product.CategoryId" id="categoryDropdown" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
-                        <option value="0">Kategori seçin...</option>
-                        @foreach (var category in Model.Categories)
-                        {
-                            <option value="@category.Id">@Html.Raw(category.Name)</option>
-                        }
-                    </select>
-                    <span asp-validation-for="Product.CategoryId" class="text-red-500 text-sm mt-1 block"></span>
+        <div class="space-y-8">
+            <!-- 1. Temel Bilgiler -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-white">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Temel Bilgiler</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label asp-for="Product.CategoryId" class="block text-sm font-medium text-gray-700 mb-2">Kategori <span class="text-red-500">*</span></label>
+                            <select asp-for="Product.CategoryId" id="categoryDropdown" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                                <option value="0">Kategori seçin...</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.Id">@Html.Raw(category.Name)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Product.CategoryId" class="text-red-500 text-sm mt-1 block"></span>
+                        </div>
+                        <div>
+                            <label asp-for="Product.SubCategoryId" class="block text-sm font-medium text-gray-700 mb-2">Alt Kategori <span class="text-red-500">*</span></label>
+                            <select asp-for="Product.SubCategoryId" id="subCategoryDropdown" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                                <option value="0">Önce kategori seçin...</option>
+                            </select>
+                            <span asp-validation-for="Product.SubCategoryId" class="text-red-500 text-sm mt-1 block"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label asp-for="Product.Name" class="block text-sm font-medium text-gray-700 mb-2">Ürün Adı <span class="text-red-500">*</span></label>
+                        <input type="text" asp-for="Product.Name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: Şişme Oyun Parkı 5x5">
+                        <span asp-validation-for="Product.Name" class="text-red-500 text-sm mt-1 block"></span>
+                    </div>
                 </div>
+            </section>
 
-                <div>
-                    <label asp-for="Product.SubCategoryId" class="block text-sm font-medium text-gray-700 mb-2">
-                        Alt Kategori <span class="text-red-500">*</span>
-                    </label>
-                    <select asp-for="Product.SubCategoryId" id="subCategoryDropdown" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
-                        <option value="0">Önce kategori seçin...</option>
-                    </select>
-                    <span asp-validation-for="Product.SubCategoryId" class="text-red-500 text-sm mt-1 block"></span>
+            <!-- 2. İçerik / Açıklamalar -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-white">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">İçerik ve Açıklamalar</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="Product.Description" class="block text-sm font-medium text-gray-700 mb-2">Açıklama (En az 140 karakter) <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <textarea asp-for="Product.Description" id="productDescription" rows="4" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Ürün hakkında detaylı açıklama..."></textarea>
+                            <button type="button" id="aiGenerateBtn" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors duration-200 whitespace-nowrap flex items-center gap-2 self-start">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                AI ile Doldur
+                            </button>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500"><span id="charCount">0</span> / 140 karakter (minimum)</div>
+                        <span asp-validation-for="Product.Description" class="text-red-500 text-sm mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Product.Summary" class="block text-sm font-medium text-gray-700 mb-2">Özet</label>
+                        <textarea asp-for="Product.Summary" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Kısa özet (isteğe bağlı)"></textarea>
+                        <small class="text-gray-500 text-sm mt-1 block">Kart ve detay sayfasında görünür.</small>
+                    </div>
+                    <div>
+                        <label asp-for="Product.TechnicalDescription" class="block text-sm font-medium text-gray-700 mb-2">Teknik Açıklama (HTML)</label>
+                        <textarea asp-for="Product.TechnicalDescription" id="technicalDescriptionEditor" rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Teknik özellikler, HTML kullanılabilir..."></textarea>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Product Name -->
-            <div>
-                <label asp-for="Product.Name" class="block text-sm font-medium text-gray-700 mb-2">
-                    Ürün Adı <span class="text-red-500">*</span>
-                </label>
-                <input type="text" asp-for="Product.Name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: iPhone 15 Pro">
-                <span asp-validation-for="Product.Name" class="text-red-500 text-sm mt-1 block"></span>
-            </div>
-
-            <!-- Description with AI -->
-            <div>
-                <label asp-for="Product.Description" class="block text-sm font-medium text-gray-700 mb-2">
-                    Özet (En az 140 karakter) <span class="text-red-500">*</span>
-                </label>
-                <div class="flex gap-2">
-                    <textarea asp-for="Product.Description" id="productDescription" rows="3" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Ürün hakkında detaylı özet (en az 140 karakter)..."></textarea>
-                    <button type="button" id="aiGenerateBtn" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors duration-200 whitespace-nowrap flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                        </svg>
-                        AI ile Doldur
-                    </button>
-                </div>
-                <div class="mt-2 text-sm" id="charCountMessage">
-                    <span id="charCount">0</span> / 140 karakter (minimum)
-                </div>
-                <span asp-validation-for="Product.Description" class="text-red-500 text-sm mt-1 block"></span>
-            </div>
-
-            <!-- Dimensions -->
-            <div>
-                <label asp-for="Product.Dimensions" class="block text-sm font-medium text-gray-700 mb-2">Ölçü</label>
-                <input type="text" asp-for="Product.Dimensions" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 14x6x6m">
-                <small class="text-gray-500 text-sm mt-1 block">Ürünün boyutlarını girin (uzunlukxgenişlikxyükseklik formatında)</small>
-            </div>
-
-            <!-- Technical Description -->
-            <div>
-                <label asp-for="Product.TechnicalDescription" class="block text-sm font-medium text-gray-700 mb-2">Teknik Açıklama</label>
-                <textarea asp-for="Product.TechnicalDescription" id="technicalDescriptionEditor" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Ürünün teknik özellikleri ve detaylı açıklaması..."></textarea>
-            </div>
-
-            <!-- Ürün Teknik Bilgiler -->
-            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50/50">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Ürün Teknik Bilgiler</h3>
+            <!-- 3. Ürün Teknik Bilgileri -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-gray-50/50">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Ürün Teknik Bilgileri</h2>
 
                 <div class="space-y-4">
                     <div>
@@ -134,12 +125,12 @@
                         <h4 class="text-sm font-medium text-gray-700 mb-2">Montaj / demontaj</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
-                                <label asp-for="Product.AssemblyTime" class="block text-xs text-gray-600 mb-1">Montaj ve demontaj süresi</label>
-                                <input type="text" asp-for="Product.AssemblyTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: Yaklaşık 10 dakika">
+                                <label asp-for="Product.AssemblyTime" class="block text-xs text-gray-600 mb-1">Montaj ve demontaj süresi (saat)</label>
+                                <input type="number" asp-for="Product.AssemblyTime" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
                             </div>
                             <div>
                                 <label asp-for="Product.RequiredPersonCount" class="block text-xs text-gray-600 mb-1">Gerekli kişi sayısı</label>
-                                <input type="text" asp-for="Product.RequiredPersonCount" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2 kişi">
+                                <input type="number" asp-for="Product.RequiredPersonCount" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
                             </div>
                             <div>
                                 <label asp-for="Product.FanDescription" class="block text-xs text-gray-600 mb-1">Fan</label>
@@ -193,37 +184,41 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Price and Stock -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label asp-for="Product.Price" class="block text-sm font-medium text-gray-700 mb-2">
-                        Fiyat (₺) <span class="text-red-500">*</span>
-                    </label>
-                    <input type="number" asp-for="Product.Price" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="0.00">
+            <!-- 4. Fiyat ve Stok -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-white">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Fiyat ve Stok</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Product.Price" class="block text-sm font-medium text-gray-700 mb-2">Fiyat (₺) <span class="text-red-500">*</span></label>
+                        <input type="number" asp-for="Product.Price" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label asp-for="Product.Stock" class="block text-sm font-medium text-gray-700 mb-2">Stok <span class="text-red-500">*</span></label>
+                        <input type="number" asp-for="Product.Stock" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="0">
+                    </div>
                 </div>
+            </section>
 
+            <!-- 5. Görseller -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-white">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Görseller</h2>
                 <div>
-                    <label asp-for="Product.Stock" class="block text-sm font-medium text-gray-700 mb-2">
-                        Stok <span class="text-red-500">*</span>
-                    </label>
-                    <input type="number" asp-for="Product.Stock" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="0">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ürün Resimleri</label>
+                    <input type="file" name="Images" accept="image/*" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                    <small class="text-gray-500 text-sm mt-1 block">Birden fazla resim seçebilirsiniz. İlk resim ana resim olur. (350px, 1000px ve orijinal boyutlarda kaydedilir)</small>
                 </div>
-            </div>
+            </section>
 
-            <!-- Images -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Ürün Resimleri</label>
-                <input type="file" name="Images" accept="image/*" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
-                <small class="text-gray-500 text-sm mt-1 block">Birden fazla resim seçebilirsiniz. İlk resim ana resim olacaktır. (350px, 1000px ve orijinal boyutlarda kaydedilecek)</small>
-            </div>
-
-            <!-- Is Active -->
-            <div class="flex items-center">
-                <input type="checkbox" asp-for="Product.IsActive" checked class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
-                <label asp-for="Product.IsActive" class="ml-2 block text-sm text-gray-900">Aktif</label>
-            </div>
+            <!-- 6. Yayın -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-white">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Yayın</h2>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" asp-for="Product.IsActive" checked class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                    <label asp-for="Product.IsActive" class="text-sm text-gray-700">Ürün aktif (sitede listelenir)</label>
+                </div>
+            </section>
         </div>
 
         <!-- Submit Buttons -->
@@ -357,7 +352,7 @@
                                 editor.setData(response.data.technicalDescription);
                             }
                         }
-                        if (response.data.dimensions) $('#Product_Dimensions').val(response.data.dimensions);
+                        if (response.data.summary) $('#Product_Summary').val(response.data.summary);
                         if (response.data.suggestedPrice) $('#Product_Price').val(response.data.suggestedPrice);
                         if (response.data.suggestedStock) $('#Product_Stock').val(response.data.suggestedStock);
 

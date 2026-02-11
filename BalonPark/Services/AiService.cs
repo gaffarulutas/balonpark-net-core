@@ -30,7 +30,7 @@ public class AiService(HttpClient httpClient, ILogger<AiService> logger, IConfig
             }
 
             // ChatGPT API ile gerçek içerik oluştur
-            var prompt = $"Ürün açıklaması: {productDescription}. Bu ürün için Türkçe olarak JSON formatında şu bilgileri oluştur: {{\"name\": \"ürün adı\", \"description\": \"en az 140 karakter olan detaylı açıklama\", \"technicalDescription\": \"HTML formatında oldukça uzun ve detaylı teknik açıklama (en az 500 karakter, başlıklar için <h3>, listeler için <ul><li>, kalın yazı için <strong>, paragraflar için <p> kullan, 'Ürün Özellikleri' başlığı kullanma)\", \"dimensions\": \"boyutlar sadece sayıx-sayıx-sayı formatında (örn: 14x6x6m)\", \"suggestedPrice\": 100, \"suggestedStock\": 10}}. Sadece JSON formatında yanıt ver, başka açıklama ekleme.";
+            var prompt = $"Ürün açıklaması: {productDescription}. Bu ürün için Türkçe olarak JSON formatında şu bilgileri oluştur: {{\"name\": \"ürün adı\", \"description\": \"en az 140 karakter olan detaylı açıklama\", \"technicalDescription\": \"HTML formatında oldukça uzun ve detaylı teknik açıklama (en az 500 karakter, başlıklar için <h3>, listeler için <ul><li>, kalın yazı için <strong>, paragraflar için <p> kullan, 'Ürün Özellikleri' başlığı kullanma)\", \"summary\": \"ürün kartı ve detay sayfasında görünecek kısa özet (en fazla 1-2 cümle, örn: Dayanıklı PVC, açık/hava koşullarına uygun, 3–12 yaş)\", \"suggestedPrice\": 100, \"suggestedStock\": 10}}. Sadece JSON formatında yanıt ver, başka açıklama ekleme.";
 
             var requestBody = new
             {

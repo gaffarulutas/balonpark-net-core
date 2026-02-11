@@ -97,7 +97,7 @@ header.fixed-header {
     flex-direction: column;
 }
 
-/* Ürün Kartlarında Butonlar */
+/* Ürün Kartlarında Butonlar (hover: compare & favori) */
 .product-box {
     position: relative;
     overflow: visible;
@@ -147,6 +147,76 @@ header.fixed-header {
 
 .product-box .product-actions i {
     font-size: 14px;
+}
+
+/* Ürün kartı hover: Favori & Karşılaştır – büyük, tıklanabilir butonlar */
+.product-card .product-card-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.2s ease;
+}
+
+.product-card:hover .product-card-actions {
+    opacity: 1;
+}
+
+.product-card .product-card-actions .favorite-btn,
+.product-card .product-card-actions .compare-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    color: #6b7280;
+    transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.product-card .product-card-actions .favorite-btn:hover,
+.product-card .product-card-actions .compare-btn:hover {
+    background: #fff;
+    color: var(--color-primary, #6262a6);
+    transform: scale(1.08);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.product-card .product-card-actions .favorite-btn.active {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+
+.product-card .product-card-actions .compare-btn.active {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #2563eb;
+}
+
+.product-card .product-card-actions .favorite-btn i,
+.product-card .product-card-actions .compare-btn i,
+.product-card .product-card-actions .favorite-btn svg,
+.product-card .product-card-actions .compare-btn svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.product-card .product-card-actions .btn-text {
+    display: none;
 }
 
 /* Modern Product Card: Favori/Karşılaştır resmin üstünde sağ üst, hover'da görünür */
@@ -365,6 +435,13 @@ header.fixed-header {
 
 .favorites-notification i {
     font-size: 16px;
+}
+
+/* Ürün kartı aksiyonları: mobilde her zaman görünsün (hover yok) */
+@media (max-width: 768px) {
+    .product-card .product-card-actions {
+        opacity: 1;
+    }
 }
 
 /* Responsive */
@@ -805,6 +882,28 @@ header.fixed-header {
 /* Modal overlay: header ve kategorilerin (sidebar) üstünde kalması için */
 .modal-overlay {
     z-index: 99999 !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* Modal açılış/kapanış animasyonu + blur arka plan */
+.modal-overlay {
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+}
+.modal-overlay.modal-overlay-open {
+    opacity: 1;
+}
+.modal-panel,
+.modal-panel-enter {
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+.modal-panel.modal-panel-open,
+.modal-panel-enter.modal-panel-open {
+    transform: scale(1);
+    opacity: 1;
 }
 
 /* Modal Styles */

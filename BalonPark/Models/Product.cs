@@ -9,7 +9,8 @@ public class Product
     public string Slug { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? TechnicalDescription { get; set; }
-    public string? Dimensions { get; set; }
+    /// <summary>Kısa özet (ürün kartı ve detay özet alanında gösterilir).</summary>
+    public string? Summary { get; set; }
     public decimal Price { get; set; }
     public decimal UsdPrice { get; set; }
     public decimal EuroPrice { get; set; }
@@ -25,9 +26,9 @@ public class Product
     public string? InflatedHeight { get; set; }
     public int? UserCount { get; set; }
 
-    // Montaj / demontaj (Assembly / disassembly)
-    public string? AssemblyTime { get; set; }
-    public string? RequiredPersonCount { get; set; }
+    // Montaj / demontaj (Assembly / disassembly) - süre saat (int), kişi sayısı (int)
+    public int? AssemblyTime { get; set; }
+    public int? RequiredPersonCount { get; set; }
     public string? FanDescription { get; set; }
     public decimal? FanWeightKg { get; set; }
 

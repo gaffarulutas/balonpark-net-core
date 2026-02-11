@@ -103,7 +103,7 @@
     <nav class="breadcrumb-nav">
         <div class="breadcrumb-container">
             <a href="/" class="breadcrumb-item">
-                <i class="fas fa-home"></i>
+                <i data-lucide="home" class="w-4 h-4"></i>
                 <span>Ana Sayfa</span>
             </a>
             <span class="breadcrumb-separator">/</span>
@@ -120,7 +120,7 @@
                     <div class="col-md-6 mb-4">
                         <div class="iletisim-contact-card h-100">
                             <div class="iletisim-contact-icon">
-                                <i class="fas fa-map-marker-alt"></i>
+                                <i data-lucide="map-pin" class="w-5 h-5"></i>
                             </div>
                             <div class="iletisim-contact-content">
                                 <h4>Adresimiz</h4>
@@ -148,7 +148,7 @@
                     <div class="col-md-6 mb-4">
                         <div class="iletisim-contact-card h-100">
                             <div class="iletisim-contact-icon">
-                                <i class="fas fa-envelope"></i>
+                                <i data-lucide="mail" class="w-5 h-5"></i>
                             </div>
                             <div class="iletisim-contact-content">
                                 <h4>E-posta</h4>
@@ -161,7 +161,7 @@
                     <div class="col-md-6 mb-4">
                         <div class="iletisim-contact-card h-100">
                             <div class="iletisim-contact-icon">
-                                <i class="fas fa-phone"></i>
+                                <i data-lucide="phone" class="w-5 h-5"></i>
                             </div>
                             <div class="iletisim-contact-content">
                                 <h4>Telefon</h4>
@@ -184,7 +184,7 @@
                     <div class="col-md-6 mb-4">
                         <div class="iletisim-contact-card h-100">
                             <div class="iletisim-contact-icon">
-                                <i class="fab fa-whatsapp"></i>
+                                <i data-lucide="message-circle" class="w-5 h-5"></i>
                             </div>
                             <div class="iletisim-contact-content">
                                 <h4>WhatsApp</h4>
@@ -231,7 +231,7 @@
                     @if (Model.IsEmailSent)
                     {
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>
+                            <i data-lucide="check-circle" class="w-5 h-5 me-2"></i>
                             @TempData["SuccessMessage"]
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
@@ -240,7 +240,7 @@
                     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <i data-lucide="circle-alert" class="w-5 h-5 me-2"></i>
                             @Model.ErrorMessage
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
@@ -291,7 +291,7 @@
 
                             <div class="text-center">
                                 <button type="submit" class="btn iletisim-submit-btn">
-                                    <i class="fas fa-paper-plane me-2"></i>
+                                    <i data-lucide="send" class="w-5 h-5 me-2"></i>
                                     Mesajı Gönder
                                 </button>
                             </div>

@@ -57,6 +57,7 @@
         }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.526.0/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="h-screen overflow-hidden bg-gray-50">
@@ -452,6 +453,11 @@
         });
     </script>
     
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) { lucide.createIcons(); }
+        });
+    </script>
     @await RenderSectionAsync("Styles", required: false)
     @await RenderSectionAsync("Scripts", required: false)
 </body>

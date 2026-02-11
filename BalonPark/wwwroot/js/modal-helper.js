@@ -55,7 +55,7 @@
         var closeLabel = options.closeLabel || 'Kapat';
         var onClose = typeof options.onClose === 'function' ? options.onClose : function () {};
         var onContentReady = typeof options.onContentReady === 'function' ? options.onContentReady : function () {};
-        var contentClassName = options.contentClassName || 'bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col focus:outline-none';
+        var contentClassName = options.contentClassName || 'bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col focus:outline-none modal-panel';
 
         var previousActive = document.activeElement;
         var overlay = document.createElement('div');
@@ -63,12 +63,12 @@
         overlay.setAttribute('aria-modal', 'true');
         overlay.setAttribute('aria-labelledby', titleId);
         overlay.setAttribute('aria-label', title || 'Modal');
-        overlay.className = 'fixed inset-0 flex items-center justify-center p-4 bg-black/50 modal-overlay';
+        overlay.className = 'fixed inset-0 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm modal-overlay modal-overlay-enter';
         overlay.style.zIndex = '99999';
         overlay.tabIndex = -1;
 
         overlay.innerHTML =
-            '<div class="' + contentClassName + '" tabindex="-1">' +
+            '<div class="' + contentClassName + ' modal-panel-enter" tabindex="-1">' +
             '  <div class="flex justify-between items-center px-4 py-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">' +
             '    <h2 id="' + titleId + '" class="text-lg font-semibold text-gray-900">' + escapeHtml(title) + '</h2>' +
             '    <button type="button" class="modal-close-btn w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors" aria-label="' + escapeHtml(closeLabel) + '">&times;</button>' +
@@ -87,12 +87,16 @@
         }
 
         function closeModal() {
-            overlay.remove();
-            document.body.style.overflow = '';
-            if (previousActive && typeof previousActive.focus === 'function') {
-                try { previousActive.focus(); } catch (_) {}
-            }
-            onClose();
+            overlay.classList.remove('modal-overlay-open');
+            if (panel) panel.classList.remove('modal-panel-open');
+            setTimeout(function () {
+                overlay.remove();
+                document.body.style.overflow = '';
+                if (previousActive && typeof previousActive.focus === 'function') {
+                    try { previousActive.focus(); } catch (_) {}
+                }
+                onClose();
+            }, 200);
         }
 
         var closeBtn = overlay.querySelector('.modal-close-btn');
@@ -111,13 +115,20 @@
         document.body.style.overflow = 'hidden';
         document.body.appendChild(overlay);
 
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                overlay.classList.add('modal-overlay-open');
+                if (panel) panel.classList.add('modal-panel-open');
+            });
+        });
+
         if (closeBtn && typeof closeBtn.focus === 'function') {
             closeBtn.focus();
         } else {
             overlay.focus();
         }
 
-        onContentReady(contentBody);
+        onContentReady(contentBody, overlay, closeModal);
 
         return {
             close: closeModal,

@@ -89,7 +89,7 @@
                     {
                         <div class="pt-6 px-6">
                             <a href="/blog?category=@Uri.EscapeDataString(Model.Blog.Category)" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary-dark transition">
-                                <i class="fas fa-tag text-[10px]"></i> @Html.Raw(Model.Blog.Category)
+                                <i data-lucide="tag" class="w-3 h-3"></i> @Html.Raw(Model.Blog.Category)
                             </a>
                         </div>
                     }
@@ -97,15 +97,15 @@
                         <h1 class="text-ink text-2xl sm:text-3xl font-bold leading-tight">@Html.Raw(Model.Blog.Title)</h1>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 px-6 pb-4 border-b border-gray-100 text-sm text-gray-500">
-                        <span class="flex items-center gap-1.5"><i class="fas fa-user-circle text-primary text-xs w-4 text-center"></i> @(Model.Blog.AuthorName ?? companyName)</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="user-circle" class="w-4 h-4 text-primary flex-shrink-0"></i> @(Model.Blog.AuthorName ?? companyName)</span>
                         <span class="text-gray-300">•</span>
-                        <span class="flex items-center gap-1.5"><i class="fas fa-calendar-alt text-primary text-xs w-4 text-center"></i> @(Model.Blog.PublishedAt?.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR")) ?? Model.Blog.CreatedAt.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR")))</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4 text-primary flex-shrink-0"></i> @(Model.Blog.PublishedAt?.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR")) ?? Model.Blog.CreatedAt.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR")))</span>
                         <span class="text-gray-300">•</span>
-                        <span class="flex items-center gap-1.5"><i class="fas fa-clock text-primary text-xs w-4 text-center"></i> @Model.ReadingTime dk okuma</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4 text-primary flex-shrink-0"></i> @Model.ReadingTime dk okuma</span>
                         @if (Model.Blog.ViewCount > 0)
                         {
                             <span class="text-gray-300">•</span>
-                            <span class="flex items-center gap-1.5"><i class="fas fa-eye text-primary text-xs w-4 text-center"></i> @Model.Blog.ViewCount görüntülenme</span>
+                            <span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4 text-primary flex-shrink-0"></i> @Model.Blog.ViewCount görüntülenme</span>
                         }
                     </div>
                     @if (!string.IsNullOrEmpty(Model.Blog.FeaturedImage))
@@ -144,11 +144,11 @@
                 <div class="p-4 rounded-xl border border-gray-100 bg-white">
                     <h3 class="text-ink text-sm font-semibold mb-3">Bu yazıyı paylaşın:</h3>
                     <div class="flex flex-wrap gap-3">
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=@Uri.EscapeDataString(shareUrl)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#1877F2] hover:opacity-90 transition" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://twitter.com/intent/tweet?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#1DA1F2] hover:opacity-90 transition" title="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=@Uri.EscapeDataString(shareUrl)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#0077B5] hover:opacity-90 transition" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://wa.me/?text=@Uri.EscapeDataString($"{shareTitle} - {shareUrl}")" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#25d366] hover:opacity-90 transition" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-                        <a href="https://t.me/share/url?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#0088cc] hover:opacity-90 transition" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=@Uri.EscapeDataString(shareUrl)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#1877F2] hover:opacity-90 transition" title="Facebook" aria-label="Facebook"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                        <a href="https://twitter.com/intent/tweet?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#1DA1F2] hover:opacity-90 transition" title="Twitter" aria-label="Twitter"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=@Uri.EscapeDataString(shareUrl)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#0077B5] hover:opacity-90 transition" title="LinkedIn" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+                        <a href="https://wa.me/?text=@Uri.EscapeDataString($"{shareTitle} - {shareUrl}")" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#25d366] hover:opacity-90 transition" title="WhatsApp" aria-label="WhatsApp"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
+                        <a href="https://t.me/share/url?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#0088cc] hover:opacity-90 transition" title="Telegram" aria-label="Telegram"><i data-lucide="send" class="w-5 h-5"></i></a>
                     </div>
                 </div>
 
@@ -166,7 +166,7 @@
                                     }
                                     else
                                     {
-                                        <div class="w-full h-28 bg-gray-100 flex items-center justify-center"><i class="fas fa-image text-gray-300"></i></div>
+                                        <div class="w-full h-28 bg-gray-100 flex items-center justify-center"><i data-lucide="image" class="w-8 h-8 text-gray-300"></i></div>
                                     }
                                     <div class="p-3">
                                         <p class="text-sm font-medium text-ink group-hover:text-primary line-clamp-2 transition">@Html.Raw(product.Product.Name)</p>
@@ -192,32 +192,32 @@
                             @if (Model.PreviousBlog != null)
                             {
                                 <a href="/blog/@Model.PreviousBlog.Slug" class="inline-flex items-center gap-2 px-4 py-2.5 rounded border border-gray-200 text-ink text-sm font-medium hover:bg-primary hover:text-white hover:border-primary transition">
-                                    <i class="fas fa-chevron-left"></i> Önceki Yazı
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i> Önceki Yazı
                                 </a>
                             }
                             else
                             {
                                 <span class="inline-flex items-center gap-2 px-4 py-2.5 rounded border border-gray-100 text-gray-400 text-sm cursor-not-allowed opacity-60">
-                                    <i class="fas fa-chevron-left"></i> Önceki Yazı
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i> Önceki Yazı
                                 </span>
                             }
                         </div>
                         <div class="flex-shrink-0 text-center">
                             <a href="/blog" class="inline-flex items-center gap-2 px-4 py-2.5 rounded border border-gray-200 text-ink text-sm font-medium hover:bg-gray-50 transition">
-                                <i class="fas fa-list"></i> Tüm Yazılar
+                                <i data-lucide="list" class="w-4 h-4"></i> Tüm Yazılar
                             </a>
                         </div>
                         <div class="flex-1 text-center sm:text-right">
                             @if (Model.NextBlog != null)
                             {
                                 <a href="/blog/@Model.NextBlog.Slug" class="inline-flex items-center gap-2 px-4 py-2.5 rounded border border-gray-200 text-ink text-sm font-medium hover:bg-primary hover:text-white hover:border-primary transition">
-                                    Sonraki Yazı <i class="fas fa-chevron-right"></i>
+                                    Sonraki Yazı <i data-lucide="chevron-right" class="w-4 h-4 inline-block align-middle"></i>
                                 </a>
                             }
                             else
                             {
                                 <span class="inline-flex items-center gap-2 px-4 py-2.5 rounded border border-gray-100 text-gray-400 text-sm cursor-not-allowed opacity-60">
-                                    Sonraki Yazı <i class="fas fa-chevron-right"></i>
+                                    Sonraki Yazı <i data-lucide="chevron-right" class="w-4 h-4 inline-block align-middle"></i>
                                 </span>
                             }
                         </div>
@@ -242,7 +242,7 @@
                                     }
                                     else
                                     {
-                                        <a href="/blog/@relatedBlog.Slug" class="flex-shrink-0 w-20 h-14 rounded bg-gray-100 flex items-center justify-center"><i class="fas fa-image text-gray-300 text-sm"></i></a>
+                                        <a href="/blog/@relatedBlog.Slug" class="flex-shrink-0 w-20 h-14 rounded bg-gray-100 flex items-center justify-center"><i data-lucide="image" class="w-5 h-5 text-gray-300"></i></a>
                                     }
                                     <div class="min-w-0 flex-1">
                                         <a href="/blog/@relatedBlog.Slug" class="text-sm font-medium text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(relatedBlog.Title)</a>
@@ -257,7 +257,7 @@
                     <h3 class="text-primary text-sm font-semibold mb-2 pb-2 border-b-2 border-primary">Blog Aboneliği</h3>
                     <p class="text-sm text-gray-500 mb-3">Yeni blog yazılarımızdan haberdar olmak için RSS aboneliği yapabilirsiniz.</p>
                     <a href="/blog/feed" class="inline-flex items-center gap-2 w-full justify-center py-2.5 px-4 rounded border border-primary text-primary font-medium text-sm hover:bg-primary hover:text-white transition">
-                        <i class="fas fa-rss"></i> RSS Aboneliği
+                        <i data-lucide="rss" class="w-4 h-4"></i> RSS Aboneliği
                     </a>
                 </div>
             </aside>
@@ -267,11 +267,11 @@
 else
 {
     <div class="text-center py-12 px-4">
-        <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-3"></i>
+        <i data-lucide="alert-triangle" class="w-12 h-12 text-yellow-500 mb-3"></i>
         <h2 class="text-xl font-medium text-ink mt-3">Blog yazısı bulunamadı</h2>
         <p class="text-sm text-gray-500 mt-1">Aradığınız blog yazısı bulunamadı veya yayından kaldırılmış olabilir.</p>
         <a asp-page="/Blog" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded bg-primary text-white font-medium text-sm hover:bg-primary-dark transition">
-            <i class="fas fa-arrow-left"></i> Blog'a Dön
+            <i data-lucide="arrow-left" class="w-4 h-4 inline-block align-middle"></i> Blog'a Dön
         </a>
     </div>
 }

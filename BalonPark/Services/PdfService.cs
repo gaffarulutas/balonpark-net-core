@@ -297,7 +297,7 @@ public class PdfService(
                 {
                     WidthPercentage = 100,
                     HeaderRows = 1 // Header satırlarının sayfa geçişlerinde tekrarlanması için
-                }; // Resim, Kod, Ad, Ölçü, Fiyat TL, Fiyat USD, Fiyat EUR
+                }; // Resim, Kod, Ad, Özet, Fiyat TL, Fiyat USD, Fiyat EUR
                 table.SetWidths([1f, 1f, 2.5f, 1.2f, 1.2f, 1.2f, 1.2f]);
 
                 // Tablo başlıkları - Türkçe font kullan
@@ -329,7 +329,7 @@ public class PdfService(
                 };
                 table.AddCell(headerCell);
 
-                headerCell = new PdfPCell(new Phrase("Ölçü", headerFont))
+                headerCell = new PdfPCell(new Phrase("Özet", headerFont))
                 {
                     BackgroundColor = new BaseColor(98, 98, 166),
                     HorizontalAlignment = Element.ALIGN_CENTER,
@@ -441,8 +441,8 @@ public class PdfService(
                 };
                 table.AddCell(cell);
 
-                // Ölçü
-                cell = new PdfPCell(new Phrase(product.Dimensions ?? "Belirtilmemiş", cellFont))
+                // Özet
+                cell = new PdfPCell(new Phrase(product.Summary ?? "-", cellFont))
                 {
                     HorizontalAlignment = Element.ALIGN_CENTER,
                     VerticalAlignment = Element.ALIGN_MIDDLE,
@@ -611,8 +611,8 @@ public class PdfService(
                     product.SubCategorySlug = "tum-urunler";
                 }
 
-                // Ölçü (4. hücre)
-                product.Dimensions = cells[3].InnerText.Trim();
+                // Özet (4. hücre)
+                product.Summary = cells[3].InnerText.Trim();
 
                 // Fiyat TL (5. hücre) - Metin formatında parsing
                 var priceText = cells[4].InnerText.Trim();
@@ -730,7 +730,7 @@ public class PdfService(
         public string Slug { get; set; } = string.Empty;
         public string? CategorySlug { get; set; }
         public string? SubCategorySlug { get; set; }
-        public string? Dimensions { get; set; }
+        public string? Summary { get; set; }
         public decimal Price { get; set; }
         public decimal UsdPrice { get; set; }
         public decimal EuroPrice { get; set; }
@@ -782,7 +782,7 @@ public class PdfService(
                     document.Add(productName);
 
                     // Ürün detayları
-                    var details = new Paragraph($"  Kod: U-{product.Id} | Ölçü: {product.Dimensions ?? "Belirtilmemiş"}", productFont);
+                    var details = new Paragraph($"  Kod: U-{product.Id} | Özet: {product.Summary ?? "-"}", productFont);
                     document.Add(details);
 
                     // Fiyatlar

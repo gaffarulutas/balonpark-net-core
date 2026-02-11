@@ -198,10 +198,10 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
     public async Task<int> CreateAsync(Product product)
     {
         var query = @"
-            INSERT INTO Products (CategoryId, SubCategoryId, Name, Slug, Description, TechnicalDescription, Dimensions, Price, Stock, DisplayOrder, IsActive, CreatedAt,
+            INSERT INTO Products (CategoryId, SubCategoryId, Name, Slug, Description, TechnicalDescription, Summary, Price, Stock, DisplayOrder, IsActive, CreatedAt,
                 InflatedLength, InflatedWidth, InflatedHeight, UserCount, AssemblyTime, RequiredPersonCount, FanDescription, FanWeightKg,
                 PackagedLength, PackagedDepth, PackagedWeightKg, PackagePalletCount, HasCertificate, WarrantyDescription, AfterSalesService)
-            VALUES (@CategoryId, @SubCategoryId, @Name, @Slug, @Description, @TechnicalDescription, @Dimensions, @Price, @Stock, @DisplayOrder, @IsActive, @CreatedAt,
+            VALUES (@CategoryId, @SubCategoryId, @Name, @Slug, @Description, @TechnicalDescription, @Summary, @Price, @Stock, @DisplayOrder, @IsActive, @CreatedAt,
                 @InflatedLength, @InflatedWidth, @InflatedHeight, @UserCount, @AssemblyTime, @RequiredPersonCount, @FanDescription, @FanWeightKg,
                 @PackagedLength, @PackagedDepth, @PackagedWeightKg, @PackagePalletCount, @HasCertificate, @WarrantyDescription, @AfterSalesService);
             SELECT CAST(SCOPE_IDENTITY() as int)";
@@ -233,7 +233,7 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
                 Slug = @Slug,
                 Description = @Description,
                 TechnicalDescription = @TechnicalDescription,
-                Dimensions = @Dimensions,
+                Summary = @Summary,
                 Price = @Price,
                 Stock = @Stock,
                 DisplayOrder = @DisplayOrder,
