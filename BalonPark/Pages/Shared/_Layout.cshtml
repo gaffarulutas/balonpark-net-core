@@ -43,8 +43,8 @@
     <meta name="geo.region" content="TR">
     <meta name="geo.country" content="Turkey">
     <meta name="geo.placename" content="Türkiye">
-    <meta name="theme-color" content="#6262a6">
-    <meta name="msapplication-TileColor" content="#6262a6">
+    <meta name="theme-color" content="#00A8E8">
+    <meta name="msapplication-TileColor" content="#00A8E8">
     <meta name="msapplication-TileImage" content="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" />
     
     <!-- Google Site Verification -->
@@ -52,29 +52,7 @@
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8VRG223YDS"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-8VRG223YDS');
-    </script>
-
-    <!-- Event snippet for Sayfa görüntüleme conversion page -->
-    <script>
-        gtag('event', 'conversion', {
-            'send_to': 'AW-17719505609/BlBkCPLF2L0bEMnlqIFC',
-            'value': 1.0,
-            'currency': 'TRY'
-        });
-    </script>
-
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-TV5NVNB4');</script>
-    <!-- End Google Tag Manager -->
+    <script src="~/js/analytics.js"></script>
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="@(ViewData["Image"] != null && ViewData["Image"]?.ToString()?.Contains("uploads") == true ? "product" : "website")">
@@ -111,7 +89,7 @@
     <meta name="twitter:creator" content="@@balonpark">
 
     <!-- Additional SEO -->
-    <meta name="theme-color" content="#fdfdfe">
+    <meta name="theme-color" content="#FFFFFF">
     <meta name="msapplication-TileColor" content="#fdfdfe">
     <link rel="canonical"
         href="@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"{Context.Request.Path}{Context.Request.QueryString}") ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}")">
@@ -184,23 +162,8 @@
     <link rel="icon" sizes="16x16" href="@logoUrl">
     <title>@Html.Raw(ViewData["Title"] ?? siteSettings?.MetaTitle ?? companyName)</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6262a6',
-                        'primary-dark': '#4a4a8a',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                },
-            },
-        };
-    </script>
+    <!-- Tailwind CSS (built; run "npm run build:css" in BalonPark to rebuild) -->
+    <link href="~/css/tailwind.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
     <!-- Inter font -->
@@ -220,7 +183,7 @@
 
 </head>
 
-<body class="font-sans text-[13px] bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col">
+<body class="font-sans text-[13px] bg-white text-ink antialiased min-h-screen flex flex-col">
 
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TV5NVNB4"
@@ -230,123 +193,111 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="main-wrapper flex flex-col min-h-screen flex-1">
 
     <!-- Header -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-[60] shadow-sm">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <button type="button" class="xl:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg border-2 border-primary text-primary hover:bg-primary hover:text-white transition" onclick="toggleCategoryMenu()" aria-label="Menü">
-                                    <i class="fas fa-bars"></i>
-                                </button>
+    <header class="bg-white border-b border-gray-100 sticky top-0 z-[60]">
+        <div class="max-w-7xl mx-auto px-4 py-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+                <button type="button" class="xl:hidden inline-flex items-center justify-center w-9 h-9 rounded bg-gray-100 text-ink hover:bg-gray-200 transition" onclick="toggleCategoryMenu()" aria-label="Menü">
+                    <i class="fas fa-bars text-sm"></i>
+                </button>
 
-                                <a asp-page="/Index" class="xl:hidden flex-shrink-0">
-                                    <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-10 w-auto" width="120" height="60" loading="eager">
-                                </a>
+                <a asp-page="/Index" class="xl:hidden flex-shrink-0">
+                    <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-9 w-auto" width="120" height="48" loading="eager">
+                </a>
 
-                                <div class="flex-1 flex items-center gap-3 min-w-0 max-w-2xl">
-                                    <div class="hidden xl:flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-                                        <button type="button" class="currency-btn w-9 h-9 rounded-md border inline-flex items-center justify-center transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-gray-500 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-200")" data-currency="TL" onclick="setCurrency('TL')"><i class="fa-solid fa-turkish-lira-sign"></i></button>
-                                        <button type="button" class="currency-btn w-9 h-9 rounded-md border inline-flex items-center justify-center transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-gray-500 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-200")" data-currency="USD" onclick="setCurrency('USD')"><i class="fa-solid fa-dollar-sign"></i></button>
-                                        <button type="button" class="currency-btn w-9 h-9 rounded-md border inline-flex items-center justify-center transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-gray-500 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-200")" data-currency="EUR" onclick="setCurrency('EUR')"><i class="fa-solid fa-euro-sign"></i></button>
-                                    </div>
-                                    <form action="/Search" method="get" class="flex-1 min-w-0">
-                                        <div class="relative">
-                                            <input type="search" name="q" placeholder="Ürün veya kategori ara..." class="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
-                                            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary"><i class="fas fa-search"></i></button>
-                                        </div>
-                                    </form>
-                                </div>
+                <div class="flex-1 flex items-center gap-2.5 min-w-0 max-w-2xl">
+                    <div class="hidden xl:flex items-center gap-1 rounded bg-gray-50 p-1">
+                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="TL" onclick="setCurrency('TL')"><i class="fa-solid fa-turkish-lira-sign"></i></button>
+                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="USD" onclick="setCurrency('USD')"><i class="fa-solid fa-dollar-sign"></i></button>
+                        <button type="button" class="currency-btn w-8 h-8 rounded inline-flex items-center justify-center text-xs transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white" : "text-ink hover:bg-gray-100")" data-currency="EUR" onclick="setCurrency('EUR')"><i class="fa-solid fa-euro-sign"></i></button>
+                    </div>
+                    <form action="/Search" method="get" class="flex-1 min-w-0">
+                        <div class="relative">
+                            <input type="search" name="q" placeholder="Ürün veya kategori ara..." class="w-full rounded border border-gray-200 pl-3.5 pr-9 py-2 text-sm text-ink placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary">
+                            <button type="submit" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition"><i class="fas fa-search text-sm"></i></button>
+                        </div>
+                    </form>
+                </div>
 
-                                <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                                    <a href="#" onclick="showFavorites(); return false;" class="hidden sm:flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-primary transition">
-                                        <i class="fa-regular fa-heart text-lg"></i>
-                                        <span class="text-xs favorites-count-text">0</span>
-                                    </a>
-                                    <a href="#" onclick="showCompare(); return false;" class="hidden sm:flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-primary transition">
-                                        <i class="fa-solid fa-shuffle text-lg"></i>
-                                        <span class="text-xs compare-count-text">0</span>
-                                    </a>
-                                    <a href="tel:+905336355039" class="flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition">
-                                        <i class="fas fa-phone text-lg"></i>
-                                        <span class="text-xs hidden sm:inline">+90 533 635 50 39</span>
-                                    </a>
-                                    <a asp-page="/Iletisim" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark transition font-medium text-sm">
-                                        <i class="fas fa-envelope"></i>
-                                        <span class="hidden sm:inline">İletişim</span>
-                                    </a>
-                                </div>
+                <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <a href="#" onclick="showFavorites(); return false;" class="hidden sm:flex items-center gap-1.5 py-2 px-2.5 rounded hover:bg-gray-50 text-ink hover:text-primary transition text-sm">
+                        <i class="fa-regular fa-heart text-base"></i>
+                        <span class="favorites-count-text text-gray-500">0</span>
+                    </a>
+                    <a href="#" onclick="showCompare(); return false;" class="hidden sm:flex items-center gap-1.5 py-2 px-2.5 rounded hover:bg-gray-50 text-ink hover:text-primary transition text-sm">
+                        <i class="fa-solid fa-shuffle text-base"></i>
+                        <span class="compare-count-text text-gray-500">0</span>
+                    </a>
+                    <a href="tel:+905336355039" class="flex items-center gap-1.5 py-2 px-2.5 rounded hover:bg-gray-50 text-ink transition text-sm">
+                        <i class="fas fa-phone text-base"></i>
+                        <span class="hidden sm:inline">+90 533 635 50 39</span>
+                    </a>
+                    <a asp-page="/Iletisim" class="flex items-center gap-1.5 py-2 px-2.5 rounded bg-primary text-white hover:bg-primary-dark transition font-medium text-sm">
+                        <i class="fas fa-envelope text-sm"></i>
+                        <span class="hidden sm:inline">İletişim</span>
+                    </a>
+                </div>
             </div>
         </div>
     </header>
 
     <div class="flex flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 py-4 gap-6">
                 <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-[55] xl:hidden hidden" onclick="toggleCategoryMenu()" aria-hidden="true"></div>
-                <aside id="sidebar-col" class="sidebar-col w-72 xl:w-64 flex-shrink-0 bg-white xl:rounded-xl border border-gray-200 shadow-xl xl:shadow-sm overflow-y-auto fixed inset-y-0 left-0 z-[50] xl:static xl:inset-auto transition-transform duration-300 -translate-x-full xl:translate-x-0" aria-label="Kategoriler">
-                    <div class="relative pt-14 xl:pt-5 pb-6 px-4 xl:px-5 bg-gradient-to-b from-gray-50 to-white xl:bg-white h-full overflow-y-auto overflow-x-hidden">
-                        <button type="button" class="xl:hidden absolute top-4 right-4 w-9 h-9 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 shadow transition" onclick="toggleCategoryMenu()" aria-label="Kapat">
-                            <i class="fas fa-times"></i>
+                <aside id="sidebar-col" class="sidebar-col w-72 xl:w-60 flex-shrink-0 bg-white border-r border-gray-100 xl:border-r xl:shadow-none shadow-xl overflow-y-auto fixed inset-y-0 left-0 z-[50] xl:static xl:inset-auto transition-transform duration-300 -translate-x-full xl:translate-x-0" aria-label="Kategoriler">
+                    <div class="relative pt-14 xl:pt-4 pb-5 px-4 xl:px-0 xl:pr-4 h-full overflow-y-auto overflow-x-hidden">
+                        <button type="button" class="xl:hidden absolute top-3 right-3 w-9 h-9 rounded-full bg-gray-100 text-ink flex items-center justify-center hover:bg-gray-200 transition" onclick="toggleCategoryMenu()" aria-label="Kapat">
+                            <i class="fas fa-times text-sm"></i>
                         </button>
                         <a asp-page="/Index" class="hidden xl:block mb-4">
-                            <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-10 w-auto" loading="eager">
+                            <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-9 w-auto" loading="eager">
                         </a>
 
-                        <!-- Mobile Navigation Links -->
-                        <div class="xl:hidden mb-3 mt-5">
-                            <h6 class="mb-2 font-semibold text-gray-700">Sayfalar</h6>
+                        <!-- Mobile: Sayfalar -->
+                        <div class="xl:hidden mb-4 mt-4">
+                            <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Sayfalar</p>
                             <ul class="space-y-1">
-                                <li><a asp-page="/Index" class="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700"><span class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-primary"><i class="fas fa-home"></i></span>Ana Sayfa</a></li>
-                                <li><a asp-page="/Hakkimizda" class="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700"><span class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-primary"><i class="fas fa-info-circle"></i></span>Hakkımızda</a></li>
-                                <li><a asp-page="/Blog" class="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700"><span class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-primary"><i class="fas fa-blog"></i></span>Blog</a></li>
-                                <li><a asp-page="/Iletisim" class="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700"><span class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-primary"><i class="fas fa-envelope"></i></span>İletişim</a></li>
+                                <li><a asp-page="/Index" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i class="fas fa-home w-5 text-center text-gray-400"></i>Ana Sayfa</a></li>
+                                <li><a asp-page="/Hakkimizda" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i class="fas fa-info-circle w-5 text-center text-gray-400"></i>Hakkımızda</a></li>
+                                <li><a asp-page="/Blog" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i class="fas fa-blog w-5 text-center text-gray-400"></i>Blog</a></li>
+                                <li><a asp-page="/Iletisim" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:text-primary hover:bg-gray-50 rounded"><i class="fas fa-envelope w-5 text-center text-gray-400"></i>İletişim</a></li>
                             </ul>
                         </div>
 
-                        <div class="flex items-center gap-3 p-4 mb-4 rounded-xl bg-primary shadow">
-                            <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center text-white text-lg">
-                                <i class="fas fa-layer-group"></i>
-                            </div>
-                            <h6 class="m-0 text-base font-bold text-white uppercase tracking-wide">Kategoriler</h6>
-                        </div>
+                        <!-- Kategoriler başlık -->
+                        <p class="text-xs font-medium tracking-wider text-gray-400 uppercase pt-1 xl:pt-0 pb-2.5 border-b border-gray-100 mb-2.5">Kategoriler</p>
                         <ul class="list-none p-0 m-0">
                             @if (Model.Categories != null && Model.Categories.Count > 0)
                             {
                                 @foreach (var category in Model.Categories)
                                 {
                                     var hasSubCategories = category.SubCategories != null && category.SubCategories.Count > 0;
-                                    var isLastCategory = category == Model.Categories[Model.Categories.Count - 1];
-                                    
-                                    <li class="category-item mb-2 last:mb-0 rounded-xl overflow-hidden transition border border-gray-200 bg-white hover:shadow-md" data-category-id="@category.Id">
-                                        <div class="flex items-center relative bg-gradient-to-br from-white to-gray-50 hover:from-gray-50 hover:to-white">
-                                            <a href="/category/@category.Slug" class="category-link flex-1 block py-3.5 px-4 transition" data-category-slug="@category.Slug">
-                                                <div class="flex items-center gap-3">
-                                                    @if (!string.IsNullOrEmpty(category.FirstProductImage))
-                                                    {
-                                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="@Html.Raw(category.Name)" class="w-10 h-10 rounded-lg object-cover border-2 border-white shadow-sm flex-shrink-0 transition hover:scale-105" />
-                                                    }
-                                                    else
-                                                    {
-                                                        <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white text-base border-2 border-white shadow-sm flex-shrink-0">
-                                                            <i class="fas fa-folder"></i>
-                                                        </div>
-                                                    }
-                                                    <h5 class="category-name m-0 text-[15px] font-semibold text-gray-800 transition group-hover:text-primary">@Html.Raw(category.Name)</h5>
-                                                </div>
+                                    <li class="category-item border-b border-gray-50 last:border-b-0" data-category-id="@category.Id">
+                                        <div class="flex items-center min-h-0">
+                                            <a href="/category/@category.Slug" class="category-link flex-1 min-w-0 flex items-center gap-2.5 py-2.5 px-2 rounded hover:bg-gray-50 transition" data-category-slug="@category.Slug">
+                                                @if (!string.IsNullOrEmpty(category.FirstProductImage))
+                                                {
+                                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="" class="w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
+                                                }
+                                                else
+                                                {
+                                                    <span class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400 text-xs"><i class="fas fa-folder"></i></span>
+                                                }
+                                                <span class="category-name text-sm font-medium text-ink truncate hover:text-primary">@Html.Raw(category.Name)</span>
                                             </a>
                                             @if (hasSubCategories)
                                             {
-                                                <button class="category-toggle w-10 h-10 flex-shrink-0 rounded-lg border-2 border-gray-200 bg-gray-100 text-gray-500 flex items-center justify-center m-2 ml-0 hover:bg-primary hover:border-primary hover:text-white transition" type="button" data-category-id="@category.Id" onclick="toggleSubCategories(event, @category.Id)">
-                                                    <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                                                <button class="category-toggle w-8 h-8 flex-shrink-0 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-primary transition text-xs" type="button" data-category-id="@category.Id" onclick="toggleSubCategories(event, @category.Id)" aria-expanded="false">
+                                                    <i class="fas fa-chevron-down transition-transform duration-200"></i>
                                                 </button>
                                             }
                                         </div>
-                                        
                                         @if (hasSubCategories)
                                         {
-                                            <ul class="subcategory-list list-none p-0 m-0 max-h-0 overflow-hidden transition-all duration-300 opacity-0 border-t border-gray-200 bg-gray-50" id="subcategories-@category.Id">
+                                            <ul class="subcategory-list list-none p-0 m-0 max-h-0 overflow-hidden transition-all duration-200 opacity-0 bg-gray-50/50" id="subcategories-@category.Id">
                                                 @foreach (var subCategory in category.SubCategories)
                                                 {
-                                                    <li class="mb-1 last:mb-0">
-                                                        <a href="/category/@category.Slug/@subCategory.Slug" class="subcategory-link flex items-center gap-3 py-3 px-4 text-gray-600 no-underline text-sm rounded-lg hover:bg-primary/10 hover:text-primary transition font-medium" data-category-slug="@category.Slug" data-subcategory-slug="@subCategory.Slug">
-                                                            <i class="fas fa-angle-right text-gray-400"></i>
-                                                            <span>@Html.Raw(subCategory.Name)</span>
+                                                    <li>
+                                                        <a href="/category/@category.Slug/@subCategory.Slug" class="subcategory-link flex items-center py-2 pl-7 pr-2.5 text-sm text-gray-600 no-underline rounded hover:bg-gray-100 hover:text-primary transition" data-category-slug="@category.Slug" data-subcategory-slug="@subCategory.Slug">
+                                                            @Html.Raw(subCategory.Name)
                                                         </a>
                                                     </li>
                                                 }
@@ -357,28 +308,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             }
                             else
                             {
-                                <li class="mb-2 rounded-xl border border-gray-200 bg-white p-4">
-                                    <div class="flex items-center gap-3">
-                                        <h5 class="m-0 text-sm font-medium text-gray-700">Kategoriler Yok</h5>
-                                    </div>
-                                </li>
+                                <li class="py-3 text-sm text-gray-500">Kategoriler yükleniyor...</li>
                             }
                         </ul>
 
-                        <!-- Mobile Quick Access & Currency - Bottom Section -->
-                        <div class="xl:hidden mt-4 pt-3 border-t border-gray-200">
-                            <h6 class="mb-2 font-semibold text-gray-700">Hızlı Erişim</h6>
-                            <ul class="space-y-1 mb-3">
-                                <li><a href="#" class="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700" onclick="showFavorites(); return false;"><span class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center text-red-600"><i class="fa-regular fa-heart"></i></span>Favoriler <span class="favorites-count-text">0</span></a></li>
-                                <li><a href="#" class="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700" onclick="showCompare(); return false;"><span class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><i class="fa-solid fa-shuffle"></i></span>Karşılaştır <span class="compare-count-text">0</span></a></li>
+                        <!-- Mobile: Hızlı Erişim & Para Birimi -->
+                        <div class="xl:hidden mt-4 pt-4 border-t border-gray-100">
+                            <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Hızlı Erişim</p>
+                            <ul class="space-y-1 mb-4">
+                                <li><a href="#" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:bg-gray-50 rounded" onclick="showFavorites(); return false;"><i class="fa-regular fa-heart w-5 text-center text-gray-400"></i>Favoriler <span class="favorites-count-text text-gray-400">0</span></a></li>
+                                <li><a href="#" class="flex items-center gap-2.5 py-2 px-2.5 text-sm text-ink hover:bg-gray-50 rounded" onclick="showCompare(); return false;"><i class="fa-solid fa-shuffle w-5 text-center text-gray-400"></i>Karşılaştır <span class="compare-count-text text-gray-400">0</span></a></li>
                             </ul>
-                            <div>
-                                <h6 class="mb-2 font-semibold text-gray-700">Para Birimi</h6>
-                                <div class="flex gap-2">
-                                    <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1 py-2 px-3 rounded-lg border transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-gray-500 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-100")" data-currency="TL" onclick="setCurrency('TL')"><i class="fa-solid fa-turkish-lira-sign"></i> TL</button>
-                                    <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1 py-2 px-3 rounded-lg border transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-gray-500 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-100")" data-currency="USD" onclick="setCurrency('USD')"><i class="fa-solid fa-dollar-sign"></i> USD</button>
-                                    <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1 py-2 px-3 rounded-lg border transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-gray-500 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-100")" data-currency="EUR" onclick="setCurrency('EUR')"><i class="fa-solid fa-euro-sign"></i> EUR</button>
-                                </div>
+                            <p class="text-xs font-medium tracking-wider text-gray-400 uppercase mb-2">Para Birimi</p>
+                            <div class="flex gap-2">
+                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="TL" onclick="setCurrency('TL')"><i class="fa-solid fa-turkish-lira-sign"></i> TL</button>
+                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="USD" onclick="setCurrency('USD')"><i class="fa-solid fa-dollar-sign"></i> USD</button>
+                                <button type="button" class="currency-btn flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded text-sm border transition @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white border-ink" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50")" data-currency="EUR" onclick="setCurrency('EUR')"><i class="fa-solid fa-euro-sign"></i> EUR</button>
                             </div>
                         </div>
                     </div>
@@ -447,435 +392,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <script src="~/assets/semantic-ui/semantic.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
 
-    <!-- Swiper Initialization -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Category Swiper
-            const categorySwiper = new Swiper('.categorySwiper', {
-                slidesPerView: 1,
-                spaceBetween: 20,
-                loop: true,
-                autoplay: {
-                    delay: 3000,
-                    disableOnInteraction: false,
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                    clickable: true,
-                },
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
-                breakpoints: {
-                    640: {
-                        slidesPerView: 2,
-                        spaceBetween: 20,
-                    },
-                    768: {
-                        slidesPerView: 3,
-                        spaceBetween: 20,
-                    },
-                    1024: {
-                        slidesPerView: 4,
-                        spaceBetween: 20,
-                    },
-                    1200: {
-                        slidesPerView: 5,
-                        spaceBetween: 20,
-                    },
-                },
-            });
-        });
-    </script>
-
-    <!-- Mobile Category Menu JavaScript -->
-    <script>
-        function toggleCategoryMenu() {
-            const sidebar = document.getElementById('sidebar-col');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (!sidebar || !overlay) return;
-            sidebar.classList.toggle('-translate-x-full');
-            sidebar.classList.toggle('translate-x-0');
-            overlay.classList.toggle('hidden');
-        }
-
-        function toggleSubCategories(event, categoryId) {
-            event.preventDefault();
-            event.stopPropagation();
-            const button = event.currentTarget;
-            const subcategoryList = document.getElementById('subcategories-' + categoryId);
-            if (!subcategoryList) return;
-            const icon = button.querySelector('i');
-            const isOpen = subcategoryList.classList.contains('max-h-[1000px]');
-            if (isOpen) {
-                subcategoryList.classList.remove('max-h-[1000px]', 'opacity-100', 'py-3', 'px-2');
-                subcategoryList.classList.add('max-h-0', 'opacity-0');
-                button.classList.remove('bg-primary', 'border-primary', 'text-white');
-                button.classList.add('bg-gray-100', 'border-gray-200', 'text-gray-500');
-                if (icon) icon.classList.remove('rotate-180');
-            } else {
-                subcategoryList.classList.remove('max-h-0', 'opacity-0');
-                subcategoryList.classList.add('max-h-[1000px]', 'opacity-100', 'py-3', 'px-2');
-                button.classList.remove('bg-gray-100', 'border-gray-200', 'text-gray-500');
-                button.classList.add('bg-primary', 'border-primary', 'text-white');
-                if (icon) icon.classList.add('rotate-180');
-            }
-            document.querySelectorAll('.subcategory-list').forEach(function(list) {
-                if (list.id === 'subcategories-' + categoryId) return;
-                list.classList.remove('max-h-[1000px]', 'opacity-100', 'py-3', 'px-2');
-                list.classList.add('max-h-0', 'opacity-0');
-            });
-            document.querySelectorAll('.category-toggle').forEach(function(btn) {
-                if (btn === button) return;
-                btn.classList.remove('bg-primary', 'border-primary', 'text-white');
-                btn.classList.add('bg-gray-100', 'border-gray-200', 'text-gray-500');
-                var i = btn.querySelector('i');
-                if (i) i.classList.remove('rotate-180');
-            });
-        }
-
-        // Initialize category menu on page load
-        $(document).ready(function() {
-            // Mark active category and subcategory based on current URL
-            const currentPath = window.location.pathname;
-            console.log('Current Path:', currentPath);
-            
-            // Extract category and subcategory slugs from URL
-            const pathParts = currentPath.split('/').filter(part => part !== '');
-            
-            // Check for different URL patterns
-            let categorySlug = null;
-            let subCategorySlug = null;
-            
-            // Pattern: /category/{slug} - just category
-            if (pathParts[0] === 'category' && pathParts.length === 2) {
-                categorySlug = pathParts[1];
-            }
-            // Pattern: /category/{categorySlug}/{subCategorySlug} - subcategory/products page
-            else if (pathParts[0] === 'category' && pathParts.length === 3) {
-                categorySlug = pathParts[1];
-                subCategorySlug = pathParts[2];
-            }
-            // Pattern: /category/{categorySlug}/{subCategorySlug}/{productSlug} - product detail
-            else if (pathParts[0] === 'category' && pathParts.length === 4) {
-                categorySlug = pathParts[1];
-                subCategorySlug = pathParts[2];
-            }
-            
-            console.log('Category Slug:', categorySlug);
-            console.log('SubCategory Slug:', subCategorySlug);
-            
-            if (subCategorySlug) {
-                $('.subcategory-link').each(function() {
-                    if ($(this).data('category-slug') === categorySlug && $(this).data('subcategory-slug') === subCategorySlug) {
-                        $(this).addClass('bg-primary/15', 'text-primary', 'font-semibold');
-                        var subcategoryList = $(this).closest('.subcategory-list');
-                        var categoryId = subcategoryList.attr('id').replace('subcategories-', '');
-                        subcategoryList[0].classList.remove('max-h-0', 'opacity-0');
-                        subcategoryList[0].classList.add('max-h-[1000px]', 'opacity-100', 'py-3', 'px-2');
-                        $('.category-toggle[data-category-id="' + categoryId + '"]').each(function() {
-                            this.classList.remove('bg-gray-100', 'border-gray-200', 'text-gray-500');
-                            this.classList.add('bg-primary', 'border-primary', 'text-white');
-                            var i = this.querySelector('i');
-                            if (i) i.classList.add('rotate-180');
-                        });
-                        $(this).closest('.category-item').addClass('border-primary', 'ring-2', 'ring-primary/10');
-                    }
-                });
-            } else if (categorySlug) {
-                $('.category-link').each(function() {
-                    if ($(this).data('category-slug') === categorySlug) {
-                        $(this).closest('.category-item').addClass('border-primary', 'ring-2', 'ring-primary/10');
-                    }
-                });
-            }
-        });
-    </script>
-
-    <!-- Semantic UI Search Configuration -->
-    <script>
-        $(document).ready(function() {
-            $('.ui.category.search')
-                .search({
-                    type: 'category',
-                    apiSettings: {
-                        url: '/api/search/all?q={query}',
-                        onResponse: function(searchResponse) {
-                            console.log('Raw API Response:', searchResponse);
-                            
-                            var response = {
-                                results: {}
-                            };
-
-                            // Group results by type for Semantic UI Category Search
-                            if (searchResponse && searchResponse.results && Array.isArray(searchResponse.results)) {
-                                searchResponse.results.forEach(function(item) {
-                                    if (item && item.type) {
-                                        var typeKey = item.type;
-                                        
-                                        if (!response.results[typeKey]) {
-                                            response.results[typeKey] = {
-                                                name: getTypeDisplayName(typeKey),
-                                                results: []
-                                            };
-                                        }
-                                        
-                                        response.results[typeKey].results.push({
-                                            title: item.title || '',
-                                            url: item.url || '',
-                                            image: item.image || '',
-                                            price: item.price || '',
-                                            category: item.category || ''
-                                        });
-                                    }
-                                });
-                            }
-
-                            console.log('Formatted Response:', response);
-                            console.log('Formatted Response Structure:', JSON.stringify(response, null, 2));
-                            return response;
-                        }
-                    },
-                    fields: {
-                        results: 'results',
-                        title: 'title', 
-                        url: 'url'
-                    },
-                    minCharacters: 2,
-                    onSelect: function(result, response) {
-                        if (result.url) {
-                            window.location.href = result.url;
-                        }
-                    },
-                    // Remove custom templates to use Semantic UI defaults
-                    // templates: {
-                    //     category: function(response, category, html) { ... },
-                    //     result: function(result, html) { ... }
-                    // }
-                });
-        });
-
-        function getTypeDisplayName(type) {
-            switch(type) {
-                case 'product':
-                    return 'Ürünler';
-                case 'category':
-                    return 'Kategoriler';
-                case 'subcategory':
-                    return 'Alt Kategoriler';
-                default:
-                    return 'Sonuçlar';
-            }
-        }
-
-        // Search popup'ının kapanmasını önle
-        $(document).on('click', '.ui.category.search .prompt', function(e) {
-            e.stopPropagation();
-            $(this).focus();
-        });
-
-        $(document).on('click', '.ui.category.search .results', function(e) {
-            e.stopPropagation();
-        });
-
-        // Dışarı tıklandığında kapat
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('.ui.category.search').length) {
-                $('.ui.category.search').search('hide');
-            }
-        });
-    </script>
-
-    <!-- Currency Management JavaScript -->
-    <script>
-        function setCurrency(currency) {
-            // API'ye para birimi değişikliği gönder
-            fetch('/api/currency/set', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ currency: currency })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.querySelectorAll('.currency-btn').forEach(btn => {
-                        btn.classList.remove('bg-gray-500', 'border-gray-500', 'text-white');
-                        btn.classList.add('bg-white', 'border-gray-300', 'text-gray-600');
-                    });
-                    const selectedBtn = document.querySelector(`[data-currency="${currency}"]`);
-                    if (selectedBtn) {
-                        selectedBtn.classList.remove('bg-white', 'border-gray-300', 'text-gray-600');
-                        selectedBtn.classList.add('bg-gray-500', 'border-gray-500', 'text-white');
-                    }
-                    window.location.reload();
-                } else {
-                    console.error('Currency değiştirilemedi:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Currency değiştirilirken hata oluştu:', error);
-            });
-        }
-
-        // Sayfa yüklendiğinde mevcut currency'yi kontrol et
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/currency/current')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelectorAll('.currency-btn').forEach(btn => {
-                            btn.classList.remove('bg-gray-500', 'border-gray-500', 'text-white');
-                            btn.classList.add('bg-white', 'border-gray-300', 'text-gray-600');
-                        });
-                        const currentBtn = document.querySelector(`[data-currency="${data.currency}"]`);
-                        if (currentBtn) {
-                            currentBtn.classList.remove('bg-white', 'border-gray-300', 'text-gray-600');
-                            currentBtn.classList.add('bg-gray-500', 'border-gray-500', 'text-white');
-                        }
-                    }
-                })
-                .catch(function() {});
-        });
-
-        // Favorites & Compare Functions
-        function showFavorites() {
-            const favorites = window.favoritesAndCompare.getFavorites();
-            if (favorites.length === 0) {
-                alert('Favori listesi boş');
-                return;
-            }
-            
-            // Favori listesini göster (modal veya yeni sayfa)
-            let favoritesHtml = '<div class="favorites-modal"><h3>Favori Ürünlerim</h3><div class="favorites-grid">';
-            
-            favorites.forEach(item => {
-                favoritesHtml += `
-                    <div class="favorites-item">
-                        <img src="${item.image}" alt="${item.name}" class="product-image">
-                        <div class="product-info">
-                            <div class="product-name">${item.name}</div>
-                            <div class="product-price">${item.price}</div>
-                            <div class="product-actions">
-                                <a href="${item.url}" class="btn btn-primary btn-sm">Ürüne Git</a>
-                                <button class="btn btn-outline-danger btn-sm" onclick="removeFromFavorites(${item.id})">Kaldır</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            favoritesHtml += '</div></div>';
-            
-            // Modal göster (basit implementasyon)
-            const modal = document.createElement('div');
-            modal.className = 'favorites-modal-overlay';
-            modal.innerHTML = `
-                <div class="favorites-modal-content">
-                    <div class="modal-header">
-                        <h3>Favori Ürünlerim (${favorites.length})</h3>
-                        <button onclick="this.closest('.favorites-modal-overlay').remove()" class="close-btn">&times;</button>
-                    </div>
-                    <div class="favorites-grid">
-                        ${favorites.map(item => `
-                            <div class="favorites-item">
-                                <img src="${item.image}" alt="${item.name}" class="product-image">
-                                <div class="product-info">
-                                    <div class="product-name">${item.name}</div>
-                                    <div class="product-price">${item.price}</div>
-                                    <div class="product-actions">
-                                        <a href="${item.url}" class="btn btn-primary btn-sm">Ürüne Git</a>
-                                        <button class="btn btn-outline-danger btn-sm" onclick="removeFromFavorites(${item.id}); this.closest('.favorites-modal-overlay').remove();">Kaldır</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
-
-        function showCompare() {
-            const compareList = window.favoritesAndCompare.getCompareList();
-            if (compareList.length === 0) {
-                alert('Karşılaştırma listesi boş');
-                return;
-            }
-            
-            // Karşılaştırma sayfasına yönlendir veya modal göster
-            if (compareList.length === 1) {
-                alert('En az 2 ürün karşılaştırmanız gerekiyor');
-                return;
-            }
-            
-            // Karşılaştırma modal'ı göster
-            const modal = document.createElement('div');
-            modal.className = 'compare-modal-overlay';
-            modal.innerHTML = `
-                <div class="compare-modal-content">
-                    <div class="modal-header">
-                        <h3>Ürün Karşılaştırması (${compareList.length})</h3>
-                        <button onclick="this.closest('.compare-modal-overlay').remove()" class="close-btn">&times;</button>
-                    </div>
-                    <div class="compare-table-container">
-                        <table class="compare-table">
-                            <thead>
-                                <tr>
-                                    <th>Özellik</th>
-                                    ${compareList.map(item => `<th class="product-cell">${item.name}</th>`).join('')}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Resim</td>
-                                    ${compareList.map(item => `
-                                        <td class="product-cell">
-                                            <img src="${item.image}" alt="${item.name}" class="product-image">
-                                        </td>
-                                    `).join('')}
-                                </tr>
-                                <tr>
-                                    <td>Fiyat</td>
-                                    ${compareList.map(item => `<td class="product-price">${item.price}</td>`).join('')}
-                                </tr>
-                                <tr>
-                                    <td>İşlemler</td>
-                                    ${compareList.map(item => `
-                                        <td>
-                                            <a href="${item.url}" class="btn btn-primary btn-sm">Ürüne Git</a>
-                                            <button class="btn btn-outline-danger btn-sm" onclick="removeFromCompare(${item.id}); this.closest('.compare-modal-overlay').remove();">Kaldır</button>
-                                        </td>
-                                    `).join('')}
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
-
-        function removeFromFavorites(productId) {
-            const favorites = window.favoritesAndCompare.getFavorites();
-            const product = favorites.find(item => item.id === productId);
-            if (product) {
-                window.favoritesAndCompare.toggleFavorite(productId, product);
-            }
-        }
-
-        function removeFromCompare(productId) {
-            const compareList = window.favoritesAndCompare.getCompareList();
-            const product = compareList.find(item => item.id === productId);
-            if (product) {
-                window.favoritesAndCompare.toggleCompare(productId, product);
-            }
-        }
-    </script>
+    <script src="~/js/site.js" defer></script>
 
     <!-- SweetAlert2 JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

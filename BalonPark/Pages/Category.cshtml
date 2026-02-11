@@ -83,385 +83,128 @@
 
 
 <!-- Category Section Start -->
-<div class="section-b-space">
-    <!-- Breadcrumb Navigation -->
-    <nav class="breadcrumb-nav">
-        <div class="breadcrumb-container">
-            <a href="/" class="breadcrumb-item">
-                <i class="fas fa-home"></i>
-                <span>Ana Sayfa</span>
-            </a>
-            <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-item active">@Html.Raw(Model.Category?.Name)</span>
-        </div>
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-1.5 text-sm text-gray-500" aria-label="Breadcrumb">
+        <a href="/" class="text-ink hover:text-primary transition">Ana Sayfa</a>
+        <span>/</span>
+        <span class="text-ink font-medium">@Html.Raw(Model.Category?.Name)</span>
     </nav>
 
-        @if (Model.SubCategories.Any())
-        {
-            <div class="swiper categorySwiper">
-                <div class="swiper-wrapper">
-                    @foreach (var subCategory in Model.SubCategories)
-                    {
-                        <div class="swiper-slide">
-                            <div class="ui card">
-                                @if (!string.IsNullOrEmpty(subCategory.FirstProductImage))
-                                {
-                                    <div class="image">
-                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(subCategory.FirstProductImage) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{subCategory.FirstProductImage}")" alt="@Html.Raw(subCategory.Name)" class="subcategory-thumbnail">
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="image">
-                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" alt="@Html.Raw(subCategory.Name)" class="subcategory-thumbnail">
-                                    </div>
-                                }
-                                <div class="content">
-                                    <div class="header">
-                                        <a href="/category/@Model.Category?.Slug/@subCategory.Slug">
-                                            @Html.Raw(subCategory.Name)
-                                        </a>
-                                    </div>
-                                    @if (!string.IsNullOrEmpty(subCategory.Description))
-                                    {
-                                        <div class="description">
-                                            @Html.Raw(subCategory.Description)
-                                        </div>
-                                    }
-                                </div>
-                                <div class="extra content">
-                                    <a href="/category/@Model.Category?.Slug/@subCategory.Slug" class="ui primary button">
-                                        <i class="shopping bag icon"></i>
-                                        @Html.Raw(subCategory.Name) (<b>@subCategory.ProductCount</b> ürün)
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
-            </div>
-        }
-
-        @if (Model.SubCategories.Any())
-        {
+    @if (Model.SubCategories.Any())
+    {
+        <!-- Alt kategoriler (grid, swiper yerine) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach (var subCategory in Model.SubCategories)
             {
-                <div class="modern-subcategory-section mb-5">
-                    <div class="modern-subcategory-header mb-4">
-                        <h3 class="modern-subcategory-title">@Html.Raw(subCategory.Name) (@subCategory.ProductCount ürün)</h3>
+                <a href="/category/@Model.Category?.Slug/@subCategory.Slug" class="group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
+                    <div class="aspect-square bg-gray-50 overflow-hidden">
+                        @if (!string.IsNullOrEmpty(subCategory.FirstProductImage))
+                        {
+                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(subCategory.FirstProductImage) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{subCategory.FirstProductImage}")" alt="@Html.Raw(subCategory.Name)" class="w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" loading="lazy">
+                        }
+                        else
+                        {
+                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" alt="@Html.Raw(subCategory.Name)" class="w-full h-full object-cover">
+                        }
+                    </div>
+                    <div class="p-3 border-t border-gray-100">
+                        <span class="font-medium text-sm text-ink group-hover:text-primary transition">@Html.Raw(subCategory.Name)</span>
                         @if (!string.IsNullOrEmpty(subCategory.Description))
                         {
-                            <p class="modern-subcategory-description">@Html.Raw(subCategory.Description)</p>
+                            <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">@Html.Raw(subCategory.Description)</p>
                         }
+                        <p class="text-xs text-gray-400 mt-1">@subCategory.ProductCount ürün</p>
                     </div>
-                    
-                    @if (Model.ProductsBySubCategory.ContainsKey(subCategory.Slug) && Model.ProductsBySubCategory[subCategory.Slug].Any())
+                </a>
+            }
+        </div>
+    }
+
+    @if (Model.SubCategories.Any())
+    {
+        @foreach (var subCategory in Model.SubCategories)
+        {
+            <div class="pt-2 pb-4 border-b border-gray-100 last:border-b-0">
+                <div class="mb-3">
+                    <h2 class="text-ink text-base font-medium">@Html.Raw(subCategory.Name) <span class="text-gray-400 font-normal">(@subCategory.ProductCount ürün)</span></h2>
+                    @if (!string.IsNullOrEmpty(subCategory.Description))
                     {
-                        <div class="row row-cols-xxl-6 row-cols-lg-5 row-cols-md-4 row-cols-sm-3 row-cols-2 g-sm-4 g-3">
-                            @foreach (var item in Model.ProductsBySubCategory[subCategory.Slug])
-                            {
-                                <div>
-                                    <div class="product-box modern-product-card wow fadeIn">
-                                        <!-- Product Actions -->
-                                        <div class="product-actions">
-                                            <button class="favorite-btn" data-product-id="@item.Product.Id">
-                                                <i class="fa-regular fa-heart"></i>
-                                                <span class="btn-text">Favori</span>
-                                            </button>
-                                            <button class="compare-btn" data-product-id="@item.Product.Id">
-                                                <i class="fa-solid fa-shuffle"></i>
-                                                <span class="btn-text">Karşılaştır</span>
-                                            </button>
-                                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">@Html.Raw(subCategory.Description)</p>
+                    }
+                </div>
 
-                                        <div class="product-image">
-                                            <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
-                                                @if (item.MainImage != null)
-                                                {
-                                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}")" class="img-fluid blur-up lazyload product-thumbnail" alt="@Html.Raw(item.Product.Name)">
-                                                }
-                                                else
-                                                {
-                                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" class="img-fluid blur-up lazyload product-thumbnail" alt="@Html.Raw(item.Product.Name)">
-                                                }
-                                            </a>
-                                        </div>
-                                        <div class="product-detail position-relative">
-                                            <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug">
-                                                <h6 class="name">@Html.Raw(item.Product.Name)</h6>
-                                            </a>
-
-                                            <h6 class="sold weight text-content fw-normal">@Html.Raw(item.Product.CategoryName)</h6>
-
-                                            @if (!string.IsNullOrEmpty(item.Product.Description))
-                                            {
-                                                <p class="product-description text-content">
-                                                    @Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)
-                                                </p>
-                                            }
-
-                                            @if (!string.IsNullOrEmpty(item.Product.Dimensions))
-                                            {
-                                                <div class="product-dimensions">
-                                                    <i class="fa-solid fa-ruler-combined"></i>
-                                                    <span class="dimensions-text">@Html.Raw(item.Product.Dimensions)</span>
-                                                </div>
-                                            }
-
-                                            <div class="price-section">
-                                                @if (item.Product.Price <= 0)
-                                                {
-                                                    <p class="price-contact-text">Fiyat için iletişime geçin</p>
-                                                }
-                                                else
-                                                {
-                                                    <h6 class="price price-tl text-primary font-semibold @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N2")</h6>
-                                                    <h6 class="price price-usd text-primary font-semibold @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N2")</h6>
-                                                    <h6 class="price price-eur text-primary font-semibold @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N2")</h6>
-                                                }
-                                            </div>
-                                        </div>
+                @if (Model.ProductsBySubCategory.ContainsKey(subCategory.Slug) && Model.ProductsBySubCategory[subCategory.Slug].Any())
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        @foreach (var item in Model.ProductsBySubCategory[subCategory.Slug])
+                        {
+                            <article class="group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
+                                <div class="relative flex items-center justify-end gap-1 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button type="button" class="favorite-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 text-sm transition" data-product-id="@item.Product.Id" title="Favori"><i class="fa-regular fa-heart"></i></button>
+                                    <button type="button" class="compare-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 text-sm transition" data-product-id="@item.Product.Id" title="Karşılaştır"><i class="fa-solid fa-shuffle"></i></button>
+                                </div>
+                                <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="block aspect-square bg-gray-50 overflow-hidden">
+                                    @if (item.MainImage != null)
+                                    {
+                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}")" class="w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" alt="@Html.Raw(item.Product.Name)" loading="lazy">
+                                    }
+                                    else
+                                    {
+                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" class="w-full h-full object-cover" alt="@Html.Raw(item.Product.Name)">
+                                    }
+                                </a>
+                                <div class="p-3 flex flex-col flex-1 border-t border-gray-100">
+                                    <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(item.Product.Name)</a>
+                                    <p class="text-xs text-gray-400 mt-0.5">@Html.Raw(item.Product.CategoryName)</p>
+                                    @if (!string.IsNullOrEmpty(item.Product.Description))
+                                    {
+                                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">@Html.Raw(item.Product.Description.Length > 60 ? item.Product.Description.Substring(0, 60) + "..." : item.Product.Description)</p>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Product.Dimensions))
+                                    {
+                                        <p class="text-[11px] text-gray-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-ruler-combined w-3.5"></i> @Html.Raw(item.Product.Dimensions)</p>
+                                    }
+                                    <div class="mt-auto pt-2.5">
+                                        @if (item.Product.Price <= 0)
+                                        {
+                                            <p class="text-xs text-gray-500">Fiyat için iletişime geçin</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="price-tl text-sm font-medium text-primary @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N2")</p>
+                                            <p class="price-usd text-sm font-medium text-primary @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N2")</p>
+                                            <p class="price-eur text-sm font-medium text-primary @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N2")</p>
+                                        }
                                     </div>
                                 </div>
-                            }
-                        </div>
-                        
-                        @* Tümünü Gör Butonu - Eğer gösterilenden fazla ürün varsa *@
-                        @if (subCategory.ProductCount > Model.MaxProductsPerSubCategory)
-                        {
-                            <div class="text-center mt-4">
-                                <a href="/category/@Model.Category?.Slug/@subCategory.Slug" class="btn btn-outline-primary btn-lg">
-                                    <i class="fas fa-arrow-right"></i>
-                                    Tümünü Gör (@subCategory.ProductCount ürün)
-                                </a>
-                                <small class="d-block mt-2 text-muted">
-                                    (@Model.MaxProductsPerSubCategory / @subCategory.ProductCount ürün gösteriliyor)
-                                </small>
-                            </div>
+                            </article>
                         }
-                    }
-                    else
-                    {
-                        <div class="no-products">
-                            <p class="text-muted">Bu alt kategoride henüz ürün bulunmamaktadır.</p>
-                        </div>
-                    }
-                </div>
-            }
-        }
-        else
-        {
-            <div class="row">
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <h5>Alt kategori bulunmamaktadır</h5>
-                        <p>Lütfen daha sonra tekrar kontrol edin</p>
                     </div>
-                </div>
-            </div>
-        }
 
-        @* Ana kategoride pagination kaldırıldı - Her alt kategoride max 36 ürün gösteriliyor *@
- 
-</div>
-
-@section Styles {
-    <style>
-
-        .product-dimensions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin: 8px 0;
-            padding: 4px 8px;
-            background: rgba(98, 98, 166, 0.1);
-            border-radius: 6px;
-            font-size: 12px;
-            color: #6262a6;
-            font-weight: 500;
-        }
-
-        .product-dimensions i {
-            font-size: 11px;
-            color: #6262a6;
-        }
-
-        .dimensions-text {
-            font-size: 11px;
-            color: #6262a6;
-            font-weight: 500;
-        }
-
-        .modern-product-card .product-dimensions {
-            margin: 6px 0;
-            padding: 3px 6px;
-            background: rgba(98, 98, 166, 0.08);
-            border-radius: 4px;
-        }
-
-        .modern-product-card .product-dimensions i {
-            font-size: 10px;
-        }
-
-        .modern-product-card .dimensions-text {
-            font-size: 10px;
-        }
-
-        /* Responsive adjustments */
-        @@media (max-width: 768px) {
-            .product-dimensions {
-                margin: 6px 0;
-                padding: 3px 6px;
-                font-size: 11px;
-            }
-            
-            .product-dimensions i {
-                font-size: 10px;
-            }
-            
-            .dimensions-text {
-                font-size: 10px;
-            }
-        }
-
-        /* Swiper Category Slider */
-        .categorySwiper {
-            padding: 20px 0;
-            z-index: 0;
-        }
-
-        .categorySwiper .swiper-slide {
-            width: 25%; /* 4 items per view */
-        }
-
-        .categorySwiper .ui.card {
-            margin: 0; /* Remove default margin */
-            width: auto; /* Full width cards */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .categorySwiper .ui.card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        }
-
-        .categorySwiper .ui.card .image {
-            width: auto;
-        }
-
-        .categorySwiper .ui.card .content {
-            width: auto;
-            padding: 15px;
-        }
-
-        .categorySwiper .ui.card .extra.content {
-            width: auto;
-            padding: 15px;
-        }
-
-        @@media (max-width: 1200px) {
-            .categorySwiper .swiper-slide {
-                width: 33.333%; /* 3 items per view */
-            }
-        }
-
-        @@media (max-width: 768px) {
-            .categorySwiper .swiper-slide {
-                width: 50%; /* 2 items per view */
-            }
-        }
-
-        @@media (max-width: 576px) {
-            .categorySwiper .swiper-slide {
-                width: 100%; /* 1 item per view */
-            }
-        }
-
-        /* Tümünü Gör Butonu Stilleri */
-        .btn-outline-primary {
-            border: 2px solid #6262a6;
-            color: #6262a6;
-            font-weight: 600;
-            padding: 12px 32px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-outline-primary:hover {
-            background-color: #6262a6;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(98, 98, 166, 0.3);
-            text-decoration: none;
-        }
-
-        .btn-outline-primary i {
-            transition: transform 0.3s ease;
-        }
-
-        .btn-outline-primary:hover i {
-            transform: translateX(5px);
-        }
-
-        .btn-lg {
-            font-size: 16px;
-            padding: 14px 36px;
-        }
-
-        @@media (max-width: 768px) {
-            .btn-lg {
-                font-size: 14px;
-                padding: 10px 24px;
-            }
-        }
-    </style>
-}
-
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Category Swiper
-            const categorySwiper = new Swiper('.categorySwiper', {
-                slidesPerView: 4,
-                spaceBetween: 20, // Item spacing
-                loop: false,
-
-                autoplay: false,
-                pagination: {
-                    el: '.swiper-pagination',
-                    clickable: true,
-                },
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
-                breakpoints: {
-                    1200: {
-                        slidesPerView: 4,
-                        spaceBetween: 20,
-                    },
-                    768: {
-                        slidesPerView: 3,
-                        spaceBetween: 15,
-                    },
-                    576: {
-                        slidesPerView: 2,
-                        spaceBetween: 10,
-                    },
-                    320: {
-                        slidesPerView: 1,
-                        spaceBetween: 10,
+                    @if (subCategory.ProductCount > Model.MaxProductsPerSubCategory)
+                    {
+                        <div class="text-center mt-4">
+                            <a href="/category/@Model.Category?.Slug/@subCategory.Slug" class="inline-flex items-center gap-2 py-2 px-4 rounded border border-gray-200 text-sm text-ink hover:bg-gray-50 hover:border-primary hover:text-primary transition">
+                                <i class="fas fa-arrow-right text-xs"></i>
+                                Tümünü Gör (@subCategory.ProductCount ürün)
+                            </a>
+                            <p class="text-xs text-gray-400 mt-1.5">@Model.MaxProductsPerSubCategory / @subCategory.ProductCount ürün gösteriliyor</p>
+                        </div>
                     }
                 }
-            });
-        });
-    </script>
-}
+                else
+                {
+                    <p class="text-sm text-gray-500 py-4">Bu alt kategoride henüz ürün bulunmamaktadır.</p>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="rounded border border-gray-100 bg-gray-50 py-12 px-4 text-center">
+            <h3 class="text-base font-medium text-ink">Alt kategori bulunmamaktadır</h3>
+            <p class="text-sm text-gray-500 mt-1">Lütfen daha sonra tekrar kontrol edin.</p>
+        </div>
+    }
+</div>

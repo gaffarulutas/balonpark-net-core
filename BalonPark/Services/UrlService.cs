@@ -16,17 +16,18 @@ public class UrlService(IConfiguration configuration, IHttpContextAccessor httpC
 
     public string GetBaseUrl()
     {
-        var siteUrl = configuration["siteUrl"];
-        if (!string.IsNullOrEmpty(siteUrl))
-        {
-            return siteUrl.TrimEnd('/');
-        }
-
-        // Fallback to Request.Host if siteUrl is not configured
+        // Use the current request host whenever available so the URL is accurate
+        // for whichever environment (local, staging, production) is serving.
         var request = httpContextAccessor.HttpContext?.Request;
         if (request != null)
         {
             return $"{request.Scheme}://{request.Host}";
+        }
+
+        var siteUrl = configuration["siteUrl"];
+        if (!string.IsNullOrEmpty(siteUrl))
+        {
+            return siteUrl.TrimEnd('/');
         }
 
         return string.Empty;
