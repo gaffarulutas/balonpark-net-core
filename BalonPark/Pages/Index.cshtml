@@ -40,33 +40,30 @@
 <div class="space-y-4 sm:space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-4 overflow-visible">
         <!-- Kategoriler: solda liste, hover ile sağda tek mega panel (aynı yükseklik, bitişik görünüm, grid) -->
-        <nav class="mega-menu-nav relative z-20 rounded-xl bg-white/95 backdrop-blur border border-gray-100 p-0 order-2 md:order-1 shadow-sm js-category-popover-nav overflow-visible flex flex-col md:flex-row md:min-h-0" aria-label="Kategoriler">
-            <div class="mega-menu-list flex-shrink-0 w-full px-4 pt-4 pb-4 md:px-5 md:pt-5 md:pb-5">
-                <p class="text-xs font-medium tracking-wider text-gray-400 uppercase pb-3 border-b border-gray-100 mb-3">Kategoriler</p>
-                <ul class="list-none p-0 m-0">
+        <nav class="mega-menu-nav relative z-20 rounded-xl bg-white border border-gray-200 p-0 order-2 md:order-1 shadow-sm js-category-popover-nav overflow-visible flex flex-col md:flex-row md:min-h-0" aria-label="Kategoriler">
+            <div class="mega-menu-list flex-shrink-0 w-full px-3 py-2.5 md:px-4 md:py-3">
+                <ul class="list-none p-0 m-0 divide-y divide-gray-50">
                     @if (Model.Categories != null && Model.Categories.Count > 0)
                     {
                         @foreach (var category in Model.Categories)
                         {
                             var hasSubCategories = category.SubCategories != null && category.SubCategories.Count > 0;
-                            <li class="category-popover-trigger group border-b border-gray-50 last:border-b-0 relative" data-category-id="@category.Id" aria-haspopup="true" aria-expanded="false">
-                                <div class="flex items-center min-h-0">
-                                    <a href="/category/@category.Slug" class="category-link flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-gray-50 transition text-sm w-full min-w-0" data-category-slug="@category.Slug">
-                                        @if (!string.IsNullOrEmpty(category.FirstProductImage))
-                                        {
-                                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="" class="lazy-image w-7 h-7 rounded object-cover flex-shrink-0" loading="lazy">
-                                        }
-                                        else
-                                        {
-                                            <span class="w-7 h-7 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400"><i data-lucide="folder" class="w-3.5 h-3.5"></i></span>
-                                        }
-                                        <span class="category-name font-medium text-ink truncate text-[15px] flex-1 min-w-0">@Html.Raw(category.Name)</span>
-                                        @if (hasSubCategories)
-                                        {
-                                            <span class="category-arrow w-5 h-5 flex-shrink-0 flex items-center justify-center text-gray-400 ml-auto" aria-hidden="true"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></span>
-                                        }
-                                    </a>
-                                </div>
+                            <li class="category-popover-trigger group relative" data-category-id="@category.Id" aria-haspopup="true" aria-expanded="false">
+                                <a href="/category/@category.Slug" class="category-link flex items-center gap-2.5 py-2.5 px-3 rounded-lg hover:bg-gray-50 transition text-sm w-full min-w-0" data-category-slug="@category.Slug">
+                                    @if (!string.IsNullOrEmpty(category.FirstProductImage))
+                                    {
+                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="" class="lazy-image w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
+                                    }
+                                    else
+                                    {
+                                        <span class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400"><i data-lucide="folder" class="w-4 h-4"></i></span>
+                                    }
+                                    <span class="category-name font-medium text-ink truncate whitespace-nowrap text-[15px] flex-1 min-w-0">@Html.Raw(category.Name)</span>
+                                    @if (hasSubCategories)
+                                    {
+                                        <span class="category-arrow w-5 h-5 flex-shrink-0 flex items-center justify-center text-gray-400 ml-auto" aria-hidden="true"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></span>
+                                    }
+                                </a>
                             </li>
                         }
                     }
@@ -77,11 +74,11 @@
                 </ul>
             </div>
             <!-- Tek mega panel: soldaki liste ile aynı yükseklik, bitişik (border-l yok), grid içerik -->
-            <div class="mega-menu-panel category-popover-panel absolute left-full top-0 bottom-0 z-[9999] w-[min(880px,96vw)] min-h-0 md:min-h-[inherit] bg-white backdrop-blur border border-l-0 border-gray-200 rounded-r-xl shadow-xl overflow-hidden flex flex-col transition-all duration-150 ease-out"
+            <div class="mega-menu-panel category-popover-panel absolute left-full top-0 bottom-0 z-[9999] min-h-0 md:min-h-[inherit] bg-white border border-l-0 border-gray-200 rounded-r-xl shadow-xl overflow-hidden flex flex-col transition-all duration-150 ease-out"
                  style="opacity:0;visibility:hidden;pointer-events:none;margin-left:0;"
                  role="menu"
                  aria-label="Kategori alt menüsü">
-                <div class="mega-menu-panel-inner flex-1 overflow-y-auto">
+                <div class="mega-menu-panel-inner flex-1 overflow-y-auto px-5 py-4">
                     @{
                         var urlService = (IUrlService?)ViewData["UrlService"];
                     }
@@ -94,13 +91,13 @@
                             <div class="mega-panel-content hidden" data-category-id="@category.Id" role="none" aria-hidden="true">
                                 @if (hasSubCategories)
                                 {
-                                    <div class="mega-menu-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" role="none">
+                                    <div class="mega-menu-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" role="none">
                                         @foreach (var subCategory in subs)
                                         {
                                             var imagePath = !string.IsNullOrEmpty(subCategory.FirstProductImage)
                                                 ? (urlService?.GetImageUrl(subCategory.FirstProductImage) ?? subCategory.FirstProductImage)
                                                 : null;
-                                            <a href="/category/@category.Slug/@subCategory.Slug" class="subcategory-link group flex flex-col gap-2 p-3 rounded-lg border border-gray-100 bg-white text-sm text-ink no-underline transition hover:border-primary/40 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40" role="menuitem" data-category-slug="@category.Slug" data-subcategory-slug="@subCategory.Slug">
+                                            <a href="/category/@category.Slug/@subCategory.Slug" class="subcategory-link group flex flex-col gap-2.5 p-3 rounded-lg border border-gray-100 bg-white text-sm text-ink no-underline transition hover:border-primary/40 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40" role="menuitem" data-category-slug="@category.Slug" data-subcategory-slug="@subCategory.Slug">
                                                 <span class="relative block overflow-hidden rounded-md bg-gray-50 aspect-[4/3]">
                                                     @if (!string.IsNullOrEmpty(imagePath))
                                                     {
@@ -113,11 +110,7 @@
                                                         </span>
                                                     }
                                                 </span>
-                                                <span class="font-medium text-center leading-tight text-[14px]">@Html.Raw(subCategory.Name)</span>
-                                                @if (subCategory.ProductCount > 0)
-                                                {
-                                                    <span class="text-xs text-gray-400 text-center">@subCategory.ProductCount ürün</span>
-                                                }
+                                                <span class="font-medium text-center leading-snug text-[13px] whitespace-nowrap">@Html.Raw(subCategory.Name)</span>
                                             </a>
                                         }
                                     </div>
@@ -161,7 +154,7 @@
         <p class="text-gray-400 text-xs mt-0.5">Tüm kategorilerden seçilmiş ürünler</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
     @if (Model.Products.Any())
     {
         @foreach (var item in Model.Products)
@@ -228,7 +221,12 @@
     /* Mega menü: panel açıkken soldaki nav sağ köşesi düz (bitişik panel görünümü) */
     @@media (min-width: 768px) {
         .mega-menu-nav.mega-menu-open { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-        .mega-menu-panel { height: 100%; min-height: 100%; }
+        .mega-menu-panel {
+            height: 100%;
+            min-height: 100%;
+            width: min(940px, calc(100vw - 372px));
+            max-width: min(940px, calc(100vw - 372px));
+        }
     }
     /* Mega panel grid: alt kategoriler düzeni */
     .mega-menu-grid {
