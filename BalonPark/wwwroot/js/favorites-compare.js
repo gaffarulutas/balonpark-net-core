@@ -387,7 +387,7 @@ class FavoritesAndCompare {
                 '</div>';
         }
 
-        return '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">' +
+        return '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 favorites-modal-grid">' +
             this.favorites.map(function (item) {
                 const d = escProduct(item);
                 return '<article class="group favorites-item bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">' +
@@ -427,7 +427,7 @@ class FavoritesAndCompare {
         window.openModal({
             title: 'Favorilerim (' + this.favorites.length + ')',
             titleId: titleId,
-            contentClassName: 'bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col focus:outline-none modal-panel',
+            contentClassName: 'bg-white rounded-xl shadow-2xl max-w-2xl max-h-[90vh] overflow-hidden flex flex-col focus:outline-none modal-panel favorites-modal-panel',
             content: this.buildFavoritesModalContent(),
             closeLabel: 'Kapat',
             onContentReady: function (contentEl, overlayEl, closeFn) {

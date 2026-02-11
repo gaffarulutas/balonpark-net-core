@@ -38,7 +38,7 @@
 <!-- Hero + Kategoriler (solda) + Product Section -->
 
 <div class="space-y-4 sm:space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-4 overflow-visible">
+    <div class="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 overflow-visible">
         <!-- Kategoriler: solda liste, hover ile sağda tek mega panel (aynı yükseklik, bitişik görünüm, grid) -->
         <nav class="mega-menu-nav relative z-20 rounded-xl bg-white border border-gray-200 p-0 order-2 md:order-1 shadow-sm js-category-popover-nav overflow-visible flex flex-col md:flex-row md:min-h-0" aria-label="Kategoriler">
             <div class="mega-menu-list flex-shrink-0 w-full px-3 py-2.5 md:px-4 md:py-3">
@@ -122,28 +122,32 @@
             </div>
         </nav>
 
-        <!-- Hero alanı (resimler) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 order-1 md:order-2">
-            <div class="md:col-span-2 relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] min-h-[200px]">
-                <img src="~/assets/images/1.png" class="absolute inset-0 w-full h-full object-cover" alt="Şişme Oyun Parkları ve Çocuk Oyun Grupları - Balon Park Eğlence Merkezi" loading="eager" width="800" height="400">
-                <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center p-6 sm:p-8">
-                    <span class="text-primary font-medium text-sm sm:text-base">Hazır Olun</span>
-                    <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">EĞLENCEYE!</h2>
-                    <p class="text-white/90 text-sm mt-2 max-w-md hidden sm:block">Çocuklarınız için güvenli ve eğlenceli şişme oyun grupları ile unutulmaz anlar yaşayın.</p>
-                    <a href="/category/siseme-parklar/sisme-kaydirak" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
-                        Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4 inline-block align-middle"></i>
-                    </a>
+        <!-- Hero: sol büyük, sağ küçük panel; arada boşluk; overlap yok -->
+        <div class="hero-row grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 order-1 md:order-2 min-w-0">
+            <div class="hero-panel relative rounded-xl overflow-hidden bg-gray-100 min-h-[200px] min-w-0">
+                <div class="aspect-[2/1] w-full relative">
+                    <img src="~/assets/images/1.png" class="absolute inset-0 w-full h-full object-cover" alt="Şişme Oyun Parkları - Balon Park" loading="eager" width="800" height="400">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col items-start justify-start p-6 sm:p-8">
+                        <span class="text-primary font-medium text-sm sm:text-base">Hazır Olun</span>
+                        <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">EĞLENCEYE!</h2>
+                        <p class="text-white/90 text-sm mt-2 max-w-md hidden sm:block">Çocuklarınız için güvenli ve eğlenceli şişme oyun grupları ile unutulmaz anlar yaşayın.</p>
+                        <a href="/category/siseme-parklar/sisme-kaydirak" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
+                            Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] md:aspect-auto min-h-[200px]">
-                <img src="~/assets/images/2.png" class="absolute inset-0 w-full h-full object-cover" alt="" loading="eager">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
-                    <span class="text-primary font-medium text-sm">Kaliteli</span>
-                    <h2 class="text-white text-xl font-bold mt-1">Güvenli</h2>
-                    <p class="text-white/90 text-sm mt-1">En İyi Fiyatlarla Sizlerle</p>
-                    <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition w-fit">
-                        Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4 inline-block align-middle"></i>
-                    </a>
+            <div class="hero-panel relative rounded-xl overflow-hidden bg-gray-100 min-h-[200px] min-w-0 md:min-h-0">
+                <div class="aspect-[2/1] w-full relative md:aspect-auto md:h-full md:min-h-0">
+                    <img src="~/assets/images/2.png" class="absolute inset-0 w-full h-full object-cover" alt="Kaliteli Güvenli - Balon Park" loading="eager">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col items-start justify-start p-6 sm:p-8">
+                        <span class="text-primary font-medium text-sm sm:text-base">Kaliteli</span>
+                        <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">Güvenli</h2>
+                        <p class="text-white/90 text-sm mt-2">En İyi Fiyatlarla Sizlerle</p>
+                        <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
+                            Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -154,7 +158,7 @@
         <p class="text-gray-400 text-xs mt-0.5">Tüm kategorilerden seçilmiş ürünler</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
     @if (Model.Products.Any())
     {
         @foreach (var item in Model.Products)
@@ -215,6 +219,9 @@
 
 @section Styles {
 <style>
+    /* Hero: iki panel yan yana, overlap yok */
+    .hero-row { align-items: stretch; }
+    .hero-panel { isolation: isolate; }
     /* Kategori trigger vurgusu */
     .category-popover-trigger.is-dropdown-open .category-link { background-color: rgb(249 250 251); }
     .category-popover-trigger.is-dropdown-open .category-name { color: rgb(0 168 232); }
