@@ -18,11 +18,17 @@
             window.lucide.createIcons();
         }
         var mainHeader = document.getElementById('main-header');
+        var scrollContainer = document.querySelector('.layout-main');
         if (mainHeader) {
             function onScrollHeader() {
-                mainHeader.classList.toggle('is-scrolled', window.scrollY > 8);
+                var y = scrollContainer ? scrollContainer.scrollTop : window.scrollY;
+                mainHeader.classList.toggle('is-scrolled', y > 8);
             }
-            window.addEventListener('scroll', onScrollHeader, { passive: true });
+            if (scrollContainer) {
+                scrollContainer.addEventListener('scroll', onScrollHeader, { passive: true });
+            } else {
+                window.addEventListener('scroll', onScrollHeader, { passive: true });
+            }
             onScrollHeader();
         }
     }
