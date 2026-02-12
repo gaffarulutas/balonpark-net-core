@@ -96,7 +96,6 @@ public class CreateModel : BaseAdminPage
             // Slug'ı otomatik oluştur
             Product.Slug = SlugHelper.GenerateSlug(Product.Name);
             Product.CreatedAt = DateTime.Now;
-            
             var productId = await _productRepository.CreateAsync(Product);
 
         // Resimleri yükle

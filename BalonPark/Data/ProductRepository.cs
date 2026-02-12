@@ -436,5 +436,59 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
         using var connection = context.CreateConnection();
         return await connection.QueryAsync<ProductImage>(query, new { ProductId = productId });
     }
+
+    /// <summary>
+    /// Aynı alt kategorideki diğer ürünleri getirir (ürün detay sayfası "İlgili Ürünler" için).
+    /// Mevcut ürün hariç, DisplayOrder ve Name'e göre sıralı.
+    /// </summary>
+    public async Task<IEnumerable<Product>> GetRelatedBySubCategoryAsync(string subCategorySlug, int excludeProductId, int limit = 6)
+    {
+        if (string.IsNullOrEmpty(subCategorySlug))
+            return Enumerable.Empty<Product>();
+        try
+        {
+            var query = @"
+                SELECT TOP (@Limit) p.*, c.Name as CategoryName, c.Slug as CategorySlug,
+                       sc.Name as SubCategoryName, sc.Slug as SubCategorySlug
+                FROM Products p
+                INNER JOIN Categories c ON p.CategoryId = c.Id
+                INNER JOIN SubCategories sc ON p.SubCategoryId = sc.Id
+                WHERE sc.Slug = @SubCategorySlug AND p.Id != @ExcludeProductId AND p.IsActive = 1 AND sc.IsActive = 1 AND c.IsActive = 1
+                ORDER BY p.DisplayOrder ASC, p.Name ASC";
+            using var connection = context.CreateConnection();
+            return await connection.QueryAsync<Product>(query, new { SubCategorySlug = subCategorySlug, ExcludeProductId = excludeProductId, Limit = limit });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "İlgili ürünler getirme hatası. SubCategorySlug: {SubCategorySlug}", subCategorySlug);
+            return Enumerable.Empty<Product>();
+        }
+    }
+
+    /// <summary>
+    /// Görüntülenme sayısı ve popüler etiketine göre popüler ürünleri getirir (ürün detay "Bu hafta popüler" için).
+    /// Mevcut ürün hariç.
+    /// </summary>
+    public async Task<IEnumerable<Product>> GetPopularProductsAsync(int excludeProductId, int limit = 6)
+    {
+        try
+        {
+            var query = @"
+                SELECT TOP (@Limit) p.*, c.Name as CategoryName, c.Slug as CategorySlug,
+                       sc.Name as SubCategoryName, sc.Slug as SubCategorySlug
+                FROM Products p
+                INNER JOIN Categories c ON p.CategoryId = c.Id
+                INNER JOIN SubCategories sc ON p.SubCategoryId = sc.Id
+                WHERE p.Id != @ExcludeProductId AND p.IsActive = 1 AND sc.IsActive = 1 AND c.IsActive = 1
+                ORDER BY CASE WHEN p.IsPopular = 1 THEN 0 ELSE 1 END, p.ViewCount DESC, p.DisplayOrder ASC, p.Name ASC";
+            using var connection = context.CreateConnection();
+            return await connection.QueryAsync<Product>(query, new { ExcludeProductId = excludeProductId, Limit = limit });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Popüler ürünler getirme hatası");
+            return Enumerable.Empty<Product>();
+        }
+    }
 }
 

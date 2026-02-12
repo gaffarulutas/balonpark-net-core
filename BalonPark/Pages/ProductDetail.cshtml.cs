@@ -15,6 +15,10 @@ public class ProductDetailModel : BasePage
     public Product? Product { get; set; }
     public ProductImage? MainImage { get; set; }
     public List<ProductImage> ProductImages { get; set; } = new();
+    /// <summary>İlgili ürünler (aynı alt kategoriden, mevcut ürün hariç).</summary>
+    public List<ProductWithImage> RelatedProducts { get; set; } = new();
+    /// <summary>Bu hafta popüler (görüntülenme / IsPopular, mevcut ürün hariç).</summary>
+    public List<ProductWithImage> PopularProducts { get; set; } = new();
 
     public ProductDetailModel(
         CategoryRepository categoryRepository,
@@ -78,6 +82,28 @@ public class ProductDetailModel : BasePage
         // Ürünün fiyat bilgilerini güncelle
         Product.UsdPrice = Math.Round(usdPrice, 2);
         Product.EuroPrice = Math.Round(euroPrice, 2);
+
+        // İlgili ürünler (aynı alt kategoriden)
+        var related = await _productRepository.GetRelatedBySubCategoryAsync(Product.SubCategorySlug ?? "", Product.Id, 6);
+        foreach (var p in related)
+        {
+            var (pu, pe) = await _currencyService.CalculatePricesAsync(p.Price);
+            p.UsdPrice = Math.Round(pu, 2);
+            p.EuroPrice = Math.Round(pe, 2);
+            var mainImg = await _productImageRepository.GetMainImageAsync(p.Id);
+            RelatedProducts.Add(new ProductWithImage { Product = p, MainImage = mainImg });
+        }
+
+        // Popüler ürünler (görüntülenme / IsPopular)
+        var popular = await _productRepository.GetPopularProductsAsync(Product.Id, 6);
+        foreach (var p in popular)
+        {
+            var (pu, pe) = await _currencyService.CalculatePricesAsync(p.Price);
+            p.UsdPrice = Math.Round(pu, 2);
+            p.EuroPrice = Math.Round(pe, 2);
+            var mainImg = await _productImageRepository.GetMainImageAsync(p.Id);
+            PopularProducts.Add(new ProductWithImage { Product = p, MainImage = mainImg });
+        }
 
         // Google Shopping gereksinimleri: Sayfa başarıyla yüklendi
         return Page();

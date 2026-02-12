@@ -3,27 +3,18 @@ using Serilog;
 
 namespace BalonPark.Middleware;
 
-public class GlobalExceptionHandlingMiddleware
+public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger;
-
-    public GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (Exception ex)
         {
             // Detaylı hata logu
-            _logger.LogError(ex, 
+            logger.LogError(ex, 
                 "Global Exception Handler - Beklenmeyen hata oluştu. " +
                 "Path: {Path}, Method: {Method}, User: {User}, IP: {IP}, Query: {Query}", 
                 context.Request.Path, 

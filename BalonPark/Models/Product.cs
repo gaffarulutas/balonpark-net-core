@@ -40,19 +40,19 @@ public class Product
     public int? PackagePalletCount { get; set; }
 
     // Genel (General)
-    public bool? HasCertificate { get; set; }
+    public bool HasCertificate { get; set; }
     public string? WarrantyDescription { get; set; }
     public string? AfterSalesService { get; set; }
 
     // Ürün etiketleri ve ek özellikler (detay sayfası badge/feature tags)
-    public bool? IsDiscounted { get; set; }
-    public bool? IsPopular { get; set; }
-    public bool? IsProjectSpecial { get; set; }
+    public bool IsDiscounted { get; set; }
+    public bool IsPopular { get; set; }
+    public bool IsProjectSpecial { get; set; }
     /// <summary>Eski alan; detayda metin otomatik oluşturuluyorsa DeliveryDaysMin/Max kullan.</summary>
     public string? DeliveryDays { get; set; }
     public int? DeliveryDaysMin { get; set; }
     public int? DeliveryDaysMax { get; set; }
-    public bool? IsFireResistant { get; set; }
+    public bool IsFireResistant { get; set; }
     /// <summary>Eski alan; detayda metin otomatik oluşturuluyorsa MaterialWeightGrm2 kullan.</summary>
     public string? MaterialWeight { get; set; }
     public int? MaterialWeightGrm2 { get; set; }

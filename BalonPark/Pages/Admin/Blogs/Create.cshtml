@@ -65,6 +65,27 @@
         @Html.AntiForgeryToken()
         
         <div class="space-y-6">
+            <!-- Öne Çıkan Görsel (resim yükleme yukarıda) -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Öne Çıkan Görsel</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-400 transition-colors duration-200">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600">
+                            <label for="FeaturedImageFile" class="relative cursor-pointer bg-white rounded-md font-medium text-gray-900 hover:text-gray-800">
+                                <span>Dosya yükle</span>
+                                <input type="file" id="FeaturedImageFile" name="FeaturedImageFile" accept="image/*" class="sr-only">
+                            </label>
+                            <p class="pl-1">veya URL girin</p>
+                        </div>
+                        <input type="text" asp-for="Blog.FeaturedImage" class="w-full mt-2 px-3 py-2 text-sm border border-gray-200 rounded-md" placeholder="https://example.com/image.jpg">
+                    </div>
+                </div>
+                <small class="text-gray-500 text-sm mt-2 block">Görsel dosyası yükleyin veya URL girin</small>
+            </div>
+
             <!-- Title and Category -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -114,27 +135,6 @@
                 <label asp-for="Blog.MetaDescription" class="block text-sm font-medium text-gray-700 mb-2">Meta Açıklama (SEO)</label>
                 <textarea asp-for="Blog.MetaDescription" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="SEO için meta açıklama (max 160 karakter)"></textarea>
                 <small class="text-gray-500 text-sm mt-1 block">Arama motorlarında görünecek açıklama</small>
-            </div>
-
-            <!-- Featured Image -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Öne Çıkan Görsel</label>
-                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-400 transition-colors duration-200">
-                    <div class="space-y-1 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        <div class="flex text-sm text-gray-600">
-                            <label for="FeaturedImageFile" class="relative cursor-pointer bg-white rounded-md font-medium text-gray-900 hover:text-gray-800">
-                                <span>Dosya yükle</span>
-                                <input type="file" id="FeaturedImageFile" name="FeaturedImageFile" accept="image/*" class="sr-only">
-                            </label>
-                            <p class="pl-1">veya URL girin</p>
-                        </div>
-                        <input type="text" asp-for="Blog.FeaturedImage" class="w-full mt-2 px-3 py-2 text-sm border border-gray-200 rounded-md" placeholder="https://example.com/image.jpg">
-                    </div>
-                </div>
-                <small class="text-gray-500 text-sm mt-2 block">Görsel dosyası yükleyin veya URL girin</small>
             </div>
 
             <!-- Author and Tags -->
