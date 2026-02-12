@@ -236,12 +236,12 @@
 
 <div class="main-wrapper flex flex-col min-h-screen flex-1">
 
-    <!-- Top bar: slogan + promo + güvenli alışveriş | telefon, favori, karşılaştır -->
+    <!-- Top bar: slogan + promo | telefon (favori ve karşılaştır ana header'da) -->
     @{
         var topBarSlogan = siteSettings?.MetaTitle ?? "Eğlence Burada, Hareket Oyun Güven";
     }
     <div id="header-promo-bar" class="hidden md:block bg-ink text-white py-2 text-xs sm:text-sm font-medium" role="banner">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap px-3 sm:px-4">
+        <div class="w-full flex items-center justify-between gap-3 flex-wrap px-3 sm:px-4 lg:px-6">
             <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <span class="inline-flex items-center gap-1.5 text-primary font-semibold">
                     <i data-lucide="sparkles" class="w-4 h-4 flex-shrink-0" aria-hidden="true"></i>
@@ -264,49 +264,29 @@
                         <span class="hidden sm:inline">İletişim</span>
                     </a>
                 }
-                <a href="#" id="header-favorites-btn" class="inline-flex items-center gap-1.5 py-1 px-2 rounded hover:bg-white/10 text-white transition-colors" aria-label="Favoriler">
-                    <i data-lucide="heart" class="w-4 h-4 lucide-fav-header"></i>
-                    <span class="favorites-count-text text-white/80">0</span>
-                </a>
-                <a href="#" id="header-compare-btn" class="inline-flex items-center gap-1.5 py-1 px-2 rounded hover:bg-white/10 text-white transition-colors" aria-label="Karşılaştır">
-                    <i data-lucide="shuffle" class="w-4 h-4"></i>
-                    <span class="compare-count-text text-white/80">0</span>
-                </a>
             </div>
         </div>
     </div>
 
-    <!-- Main header (logo, Kategoriler mega menü, search, CTAs) -->
-    <header class="bg-white border-b border-gray-100 sticky top-0 z-[60] shadow-sm relative" id="main-header">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4">
-            <!-- Row 1: Logo + Kategoriler + Search + Actions -->
+    <!-- Main header: full width, logo + arama + nav -->
+    <header class="bg-white border-b border-gray-100 sticky top-0 z-[50] shadow-sm" id="main-header">
+        <div class="w-full px-3 sm:px-4 lg:px-6">
             <div class="flex items-center justify-between gap-3 py-3">
                 <div class="flex items-center gap-3 min-w-0 flex-shrink-0">
-                    <button type="button" id="header-mobile-menu-btn" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 text-ink hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2" aria-label="Menüyü aç" aria-expanded="false" aria-controls="header-mega-menu">
-                        <i data-lucide="menu" class="w-5 h-5 mobile-menu-icon-open" aria-hidden="true"></i>
-                        <i data-lucide="x" class="w-5 h-5 hidden mobile-menu-icon-close" aria-hidden="true"></i>
+                    <button type="button" id="header-sidebar-toggle" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 text-ink hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2" aria-label="Kategori menüsünü aç" aria-expanded="false" aria-controls="layout-sidebar">
+                        <i data-lucide="menu" class="w-5 h-5" aria-hidden="true"></i>
                     </button>
                     <a asp-page="/Index" class="flex items-center flex-shrink-0" aria-label="@Html.Raw(companyName) Ana Sayfa">
                         <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-8 sm:h-9 w-auto max-h-12 object-contain" loading="eager">
                     </a>
-                    <!-- Kategoriler + Ana Sayfa, Hakkımızda, Blog, İletişim (768px ve üzeri) -->
-                    <div class="hidden md:flex items-center gap-1 ml-2">
-                        <button type="button" id="header-categories-toggle" class="header-categories-btn inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" aria-expanded="false" aria-haspopup="true" aria-controls="header-mega-menu">
-                            <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                            <span>Kategoriler</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200 header-categories-chevron"></i>
-                        </button>
-                        <nav class="flex items-center gap-0.5 border-l border-gray-200 pl-3 ml-1" aria-label="Site menüsü">
-                            <a asp-page="/Index" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" title="Ana Sayfa">Ana Sayfa</a>
-                            <a asp-page="/Hakkimizda" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" title="Hakkımızda">Hakkımızda</a>
-                            <a asp-page="/Blog" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" title="Blog">Blog</a>
-                            <a asp-page="/Iletisim" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" title="İletişim">İletişim</a>
-                        </nav>
-                    </div>
+                    <nav class="hidden md:flex items-center gap-0.5 border-l border-gray-200 pl-3 ml-1" aria-label="Site menüsü">
+                        <a asp-page="/Index" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors" title="Ana Sayfa">Ana Sayfa</a>
+                        <a asp-page="/Hakkimizda" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors" title="Hakkımızda">Hakkımızda</a>
+                        <a asp-page="/Blog" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors" title="Blog">Blog</a>
+                        <a asp-page="/Iletisim" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors" title="İletişim">İletişim</a>
+                    </nav>
                 </div>
-
-                <!-- Search: autocomplete (trend aramalar, son aramalar, canlı öneri) -->
-                <div class="flex-1 min-w-0 max-w-xl mx-2 sm:mx-4 hidden sm:block relative" id="header-search-wrap-desktop">
+                <div class="flex-1 min-w-0 max-w-xl mx-2 sm:mx-4 relative" id="header-search-wrap-desktop">
                     <form action="/Search" method="get" class="relative" role="search">
                         <div class="relative">
                             <input type="search" name="q" id="header-search-input-desktop" class="header-search-input w-full rounded-lg border border-gray-200 pl-4 pr-10 py-2.5 text-sm text-ink placeholder-gray-400 transition focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-gray-300" placeholder="Ürün veya kategori ara..." autocomplete="off" aria-label="Site içi arama" aria-autocomplete="list" aria-expanded="false" aria-controls="header-search-dropdown" aria-haspopup="listbox" aria-activedescendant="">
@@ -316,126 +296,122 @@
                         </div>
                     </form>
                 </div>
-
-                <div class="flex items-center gap-1 sm:gap-0.5 flex-shrink-0">
-                    <!-- Currency (desktop) -->
-                    <div class="hidden lg:flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 mr-1">
+                <div class="sm:hidden flex-shrink-0">
+                    <form action="/Search" method="get" class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200" role="search" aria-label="Ara">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </form>
+                </div>
+                <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <a href="#" id="header-favorites-btn" class="inline-flex items-center justify-center gap-1.5 w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-primary transition-colors" aria-label="Favoriler" title="Favoriler">
+                        <i data-lucide="heart" class="w-5 h-5 lucide-fav-header"></i>
+                        <span class="favorites-count-text hidden sm:inline text-sm font-medium text-gray-500">0</span>
+                    </a>
+                    <a href="#" id="header-compare-btn" class="inline-flex items-center justify-center gap-1.5 w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-primary transition-colors" aria-label="Karşılaştır" title="Karşılaştır">
+                        <i data-lucide="shuffle" class="w-5 h-5"></i>
+                        <span class="compare-count-text hidden sm:inline text-sm font-medium text-gray-500">0</span>
+                    </a>
+                    <div class="hidden lg:flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 ml-1">
                         <button type="button" class="currency-btn w-8 h-8 rounded-md inline-flex items-center justify-center text-xs transition-colors @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white" : "text-gray-600 hover:bg-gray-200")" data-currency="TL" aria-label="TL"><i data-lucide="badge-turkish-lira" class="w-4 h-4"></i></button>
                         <button type="button" class="currency-btn w-8 h-8 rounded-md inline-flex items-center justify-center text-xs transition-colors @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white" : "text-gray-600 hover:bg-gray-200")" data-currency="USD" aria-label="USD"><i data-lucide="dollar-sign" class="w-4 h-4"></i></button>
                         <button type="button" class="currency-btn w-8 h-8 rounded-md inline-flex items-center justify-center text-xs transition-colors @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white" : "text-gray-600 hover:bg-gray-200")" data-currency="EUR" aria-label="EUR"><i data-lucide="euro" class="w-4 h-4"></i></button>
                     </div>
                 </div>
             </div>
-
-            <!-- Mobile: Search bar (full width below) -->
-            <div class="sm:hidden pb-3 relative" id="header-search-wrap-mobile">
-                <form action="/Search" method="get" role="search">
-                    <div class="relative">
-                        <input type="search" name="q" id="header-search-input-mobile" class="header-search-input w-full rounded-lg border border-gray-200 pl-4 pr-10 py-2.5 text-sm text-ink placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Ürün veya kategori ara..." autocomplete="off" aria-label="Site içi arama" aria-autocomplete="list" aria-expanded="false" aria-controls="header-search-dropdown" aria-haspopup="listbox" aria-activedescendant="">
-                        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary" aria-label="Ara"><i data-lucide="search" class="w-5 h-5"></i></button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Autocomplete dropdown: input ile aynı hizada, tek parça görünüm, açılma animasyonu -->
-            <div id="header-search-dropdown" role="listbox" aria-label="Arama önerileri" class="hidden absolute z-[70] bg-white rounded-b-xl border border-gray-200 border-t-0 shadow-xl overflow-hidden header-search-dropdown-closed">
-                <div id="header-search-trending" class="p-2 border-b border-gray-100 hidden">
-                    <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Trend aramalar</p>
-                    <div id="header-search-trending-list" class="flex flex-wrap gap-1.5"></div>
-                </div>
-                <div id="header-search-recent" class="p-2 border-b border-gray-100 hidden">
-                    <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Son aramalar</p>
-                    <ul id="header-search-recent-list" class="space-y-0.5" role="list"></ul>
-                </div>
-                <div id="header-search-suggestions" class="p-2 overflow-y-auto hidden">
-                    <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Öneriler</p>
-                    <ul id="header-search-suggestions-list" class="space-y-0.5" role="list"></ul>
-                </div>
-                <p id="header-search-loading" class="hidden px-4 py-3 text-sm text-gray-500">Yükleniyor...</p>
-                <p id="header-search-empty" class="hidden px-4 py-3 text-sm text-gray-500">Sonuç bulunamadı.</p>
-            </div>
         </div>
-
-        <!-- Mobil: menü açıkken overlay (dışarı tıklayınca kapanır) -->
-        <div id="header-mobile-menu-overlay" class="fixed inset-0 z-40 bg-black/50 opacity-0 invisible transition-opacity duration-200 md:opacity-0 md:invisible md:pointer-events-none" aria-hidden="true"></div>
-
-        <!-- Full-width mega menü: Kategoriler (açılır/kapanır, Tailwind animasyon) -->
-        <div id="header-mega-menu" role="menu" aria-label="Ürün kategorileri"
-             class="header-mega-dropdown absolute left-0 right-0 top-full z-50 bg-white border-b border-gray-200 shadow-lg overflow-hidden transition-all duration-200 ease-out opacity-0 invisible -translate-y-2 pointer-events-none max-h-[calc(100vh-8rem)] md:max-h-none overflow-y-auto"
-             data-open="false">
-            <div class="max-w-7xl mx-auto px-4 py-6">
-                <div class="flex flex-col md:flex-row gap-6 md:gap-8">
-                    <!-- Sol: Ana kategoriler listesi (mobilde tam genişlik) -->
-                    <nav class="w-full md:w-56 flex-shrink-0 md:border-r border-gray-100 md:pr-6" aria-label="Ana kategoriler">
-                        <ul class="space-y-0.5">
-                            @{
-                                var urlService = (IUrlService?)ViewData["UrlService"];
-                            }
-                            @if (headerCategories.Count > 0)
-                            {
-                                @foreach (var cat in headerCategories)
-                                {
-                                    var hasSubs = cat.SubCategories != null && cat.SubCategories.Count > 0;
-                                    <li class="header-mega-cat group" data-category-id="@cat.Id">
-                                        <a href="/category/@cat.Slug" class="header-mega-cat-link flex items-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors @(hasSubs ? "flex" : "")" @(hasSubs ? "aria-haspopup=\"true\" aria-expanded=\"false\"" : "")>
-                                            @if (!string.IsNullOrEmpty(cat.FirstProductImage))
-                                            {
-                                                <img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="@Html.Raw(cat.Name)" class="w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
-                                            }
-                                            else
-                                            {
-                                                <span class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400"><i data-lucide="folder" class="w-4 h-4"></i></span>
-                                            }
-                                            <span class="truncate">@Html.Raw(cat.Name)</span>
-                                            @if (hasSubs)
-                                            {
-                                                <i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 ml-auto text-gray-400 group-hover:text-primary"></i>
-                                            }
-                                        </a>
-                                    </li>
-                                }
-                            }
-                            else
-                            {
-                                <li class="py-2 text-sm text-gray-500">Kategori bulunamadı.</li>
-                            }
-                        </ul>
-                    </nav>
-                    <!-- Sağ: Hover edilen kategorinin alt kategorileri -->
-                    <div class="flex-1 min-w-0">
-                        @if (headerCategories.Count > 0)
-                        {
-                            @foreach (var cat in headerCategories)
-                            {
-                                var subs = cat.SubCategories ?? new List<BalonPark.Models.SubCategory>();
-                                <div class="header-mega-subs hidden transition-opacity duration-200" data-category-id="@cat.Id" role="group" aria-label="@cat.Name alt kategorileri">
-                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                        @foreach (var sub in subs)
-                                        {
-                                            var subImg = !string.IsNullOrEmpty(sub.FirstProductImage) ? (urlService?.GetImageUrl(sub.FirstProductImage) ?? sub.FirstProductImage) : null;
-                                            <a href="/category/@cat.Slug/@sub.Slug" class="flex flex-col gap-2 p-3 rounded-lg border border-gray-100 text-sm text-ink no-underline transition hover:border-primary/40 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40" role="menuitem">
-                                                @if (!string.IsNullOrEmpty(subImg))
-                                                {
-                                                    <span class="block overflow-hidden rounded-md bg-gray-50 aspect-[4/3]">
-                                                        <img src="@subImg" alt="@sub.Name" class="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-200" loading="lazy">
-                                                    </span>
-                                                }
-                                                <span class="font-medium text-center">@Html.Raw(sub.Name)</span>
-                                            </a>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        }
-                    </div>
-                </div>
+        <div id="header-search-dropdown" role="listbox" aria-label="Arama önerileri" class="hidden absolute left-0 right-0 top-full z-[70] bg-white rounded-b-xl border border-gray-200 border-t-0 shadow-xl overflow-hidden header-search-dropdown-closed mx-3 sm:mx-4 lg:mx-6 max-w-xl">
+            <div id="header-search-trending" class="p-2 border-b border-gray-100 hidden">
+                <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Trend aramalar</p>
+                <div id="header-search-trending-list" class="flex flex-wrap gap-1.5"></div>
             </div>
+            <div id="header-search-recent" class="p-2 border-b border-gray-100 hidden">
+                <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Son aramalar</p>
+                <ul id="header-search-recent-list" class="space-y-0.5" role="list"></ul>
+            </div>
+            <div id="header-search-suggestions" class="p-2 overflow-y-auto hidden">
+                <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Öneriler</p>
+                <ul id="header-search-suggestions-list" class="space-y-0.5" role="list"></ul>
+            </div>
+            <p id="header-search-loading" class="hidden px-4 py-3 text-sm text-gray-500">Yükleniyor...</p>
+            <p id="header-search-empty" class="hidden px-4 py-3 text-sm text-gray-500">Sonuç bulunamadı.</p>
         </div>
     </header>
 
-    <div class="flex flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 py-4">
-        <main class="content-col flex-1 min-w-0">
-            <div class="main-content">
+    <!-- Full screen: sidebar + main -->
+    <div class="layout-body flex flex-1 w-full min-h-0">
+        <!-- Sidebar: Kategoriler (parent-children tree) -->
+        <aside id="layout-sidebar" class="layout-sidebar" aria-label="Kategori menüsü">
+            <div class="layout-sidebar-inner">
+                <div class="layout-sidebar-header">
+                    <h2 class="layout-sidebar-title">Kategoriler</h2>
+                    <button type="button" id="layout-sidebar-close" class="layout-sidebar-close" aria-label="Menüyü kapat">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <nav class="category-tree" role="navigation" aria-label="Ürün kategorileri">
+                    @{
+                        var urlService = (IUrlService?)ViewData["UrlService"];
+                    }
+                    @if (headerCategories.Count > 0)
+                    {
+                        <ul class="category-tree-list">
+                            @foreach (var cat in headerCategories)
+                            {
+                                var hasSubs = cat.SubCategories != null && cat.SubCategories.Count > 0;
+                                <li class="category-tree-item" data-category-id="@cat.Id">
+                                    <div class="category-tree-parent">
+                                        <a href="/category/@cat.Slug" class="category-tree-link">
+                                            @if (!string.IsNullOrEmpty(cat.FirstProductImage))
+                                            {
+                                                <span class="category-tree-icon category-tree-icon-img">
+                                                    <img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="" loading="lazy">
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="category-tree-icon category-tree-icon-default"><i data-lucide="folder" class="w-5 h-5"></i></span>
+                                            }
+                                            <span class="category-tree-label">@Html.Raw(cat.Name)</span>
+                                        </a>
+                                        @if (hasSubs)
+                                        {
+                                            <button type="button" class="category-tree-toggle" aria-expanded="false" aria-controls="category-children-@cat.Id" data-toggle-for="category-children-@cat.Id">
+                                                <i data-lucide="chevron-right" class="category-tree-chevron"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="category-tree-toggle-placeholder" aria-hidden="true"></span>
+                                        }
+                                    </div>
+                                    @if (hasSubs)
+                                    {
+                                        <ul id="category-children-@cat.Id" class="category-tree-children hidden" role="group" aria-label="@cat.Name alt kategorileri">
+                                            @foreach (var sub in cat.SubCategories!)
+                                            {
+                                                <li class="category-tree-child">
+                                                    <a href="/category/@cat.Slug/@sub.Slug" class="category-tree-child-link">
+                                                        <i data-lucide="chevron-right" class="category-tree-child-chevron"></i>
+                                                        <span class="category-tree-child-label">@Html.Raw(sub.Name)</span>
+                                                    </a>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="category-tree-empty">Kategori bulunamadı.</p>
+                    }
+                </nav>
+            </div>
+        </aside>
+        <div id="layout-sidebar-overlay" class="layout-sidebar-overlay" aria-hidden="true"></div>
+
+        <main class="layout-main flex-1 min-w-0 overflow-auto">
+            <div class="main-content w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
                 @RenderBody()
             </div>
         </main>
@@ -454,7 +430,7 @@
     }
 
     <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-6">
+        <div class="w-full px-3 sm:px-4 lg:px-6 py-6">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <p class="text-sm text-gray-600">© @DateTime.Now.Year @Html.Raw(companyName). Tüm hakları saklıdır.</p>
                 <nav class="flex flex-wrap gap-4 text-sm">
