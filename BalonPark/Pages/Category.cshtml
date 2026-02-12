@@ -98,14 +98,15 @@
             @foreach (var subCategory in Model.SubCategories)
             {
                 <a href="/category/@Model.Category?.Slug/@subCategory.Slug" class="group bg-white rounded border border-gray-100 overflow-hidden hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-200 flex flex-col">
-                    <div class="aspect-square bg-gray-50 overflow-hidden">
+                    <div class="aspect-square bg-gray-50 overflow-hidden product-image-wrap">
+                        <span class="img-loading-spinner" aria-hidden="true"></span>
                         @if (!string.IsNullOrEmpty(subCategory.FirstProductImage))
                         {
-                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(subCategory.FirstProductImage) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{subCategory.FirstProductImage}")" alt="@Html.Raw(subCategory.Name)" class="lazy-image w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" loading="lazy">
+                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(subCategory.FirstProductImage) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{subCategory.FirstProductImage.TrimStart('/')}")" alt="@Html.Raw(subCategory.Name)" class="lazy-image w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-200" loading="lazy" onload="this.classList.add('loaded'); var s=this.previousElementSibling; if(s) s.classList.add('hidden');">
                         }
                         else
                         {
-                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" alt="@Html.Raw(subCategory.Name)" class="lazy-image w-full h-full object-cover" loading="lazy">
+                            <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" alt="@Html.Raw(subCategory.Name)" class="lazy-image w-full h-full object-cover" loading="lazy" onload="this.classList.add('loaded'); var s=this.previousElementSibling; if(s) s.classList.add('hidden');">
                         }
                     </div>
                     <div class="p-3 border-t border-gray-100">

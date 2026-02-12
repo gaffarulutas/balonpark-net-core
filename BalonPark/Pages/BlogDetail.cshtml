@@ -144,11 +144,11 @@
                 <div class="p-4 rounded-xl border border-gray-100 bg-white">
                     <h3 class="text-ink text-sm font-semibold mb-3">Bu yazıyı paylaşın:</h3>
                     <div class="flex flex-wrap gap-3">
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=@Uri.EscapeDataString(shareUrl)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#1877F2] hover:opacity-90 transition" title="Facebook" aria-label="Facebook"><i data-lucide="facebook" class="w-5 h-5"></i></a>
-                        <a href="https://twitter.com/intent/tweet?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#1DA1F2] hover:opacity-90 transition" title="Twitter" aria-label="Twitter"><i data-lucide="twitter" class="w-5 h-5"></i></a>
-                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=@Uri.EscapeDataString(shareUrl)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#0077B5] hover:opacity-90 transition" title="LinkedIn" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
-                        <a href="https://wa.me/?text=@Uri.EscapeDataString($"{shareTitle} - {shareUrl}")" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#25d366] hover:opacity-90 transition" title="WhatsApp" aria-label="WhatsApp"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
-                        <a href="https://t.me/share/url?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" target="_blank" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#0088cc] hover:opacity-90 transition" title="Telegram" aria-label="Telegram"><i data-lucide="send" class="w-5 h-5"></i></a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=@Uri.EscapeDataString(shareUrl)" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#1877F2] hover:opacity-90 transition" title="Facebook'ta paylaş" aria-label="Facebook'ta paylaş"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                        <a href="https://twitter.com/intent/tweet?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#1DA1F2] hover:opacity-90 transition" title="Twitter'da paylaş" aria-label="Twitter'da paylaş"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=@Uri.EscapeDataString(shareUrl)" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#0077B5] hover:opacity-90 transition" title="LinkedIn'de paylaş" aria-label="LinkedIn'de paylaş"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+                        <a href="https://wa.me/?text=@Uri.EscapeDataString($"{shareTitle} - {shareUrl}")" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#25d366] hover:opacity-90 transition" title="WhatsApp'ta paylaş" aria-label="WhatsApp'ta paylaş"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
+                        <a href="https://t.me/share/url?url=@Uri.EscapeDataString(shareUrl)&text=@Uri.EscapeDataString(shareTitle)" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full flex items-center justify-center text-white bg-[#0088cc] hover:opacity-90 transition" title="Telegram'da paylaş" aria-label="Telegram'da paylaş"><i data-lucide="send" class="w-5 h-5"></i></a>
                     </div>
                 </div>
 
@@ -159,10 +159,14 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             @foreach (var product in Model.Blog.RelatedProducts.Take(3))
                             {
-                                <a href="/category/@product.Product.CategorySlug/@product.Product.SubCategorySlug/@product.Product.Slug" class="group rounded-lg border border-gray-100 overflow-hidden hover:border-gray-200 hover:shadow-md transition">
+                                <a href="/category/@product.Product.CategorySlug/@product.Product.SubCategorySlug/@product.Product.Slug" class="group rounded-lg border border-gray-100 overflow-hidden hover:border-gray-200 hover:shadow-md transition block">
                                     @if (product.MainImage != null)
                                     {
-                                        <img src="@Model.UrlService?.GetImageUrl(product.MainImage.ThumbnailPath)" alt="@Html.Raw(product.Product.Name)" class="lazy-image w-full h-28 object-cover" loading="lazy">
+                                        var prodImgUrl = Model.UrlService?.GetImageUrl(product.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{product.MainImage.ThumbnailPath.TrimStart('/')}";
+                                        <div class="product-image-wrap w-full h-28 min-h-0">
+                                            <span class="img-loading-spinner" aria-hidden="true"></span>
+                                            <img src="@prodImgUrl" alt="@Html.Raw(product.Product.Name)" class="lazy-image w-full h-28 object-cover" loading="lazy" onload="this.classList.add('loaded'); var s=this.previousElementSibling; if(s) s.classList.add('hidden');">
+                                        </div>
                                     }
                                     else
                                     {
@@ -236,8 +240,10 @@
                                 <div class="flex gap-3 pb-3 border-b border-gray-50 last:border-0 last:pb-0">
                                     @if (!string.IsNullOrEmpty(relatedBlog.FeaturedImage))
                                     {
-                                        <a href="/blog/@relatedBlog.Slug" class="flex-shrink-0 w-20 h-14 rounded overflow-hidden bg-gray-100">
-                                            <img src="@Model.UrlService?.GetImageUrl(relatedBlog.FeaturedImage)" alt="@Html.Raw(relatedBlog.Title)" class="lazy-image w-full h-full object-cover" loading="lazy">
+                                        var relImgUrl = Model.UrlService?.GetImageUrl(relatedBlog.FeaturedImage) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{relatedBlog.FeaturedImage.TrimStart('/')}";
+                                        <a href="/blog/@relatedBlog.Slug" class="flex-shrink-0 w-20 h-14 rounded overflow-hidden product-image-wrap min-h-0">
+                                            <span class="img-loading-spinner" aria-hidden="true"></span>
+                                            <img src="@relImgUrl" alt="@Html.Raw(relatedBlog.Title)" class="lazy-image w-full h-full object-cover" loading="lazy" onload="this.classList.add('loaded'); var s=this.previousElementSibling; if(s) s.classList.add('hidden');">
                                         </a>
                                     }
                                     else

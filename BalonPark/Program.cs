@@ -156,6 +156,9 @@ try
 
     app.UseRouting();
 
+    // 404 ve diğer hata kodları için özel sayfa (404 = NotFound.cshtml)
+    app.UseStatusCodePagesWithReExecute("/NotFound", "?statusCode={0}");
+
     app.UseSession();
     app.UseAuthorization();
 

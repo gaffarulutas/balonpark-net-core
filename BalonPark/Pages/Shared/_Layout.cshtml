@@ -29,6 +29,7 @@
 <html lang="tr">
 
 <head>
+    <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -43,6 +44,7 @@
     <meta name="keywords"
         content="@Html.Raw(ViewData["Keywords"] ?? siteSettings?.MetaKeywords ?? "şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı")">
     <meta name="author" content="@Html.Raw(companyName)">
+    <meta name="publisher" content="@Html.Raw(companyName)">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta name="language" content="tr">
     <meta name="revisit-after" content="1 days">
@@ -192,7 +194,12 @@
     <link rel="apple-touch-icon" href="@logoUrl">
     <link rel="icon" sizes="32x32" href="@logoUrl">
     <link rel="icon" sizes="16x16" href="@logoUrl">
-    <title>@Html.Raw(ViewData["Title"] ?? siteSettings?.MetaTitle ?? companyName)</title>
+    @{
+        var pageTitle = ViewData["Title"]?.ToString() ?? siteSettings?.MetaTitle ?? companyName ?? "";
+        var titleMaxLength = 60;
+        var titleForTag = pageTitle.Length > titleMaxLength ? pageTitle.Substring(0, titleMaxLength - 1).TrimEnd() + "…" : pageTitle;
+    }
+    <title>@Html.Raw(titleForTag)</title>
 
     <!-- Tailwind CSS (built; run "npm run build:css" in BalonPark to rebuild) -->
     <link href="~/css/tailwind.css" rel="stylesheet">
@@ -219,7 +226,7 @@
 
 </head>
 
-<body class="font-sans text-[13px] bg-white text-ink antialiased min-h-screen flex flex-col">
+<body class="font-sans text-[15px] sm:text-base bg-white text-ink antialiased min-h-screen flex flex-col">
 @if (!string.IsNullOrEmpty(siteSettings?.GoogleTagManager))
 {
 <!-- Google Tag Manager (noscript) - Admin Ayarlardan güncellenir -->
@@ -290,10 +297,10 @@
                             <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200 header-categories-chevron"></i>
                         </button>
                         <nav class="flex items-center gap-0.5 border-l border-gray-200 pl-3 ml-1" aria-label="Site menüsü">
-                            <a asp-page="/Index" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200">Ana Sayfa</a>
-                            <a asp-page="/Hakkimizda" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200">Hakkımızda</a>
-                            <a asp-page="/Blog" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200">Blog</a>
-                            <a asp-page="/Iletisim" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200">İletişim</a>
+                            <a asp-page="/Index" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" title="Ana Sayfa">Ana Sayfa</a>
+                            <a asp-page="/Hakkimizda" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" title="Hakkımızda">Hakkımızda</a>
+                            <a asp-page="/Blog" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" title="Blog">Blog</a>
+                            <a asp-page="/Iletisim" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200" title="İletişim">İletişim</a>
                         </nav>
                     </div>
                 </div>
@@ -373,7 +380,7 @@
                                         <a href="/category/@cat.Slug" class="header-mega-cat-link flex items-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors @(hasSubs ? "flex" : "")" @(hasSubs ? "aria-haspopup=\"true\" aria-expanded=\"false\"" : "")>
                                             @if (!string.IsNullOrEmpty(cat.FirstProductImage))
                                             {
-                                                <img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="" class="w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
+                                                <img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="@Html.Raw(cat.Name)" class="w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
                                             }
                                             else
                                             {
@@ -440,7 +447,7 @@
         if (!string.IsNullOrEmpty(whatsAppNumber))
         {
             <!-- WhatsApp FAB (Admin Ayarlardan güncellenir) -->
-            <a href="https://wa.me/@whatsAppNumber" target="_blank" rel="noopener" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:bg-green-600 hover:scale-110 transition-all" aria-label="WhatsApp ile iletişime geç">
+            <a href="https://wa.me/@whatsAppNumber" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:bg-green-600 hover:scale-110 transition-all" aria-label="WhatsApp ile iletişime geç" title="WhatsApp ile iletişime geç">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
             </a>
         }
@@ -451,21 +458,21 @@
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <p class="text-sm text-gray-600">© @DateTime.Now.Year @Html.Raw(companyName). Tüm hakları saklıdır.</p>
                 <nav class="flex flex-wrap gap-4 text-sm">
-                    <a asp-page="/Hakkimizda" class="text-gray-600 hover:text-primary">Hakkımızda</a>
-                    <a asp-page="/Blog" class="text-gray-600 hover:text-primary">Blog</a>
-                    <a asp-page="/Iletisim" class="text-gray-600 hover:text-primary">İletişim</a>
-                    <a asp-page="/Sitemap" class="text-gray-600 hover:text-primary">Site Haritası</a>
-                    <a asp-page="/Privacy" class="text-gray-600 hover:text-primary">Gizlilik</a>
-                    <a asp-page="/KullanimKosullari" class="text-gray-600 hover:text-primary">Kullanım Koşulları</a>
+                    <a asp-page="/Hakkimizda" class="text-gray-600 hover:text-primary" title="Hakkımızda">Hakkımızda</a>
+                    <a asp-page="/Blog" class="text-gray-600 hover:text-primary" title="Blog">Blog</a>
+                    <a asp-page="/Iletisim" class="text-gray-600 hover:text-primary" title="İletişim">İletişim</a>
+                    <a asp-page="/Sitemap" class="text-gray-600 hover:text-primary" title="Site Haritası">Site Haritası</a>
+                    <a asp-page="/Privacy" class="text-gray-600 hover:text-primary" title="Gizlilik Politikası">Gizlilik</a>
+                    <a asp-page="/KullanimKosullari" class="text-gray-600 hover:text-primary" title="Kullanım Koşulları">Kullanım Koşulları</a>
                 </nav>
                 @if (!string.IsNullOrEmpty(siteSettings?.Facebook) || !string.IsNullOrEmpty(siteSettings?.Instagram) || !string.IsNullOrEmpty(siteSettings?.Twitter) || !string.IsNullOrEmpty(siteSettings?.LinkedIn) || !string.IsNullOrEmpty(siteSettings?.YouTube))
                 {
                     <div class="flex gap-4 text-gray-500">
-                        @if (!string.IsNullOrEmpty(siteSettings?.Facebook)) { <a href="@siteSettings.Facebook" target="_blank" rel="noopener" class="hover:text-primary" aria-label="Facebook"><i data-lucide="facebook" class="w-5 h-5"></i></a> }
-                        @if (!string.IsNullOrEmpty(siteSettings?.Instagram)) { <a href="@siteSettings.Instagram" target="_blank" rel="noopener" class="hover:text-primary" aria-label="Instagram"><i data-lucide="instagram" class="w-5 h-5"></i></a> }
-                        @if (!string.IsNullOrEmpty(siteSettings?.Twitter)) { <a href="@siteSettings.Twitter" target="_blank" rel="noopener" class="hover:text-primary" aria-label="Twitter"><i data-lucide="twitter" class="w-5 h-5"></i></a> }
-                        @if (!string.IsNullOrEmpty(siteSettings?.LinkedIn)) { <a href="@siteSettings.LinkedIn" target="_blank" rel="noopener" class="hover:text-primary" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-5 h-5"></i></a> }
-                        @if (!string.IsNullOrEmpty(siteSettings?.YouTube)) { <a href="@siteSettings.YouTube" target="_blank" rel="noopener" class="hover:text-primary" aria-label="YouTube"><i data-lucide="youtube" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.Facebook)) { <a href="@siteSettings.Facebook" target="_blank" rel="noopener noreferrer" class="hover:text-primary" aria-label="Facebook" title="Facebook"><i data-lucide="facebook" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.Instagram)) { <a href="@siteSettings.Instagram" target="_blank" rel="noopener noreferrer" class="hover:text-primary" aria-label="Instagram" title="Instagram"><i data-lucide="instagram" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.Twitter)) { <a href="@siteSettings.Twitter" target="_blank" rel="noopener noreferrer" class="hover:text-primary" aria-label="Twitter" title="Twitter"><i data-lucide="twitter" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.LinkedIn)) { <a href="@siteSettings.LinkedIn" target="_blank" rel="noopener noreferrer" class="hover:text-primary" aria-label="LinkedIn" title="LinkedIn"><i data-lucide="linkedin" class="w-5 h-5"></i></a> }
+                        @if (!string.IsNullOrEmpty(siteSettings?.YouTube)) { <a href="@siteSettings.YouTube" target="_blank" rel="noopener noreferrer" class="hover:text-primary" aria-label="YouTube" title="YouTube"><i data-lucide="youtube" class="w-5 h-5"></i></a> }
                     </div>
                 }
             </div>

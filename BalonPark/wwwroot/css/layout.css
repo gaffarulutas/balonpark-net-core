@@ -65,3 +65,58 @@ body {
     display: none;
     visibility: hidden;
 }
+
+/* Ürün resimleri: lazy loading spinner */
+.product-image-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image-wrap .img-loading-spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+    transition: opacity 0.2s ease;
+    z-index: 1;
+}
+
+.product-image-wrap .img-loading-spinner.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.product-image-wrap .img-loading-spinner::after {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #00A8E8;
+    border-radius: 50%;
+    animation: product-img-spin 0.7s linear infinite;
+}
+
+.product-image-wrap img {
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.product-image-wrap img.loaded {
+    opacity: 1;
+}
+
+@keyframes product-img-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

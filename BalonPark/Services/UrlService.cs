@@ -33,16 +33,22 @@ public class UrlService(IConfiguration configuration, IHttpContextAccessor httpC
         return string.Empty;
     }
 
+    /// <summary>
+    /// Resim URL'leri her zaman siteUrl (örn. https://balonpark.com) üzerinden verilir;
+    /// böylece resimler tek bir domain'den yüklenir (CDN/önbellek için uygun).
+    /// </summary>
     public string GetImageUrl(string imagePath)
     {
         if (string.IsNullOrEmpty(imagePath))
             return GetImageUrl("/assets/images/no-image.png");
 
-        var baseUrl = GetBaseUrl();
+        // Önce ImageBaseUrl, yoksa siteUrl kullan (resimler BalonPark.com'dan)
+        var baseUrl = configuration["ImageBaseUrl"]?.TrimEnd('/')
+            ?? configuration["siteUrl"]?.TrimEnd('/')
+            ?? GetBaseUrl();
         if (string.IsNullOrEmpty(baseUrl))
             return imagePath;
 
-        // Remove leading ~/ or / if present
         var cleanPath = imagePath.TrimStart('~', '/');
         return $"{baseUrl}/{cleanPath}";
     }

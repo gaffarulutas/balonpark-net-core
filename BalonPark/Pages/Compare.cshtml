@@ -51,7 +51,10 @@
                             {
                                 <td class="px-4 py-4 min-w-[200px] max-w-[320px] text-center align-top">
                                     <a href="/category/@item.Product.CategorySlug/@item.Product.SubCategorySlug/@item.Product.Slug" class="inline-block">
-                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage?.LargePath ?? "/assets/images/no-image.png") ?? $"/{item.MainImage?.LargePath ?? "assets/images/no-image.png"}")" alt="@Html.Raw(item.Product.Name)" class="lazy-image w-40 h-40 object-cover rounded-lg border border-gray-100 hover:opacity-95 transition mx-auto" loading="lazy">
+                                        <div class="product-image-wrap w-40 h-40 rounded-lg border border-gray-100 mx-auto flex-shrink-0">
+                                        <span class="img-loading-spinner" aria-hidden="true"></span>
+                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage?.LargePath ?? "/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{((item.MainImage?.LargePath ?? "assets/images/no-image.png").TrimStart('/'))}")" alt="@Html.Raw(item.Product.Name)" class="lazy-image w-40 h-40 object-cover rounded-lg hover:opacity-95 transition" loading="lazy" onload="this.classList.add('loaded'); var s=this.previousElementSibling; if(s) s.classList.add('hidden');">
+                                    </div>
                                     </a>
                                 </td>
                             }
