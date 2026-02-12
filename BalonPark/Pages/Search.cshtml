@@ -74,11 +74,11 @@
 </script>
 
 <div class="space-y-4 sm:space-y-6">
-    <nav class="flex items-center gap-1.5 text-sm text-gray-500" aria-label="Breadcrumb">
-        <a href="/" class="text-ink hover:text-primary transition">Ana Sayfa</a>
-        <span>/</span>
-        <span class="text-ink font-medium">Arama Sonuçları</span>
-    </nav>
+    @await Html.PartialAsync("Shared/_Breadcrumb", new List<BreadcrumbItem>
+    {
+        BreadcrumbItem.Link("Ana Sayfa", "/"),
+        BreadcrumbItem.Current("Arama Sonuçları")
+    })
 
     <div class="pt-1 pb-2.5 border-b border-gray-100">
         <h2 class="text-ink text-base font-medium">Arama Sonuçları</h2>

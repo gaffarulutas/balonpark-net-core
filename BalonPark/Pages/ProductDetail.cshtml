@@ -28,138 +28,123 @@
 
 <!-- Product Section Start -->
 <div class="space-y-6">
-    <!-- Breadcrumb -->
-    <nav class="flex flex-wrap items-center gap-1.5 text-sm text-gray-500" aria-label="Breadcrumb">
-        <a href="/" class="text-ink hover:text-primary transition">Ana Sayfa</a>
-        <span>/</span>
-        <a href="/category/@Model.Product?.CategorySlug" class="text-ink hover:text-primary transition">@Html.Raw(Model.Product?.CategoryName)</a>
-        <span>/</span>
-        <a href="/category/@Model.Product?.CategorySlug/@Model.Product?.SubCategorySlug" class="text-ink hover:text-primary transition">@Html.Raw(Model.Product?.SubCategoryName)</a>
-        <span>/</span>
-        <span class="text-ink font-medium">@Html.Raw(Model.Product?.Name)</span>
-    </nav>
+    @await Html.PartialAsync("Shared/_Breadcrumb", new List<BreadcrumbItem>
+    {
+        BreadcrumbItem.Link("Ana Sayfa", "/"),
+        BreadcrumbItem.Link(Model.Product?.CategoryName ?? "Kategoriler", $"/category/{Model.Product?.CategorySlug}"),
+        BreadcrumbItem.Link(Model.Product?.SubCategoryName ?? "Alt Kategoriler", $"/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}"),
+        BreadcrumbItem.Current(Model.Product?.Name ?? "")
+    })
 
-    <!-- Product Header -->
-    <div class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-            <div class="space-y-1">
-                <h1 class="text-ink text-xl font-medium">@Html.Raw(Model.Product?.Name)</h1>
+    <!-- Product meta bar: görüntülenme, paylaş ve aksiyonlar tek satırda, hizalı -->
+    <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-500">
+        @if ((Model.Product?.ViewCount ?? 0) > 0)
+        {
+            <span class="flex items-center gap-1.5" aria-label="@Model.Product!.ViewCount görüntülenme">
+                <i data-lucide="eye" class="w-4 h-4 text-gray-400" aria-hidden="true"></i>
+                <span>@Model.Product!.ViewCount görüntülenme</span>
+            </span>
+        }
+        <div class="flex items-center gap-3 ml-auto">
+            <span class="sr-only">Paylaş</span>
+            <div class="flex items-center gap-1" role="group" aria-label="Sosyal medyada paylaş">
+                <a href="https://www.facebook.com/sharer/sharer.php?u=@productShareUrl" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-[#1877f2] hover:bg-gray-100 transition" title="Facebook'ta paylaş" aria-label="Facebook'ta paylaş"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                <a href="https://twitter.com/intent/tweet?url=@productShareUrl&text=@productShareTitle" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-[#1da1f2] hover:bg-gray-100 transition" title="Twitter'da paylaş" aria-label="Twitter'da paylaş"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=@productShareUrl" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-[#0077b5] hover:bg-gray-100 transition" title="LinkedIn'de paylaş" aria-label="LinkedIn'de paylaş"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
+                <a href="https://wa.me/?text=@productShareTitle%20@productShareUrl" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-[#25d366] hover:bg-gray-100 transition" title="WhatsApp'ta paylaş" aria-label="WhatsApp'ta paylaş"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
             </div>
-            <div class="flex items-center gap-1">
-                <button type="button" class="favorite-btn-detail w-9 h-9 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 transition text-sm" data-product-id="@Model.Product?.Id" title="Favorilere Ekle"><i data-lucide="heart" class="w-4 h-4"></i></button>
-                <button type="button" class="compare-btn-detail w-9 h-9 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 transition text-sm" data-product-id="@Model.Product?.Id" data-product-url="/category/@Model.Product?.CategorySlug/@Model.Product?.SubCategorySlug/@Model.Product?.Slug" data-product-slug="@Model.Product?.Slug" title="Karşılaştır"><i data-lucide="shuffle" class="w-4 h-4"></i></button>
-            </div>
-        </div>
-        <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-            <div class="flex items-center gap-3">
-                @if ((Model.Product?.ViewCount ?? 0) > 0)
-                {
-                    <span class="flex items-center gap-1">
-                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                        <span>@Model.Product!.ViewCount görüntülenme</span>
-                    </span>
-                }
-                <span class="flex items-center gap-1 text-gray-500">
-                    <span class="font-medium text-ink">Ürün Kodu:</span>
-                    <span>U-@Model.Product?.Id</span>
-                </span>
-            </div>
-            <div class="flex items-center gap-1 text-gray-400">
-                <span class="uppercase tracking-wide text-[10px] text-gray-400">Paylaş</span>
-                <a href="https://www.facebook.com/sharer/sharer.php?u=@productShareUrl" target="_blank" rel="noopener noreferrer" class="w-7 h-7 rounded-full flex items-center justify-center hover:text-[#1877f2] hover:bg-gray-100 transition" title="Facebook'ta paylaş" aria-label="Facebook'ta paylaş"><i data-lucide="facebook" class="w-3.5 h-3.5"></i></a>
-                <a href="https://twitter.com/intent/tweet?url=@productShareUrl&text=@productShareTitle" target="_blank" rel="noopener noreferrer" class="w-7 h-7 rounded-full flex items-center justify-center hover:text-[#1da1f2] hover:bg-gray-100 transition" title="Twitter'da paylaş" aria-label="Twitter'da paylaş"><i data-lucide="twitter" class="w-3.5 h-3.5"></i></a>
-                <a href="https://www.linkedin.com/sharing/share-offsite/?url=@productShareUrl" target="_blank" rel="noopener noreferrer" class="w-7 h-7 rounded-full flex items-center justify-center hover:text-[#0077b5] hover:bg-gray-100 transition" title="LinkedIn'de paylaş" aria-label="LinkedIn'de paylaş"><i data-lucide="linkedin" class="w-3.5 h-3.5"></i></a>
-                <a href="https://wa.me/?text=@productShareTitle%20@productShareUrl" target="_blank" rel="noopener noreferrer" class="w-7 h-7 rounded-full flex items-center justify-center hover:text-[#25d366] hover:bg-gray-100 transition" title="WhatsApp'ta paylaş" aria-label="WhatsApp'ta paylaş"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i></a>
+            <div class="flex items-center gap-0.5 border-l border-gray-200 pl-3" role="group" aria-label="Ürün aksiyonları">
+                <button type="button" class="favorite-btn-detail w-9 h-9 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 transition" data-product-id="@Model.Product?.Id" title="Favorilere Ekle" aria-label="Favorilere Ekle"><i data-lucide="heart" class="w-4 h-4"></i></button>
+                <button type="button" class="compare-btn-detail w-9 h-9 rounded flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 transition" data-product-id="@Model.Product?.Id" data-product-url="/category/@Model.Product?.CategorySlug/@Model.Product?.SubCategorySlug/@Model.Product?.Slug" data-product-slug="@Model.Product?.Slug" title="Karşılaştır" aria-label="Karşılaştır"><i data-lucide="shuffle" class="w-4 h-4"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- Main Product Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Product Images -->
-        <div class="product-gallery border border-gray-100 overflow-hidden bg-gray-50">
-                        <!-- Main Swiper with lightGallery -->
-                        <div class="swiper productMainSwiper" data-swiper-autoplay="false" id="lightgallery">
-                            <div class="swiper-wrapper">
-                                @if (Model.ProductImages.Any())
-                                {
-                                    @foreach (var image in Model.ProductImages)
-                                    {
-                                        <div class="swiper-slide">
-                                            <div class="image-wrapper product-image-wrap">
-                                                <span class="img-loading-spinner" aria-hidden="true"></span>
-                                                <a href="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")"
-                                                   data-lg-size="1600-1600"
-                                                   data-src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")"
-                                                   data-sub-html="<h4>@Html.Raw(Model.Product?.Name)</h4>"
-                                                   class="block overflow-hidden bg-white">
-                                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")" 
-                                                         class="lazy-image main-image w-full h-64 sm:h-80 lg:h-96 object-cover" 
-                                                         alt="@Html.Raw(Model.Product?.Name)"
-                                                         loading="lazy"
-                                                         onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');"
-                                                         onerror="this.src='@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")'; this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <div class="swiper-slide">
-                                        <div class="image-wrapper product-image-wrap">
-                                            <span class="img-loading-spinner" aria-hidden="true"></span>
-                                            <a href="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")"
-                                               data-lg-size="800-800"
-                                               data-src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")"
-                                               data-sub-html="<h4>@Html.Raw(Model.Product?.Name)</h4>"
-                                               class="block overflow-hidden bg-white">
-                                                <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")" 
-                                                     class="lazy-image main-image w-full h-64 sm:h-80 lg:h-96 object-cover" 
-                                                     alt="@Html.Raw(Model.Product?.Name)"
-                                                     loading="lazy"
-                                                     onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
-                                            </a>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                            <!-- Navigation buttons -->
-                            <div class="swiper-button-next" aria-label="Next image"></div>
-                            <div class="swiper-button-prev" aria-label="Previous image"></div>
-                            <!-- Pagination -->
-                            <div class="swiper-pagination" aria-label="Image pagination"></div>
-                        </div>
-
-                        @if (Model.ProductImages.Count > 1)
+    <!-- Main Product Content: sol galeri (sabit genişlik), sağ ürün bilgisi (kalan alan) -->
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,460px)_1fr] gap-6 lg:gap-8 items-start">
+        <div class="product-gallery product-detail-gallery w-full max-w-full">
+            <div class="product-gallery-main-wrap">
+            <div class="swiper productMainSwiper product-gallery-main" data-swiper-autoplay="false" id="lightgallery">
+                <div class="swiper-wrapper">
+                    @if (Model.ProductImages.Any())
+                    {
+                        @foreach (var image in Model.ProductImages)
                         {
-                            <!-- Thumbnail Swiper: daha büyük thumblar, az boşluk -->
-                            <div class="swiper productThumbsSwiper product-gallery-thumbs">
-                                <div class="swiper-wrapper">
-                                    @foreach (var image in Model.ProductImages)
-                                    {
-                                        <div class="swiper-slide">
-                                            <div class="thumbnail-item product-image-wrap flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 overflow-hidden border border-transparent cursor-pointer rounded-sm min-h-0" role="button" tabindex="0" aria-label="View image">
-                                                <span class="img-loading-spinner" aria-hidden="true"></span>
-                                                <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.ThumbnailPath}")" 
-                                                     class="lazy-image w-full h-full object-cover" 
-                                                     alt="@Html.Raw(Model.Product?.Name)"
-                                                     loading="lazy"
-                                                     onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');"
-                                                     onerror="this.src='@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")'; this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
-                                            </div>
-                                        </div>
-                                    }
+                            <div class="swiper-slide">
+                                <div class="image-wrapper product-image-wrap product-gallery-slide-inner">
+                                    <span class="img-loading-spinner" aria-hidden="true"></span>
+                                    <a href="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")"
+                                       data-lg-size="1600-1600"
+                                       data-src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")"
+                                       data-sub-html="<h4>@Html.Raw(Model.Product?.Name)</h4>"
+                                       class="product-gallery-link">
+                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")"
+                                             class="lazy-image main-image product-gallery-img"
+                                             alt="@Html.Raw(Model.Product?.Name)"
+                                             loading="lazy"
+                                             onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');"
+                                             onerror="this.src='@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")'; this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
+                                    </a>
                                 </div>
                             </div>
                         }
+                    }
+                    else
+                    {
+                        <div class="swiper-slide">
+                            <div class="image-wrapper product-image-wrap product-gallery-slide-inner">
+                                <span class="img-loading-spinner" aria-hidden="true"></span>
+                                <a href="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")"
+                                   data-lg-size="800-800"
+                                   data-src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")"
+                                   data-sub-html="<h4>@Html.Raw(Model.Product?.Name)</h4>"
+                                   class="product-gallery-link">
+                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")"
+                                         class="lazy-image main-image product-gallery-img"
+                                         alt="@Html.Raw(Model.Product?.Name)"
+                                         loading="lazy"
+                                         onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="swiper-button-next product-gallery-next" aria-label="Sonraki resim"></div>
+                <div class="swiper-button-prev product-gallery-prev" aria-label="Önceki resim"></div>
+                <div class="swiper-pagination product-gallery-pagination" aria-label="Resim sayfası"></div>
+            </div>
+            </div>
+
+            @if (Model.ProductImages.Count > 1)
+            {
+                <div class="swiper productThumbsSwiper product-gallery-thumbs">
+                    <div class="swiper-wrapper">
+                        @foreach (var image in Model.ProductImages)
+                        {
+                            <div class="swiper-slide">
+                                <div class="thumbnail-item product-image-wrap" role="button" tabindex="0" aria-label="Resmi görüntüle">
+                                    <span class="img-loading-spinner" aria-hidden="true"></span>
+                                    <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.ThumbnailPath}")"
+                                         class="lazy-image product-gallery-thumb-img"
+                                         alt="@Html.Raw(Model.Product?.Name)"
+                                         loading="lazy"
+                                         onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');"
+                                         onerror="this.src='@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")'; this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         </div>
 
         <!-- Product Information -->
-        <div class="space-y-4">
+        <div class="space-y-4 min-w-0">
             @{
                 var selectedCurrency = ViewData["SelectedCurrency"]?.ToString() ?? "TL";
             }
+            <!-- Ürün adı (fiyatın üstünde) -->
+            <h1 class="text-ink text-xl font-medium">@Html.Raw(Model.Product?.Name)</h1>
             <!-- Price -->
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4">
                 <div>
@@ -176,12 +161,12 @@
                 </div>
             </div>
 
-            <!-- Product Code & WhatsApp -->
+            <!-- Ürün kodu (tek yerde) & WhatsApp -->
             <div class="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-gray-100">
-                <div class="flex items-center gap-2 text-sm text-gray-500">
-                    <span class="font-medium text-ink">Ürün Kodu:</span>
-                    <span>U-@Model.Product?.Id</span>
-                </div>
+                <span class="flex items-center gap-2 text-sm text-gray-600" aria-label="Ürün kodu">
+                    <i data-lucide="hash" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                    <span class="font-medium text-ink">U-@Model.Product?.Id</span>
+                </span>
                 @if (!string.IsNullOrEmpty(whatsAppDigits))
                 {
                     <a href="https://wa.me/@whatsAppDigits?text=@(Uri.EscapeDataString($"Bu ürün hakkında bilgi almak istiyorum: {Model.Product?.Name}"))%20@(((IUrlService?)ViewData["UrlService"])?.GetProductUrl(Model.Product?.CategorySlug ?? "", Model.Product?.SubCategorySlug ?? "", Model.Product?.Slug ?? "") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{Model.Product?.CategorySlug}/{Model.Product?.SubCategorySlug}/{Model.Product?.Slug}")" target="_blank" rel="noopener noreferrer" title="WhatsApp ile bilgi al" class="inline-flex items-center gap-2 py-2 px-3 rounded bg-[#25d366] text-white text-sm font-medium hover:opacity-90 transition">
@@ -245,8 +230,11 @@
             @if (!string.IsNullOrEmpty(Model.Product?.Summary))
             {
                 <div class="pt-3 mt-3 border-t border-gray-100">
-                    <h3 class="text-ink text-sm font-semibold mb-2">Özet</h3>
-                    <p class="text-sm text-ink leading-relaxed">@Html.Raw(Model.Product.Summary)</p>
+                    <h3 class="flex items-center gap-2 text-ink text-sm font-semibold mb-2">
+                        <i data-lucide="file-text" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                        Özet
+                    </h3>
+                    <p class="text-sm text-ink leading-relaxed font-medium">@Html.Raw(Model.Product.Summary)</p>
                 </div>
             }
         </div>
@@ -265,8 +253,11 @@
     @if (hasDescription)
     {
         <div class="pt-4 mt-4 border-t border-gray-100">
-            <h3 class="text-ink text-base font-medium pb-2 border-b border-gray-100 mb-3">Açıklama</h3>
-            <div class="text-sm text-ink leading-relaxed">@Html.Raw(Model.Product?.Description)</div>
+            <h3 class="flex items-center gap-2 text-ink text-base font-semibold pb-2 border-b border-gray-100 mb-3">
+                <i data-lucide="book-open" class="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true"></i>
+                Açıklama
+            </h3>
+            <div class="text-sm text-ink leading-relaxed font-medium">@Html.Raw(Model.Product?.Description)</div>
         </div>
     }
 
@@ -274,52 +265,67 @@
     @if (hasTechnicalInfo)
     {
         <div class="pt-4 mt-4 border-t border-gray-100">
-            <h3 class="text-ink text-base font-medium pb-2 border-b border-gray-100 mb-4">Ürün Teknik Bilgileri</h3>
+            <h3 class="flex items-center gap-2 text-ink text-base font-semibold pb-2 border-b border-gray-100 mb-4">
+                <i data-lucide="clipboard-list" class="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true"></i>
+                Ürün Teknik Bilgileri
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @if (hasInflated)
                 {
                     <div class="rounded-lg border border-gray-200 bg-gray-50/50 p-4">
-                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Şişmiş ürün</h4>
-                        <dl class="space-y-2 text-sm">
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedLength)) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Uzunluk</dt><dd class="text-ink font-medium">@Model.Product.InflatedLength</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedWidth)) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Genişlik</dt><dd class="text-ink font-medium">@Model.Product.InflatedWidth</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedHeight)) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Yükseklik</dt><dd class="text-ink font-medium">@Model.Product.InflatedHeight</dd></div> }
-                            @if (Model.Product?.UserCount != null) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Kullanıcı Sayısı</dt><dd class="text-ink font-medium">@Model.Product.UserCount</dd></div> }
+                        <h4 class="flex items-center gap-2 text-sm font-semibold text-ink mb-3">
+                            <i data-lucide="maximize-2" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                            Şişmiş ürün
+                        </h4>
+                        <dl class="space-y-2.5 text-sm">
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedLength)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-horizontal" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold">@Model.Product.InflatedLength</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedWidth)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move" class="w-4 h-4 text-primary flex-shrink-0"></i>Genişlik</dt><dd class="text-ink font-semibold">@Model.Product.InflatedWidth</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedHeight)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-vertical" class="w-4 h-4 text-primary flex-shrink-0"></i>Yükseklik</dt><dd class="text-ink font-semibold">@Model.Product.InflatedHeight</dd></div> }
+                            @if (Model.Product?.UserCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="users" class="w-4 h-4 text-primary flex-shrink-0"></i>Kullanıcı Sayısı</dt><dd class="text-ink font-semibold">@Model.Product.UserCount</dd></div> }
                         </dl>
                     </div>
                 }
                 @if (hasAssembly)
                 {
                     <div class="rounded-lg border border-gray-200 bg-gray-50/50 p-4">
-                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Montaj / demontaj</h4>
-                        <dl class="space-y-2 text-sm">
-                            @if (Model.Product?.AssemblyTime != null) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Montaj ve demontaj süresi</dt><dd class="text-ink font-medium">@(Model.Product.AssemblyTime) saat</dd></div> }
-                            @if (Model.Product?.RequiredPersonCount != null) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Gerekli kişi sayısı</dt><dd class="text-ink font-medium">@(Model.Product.RequiredPersonCount) kişi</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.FanDescription)) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Fan</dt><dd class="text-ink font-medium">@Model.Product.FanDescription</dd></div> }
-                            @if (Model.Product?.FanWeightKg != null) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Fan ağırlığı</dt><dd class="text-ink font-medium">@Model.Product.FanWeightKg kg</dd></div> }
+                        <h4 class="flex items-center gap-2 text-sm font-semibold text-ink mb-3">
+                            <i data-lucide="wrench" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                            Montaj / demontaj
+                        </h4>
+                        <dl class="space-y-2.5 text-sm">
+                            @if (Model.Product?.AssemblyTime != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="clock" class="w-4 h-4 text-primary flex-shrink-0"></i>Montaj ve demontaj süresi</dt><dd class="text-ink font-semibold">@(Model.Product.AssemblyTime) saat</dd></div> }
+                            @if (Model.Product?.RequiredPersonCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="users" class="w-4 h-4 text-primary flex-shrink-0"></i>Gerekli kişi sayısı</dt><dd class="text-ink font-semibold">@(Model.Product.RequiredPersonCount) kişi</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.FanDescription)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="wind" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan</dt><dd class="text-ink font-semibold">@Model.Product.FanDescription</dd></div> }
+                            @if (Model.Product?.FanWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan ağırlığı</dt><dd class="text-ink font-semibold">@Model.Product.FanWeightKg kg</dd></div> }
                         </dl>
                     </div>
                 }
                 @if (hasPackaged)
                 {
                     <div class="rounded-lg border border-gray-200 bg-gray-50/50 p-4">
-                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Paketlenmiş ürünün özellikleri</h4>
-                        <dl class="space-y-2 text-sm">
-                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedLength)) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Uzunluk</dt><dd class="text-ink font-medium">@Model.Product.PackagedLength</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedDepth)) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Derinlik</dt><dd class="text-ink font-medium">@Model.Product.PackagedDepth</dd></div> }
-                            @if (Model.Product?.PackagedWeightKg != null) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Ağırlık</dt><dd class="text-ink font-medium">@Model.Product.PackagedWeightKg kg</dd></div> }
-                            @if (Model.Product?.PackagePalletCount != null) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Paket / palet sayısı</dt><dd class="text-ink font-medium">@Model.Product.PackagePalletCount</dd></div> }
+                        <h4 class="flex items-center gap-2 text-sm font-semibold text-ink mb-3">
+                            <i data-lucide="package" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                            Paketlenmiş ürünün özellikleri
+                        </h4>
+                        <dl class="space-y-2.5 text-sm">
+                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedLength)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="ruler" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold">@Model.Product.PackagedLength</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedDepth)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="box" class="w-4 h-4 text-primary flex-shrink-0"></i>Derinlik</dt><dd class="text-ink font-semibold">@Model.Product.PackagedDepth</dd></div> }
+                            @if (Model.Product?.PackagedWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Ağırlık</dt><dd class="text-ink font-semibold">@Model.Product.PackagedWeightKg kg</dd></div> }
+                            @if (Model.Product?.PackagePalletCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="layers" class="w-4 h-4 text-primary flex-shrink-0"></i>Paket / palet sayısı</dt><dd class="text-ink font-semibold">@Model.Product.PackagePalletCount</dd></div> }
                         </dl>
                     </div>
                 }
                 @if (hasGeneral)
                 {
                     <div class="rounded-lg border border-gray-200 bg-gray-50/50 p-4">
-                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Genel</h4>
-                        <dl class="space-y-2 text-sm">
-                            @if (Model.Product?.HasCertificate == true) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Sertifika</dt><dd class="text-ink font-medium">Sertifika var</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.WarrantyDescription)) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Garanti</dt><dd class="text-ink font-medium">@Model.Product.WarrantyDescription</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.AfterSalesService)) { <div class="flex justify-between gap-2"><dt class="text-gray-500">Garanti Sonrası Hizmet</dt><dd class="text-ink font-medium">@Model.Product.AfterSalesService</dd></div> }
+                        <h4 class="flex items-center gap-2 text-sm font-semibold text-ink mb-3">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                            Genel
+                        </h4>
+                        <dl class="space-y-2.5 text-sm">
+                            @if (Model.Product?.HasCertificate == true) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="award" class="w-4 h-4 text-primary flex-shrink-0"></i>Sertifika</dt><dd class="text-ink font-semibold">Sertifika var</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.WarrantyDescription)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="shield-check" class="w-4 h-4 text-primary flex-shrink-0"></i>Garanti</dt><dd class="text-ink font-semibold">@Model.Product.WarrantyDescription</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.AfterSalesService)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="headset" class="w-4 h-4 text-primary flex-shrink-0"></i>Garanti Sonrası Hizmet</dt><dd class="text-ink font-semibold">@Model.Product.AfterSalesService</dd></div> }
                         </dl>
                     </div>
                 }
@@ -331,8 +337,11 @@
     @if (!string.IsNullOrEmpty(Model.Product?.TechnicalDescription))
     {
         <div class="pt-4 border-t border-gray-100">
-            <h3 class="text-ink text-base font-medium pb-2 border-b border-gray-100 mb-3">Teknik Özellikler</h3>
-            <div class="text-sm text-ink prose prose-sm max-w-none">@Html.Raw(Model.Product.TechnicalDescription)</div>
+            <h3 class="flex items-center gap-2 text-ink text-base font-semibold pb-2 border-b border-gray-100 mb-3">
+                <i data-lucide="list-checks" class="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true"></i>
+                Teknik Özellikler
+            </h3>
+            <div class="technical-description-html text-ink max-w-none">@Html.Raw(Model.Product.TechnicalDescription)</div>
         </div>
     }
 </div>
@@ -373,14 +382,15 @@
 
         const slideCount = mainSwiperElement.querySelectorAll('.swiper-slide').length;
         const swiperConfig = {
-            spaceBetween: 10,
+            spaceBetween: 0,
             speed: 300,
+            autoHeight: false, /* kare alan sabit kalsın */
             navigation: {
-                nextEl: mainSwiperElement.querySelector('.swiper-button-next'),
-                prevEl: mainSwiperElement.querySelector('.swiper-button-prev'),
+                nextEl: mainSwiperElement.querySelector('.product-gallery-next'),
+                prevEl: mainSwiperElement.querySelector('.product-gallery-prev'),
             },
             pagination: {
-                el: mainSwiperElement.querySelector('.swiper-pagination'),
+                el: mainSwiperElement.querySelector('.product-gallery-pagination'),
                 type: 'fraction',
                 formatFractionCurrent: function (n) { return n; },
                 formatFractionTotal: function (n) { return n; },
@@ -532,50 +542,179 @@
 <!-- lightGallery CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.2/css/lightgallery-bundle.min.css">
 <style>
-    /* Product gallery: Swiper + lightGallery - sadece bu sayfa */
-    .product-gallery { padding: 0; }
-    .productMainSwiper .swiper-button-next,
-    .productMainSwiper .swiper-button-prev { color: #222; }
-    .productMainSwiper .swiper-pagination-fraction { color: #222; }
+    /* ========== Product detail gallery: kompakt boyut ========== */
+    .product-detail-gallery {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 0;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fafafa;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        max-width: 460px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    @@media (min-width: 1024px) {
+        .product-detail-gallery {
+            margin-left: 0;
+            margin-right: 0;
+            max-width: 100%;
+        }
+    }
 
-    /* Thumbnail strip: büyük thumblar, az boşluk */
-    .product-gallery-thumbs {
-        margin-top: 8px;
-        padding: 4px 0;
+    /* Ana galeri: yükseklik genişliğin %85’i */
+    .product-detail-gallery .product-gallery-main-wrap {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 85%;
+        border-radius: 12px 12px 0 0;
+        overflow: hidden;
+        background: #fff;
+        aspect-ratio: 1 / 0.85;
+    }
+    .product-detail-gallery .product-gallery-main {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        border-radius: 12px 12px 0 0;
         overflow: hidden;
     }
-    .productThumbsSwiper .swiper-slide {
-        width: auto !important;
-        flex-shrink: 0;
-        box-sizing: border-box;
+    .product-detail-gallery .product-gallery-main .swiper-wrapper,
+    .product-detail-gallery .product-gallery-main .swiper-slide {
+        height: 100% !important;
+        min-height: 0;
     }
-    .productThumbsSwiper .thumbnail-item {
-        width: 64px;
-        height: 64px;
-        border: 2px solid transparent;
-        transition: border-color 0.2s ease;
+    .product-detail-gallery .product-gallery-slide-inner {
+        height: 100% !important;
+        min-height: 0;
+        overflow: hidden;
     }
-    .productThumbsSwiper .thumbnail-item img {
+    /* layout.css .product-image-wrap min-height'ı galeri içinde devre dışı */
+    .product-detail-gallery .product-image-wrap {
+        min-height: 0 !important;
+        height: 100% !important;
+    }
+    .product-detail-gallery .product-gallery-link {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #fff;
+    }
+    .product-detail-gallery .product-gallery-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
+        vertical-align: middle;
+    }
+
+    /* Nav butonları: yuvarlak, gölgeli */
+    .product-detail-gallery .product-gallery-next,
+    .product-detail-gallery .product-gallery-prev {
+        width: 40px;
+        height: 40px;
+        margin-top: 0;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.95);
+        color: #374151;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .product-detail-gallery .product-gallery-next::after,
+    .product-detail-gallery .product-gallery-prev::after {
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    .product-detail-gallery .product-gallery-next:hover,
+    .product-detail-gallery .product-gallery-prev:hover {
+        background: #fff;
+        color: #00A8E8;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .product-detail-gallery .product-gallery-next.swiper-button-disabled,
+    .product-detail-gallery .product-gallery-prev.swiper-button-disabled {
+        opacity: 0.35;
+    }
+
+    /* Pagination: köşede, okunaklı */
+    .product-detail-gallery .product-gallery-pagination {
+        bottom: 12px !important;
+        left: auto !important;
+        right: 12px;
+        width: auto;
+        padding: 4px 10px;
+        background: rgba(0,0,0,0.5);
+        color: #fff;
+        border-radius: 20px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+    .product-detail-gallery .product-gallery-pagination .swiper-pagination-current { font-weight: 600; }
+
+    /* Thumbnail strip: ana galeri ile aynı oran (1 : 0.85), düzgün kırpma */
+    .product-detail-gallery .product-gallery-thumbs {
+        margin-top: 0;
+        padding: 0 4px 12px;
+        overflow: hidden;
+    }
+    .product-detail-gallery .productThumbsSwiper .swiper-wrapper {
+        align-items: center;
+    }
+    .product-detail-gallery .productThumbsSwiper .swiper-slide {
+        width: auto !important;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+    .product-detail-gallery .productThumbsSwiper .thumbnail-item {
+        width: 56px;
+        height: 48px; /* 56 * 0.85 ≈ ana galeri oranı */
+        border: 2px solid transparent;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        background: #fff;
+        flex-shrink: 0;
+    }
+    .product-detail-gallery .productThumbsSwiper .thumbnail-item:hover {
+        border-color: #d1d5db;
+    }
+    .product-detail-gallery .product-gallery-thumb-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+        vertical-align: middle;
     }
     @@media (min-width: 640px) {
-        .productThumbsSwiper .thumbnail-item {
-            width: 80px;
-            height: 80px;
+        .product-detail-gallery .productThumbsSwiper .thumbnail-item {
+            width: 64px;
+            height: 54px; /* 64 * 0.85 */
         }
     }
-    .productThumbsSwiper .swiper-slide-thumb-active .thumbnail-item {
-        border-color: #00A8E8;
+    @@media (min-width: 1024px) {
+        .product-detail-gallery .productThumbsSwiper .thumbnail-item {
+            width: 72px;
+            height: 61px; /* 72 * 0.85 */
+        }
     }
-    .product-gallery .image-wrapper,
-    .product-gallery .image-wrapper a,
-    .product-gallery .swiper-slide,
-    .productMainSwiper .swiper-slide { border-radius: 0; }
-    .productThumbsSwiper .thumbnail-item { border-radius: 4px; }
-    .image-wrapper { overflow: hidden; }
+    .product-detail-gallery .productThumbsSwiper .swiper-slide-thumb-active .thumbnail-item {
+        border-color: #00A8E8;
+        box-shadow: 0 0 0 1px #00A8E8;
+    }
+    .product-detail-gallery .image-wrapper { overflow: hidden; }
 </style>
 }
 

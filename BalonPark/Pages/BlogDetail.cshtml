@@ -74,13 +74,12 @@
 @if (Model.Blog != null)
 {
     <div class="space-y-4 sm:space-y-6">
-        <nav class="flex items-center gap-1.5 text-sm text-gray-500" aria-label="Breadcrumb">
-            <a href="/" class="text-ink hover:text-primary transition">Ana Sayfa</a>
-            <span>/</span>
-            <a href="/blog" class="text-ink hover:text-primary transition">Blog</a>
-            <span>/</span>
-            <span class="text-ink font-medium truncate max-w-[200px] sm:max-w-none">@Html.Raw(Model.Blog.Title.Length > 50 ? Model.Blog.Title.Substring(0, 50) + "..." : Model.Blog.Title)</span>
-        </nav>
+        @await Html.PartialAsync("Shared/_Breadcrumb", new List<BreadcrumbItem>
+        {
+            BreadcrumbItem.Link("Ana Sayfa", "/"),
+            BreadcrumbItem.Link("Blog", "/blog"),
+            BreadcrumbItem.Current(Model.Blog.Title.Length > 80 ? Model.Blog.Title.Substring(0, 80) + "..." : Model.Blog.Title)
+        })
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">

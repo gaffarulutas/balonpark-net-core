@@ -11,14 +11,14 @@ body {
 /* ========== Commerce Header (best practices) ========== */
 .site-header {
     --header-bg: #fbfbfb;
-    --header-border: #f3f4f6;
+    --header-border: #e2e8f0;
     --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     --header-shadow-scrolled: 0 4px 12px rgba(0, 0, 0, 0.08);
     --header-height-main: 64px;
     --header-promo-bg: #111827;
     --header-promo-text: #ffffff;
     --header-promo-accent: #00A8E8;
-    --header-nav-hover: #f9fafb;
+    --header-nav-hover: #f1f5f9;
     --header-action-size: 44px;
     --header-z: 50;
     --header-inner-px: 1rem;
@@ -237,7 +237,7 @@ body {
 .site-header__nav-link {
     display: inline-flex;
     align-items: center;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-size: 0.875rem;
     font-weight: 500;
@@ -262,7 +262,7 @@ body {
     flex: 1;
     min-width: 0;
     max-width: 42rem;
-    margin: 0 0.5rem 0 1rem;
+    margin: 0 0.75rem 0 1rem;
     position: relative; /* for dropdown positioning */
 }
 
@@ -280,7 +280,7 @@ body {
 .site-header__search-input {
     width: 100%;
     height: 2.75rem;
-    padding: 0 2.75rem 0 1rem;
+    padding: 0 3rem 0 1rem;
     border: 1px solid var(--header-border);
     border-radius: 0.5rem;
     font-size: 0.875rem;
@@ -374,13 +374,13 @@ body {
 .site-header__actions {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.5rem;
     flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
     .site-header__actions {
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 }
 
@@ -388,18 +388,20 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
+    gap: 0.5rem;
     min-width: var(--header-action-size);
     min-height: var(--header-action-size);
-    padding: 0 0.25rem;
+    padding: 0 0.5rem;
+    border: 1px solid var(--header-border);
     border-radius: 0.5rem;
     color: #4b5563;
     text-decoration: none;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .site-header__action:hover {
     background: var(--header-nav-hover);
+    border-color: #cbd5e1;
     color: #00A8E8;
 }
 
@@ -443,10 +445,11 @@ body {
 .site-header__currency {
     display: none;
     align-items: center;
-    gap: 0.125rem;
-    padding: 0.125rem;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--header-border);
     border-radius: 0.5rem;
-    background: #f3f4f6;
+    background: #fff;
 }
 
 @media (min-width: 1024px) {
@@ -462,22 +465,24 @@ body {
     width: 2rem;
     height: 2rem;
     padding: 0;
-    border: none;
+    border: 1px solid var(--header-border);
     border-radius: 0.375rem;
     font-size: 0.75rem;
     color: #4b5563;
-    background: transparent;
+    background: #fff;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .site-header__currency-btn:hover {
-    background: #e5e7eb;
+    background: var(--header-nav-hover);
+    border-color: #cbd5e1;
     color: #111827;
 }
 
 .site-header__currency-btn--active {
     background: #111827;
+    border-color: #111827;
     color: #fff;
 }
 
@@ -503,12 +508,12 @@ body {
     background: #fff;
     border: 1px solid var(--header-border);
     border-top: none;
-    border-radius: 0 0 0.75rem 0.75rem;
+    border-radius: 0 0 0.5rem 0.5rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
     overflow: hidden;
     z-index: 70;
     transform-origin: 50% 0;
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .site-header__search-dropdown.header-search-dropdown-closed {
@@ -521,6 +526,8 @@ body {
     opacity: 1;
     visibility: visible;
     transform: translateY(0) scale(1);
+    border-color: #00A8E8;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(0, 168, 232, 0.15);
 }
 
 #header-search-dropdown .site-header__search-dropdown-section {
@@ -635,6 +642,11 @@ body {
     opacity: 1;
 }
 
+/* Ürün detay galerisi: kare alan için min-height devre dışı (ProductDetail.cshtml) */
+.product-detail-gallery .product-image-wrap {
+    min-height: 0;
+}
+
 @keyframes product-img-spin {
     to {
         transform: rotate(360deg);
@@ -686,7 +698,7 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    padding: 1.25rem 1.25rem 1rem;
+    padding: 1.5rem;
     border-bottom: 1px solid #e2e8f0;
     background: #fbfbfb;
     text-decoration: none;
@@ -708,7 +720,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.25rem;
+    padding: 1.5rem;
     border-bottom: 1px solid #e2e8f0;
     background: #fbfbfb;
     flex-shrink: 0;
@@ -725,7 +737,7 @@ body {
 
 .layout-sidebar-close {
     display: none;
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border: none;
     border-radius: 0.5rem;
     color: #111827;
@@ -806,10 +818,117 @@ body {
     background: #fff;
 }
 
+/* ========== Breadcrumb – Generic Component (UI/UX) ========== */
+.breadcrumb-nav {
+    --breadcrumb-primary: #00A8E8;
+    --breadcrumb-primary-hover: #0087c4;
+    --breadcrumb-text: #222222;
+    --breadcrumb-text-muted: #64748b;
+    --breadcrumb-separator: #cbd5e1;
+    --breadcrumb-bg: #f8fafc;
+    --breadcrumb-radius: 10px;
+    --breadcrumb-padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0;
+    list-style: none;
+    padding: var(--breadcrumb-padding);
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--breadcrumb-text-muted);
+    background: var(--breadcrumb-bg);
+    border-radius: var(--breadcrumb-radius);
+    border: 1px solid rgba(0, 168, 232, 0.08);
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--breadcrumb-text-muted);
+    text-decoration: none;
+    padding: 0.25rem 0.375rem;
+    margin: -0.25rem -0.375rem;
+    border-radius: 6px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+    color: var(--breadcrumb-primary);
+    background: rgba(0, 168, 232, 0.08);
+}
+
+.breadcrumb-link:focus-visible {
+    outline: 2px solid var(--breadcrumb-primary);
+    outline-offset: 2px;
+}
+
+.breadcrumb-home-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: var(--breadcrumb-text-muted);
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover .breadcrumb-home-icon {
+    color: var(--breadcrumb-primary);
+}
+
+.breadcrumb-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--breadcrumb-text);
+    font-weight: 600;
+    padding: 0.25rem 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.breadcrumb-current .breadcrumb-home-icon {
+    color: var(--breadcrumb-primary);
+}
+
+.breadcrumb-separator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--breadcrumb-separator);
+}
+
+.breadcrumb-chevron {
+    width: 1rem;
+    height: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .breadcrumb-link,
+    .breadcrumb-nav * {
+        transition-duration: 0.01ms;
+    }
+}
+
 /* ========== Kategori tree – Custom UI/UX ========== */
 /* Container: rahat scroll, tutarlı padding */
 .category-tree {
-    padding: 1.25rem 0 2rem;
+    padding: 1.5rem 0 2.5rem;
     --cat-primary: #00A8E8;
     --cat-primary-soft: rgba(0, 168, 232, 0.08);
     --cat-primary-soft-hover: rgba(0, 168, 232, 0.12);
@@ -818,18 +937,18 @@ body {
     --cat-border: #e2e8f0;
     --cat-bg-hover: #f8fafc;
     --cat-icon-bg: #f1f5f9;
-    --cat-radius: 10px;
-    --cat-radius-sm: 8px;
-    --cat-touch: 48px;
+    --cat-radius: 12px;
+    --cat-radius-sm: 10px;
+    --cat-touch: 52px;
 }
 
 .category-tree-list {
     list-style: none;
-    padding: 0 1rem;
+    padding: 0 1.25rem;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
 }
 
 .category-tree-item {
@@ -840,9 +959,10 @@ body {
 .category-tree-link {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.875rem;
     min-height: var(--cat-touch);
-    padding: 0 1rem 0 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--cat-border);
     border-radius: var(--cat-radius);
     text-decoration: none;
     color: var(--cat-text);
@@ -850,11 +970,12 @@ body {
     font-weight: 600;
     letter-spacing: -0.01em;
     line-height: 1.35;
-    transition: color 0.2s ease, background 0.2s ease;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 .category-tree-link:hover {
     color: var(--cat-primary);
     background: var(--cat-primary-soft);
+    border-color: rgba(0, 168, 232, 0.25);
 }
 .category-tree-link:focus-visible {
     outline: 2px solid var(--cat-primary);
@@ -868,7 +989,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem;
+    padding: 0.375rem;
     color: var(--cat-text-secondary);
     cursor: pointer;
     transition: color 0.2s ease;
@@ -890,8 +1011,8 @@ body {
 /* Kategori ikonu: kare, yuvarlatılmış, tutarlı boyut */
 .category-tree-icon {
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--cat-radius-sm);
     display: flex;
     align-items: center;
@@ -926,14 +1047,14 @@ body {
 /* ----- Alt kategoriler: girintili, ince sol çizgi, hiyerarşi net ----- */
 .category-tree-children {
     list-style: none;
-    padding: 0.5rem 0 0.75rem 0;
-    margin: 0 0 0.25rem 0;
-    margin-left: 1.25rem;
-    padding-left: 1rem;
+    padding: 0.75rem 0 1rem 0;
+    margin: 0.5rem 0 0 0;
+    margin-left: 1.5rem;
+    padding-left: 1.25rem;
     border-left: 2px solid var(--cat-border);
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: 0.375rem;
     transition: opacity 0.2s ease;
 }
 
@@ -948,20 +1069,22 @@ body {
 .category-tree-child-link {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    min-height: 44px;
-    padding: 0 0.75rem 0 1rem;
+    gap: 0.625rem;
+    min-height: 46px;
+    padding: 0.625rem 1rem 0.625rem 1.25rem;
+    border: 1px solid var(--cat-border);
     border-radius: var(--cat-radius-sm);
     text-decoration: none;
     color: var(--cat-text-secondary);
     font-size: 0.9375rem;
     font-weight: 500;
     line-height: 1.4;
-    transition: color 0.2s ease, background 0.2s ease;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 .category-tree-child-link:hover {
     color: var(--cat-primary);
     background: var(--cat-primary-soft);
+    border-color: rgba(0, 168, 232, 0.25);
 }
 .category-tree-child-link:focus-visible {
     outline: 2px solid var(--cat-primary);
@@ -990,8 +1113,8 @@ body {
 
 /* ----- Boş durum: dostane mesaj ----- */
 .category-tree-empty {
-    padding: 2rem 1.5rem;
-    margin: 0;
+    padding: 2.5rem 1.5rem;
+    margin: 0 1.25rem;
     font-size: 0.9375rem;
     color: var(--cat-text-secondary);
     font-weight: 500;
@@ -1004,6 +1127,7 @@ body {
 .category-tree-link-active:hover {
     color: var(--cat-primary);
     background: var(--cat-primary-soft);
+    border-color: rgba(0, 168, 232, 0.35);
     font-weight: 600;
 }
 
@@ -1016,6 +1140,7 @@ body {
 .category-tree-child-link-active,
 .category-tree-child-link-active:hover {
     color: var(--cat-primary);
+    border-color: rgba(0, 168, 232, 0.35);
     font-weight: 600;
 }
 
@@ -1032,4 +1157,23 @@ body {
     .category-tree-toggle[aria-expanded="true"] .category-tree-chevron {
         transition: none;
     }
+}
+
+/* Teknik özellikler: CKEditor HTML olduğu gibi gösterilir, prose/typography uygulanmaz */
+.technical-description-html {
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+.technical-description-html p,
+.technical-description-html ul,
+.technical-description-html ol,
+.technical-description-html li,
+.technical-description-html table,
+.technical-description-html td,
+.technical-description-html th,
+.technical-description-html strong,
+.technical-description-html h1,
+.technical-description-html h2,
+.technical-description-html h3 {
+    all: revert;
 }

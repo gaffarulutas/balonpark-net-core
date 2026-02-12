@@ -1,0 +1,42 @@
+@model IList<BreadcrumbItem>
+@{
+    if (Model == null || !Model.Any()) return;
+}
+<nav class="breadcrumb-nav" aria-label="Breadcrumb">
+    <ol class="breadcrumb-list">
+        @for (var i = 0; i < Model.Count; i++)
+        {
+            var item = Model[i];
+            var isLast = i == Model.Count - 1;
+            var isLink = !string.IsNullOrEmpty(item.Url);
+            <li class="breadcrumb-item">
+                @if (isLink)
+                {
+                    <a href="@item.Url" class="breadcrumb-link">
+                        @if (i == 0)
+                        {
+                            <i data-lucide="home" class="breadcrumb-home-icon" aria-hidden="true"></i>
+                        }
+                        <span>@Html.Raw(item.Label)</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="breadcrumb-current" @(isLast ? "aria-current=\"page\"" : "")>
+                        @if (i == 0)
+                        {
+                            <i data-lucide="home" class="breadcrumb-home-icon" aria-hidden="true"></i>
+                        }
+                        @Html.Raw(item.Label)
+                    </span>
+                }
+                @if (!isLast)
+                {
+                    <span class="breadcrumb-separator" aria-hidden="true">
+                        <i data-lucide="chevron-right" class="breadcrumb-chevron"></i>
+                    </span>
+                }
+            </li>
+        }
+    </ol>
+</nav>

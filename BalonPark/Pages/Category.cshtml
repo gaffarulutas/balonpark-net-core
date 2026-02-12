@@ -84,12 +84,11 @@
 
 <!-- Category Section Start -->
 <div class="space-y-6">
-    <!-- Breadcrumb -->
-    <nav class="flex items-center gap-1.5 text-sm text-gray-500" aria-label="Breadcrumb">
-        <a href="/" class="text-ink hover:text-primary transition">Ana Sayfa</a>
-        <span>/</span>
-        <span class="text-ink font-medium">@Html.Raw(Model.Category?.Name)</span>
-    </nav>
+    @await Html.PartialAsync("Shared/_Breadcrumb", new List<BreadcrumbItem>
+    {
+        BreadcrumbItem.Link("Ana Sayfa", "/"),
+        BreadcrumbItem.Current(Model.Category?.Name ?? "Kategori")
+    })
 
     @if (Model.SubCategories.Any())
     {
