@@ -34,7 +34,39 @@
         @Html.AntiForgeryToken()
         
         <div class="space-y-8">
-            <!-- 1. Temel Bilgiler -->
+            <!-- 1. Görseller (en üstte - yüklenecek resimler önce seçilir ve önizlenir) -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-white" aria-labelledby="section-images-heading">
+                <h2 id="section-images-heading" class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Ürün Görselleri
+                </h2>
+                <p class="text-sm text-gray-500 mb-4">İlk eklenen resim ana kapak resmi olur. Sırayı değiştirmek için önce istediğiniz sırada seçin veya seçimi temizleyip yeniden seçin.</p>
+
+                <!-- Yükleme alanı: sürükle-bırak + dosya seç -->
+                <div id="imageDropZone" class="relative flex flex-col items-center justify-center px-6 py-10 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/80 hover:bg-gray-100/80 hover:border-gray-400 focus-within:ring-2 focus-within:ring-gray-800 focus-within:ring-offset-2 transition-colors duration-200">
+                    <input type="file" id="productImagesInput" name="Images" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" aria-label="Ürün resimleri seçin">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 48 48" aria-hidden="true">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-600 text-center pointer-events-none">
+                        <span class="font-medium text-gray-900">Dosya seçin</span> veya sürükleyip bırakın
+                    </p>
+                    <p class="mt-1 text-xs text-gray-500 pointer-events-none">PNG, JPG, WebP, GIF — dosya başına en fazla 10 MB</p>
+                </div>
+
+                <!-- Seçilen resimlerin önizlemesi -->
+                <div id="imagePreviewContainer" class="mt-4 hidden" aria-live="polite">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Yüklenecek resimler (<span id="imagePreviewCount">0</span>)</h3>
+                    <div id="imagePreviewGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                    <button type="button" id="imageClearBtn" class="mt-3 text-sm text-red-600 hover:text-red-700 font-medium">
+                        Seçimi temizle
+                    </button>
+                </div>
+            </section>
+
+            <!-- 2. Temel Bilgiler -->
             <section class="border border-gray-200 rounded-lg p-5 bg-white">
                 <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Temel Bilgiler</h2>
                 <div class="space-y-4">
@@ -66,19 +98,13 @@
                 </div>
             </section>
 
-            <!-- 2. İçerik / Açıklamalar -->
+            <!-- 3. İçerik / Açıklamalar -->
             <section class="border border-gray-200 rounded-lg p-5 bg-white">
                 <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">İçerik ve Açıklamalar</h2>
                 <div class="space-y-4">
                     <div>
                         <label asp-for="Product.Description" class="block text-sm font-medium text-gray-700 mb-2">Açıklama (En az 140 karakter) <span class="text-red-500">*</span></label>
-                        <div class="flex gap-2">
-                            <textarea asp-for="Product.Description" id="productDescription" rows="4" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Ürün hakkında detaylı açıklama..."></textarea>
-                            <button type="button" id="aiGenerateBtn" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors duration-200 whitespace-nowrap flex items-center gap-2 self-start">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-                                AI ile Doldur
-                            </button>
-                        </div>
+                        <textarea asp-for="Product.Description" id="productDescription" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Ürün hakkında detaylı açıklama..."></textarea>
                         <div class="mt-2 text-sm text-gray-500"><span id="charCount">0</span> / 140 karakter (minimum)</div>
                         <span asp-validation-for="Product.Description" class="text-red-500 text-sm mt-1 block"></span>
                     </div>
@@ -94,99 +120,99 @@
                 </div>
             </section>
 
-            <!-- 3. Ürün Teknik Bilgileri -->
-            <section class="border border-gray-200 rounded-lg p-5 bg-gray-50/50">
-                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Ürün Teknik Bilgileri</h2>
+            <!-- 4. Ürün Teknik Bilgileri -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-white">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Ürün Teknik Bilgileri</h2>
 
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div>
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Şişmiş ürün</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-3">Şişmiş Ürün Ölçüleri</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <label asp-for="Product.InflatedLength" class="block text-xs text-gray-600 mb-1">Uzunluk</label>
-                                <input type="text" asp-for="Product.InflatedLength" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 12 m">
+                                <label asp-for="Product.InflatedLength" class="block text-sm font-medium text-gray-900 mb-2">Uzunluk</label>
+                                <input type="text" asp-for="Product.InflatedLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 12 m">
                             </div>
                             <div>
-                                <label asp-for="Product.InflatedWidth" class="block text-xs text-gray-600 mb-1">Genişlik</label>
-                                <input type="text" asp-for="Product.InflatedWidth" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 3 m">
+                                <label asp-for="Product.InflatedWidth" class="block text-sm font-medium text-gray-900 mb-2">Genişlik</label>
+                                <input type="text" asp-for="Product.InflatedWidth" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 3 m">
                             </div>
                             <div>
-                                <label asp-for="Product.InflatedHeight" class="block text-xs text-gray-600 mb-1">Yükseklik</label>
-                                <input type="text" asp-for="Product.InflatedHeight" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 3 m">
+                                <label asp-for="Product.InflatedHeight" class="block text-sm font-medium text-gray-900 mb-2">Yükseklik</label>
+                                <input type="text" asp-for="Product.InflatedHeight" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 3 m">
                             </div>
                             <div>
-                                <label asp-for="Product.UserCount" class="block text-xs text-gray-600 mb-1">Kullanıcı Sayısı</label>
-                                <input type="number" asp-for="Product.UserCount" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
+                                <label asp-for="Product.UserCount" class="block text-sm font-medium text-gray-900 mb-2">Kullanıcı Sayısı</label>
+                                <input type="number" asp-for="Product.UserCount" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 2">
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Montaj / demontaj</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-3">Montaj ve Demontaj</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <label asp-for="Product.AssemblyTime" class="block text-xs text-gray-600 mb-1">Montaj ve demontaj süresi (saat)</label>
-                                <input type="number" asp-for="Product.AssemblyTime" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
+                                <label asp-for="Product.AssemblyTime" class="block text-sm font-medium text-gray-900 mb-2">Montaj / Demontaj Süresi (saat)</label>
+                                <input type="number" asp-for="Product.AssemblyTime" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 2">
                             </div>
                             <div>
-                                <label asp-for="Product.RequiredPersonCount" class="block text-xs text-gray-600 mb-1">Gerekli kişi sayısı</label>
-                                <input type="number" asp-for="Product.RequiredPersonCount" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
+                                <label asp-for="Product.RequiredPersonCount" class="block text-sm font-medium text-gray-900 mb-2">Gerekli Kişi Sayısı</label>
+                                <input type="number" asp-for="Product.RequiredPersonCount" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 2">
                             </div>
                             <div>
-                                <label asp-for="Product.FanDescription" class="block text-xs text-gray-600 mb-1">Fan</label>
-                                <input type="text" asp-for="Product.FanDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 1 x türbin">
+                                <label asp-for="Product.FanDescription" class="block text-sm font-medium text-gray-900 mb-2">Fan Açıklaması</label>
+                                <input type="text" asp-for="Product.FanDescription" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 1 x türbin">
                             </div>
                             <div>
-                                <label asp-for="Product.FanWeightKg" class="block text-xs text-gray-600 mb-1">Fan ağırlığı (kg)</label>
-                                <input type="number" asp-for="Product.FanWeightKg" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 20">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Paketlenmiş ürünün özellikleri</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <div>
-                                <label asp-for="Product.PackagedLength" class="block text-xs text-gray-600 mb-1">Uzunluk</label>
-                                <input type="text" asp-for="Product.PackagedLength" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 80 cm">
-                            </div>
-                            <div>
-                                <label asp-for="Product.PackagedDepth" class="block text-xs text-gray-600 mb-1">Derinlik</label>
-                                <input type="text" asp-for="Product.PackagedDepth" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 70 cm">
-                            </div>
-                            <div>
-                                <label asp-for="Product.PackagedWeightKg" class="block text-xs text-gray-600 mb-1">Ağırlık (kg)</label>
-                                <input type="number" asp-for="Product.PackagedWeightKg" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 95">
-                            </div>
-                            <div>
-                                <label asp-for="Product.PackagePalletCount" class="block text-xs text-gray-600 mb-1">Paket / palet sayısı</label>
-                                <input type="number" asp-for="Product.PackagePalletCount" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
+                                <label asp-for="Product.FanWeightKg" class="block text-sm font-medium text-gray-900 mb-2">Fan Ağırlığı (kg)</label>
+                                <input type="number" asp-for="Product.FanWeightKg" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 20">
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Genel</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-3">Paketlenmiş Ürün Özellikleri</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label asp-for="Product.PackagedLength" class="block text-sm font-medium text-gray-900 mb-2">Uzunluk</label>
+                                <input type="text" asp-for="Product.PackagedLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 80 cm">
+                            </div>
+                            <div>
+                                <label asp-for="Product.PackagedDepth" class="block text-sm font-medium text-gray-900 mb-2">Derinlik</label>
+                                <input type="text" asp-for="Product.PackagedDepth" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 70 cm">
+                            </div>
+                            <div>
+                                <label asp-for="Product.PackagedWeightKg" class="block text-sm font-medium text-gray-900 mb-2">Ağırlık (kg)</label>
+                                <input type="number" asp-for="Product.PackagedWeightKg" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 95">
+                            </div>
+                            <div>
+                                <label asp-for="Product.PackagePalletCount" class="block text-sm font-medium text-gray-900 mb-2">Paket / Palet Sayısı</label>
+                                <input type="number" asp-for="Product.PackagePalletCount" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 mb-3">Sertifika ve Garanti</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="flex items-center gap-2">
                                 <input type="checkbox" id="Product_HasCertificate" name="Product.HasCertificate" value="true" @(Model.Product.HasCertificate == true ? "checked" : "") class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
                                 <input type="hidden" name="Product.HasCertificate" value="false">
-                                <label for="Product_HasCertificate" class="text-sm text-gray-700">Sertifika var</label>
+                                <label for="Product_HasCertificate" class="text-sm font-medium text-gray-900">Sertifikalı ürün</label>
                             </div>
                             <div>
-                                <label asp-for="Product.WarrantyDescription" class="block text-xs text-gray-600 mb-1">Garanti</label>
-                                <input type="text" asp-for="Product.WarrantyDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2 yıl garanti">
+                                <label asp-for="Product.WarrantyDescription" class="block text-sm font-medium text-gray-900 mb-2">Garanti Süresi</label>
+                                <input type="text" asp-for="Product.WarrantyDescription" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 2 yıl garanti">
                             </div>
                             <div class="md:col-span-2">
-                                <label asp-for="Product.AfterSalesService" class="block text-xs text-gray-600 mb-1">Garanti sonrası hizmet</label>
-                                <input type="text" asp-for="Product.AfterSalesService" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 5 yıllık servis ve bakım desteği">
+                                <label asp-for="Product.AfterSalesService" class="block text-sm font-medium text-gray-900 mb-2">Garanti Sonrası Hizmet</label>
+                                <input type="text" asp-for="Product.AfterSalesService" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Örn: 5 yıllık servis ve bakım desteği">
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- 4. Fiyat ve Stok -->
+            <!-- 5. Fiyat ve Stok -->
             <section class="border border-gray-200 rounded-lg p-5 bg-white">
                 <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Fiyat ve Stok</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -198,16 +224,6 @@
                         <label asp-for="Product.Stock" class="block text-sm font-medium text-gray-700 mb-2">Stok <span class="text-red-500">*</span></label>
                         <input type="number" asp-for="Product.Stock" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="0">
                     </div>
-                </div>
-            </section>
-
-            <!-- 5. Görseller -->
-            <section class="border border-gray-200 rounded-lg p-5 bg-white">
-                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Görseller</h2>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Ürün Resimleri</label>
-                    <input type="file" name="Images" accept="image/*" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
-                    <small class="text-gray-500 text-sm mt-1 block">Birden fazla resim seçebilirsiniz. İlk resim ana resim olur. (350px, 1000px ve orijinal boyutlarda kaydedilir)</small>
                 </div>
             </section>
 
@@ -243,6 +259,118 @@
     <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
 
     <script>
+        // ----- Ürün resimleri: önizleme ve sürükle-bırak -----
+        (function() {
+            var MAX_FILE_SIZE_MB = 10;
+            var MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+            var dropZone = document.getElementById('imageDropZone');
+            var fileInput = document.getElementById('productImagesInput');
+            var previewContainer = document.getElementById('imagePreviewContainer');
+            var previewGrid = document.getElementById('imagePreviewGrid');
+            var previewCountEl = document.getElementById('imagePreviewCount');
+            var clearBtn = document.getElementById('imageClearBtn');
+
+            if (!dropZone || !fileInput) return;
+
+            function renderPreviews(files) {
+                previewGrid.innerHTML = '';
+                if (!files || files.length === 0) {
+                    previewContainer.classList.add('hidden');
+                    return;
+                }
+                previewContainer.classList.remove('hidden');
+                previewCountEl.textContent = files.length;
+
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    var card = document.createElement('div');
+                    card.className = 'relative rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50 group';
+                    card.setAttribute('role', 'img');
+                    card.setAttribute('aria-label', 'Resim ' + (i + 1) + ': ' + (file.name || 'isimsiz'));
+
+                    var img = document.createElement('img');
+                    img.className = 'w-full aspect-square object-cover';
+                    img.alt = file.name || '';
+                    var reader = new FileReader();
+                    reader.onload = (function(el) { return function(e) { el.src = e.target.result; }; })(img);
+                    reader.readAsDataURL(file);
+
+                    var overlay = document.createElement('div');
+                    overlay.className = 'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2';
+                    var label = document.createElement('span');
+                    label.className = 'text-white text-xs font-medium block truncate';
+                    label.textContent = file.name || 'isimsiz';
+                    var badge = document.createElement('span');
+                    badge.className = 'text-[10px] text-gray-200 mt-0.5 block';
+                    badge.textContent = i === 0 ? 'Ana resim' : 'Resim ' + (i + 1);
+                    overlay.appendChild(label);
+                    overlay.appendChild(badge);
+
+                    card.appendChild(img);
+                    card.appendChild(overlay);
+                    previewGrid.appendChild(card);
+                }
+            }
+
+            function handleFiles(fileList) {
+                if (!fileList || fileList.length === 0) {
+                    renderPreviews([]);
+                    return;
+                }
+                var files = Array.prototype.slice.call(fileList);
+                var valid = [];
+                var tooBig = [];
+                for (var i = 0; i < files.length; i++) {
+                    if (!files[i].type.match(/^image\/(jpeg|png|webp|gif)$/i)) continue;
+                    if (files[i].size > MAX_FILE_SIZE_BYTES) {
+                        tooBig.push(files[i].name);
+                        continue;
+                    }
+                    valid.push(files[i]);
+                }
+                if (tooBig.length && typeof showSnackbar === 'function') {
+                    showSnackbar('Bazı dosyalar ' + MAX_FILE_SIZE_MB + ' MB\'dan büyük olduğu için atlandı: ' + tooBig.join(', '), 'warning');
+                }
+                if (valid.length === 0) {
+                    fileInput.value = '';
+                    renderPreviews([]);
+                    return;
+                }
+                var dt = new DataTransfer();
+                valid.forEach(function(f) { dt.items.add(f); });
+                fileInput.files = dt.files;
+                renderPreviews(fileInput.files);
+            }
+
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+
+            clearBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                renderPreviews([]);
+            });
+
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('border-gray-500', 'bg-gray-100');
+            });
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('border-gray-500', 'bg-gray-100');
+            });
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('border-gray-500', 'bg-gray-100');
+                var files = e.dataTransfer && e.dataTransfer.files;
+                if (files && files.length) handleFiles(files);
+            });
+        })();
+
         // Character counter
         function updateCharCount() {
             const text = $('#productDescription').val();
@@ -303,71 +431,6 @@
             } else {
                 $('#subCategoryDropdown').empty().append('<option value="0">Önce kategori seçin...</option>');
             }
-        });
-
-        // AI Generate
-        $('#aiGenerateBtn').on('click', function() {
-            const productDescription = $('#productDescription').val();
-            const categoryId = $('#categoryDropdown').val();
-            const subCategoryId = $('#subCategoryDropdown').val();
-
-            if (!productDescription || productDescription.trim() === '') {
-                if (typeof showSnackbar === 'function') showSnackbar('Lütfen önce ürün hakkında bir açıklama yazın!', 'warning');
-                return;
-            }
-
-            if (!categoryId || categoryId == "0") {
-                if (typeof showSnackbar === 'function') showSnackbar('Lütfen önce kategori seçin!', 'warning');
-                $('#categoryDropdown').focus();
-                return;
-            }
-
-            if (!subCategoryId || subCategoryId == "0") {
-                if (typeof showSnackbar === 'function') showSnackbar('Lütfen önce alt kategori seçin!', 'warning');
-                $('#subCategoryDropdown').focus();
-                return;
-            }
-
-            const $btn = $(this);
-            const originalHtml = $btn.html();
-            $btn.prop('disabled', true).html('<svg class="w-5 h-5 animate-spin inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> AI Çalışıyor...');
-
-            $.ajax({
-                url: window.location.pathname + '?handler=GenerateAiContent',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ productDescription: productDescription }),
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                        if (response.success) {
-                        if (response.data.name) $('#Product_Name').val(response.data.name);
-                        if (response.data.description) {
-                            $('#productDescription').val(response.data.description);
-                            updateCharCount();
-                        }
-                        if (response.data.technicalDescription) {
-                            if (editor) {
-                                editor.setData(response.data.technicalDescription);
-                            }
-                        }
-                        if (response.data.summary) $('#Product_Summary').val(response.data.summary);
-                        if (response.data.suggestedPrice) $('#Product_Price').val(response.data.suggestedPrice);
-                        if (response.data.suggestedStock) $('#Product_Stock').val(response.data.suggestedStock);
-
-                        if (typeof showSnackbar === 'function') showSnackbar('Yapay zeka ile ürün bilgileri başarıyla oluşturuldu!', 'success');
-                    } else {
-                        if (typeof showSnackbar === 'function') showSnackbar(response.message, 'error');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    if (typeof showSnackbar === 'function') showSnackbar('Yapay zeka ile içerik oluşturulurken hata oluştu: ' + error, 'error');
-                },
-                complete: function() {
-                    $btn.prop('disabled', false).html(originalHtml);
-                }
-            });
         });
 
         // Form submit

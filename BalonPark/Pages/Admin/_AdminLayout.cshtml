@@ -55,7 +55,18 @@
         html {
             scroll-behavior: smooth;
         }
+
+        /* Admin font zoom: root font-size ile tüm rem/em ölçeklenir */
+        html { font-size: 100%; }
     </style>
+    <script>
+        (function() {
+            var key = 'adminFontSize';
+            var val = parseInt(localStorage.getItem(key) || '100', 10);
+            val = Math.min(120, Math.max(80, isNaN(val) ? 100 : val));
+            document.documentElement.style.setProperty('font-size', val + '%', 'important');
+        })();
+    </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.526.0/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
 </head>
@@ -120,6 +131,17 @@
                             <span class="text-xs font-medium">@lowStockCount</span>
                         </a>
                     }
+
+                    <!-- Font size: küçült / büyüt (localStorage) -->
+                    <div class="flex items-center gap-0.5 border-r border-gray-200 pr-3" role="group" aria-label="Yazı boyutu">
+                        <button type="button" id="adminFontDecrease" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Yazıyı küçült" aria-label="Yazıyı küçült">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
+                        </button>
+                        <span id="adminFontLabel" class="min-w-[2.5rem] text-center text-xs text-gray-500 tabular-nums">100%</span>
+                        <button type="button" id="adminFontIncrease" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Yazıyı büyüt" aria-label="Yazıyı büyüt">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
+                        </button>
+                    </div>
 
                     <!-- Notifications -->
                     <button type="button" class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">
@@ -451,6 +473,52 @@
                 }
             }
         });
+
+        // Admin font size (localStorage): 80–120%, adım 5% — Tailwind’i ezmek için !important
+        (function() {
+            var KEY = 'adminFontSize';
+            var MIN = 80;
+            var MAX = 120;
+            var STEP = 5;
+            var styleId = 'admin-font-size-style';
+
+            function getVal() {
+                var v = parseInt(localStorage.getItem(KEY) || '100', 10);
+                return isNaN(v) ? 100 : Math.min(MAX, Math.max(MIN, v));
+            }
+            function applyFontSize(val) {
+                val = Math.min(MAX, Math.max(MIN, val));
+                document.documentElement.style.setProperty('font-size', val + '%', 'important');
+                var el = document.getElementById(styleId);
+                if (el) el.textContent = 'html { font-size: ' + val + '% !important; }';
+                else {
+                    el = document.createElement('style');
+                    el.id = styleId;
+                    el.textContent = 'html { font-size: ' + val + '% !important; }';
+                    document.head.appendChild(el);
+                }
+                return val;
+            }
+            function setVal(val) {
+                val = applyFontSize(val);
+                localStorage.setItem(KEY, String(val));
+                var label = document.getElementById('adminFontLabel');
+                if (label) label.textContent = val + '%';
+            }
+
+            function initFontSize() {
+                setVal(getVal());
+                var btnDec = document.getElementById('adminFontDecrease');
+                var btnInc = document.getElementById('adminFontIncrease');
+                if (btnDec) btnDec.addEventListener('click', function() { setVal(getVal() - STEP); });
+                if (btnInc) btnInc.addEventListener('click', function() { setVal(getVal() + STEP); });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initFontSize);
+            } else {
+                initFontSize();
+            }
+        })();
     </script>
     
     <script>
