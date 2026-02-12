@@ -38,9 +38,9 @@
 <!-- Hero + Kategoriler (solda) + Product Section -->
 
 <div class="space-y-4 sm:space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 overflow-visible">
-        <!-- Kategoriler: solda liste, hover ile sağda tek mega panel (aynı yükseklik, bitişik görünüm, grid) -->
-        <nav class="mega-menu-nav relative z-20 rounded-xl bg-white border border-gray-200 p-0 order-2 md:order-1 shadow-sm js-category-popover-nav overflow-visible flex flex-col md:flex-row md:min-h-0" aria-label="Kategoriler">
+    <div class="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 overflow-visible md:items-stretch">
+        <!-- Kategoriler: solda liste, hover ile sağda tek mega panel (hero ile aynı yükseklik) -->
+        <nav class="mega-menu-nav relative z-20 rounded-xl bg-white border border-gray-200 p-0 order-2 md:order-1 shadow-sm js-category-popover-nav overflow-visible flex flex-col md:flex-row md:min-h-0 md:h-full" aria-label="Kategoriler">
             <div class="mega-menu-list flex-shrink-0 w-full px-3 py-2.5 md:px-4 md:py-3">
                 <ul class="list-none p-0 m-0 divide-y divide-gray-50">
                     @if (Model.Categories != null && Model.Categories.Count > 0)
@@ -122,29 +122,16 @@
             </div>
         </nav>
 
-        <!-- Hero: sol büyük, sağ küçük panel; arada boşluk; overlap yok -->
-        <div class="hero-row grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 order-1 md:order-2 min-w-0">
-            <div class="hero-panel relative rounded-xl overflow-hidden bg-gray-100 min-h-[200px] min-w-0">
-                <div class="aspect-[2/1] w-full relative">
+        <!-- Hero: tek geniş panel, kategori ile aynı yükseklik -->
+        <div class="hero-row order-1 md:order-2 min-w-0 w-full md:h-full">
+            <div class="hero-panel relative rounded-xl overflow-hidden bg-gray-100 min-w-0 w-full h-full">
+                <div class="hero-aspect w-full h-full relative">
                     <img src="~/assets/images/1.png" class="absolute inset-0 w-full h-full object-cover" alt="Şişme Oyun Parkları - Balon Park" loading="eager" width="800" height="400">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col items-start justify-start p-6 sm:p-8">
                         <span class="text-primary font-medium text-sm sm:text-base">Hazır Olun</span>
                         <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">EĞLENCEYE!</h2>
                         <p class="text-white/90 text-sm mt-2 max-w-md hidden sm:block">Çocuklarınız için güvenli ve eğlenceli şişme oyun grupları ile unutulmaz anlar yaşayın.</p>
                         <a href="/category/siseme-parklar/sisme-kaydirak" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
-                            Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-panel relative rounded-xl overflow-hidden bg-gray-100 min-h-[200px] min-w-0 md:min-h-0">
-                <div class="aspect-[2/1] w-full relative md:aspect-auto md:h-full md:min-h-0">
-                    <img src="~/assets/images/2.png" class="absolute inset-0 w-full h-full object-cover" alt="Kaliteli Güvenli - Balon Park" loading="eager">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col items-start justify-start p-6 sm:p-8">
-                        <span class="text-primary font-medium text-sm sm:text-base">Kaliteli</span>
-                        <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">Güvenli</h2>
-                        <p class="text-white/90 text-sm mt-2">En İyi Fiyatlarla Sizlerle</p>
-                        <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
                             Ürünleri Gör <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         </a>
                     </div>
@@ -219,9 +206,34 @@
 
 @section Styles {
 <style>
-    /* Hero: iki panel yan yana, overlap yok */
-    .hero-row { align-items: stretch; }
-    .hero-panel { isolation: isolate; }
+    /* Hero: kategori ile aynı yükseklik (md’de), mobilde sabit oran */
+    .hero-row { width: 100%; }
+    .hero-panel { isolation: isolate; width: 100%; }
+    .hero-aspect {
+        display: block;
+        width: 100%;
+        min-height: 160px;
+        position: relative;
+    }
+    /* Mobil: sabit oran, dar yükseklik */
+    .hero-aspect {
+        aspect-ratio: 3 / 1;
+        max-height: 280px;
+    }
+    @@supports not (aspect-ratio: 3/1) {
+        .hero-aspect { height: 0; padding-bottom: 33.33%; }
+        .hero-aspect > * { position: absolute; inset: 0; }
+    }
+    @@media (min-width: 768px) {
+        .hero-aspect {
+            aspect-ratio: auto;
+            max-height: none;
+            height: 100%;
+        }
+    }
+    @@media (max-width: 767px) {
+        .hero-aspect { max-height: 280px; }
+    }
     /* Kategori trigger vurgusu */
     .category-popover-trigger.is-dropdown-open .category-link { background-color: rgb(249 250 251); }
     .category-popover-trigger.is-dropdown-open .category-name { color: rgb(0 168 232); }
