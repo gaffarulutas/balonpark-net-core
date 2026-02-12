@@ -3,9 +3,24 @@ using BalonPark.Models;
 
 namespace BalonPark.Services;
 
+/// <summary>
+/// Bellek tabanlı cache servisi. TTL sonunda kayıt silinir;
+/// bir sonraki istekte cache miss olur, veri DB'den yeniden yüklenir ve tekrar cache'lenir.
+/// </summary>
 public class CacheService(IMemoryCache cache) : ICacheService
 {
-    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
+    /// <summary>Cache TTL: 3 saat. Süre dolunca entry kaldırılır, sonraki istekte veri baştan yüklenir.</summary>
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(3);
+
+    /// <summary>Absolute expiration kullanılır (sliding yok). TTL sonunda entry silinir, bir sonraki istekte cache miss → DB'den yükle → tekrar cache'le.</summary>
+    private static MemoryCacheEntryOptions CreateEntryOptions(CacheItemPriority priority = CacheItemPriority.Normal)
+    {
+        return new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = CacheTtl,
+            Priority = priority
+        };
+    }
 
     // Cache Keys
     private const string PRODUCTS_KEY = "products_all";
@@ -69,29 +84,17 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetProductsAsync(IEnumerable<Product> products)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.Normal
-        };
-        
-        cache.Set(PRODUCTS_KEY, products, cacheEntryOptions);
+        cache.Set(PRODUCTS_KEY, products, CreateEntryOptions());
         await Task.CompletedTask;
     }
 
     public async Task SetProductAsync(Product product)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.Normal
-        };
-
+        var options = CreateEntryOptions();
         var idKey = string.Format(PRODUCT_BY_ID_KEY, product.Id);
         var slugKey = string.Format(PRODUCT_BY_SLUG_KEY, product.Slug);
-
-        cache.Set(idKey, product, cacheEntryOptions);
-        cache.Set(slugKey, product, cacheEntryOptions);
+        cache.Set(idKey, product, options);
+        cache.Set(slugKey, product, options);
         await Task.CompletedTask;
     }
 
@@ -118,29 +121,17 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetCategoriesAsync(IEnumerable<Category> categories)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.Normal
-        };
-        
-        cache.Set(CATEGORIES_KEY, categories, cacheEntryOptions);
+        cache.Set(CATEGORIES_KEY, categories, CreateEntryOptions());
         await Task.CompletedTask;
     }
 
     public async Task SetCategoryAsync(Category category)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.Normal
-        };
-
+        var options = CreateEntryOptions();
         var idKey = string.Format(CATEGORY_BY_ID_KEY, category.Id);
         var slugKey = string.Format(CATEGORY_BY_SLUG_KEY, category.Slug);
-
-        cache.Set(idKey, category, cacheEntryOptions);
-        cache.Set(slugKey, category, cacheEntryOptions);
+        cache.Set(idKey, category, options);
+        cache.Set(slugKey, category, options);
         await Task.CompletedTask;
     }
 
@@ -179,29 +170,17 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetSubCategoriesAsync(IEnumerable<SubCategory> subCategories)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.Normal
-        };
-        
-        cache.Set(SUBCATEGORIES_KEY, subCategories, cacheEntryOptions);
+        cache.Set(SUBCATEGORIES_KEY, subCategories, CreateEntryOptions());
         await Task.CompletedTask;
     }
 
     public async Task SetSubCategoryAsync(SubCategory subCategory)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.Normal
-        };
-
+        var options = CreateEntryOptions();
         var idKey = string.Format(SUBCATEGORY_BY_ID_KEY, subCategory.Id);
         var slugKey = string.Format(SUBCATEGORY_BY_SLUG_KEY, subCategory.Slug);
-
-        cache.Set(idKey, subCategory, cacheEntryOptions);
-        cache.Set(slugKey, subCategory, cacheEntryOptions);
+        cache.Set(idKey, subCategory, options);
+        cache.Set(slugKey, subCategory, options);
         await Task.CompletedTask;
     }
 
@@ -244,29 +223,17 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetBlogsAsync(IEnumerable<Blog> blogs)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.Normal
-        };
-        
-        cache.Set(BLOGS_KEY, blogs, cacheEntryOptions);
+        cache.Set(BLOGS_KEY, blogs, CreateEntryOptions());
         await Task.CompletedTask;
     }
 
     public async Task SetBlogAsync(Blog blog)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.Normal
-        };
-
+        var options = CreateEntryOptions();
         var idKey = string.Format(BLOG_BY_ID_KEY, blog.Id);
         var slugKey = string.Format(BLOG_BY_SLUG_KEY, blog.Slug);
-
-        cache.Set(idKey, blog, cacheEntryOptions);
-        cache.Set(slugKey, blog, cacheEntryOptions);
+        cache.Set(idKey, blog, options);
+        cache.Set(slugKey, blog, options);
         await Task.CompletedTask;
     }
 
@@ -281,13 +248,7 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetSettingsAsync(Settings settings)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = _cacheExpiration,
-            Priority = CacheItemPriority.High // Settings önemli, yüksek öncelik
-        };
-
-        cache.Set(SETTINGS_KEY, settings, cacheEntryOptions);
+        cache.Set(SETTINGS_KEY, settings, CreateEntryOptions(CacheItemPriority.High));
         await Task.CompletedTask;
     }
 

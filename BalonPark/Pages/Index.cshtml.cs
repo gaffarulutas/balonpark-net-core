@@ -17,7 +17,8 @@ public class IndexModel(
     : BasePage(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
 {
     public List<ProductWithImage> Products { get; set; } = new();
-    
+    public List<ProductWithImage> MostViewedProducts { get; set; } = new();
+
     [BindProperty(SupportsGet = true)]
     public int PageNumber { get; set; } = 1;
     
@@ -50,19 +51,24 @@ public class IndexModel(
         foreach (var product in pagedProducts)
         {
             var mainImage = await productImageRepository.GetMainImageAsync(product.Id);
-            
-            // USD ve Euro fiyatlarını hesapla
             var (usdPrice, euroPrice) = await currencyService.CalculatePricesAsync(product.Price);
-            
-            // Ürünün fiyat bilgilerini güncelle
             product.UsdPrice = Math.Round(usdPrice, 2);
             product.EuroPrice = Math.Round(euroPrice, 2);
-            
-            Products.Add(new ProductWithImage
-            {
-                Product = product,
-                MainImage = mainImage
-            });
+            Products.Add(new ProductWithImage { Product = product, MainImage = mainImage });
+        }
+
+        // En çok bakılan ürünler (ViewCount'a göre, max 16)
+        var mostViewed = activeProducts
+            .OrderByDescending(p => p.ViewCount)
+            .Take(16)
+            .ToList();
+        foreach (var product in mostViewed)
+        {
+            var mainImage = await productImageRepository.GetMainImageAsync(product.Id);
+            var (usdPrice, euroPrice) = await currencyService.CalculatePricesAsync(product.Price);
+            product.UsdPrice = Math.Round(usdPrice, 2);
+            product.EuroPrice = Math.Round(euroPrice, 2);
+            MostViewedProducts.Add(new ProductWithImage { Product = product, MainImage = mainImage });
         }
     }
 }

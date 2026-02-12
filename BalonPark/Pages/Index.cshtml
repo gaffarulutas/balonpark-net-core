@@ -155,36 +155,69 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="swiper-pagination hero-swiper-pagination" aria-label="Slider sayfa göstergesi"></div>
-                        <button type="button" class="swiper-button-prev hero-swiper-prev" aria-label="Önceki slide"></button>
-                        <button type="button" class="swiper-button-next hero-swiper-next" aria-label="Sonraki slide"></button>
+                        <div class="hero-swiper-nav-group">
+                            <button type="button" class="swiper-button-prev hero-swiper-prev" aria-label="Önceki slide"></button>
+                            <button type="button" class="swiper-button-next hero-swiper-next" aria-label="Sonraki slide"></button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="pt-1 pb-2.5 border-b border-gray-100">
-        <h2 class="text-ink text-base font-medium">Öne Çıkan Ürünler</h2>
-        <p class="text-gray-400 text-xs mt-0.5">Tüm kategorilerden seçilmiş ürünler</p>
-    </div>
+    <!-- En Çok Bakılan Ürünler (Swiper) - üstte -->
+    @if (Model.MostViewedProducts.Any())
+    {
+        <section class="home-section" aria-labelledby="most-viewed-heading">
+            <div class="section-header">
+                <div>
+                    <h2 id="most-viewed-heading" class="section-title">En Çok Bakılan Ürünler</h2>
+                    <p class="section-subtitle">Müşterilerimizin en çok incelediği ürünler</p>
+                </div>
+                <div class="most-viewed-swiper-nav">
+                    <button type="button" class="swiper-button-prev most-viewed-prev" aria-label="Önceki ürünler"></button>
+                    <button type="button" class="swiper-button-next most-viewed-next" aria-label="Sonraki ürünler"></button>
+                </div>
+            </div>
+            <div class="swiper mostViewedSwiper">
+                <div class="swiper-wrapper">
+                    @foreach (var item in Model.MostViewedProducts)
+                    {
+                        <div class="swiper-slide">
+                            @await Html.PartialAsync("Shared/_ProductCard", new ProductCardViewModel { Item = item, SelectedCurrency = Model.SelectedCurrency })
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    }
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
-    @if (Model.Products.Any())
-    {
-        @foreach (var item in Model.Products)
-        {
-            @await Html.PartialAsync("Shared/_ProductCard", new ProductCardViewModel { Item = item, SelectedCurrency = Model.SelectedCurrency })
-        }
-    }
-    else
-    {
-        <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
-            <h3 class="text-base font-medium text-ink">Şu anda ürün bulunmamaktadır</h3>
-            <p class="text-sm text-gray-500 mt-1">Lütfen daha sonra tekrar kontrol edin veya bizimle iletişime geçin.</p>
+    <!-- Öne Çıkan Ürünler -->
+    <section class="home-section" aria-labelledby="featured-heading">
+        <div class="section-header">
+            <div>
+                <h2 id="featured-heading" class="section-title">Öne Çıkan Ürünler</h2>
+                <p class="section-subtitle">Tüm kategorilerden seçilmiş ürünler</p>
+            </div>
+            <a href="/Products" class="section-link">Tümünü Gör</a>
         </div>
-    }
-    </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
+            @if (Model.Products.Any())
+            {
+                @foreach (var item in Model.Products)
+                {
+                    @await Html.PartialAsync("Shared/_ProductCard", new ProductCardViewModel { Item = item, SelectedCurrency = Model.SelectedCurrency })
+                }
+            }
+            else
+            {
+                <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <h3 class="text-base font-medium text-ink">Şu anda ürün bulunmamaktadır</h3>
+                    <p class="text-sm text-gray-500 mt-1">Lütfen daha sonra tekrar kontrol edin veya bizimle iletişime geçin.</p>
+                </div>
+            }
+        </div>
+    </section>
 </div>
 
 @if (Model.TotalPages > 1)
@@ -297,30 +330,122 @@
         .hero-slide-overlay { padding: 2rem 2.25rem 2rem 2rem; }
         .hero-slide-overlay > * { margin-bottom: 0.5em; }
     }
-    .hero-swiper-pagination { bottom: 1rem !important; }
-    .hero-swiper-pagination .swiper-pagination-bullet {
-        background: rgba(255,255,255,0.7);
-        opacity: 1;
-        width: 8px;
-        height: 8px;
+    /* Hero nav: Swiper CDN .swiper-button-prev/next (position:absolute; left/right:10px) ile çakışmasın */
+    .hero-swiper-nav-group {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 12;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
-    .hero-swiper-pagination .swiper-pagination-bullet-active {
-        background: #fff;
-        width: 24px;
-        border-radius: 4px;
-    }
-    .hero-swiper-prev,
-    .hero-swiper-next {
+    .hero-swiper-nav-group .swiper-button-prev,
+    .hero-swiper-nav-group .swiper-button-next {
+        position: relative !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        margin: 0 !important;
+        margin-top: 0 !important;
+        transform: none !important;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        border-radius: 50%;
+        flex-shrink: 0;
         color: #fff;
         background: rgba(0,0,0,0.3);
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
+        border: none;
     }
-    .hero-swiper-prev:hover,
-    .hero-swiper-next:hover { background: rgba(0,0,0,0.5); }
-    .hero-swiper-prev::after,
-    .hero-swiper-next::after { font-size: 1.25rem; }
+    .hero-swiper-nav-group .swiper-button-prev:hover,
+    .hero-swiper-nav-group .swiper-button-next:hover { background: rgba(0,0,0,0.5); color: #fff; }
+    .hero-swiper-nav-group .swiper-button-prev::after,
+    .hero-swiper-nav-group .swiper-button-next::after { font-size: 1.125rem !important; }
+    .hero-swiper-nav-group .swiper-button-disabled { opacity: 0.4; }
+    /* Ana sayfa bölümleri (e-commerce) */
+    .home-section { margin-top: 2rem; }
+    @@media (min-width: 768px) {
+        .home-section { margin-top: 2.5rem; }
+    }
+    .section-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .section-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+    }
+    .section-subtitle {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.8125rem;
+        color: #9ca3af;
+    }
+    .section-link {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #00a8e8;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    .section-link:hover { color: #0090c9; text-decoration: underline; }
+    /* En Çok Bakılan Swiper nav: CDN .swiper-button-prev/next (absolute, left/right) ile çakışmasın */
+    .most-viewed-swiper-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+    .most-viewed-swiper-nav .swiper-button-prev,
+    .most-viewed-swiper-nav .swiper-button-next {
+        position: relative !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        margin: 0 !important;
+        margin-top: 0 !important;
+        transform: none !important;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        border-radius: 50%;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #374151;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s;
+    }
+    .most-viewed-swiper-nav .swiper-button-prev:hover,
+    .most-viewed-swiper-nav .swiper-button-next:hover { background: #f3f4f6; color: #00a8e8; }
+    .most-viewed-swiper-nav .swiper-button-prev::after,
+    .most-viewed-swiper-nav .swiper-button-next::after { font-size: 1.125rem !important; }
+    .most-viewed-swiper-nav .swiper-button-disabled { opacity: 0.4; cursor: not-allowed; }
+    .mostViewedSwiper {
+        overflow: hidden;
+    }
+    .mostViewedSwiper .swiper-wrapper { align-items: stretch; }
+    .mostViewedSwiper .swiper-slide {
+        height: auto;
+        box-sizing: border-box;
+    }
+    .mostViewedSwiper .swiper-slide .product-card { height: 100%; }
     /* Kategori trigger vurgusu */
     .category-popover-trigger.is-dropdown-open .category-link { background-color: rgb(249 250 251); }
     .category-popover-trigger.is-dropdown-open .category-name { color: rgb(0 168 232); }
@@ -356,27 +481,60 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var urlParams = new URLSearchParams(window.location.search);
-        // Hero Swiper: ana sayfada slider başlat
+        // Hero Swiper
         function runHeroSwiper() {
             if (typeof window.Swiper === 'undefined') return;
             var heroEl = document.querySelector('.heroSwiper');
             if (!heroEl || heroEl.swiper) return;
-            var paginationEl = heroEl.querySelector('.hero-swiper-pagination');
             var nextEl = heroEl.querySelector('.hero-swiper-next');
             var prevEl = heroEl.querySelector('.hero-swiper-prev');
             var opts = {
                 loop: true,
-                speed: 600,
+                speed: 500,
                 autoplay: { delay: 5000, disableOnInteraction: false },
+                grabCursor: true,
                 keyboard: { enabled: true },
-                a11y: { prevSlideMessage: 'Önceki', nextSlideMessage: 'Sonraki', paginationBulletMessage: 'Slide {{index}}' }
+                observer: true,
+                observeParents: true,
+                a11y: { prevSlideMessage: 'Önceki', nextSlideMessage: 'Sonraki' }
             };
-            if (paginationEl) opts.pagination = { el: paginationEl, clickable: true };
             if (nextEl && prevEl) opts.navigation = { nextEl: nextEl, prevEl: prevEl };
             new window.Swiper(heroEl, opts);
         }
         setTimeout(runHeroSwiper, 100);
         window.addEventListener('load', function() { runHeroSwiper(); });
+
+        // En Çok Bakılan Ürünler Swiper (nav butonları aynı section içinde)
+        function runMostViewedSwiper() {
+            if (typeof window.Swiper === 'undefined') return;
+            var el = document.querySelector('.mostViewedSwiper');
+            if (!el || el.swiper) return;
+            var section = el.closest('section');
+            var nextEl = section ? section.querySelector('.most-viewed-next') : document.querySelector('.most-viewed-next');
+            var prevEl = section ? section.querySelector('.most-viewed-prev') : document.querySelector('.most-viewed-prev');
+            var slideCount = el.querySelectorAll('.swiper-slide').length;
+            var opts = {
+                slidesPerView: 2,
+                spaceBetween: 16,
+                speed: 400,
+                grabCursor: true,
+                watchSlidesProgress: true,
+                autoplay: slideCount > 1 ? { delay: 4500, disableOnInteraction: false } : false,
+                navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
+                observer: true,
+                observeParents: true,
+                breakpoints: {
+                    480: { slidesPerView: 2, spaceBetween: 16 },
+                    640: { slidesPerView: 2, spaceBetween: 18 },
+                    768: { slidesPerView: 3, spaceBetween: 20 },
+                    1024: { slidesPerView: 4, spaceBetween: 20 },
+                    1280: { slidesPerView: 5, spaceBetween: 24 }
+                }
+            };
+            if (slideCount >= 2) opts.loop = true;
+            new window.Swiper(el, opts);
+        }
+        setTimeout(runMostViewedSwiper, 150);
     });
 </script>
 }
