@@ -65,10 +65,11 @@ public abstract class BasePage : PageModel
         // Currency'yi cookie'den al
         SelectedCurrency = _currencyCookieService.GetSelectedCurrency();
 
-        // UrlService, SelectedCurrency ve SiteSettings'i ViewData'ya ekle ki layout'ta kullanılabilsin
+        // UrlService, SelectedCurrency, SiteSettings ve Categories'i ViewData'ya ekle (Layout / header mega menü için)
         ViewData["UrlService"] = _urlService;
         ViewData["SelectedCurrency"] = SelectedCurrency;
         ViewData["SiteSettings"] = SiteSettings;
+        ViewData["Categories"] = Categories;
 
         base.OnPageHandlerExecuting(context);
     }

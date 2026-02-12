@@ -1,78 +1,76 @@
 @page
 @model HakkimizdaModel
-@using System.Collections.Generic
-@using System.Linq
+@using System.Text.Json
 @{
     var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
-    ViewData["Title"] = "Hakkımızda";
+    var urlService = (IUrlService?)ViewData["UrlService"];
+    var baseUrl = urlService?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/";
+    var pageUrl = urlService?.GetPageUrl("/Hakkimizda") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Hakkimizda";
+    var logoUrl = settings?.Logo != null ? (urlService?.GetImageUrl(settings.Logo) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{settings.Logo}") : (urlService?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
+
+    ViewData["Title"] = $"Hakkımızda | {companyName}";
     ViewData["Description"] = $"{companyName} hakkında bilgi alın. Kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve daha fazlası için güvenilir çözüm ortağınız.";
     ViewData["Keywords"] = "hakkımızda, balon park, şişme oyun grupları, kaliteli ürünler, güvenilir firma";
-    ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
-    var defaultDescription = $"Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları üreticisi. Güvenli, dayanıklı ve eğlenceli ürünler.";
+    ViewData["Image"] = logoUrl;
+    var defaultDescription = "Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları fabrikası. Güvenli, dayanıklı ve eğlenceli ürünler.";
+    var aboutText = settings?.About ?? $"{companyName}, ailelere ve işletmelere şişme oyun parkı, kaydırak ve havuz çözümleri sunar. Çocukların güvenli ortamlarda oynaması için tasarlanmış ürünlerimizle sektörde güvenilir bir adres olmayı hedefliyoruz.";
 }
 
-<!-- About Page Structured Data -->
+<!-- About Page Structured Data (JSON-LD: tüm dinamik string'ler güvenli escape edilir) -->
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",
     "@@type": "AboutPage",
-    "name": "@Html.Raw("Hakkımızda - " + companyName)",
-    "description": "@Html.Raw(companyName + " hakkında bilgi alın. Kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve daha fazlası için güvenilir çözüm ortağınız.")",
-    "url": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/hakkimizda") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/hakkimizda")",
+    "name": @Html.Raw(JsonSerializer.Serialize("Hakkımızda - " + companyName)),
+    "description": @Html.Raw(JsonSerializer.Serialize(companyName + " hakkında bilgi alın. Kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve daha fazlası için güvenilir çözüm ortağınız.")),
+    "url": @Html.Raw(JsonSerializer.Serialize(pageUrl)),
     "mainEntity": {
         "@@type": "Organization",
-        "name": "@Html.Raw(companyName)",
-        "alternateName": "@Html.Raw(companyName.Replace(" ", ""))",
-        "description": "@Html.Raw(settings?.About ?? defaultDescription)",
-        "url": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/")",
-        "logo": "@(settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{settings.Logo}") : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png"))",
+        "name": @Html.Raw(JsonSerializer.Serialize(companyName)),
+        "alternateName": @Html.Raw(JsonSerializer.Serialize(companyName.Replace(" ", ""))),
+        "description": @Html.Raw(JsonSerializer.Serialize(settings?.About ?? defaultDescription)),
+        "url": @Html.Raw(JsonSerializer.Serialize(baseUrl)),
+        "logo": @Html.Raw(JsonSerializer.Serialize(logoUrl)),
         "foundingDate": "2020",
         "numberOfEmployees": "10-50",
         "industry": "Manufacturing",
         "knowsAbout": [
-            "@Html.Raw("Şişme Oyun Parkları")",
-            "@Html.Raw("Çocuk Oyun Grupları")",
-            "@Html.Raw("Şişme Kaydıraklar")",
-            "@Html.Raw("Şişme Havuzlar")",
-            "@Html.Raw("Top Havuzları")",
-            "@Html.Raw("İç Mekan Oyun Parkları")"
+            "Şişme Oyun Parkları",
+            "Çocuk Oyun Grupları",
+            "Şişme Kaydıraklar",
+            "Şişme Havuzlar",
+            "Top Havuzları",
+            "İç Mekan Oyun Parkları"
         ],
         "contactPoint": {
             "@@type": "ContactPoint",
             "contactType": "customer service",
-            "telephone": "@Html.Raw(settings?.PhoneNumber ?? "")",
-            "email": "@Html.Raw(settings?.Email ?? "")",
+            "telephone": @Html.Raw(JsonSerializer.Serialize(settings?.PhoneNumber ?? "")),
+            "email": @Html.Raw(JsonSerializer.Serialize(settings?.Email ?? "")),
             "availableLanguage": ["Turkish", "English"],
-            "contactOption": "TollFree",
             "areaServed": "TR"
         },
         "address": {
             "@@type": "PostalAddress",
-            "streetAddress": "@Html.Raw(settings?.Address ?? "")",
-            "addressLocality": "@Html.Raw(settings?.City ?? "Türkiye")",
-            "addressRegion": "@Html.Raw(settings?.District ?? "")",
-            "postalCode": "@Html.Raw(settings?.PostalCode ?? "")",
-            "addressCountry": "@Html.Raw(settings?.Country ?? "TR")"
+            "streetAddress": @Html.Raw(JsonSerializer.Serialize(settings?.Address ?? "")),
+            "addressLocality": @Html.Raw(JsonSerializer.Serialize(settings?.City ?? "Türkiye")),
+            "addressRegion": @Html.Raw(JsonSerializer.Serialize(settings?.District ?? "")),
+            "postalCode": @Html.Raw(JsonSerializer.Serialize(settings?.PostalCode ?? "")),
+            "addressCountry": @Html.Raw(JsonSerializer.Serialize(settings?.Country ?? "TR"))
         }
-    },
-    "breadcrumb": {
-        "@@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@@type": "ListItem",
-                "position": 1,
-                "name": "Ana Sayfa",
-                "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/")"
-            },
-            {
-                "@@type": "ListItem",
-                "position": 2,
-                "name": "@Html.Raw("Hakkımızda")",
-                "item": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/hakkimizda") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/hakkimizda")"
-            }
-        ]
     }
+}
+</script>
+<!-- BreadcrumbList ayrı schema (AboutPage içinde breadcrumb alanı yok) -->
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": @Html.Raw(JsonSerializer.Serialize(baseUrl)) },
+        { "@@type": "ListItem", "position": 2, "name": "Hakkımızda", "item": @Html.Raw(JsonSerializer.Serialize(pageUrl)) }
+    ]
 }
 </script>
 
@@ -84,443 +82,139 @@
     "mainEntity": [
         {
             "@@type": "Question",
-            "name": "@Html.Raw("Şişme oyun parkları güvenli midir?")",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "@Html.Raw("Evet, tüm şişme oyun parklarımız uluslararası güvenlik standartlarına uygun olarak üretilir ve kaliteli malzemelerden yapılmıştır. Çocukların güvenliği bizim önceliğimizdir.")"
-            }
+            "name": @Html.Raw(JsonSerializer.Serialize("Şişme oyun parkları güvenli midir?")),
+            "acceptedAnswer": { "@@type": "Answer", "text": @Html.Raw(JsonSerializer.Serialize("Evet, Balon Park ürünleri uluslararası güvenlik standartlarına uygun olarak üretilir ve kaliteli malzemelerden yapılmıştır. Çocukların güvenliği bizim önceliğimizdir.")) }
         },
         {
             "@@type": "Question",
-            "name": "@Html.Raw("Teslimat süresi ne kadardır?")",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "@Html.Raw("Siparişleriniz genellikle 1-3 iş günü içinde kargoya verilir ve 2-5 iş günü içinde adresinize teslim edilir.")"
-            }
+            "name": @Html.Raw(JsonSerializer.Serialize("Teslimat süresi ne kadardır?")),
+            "acceptedAnswer": { "@@type": "Answer", "text": @Html.Raw(JsonSerializer.Serialize("Siparişleriniz genellikle 1-3 iş günü içinde kargoya verilir ve 2-5 iş günü içinde adresinize teslim edilir.")) }
         },
         {
             "@@type": "Question",
-            "name": "@Html.Raw("Ürünlerin garantisi var mı?")",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "@Html.Raw("Evet, tüm ürünlerimiz üretim hatalarına karşı garantilidir. Garanti süreleri ürüne göre değişiklik gösterebilir.")"
-            }
+            "name": @Html.Raw(JsonSerializer.Serialize("Ürünlerin garantisi var mı?")),
+            "acceptedAnswer": { "@@type": "Answer", "text": @Html.Raw(JsonSerializer.Serialize("Evet, tüm ürünlerimiz üretim hatalarına karşı garantilidir. Garanti süreleri ürüne göre değişiklik gösterebilir.")) }
         },
         {
             "@@type": "Question",
-            "name": "@Html.Raw("Toplu sipariş indirimi var mı?")",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "@Html.Raw("Evet, toplu siparişlerde özel fiyat teklifleri sunuyoruz. Detaylı bilgi için bizimle iletişime geçebilirsiniz.")"
-            }
+            "name": @Html.Raw(JsonSerializer.Serialize("Toplu sipariş indirimi var mı?")),
+            "acceptedAnswer": { "@@type": "Answer", "text": @Html.Raw(JsonSerializer.Serialize("Evet, toplu siparişlerde özel fiyat teklifleri sunuyoruz. Detaylı bilgi için bizimle iletişime geçebilirsiniz.")) }
         }
     ]
 }
 </script>
 
-<!-- About Section Start -->
-<div class="about-section py-5">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="about-content">
-                    <!-- Company Info -->
-                    <div class="row mb-5">
-                        <div class="col-lg-6 mb-4">
-                            <div class="info-card">
-                                <div class="info-icon">
-                                    <i data-lucide="building" class="w-5 h-5"></i>
-                                </div>
-                                <div class="info-content">
-                                    <h3>Şirketimiz Hakkında</h3>
-                                    <p>@(settings?.About ?? $"{settings?.CompanyName ?? "Balon Park"} olarak, çocukların güvenli ve eğlenceli oyun alanları yaratma konusunda uzmanlaşmış bir firmayız. Yılların deneyimi ve kaliteli ürün anlayışımızla, şişme oyun grupları sektöründe güvenilir bir marka haline geldik.")</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 mb-4">
-                            <div class="info-card">
-                                <div class="info-icon">
-                                    <i data-lucide="target" class="w-5 h-5"></i>
-                                </div>
-                                <div class="info-content">
-                                    <h3>Misyonumuz</h3>
-                                    <p>Çocukların güvenli, eğlenceli ve sağlıklı oyun alanlarına sahip olmalarını sağlamak. Kaliteli şişme oyun grupları, kaydıraklar, havuzlar ve diğer oyun ekipmanları ile çocukların hayal güçlerini geliştiren, sosyal becerilerini artıran oyun deneyimleri sunmak.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<article class="space-y-12 md:space-y-16 pb-10" id="about-page-content">
+    <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+            <li>
+                <a asp-page="/Index" class="text-gray-500 hover:text-primary rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">Ana Sayfa</a>
+            </li>
+            <li class="flex items-center gap-2" aria-hidden="true">
+                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true"></i>
+                <span class="text-ink font-medium" aria-current="page">Hakkımızda</span>
+            </li>
+        </ol>
+    </nav>
 
-                    <!-- Vision -->
-                    <div class="row mb-5">
-                        <div class="col-12">
-                            <div class="vision-card">
-                                <div class="vision-icon">
-                                    <i data-lucide="eye" class="w-5 h-5"></i>
-                                </div>
-                                <div class="vision-content">
-                                    <h3>Vizyonumuz</h3>
-                                    <p>Türkiye'nin en güvenilir ve kaliteli şişme oyun grupları üreticisi olmak. Sektördeki liderliğimizi sürdürerek, sürekli yenilik ve gelişim ile müşteri memnuniyetini en üst seviyede tutmak.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <header class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <div class="space-y-4">
+            <h1 class="text-3xl font-bold text-ink sm:text-4xl">Hakkımızda</h1>
+            <p class="text-lg text-gray-600 max-w-3xl leading-relaxed">@aboutText</p>
+        </div>
+    </header>
 
-                    <!-- Features -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="features-section">
-                                <h3 class="features-title">Neden @(settings?.MetaTitle ?? companyName)?</h3>
-                                <div class="row">
-                                    <div class="col-lg-3 col-md-6 mb-4">
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <i data-lucide="shield-check" class="w-5 h-5"></i>
-                                            </div>
-                                            <h4>Güvenlik Önceliği</h4>
-                                            <p>Tüm ürünlerimiz uluslararası güvenlik standartlarına uygun olarak üretilir.</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6 mb-4">
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <i data-lucide="medal" class="w-5 h-5"></i>
-                                            </div>
-                                            <h4>Kalite Garantisi</h4>
-                                            <p>Premium malzemeler kullanarak uzun ömürlü ve dayanıklı ürünler üretiriz.</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6 mb-4">
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <i data-lucide="users" class="w-5 h-5"></i>
-                                            </div>
-                                            <h4>Uzman Ekip</h4>
-                                            <p>Deneyimli ve uzman ekibimizle size en iyi hizmeti sunarız.</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6 mb-4">
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <i data-lucide="headset" class="w-5 h-5"></i>
-                                            </div>
-                                            <h4>7/24 Destek</h4>
-                                            <p>Müşteri memnuniyeti için her zaman yanınızdayız.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Contact Info -->
-                    <div class="row mt-5">
-                        <div class="col-12">
-                            <div class="contact-section">
-                                <h3 class="contact-title">İletişim</h3>
-                                <p class="contact-text">Ürünlerimiz hakkında detaylı bilgi almak veya sipariş vermek için bizimle iletişime geçebilirsiniz.</p>
-                                <div class="contact-buttons">
-                                    @if (!string.IsNullOrEmpty(settings?.WhatsApp))
-                                    {
-                                        <a href="https://wa.me/@(settings.WhatsApp.Replace("+", "").Replace(" ", ""))" target="_blank" class="contact-btn whatsapp-btn">
-                                            <i data-lucide="message-circle" class="w-5 h-5"></i>
-                                            <span>WhatsApp</span>
-                                        </a>
-                                    }
-                                    @if (!string.IsNullOrEmpty(settings?.PhoneNumber))
-                                    {
-                                        <a href="tel:@settings.PhoneNumber.Replace(" ", "")" class="contact-btn phone-btn">
-                                            <i data-lucide="phone" class="w-5 h-5"></i>
-                                            <span>Telefon</span>
-                                        </a>
-                                    }
-                                    <a asp-page="/Iletisim" class="contact-btn contact-page-btn">
-                                        <i data-lucide="mail" class="w-5 h-5"></i>
-                                        <span>İletişim Sayfası</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <section aria-label="Şirket ve misyon" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+            <article class="flex gap-4">
+                <figure class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="building-2" class="h-6 w-6" aria-hidden="true"></i>
+                </figure>
+                <div>
+                    <h2 class="text-xl font-semibold text-ink mb-2">Şirketimiz</h2>
+                    <p class="text-gray-600 leading-relaxed">Sektörde edindiğimiz tecrübeyle ev, kreş, AVM ve etkinlik mekânlarına yönelik şişme park, kaydırak, top havuzu ve softplay çözümleri üretiyoruz. Ürünlerimiz CE standartlarına uygun malzemelerle üretilir; kalite kontrol süreçlerimiz titizlikle yürütülür.</p>
                 </div>
+            </article>
+            <article class="flex gap-4">
+                <figure class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="target" class="h-6 w-6" aria-hidden="true"></i>
+                </figure>
+                <div>
+                    <h2 class="text-xl font-semibold text-ink mb-2">Misyonumuz</h2>
+                    <p class="text-gray-600 leading-relaxed">Her çocuğun güvenli ve eğlenceli oyun alanlarına erişmesine katkı sunmak. Hem bireysel hem kurumsal müşterilerimize dayanıklı, ekonomik ve güvenilir şişme oyun grupları sunarak alanında referans marka olmak.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section aria-labelledby="vision-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+            <figure class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white" aria-hidden="true">
+                <i data-lucide="eye" class="h-7 w-7" aria-hidden="true"></i>
+            </figure>
+            <div class="min-w-0 flex-1 text-center sm:text-left">
+                <h2 id="vision-heading" class="text-xl font-semibold text-ink mb-2">Vizyonumuz</h2>
+                <p class="text-gray-600 leading-relaxed max-w-3xl">Yurt içi ve yurt dışında şişme oyun parkı ve çocuk eğlence ürünlerinde ilk akla gelen, yenilikçi ve güvenilir marka olmak. Kalite ve müşteri memnuniyetini sürekli artırarak sektörde lider konumumuzu pekiştirmek.</p>
             </div>
         </div>
-    </div>
-</div>
-<!-- About Section End -->
+    </section>
 
-@section Styles {
-<style>
-/* Breadcrumb Section */
-.breadcrumb-section {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    padding: 2rem 0;
-    color: white;
-}
+    <section aria-labelledby="reasons-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="reasons-heading" class="text-2xl font-semibold text-ink mb-6 text-center">Neden Balon Park?</h2>
+        <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 md:gap-8" role="list">
+            <li class="rounded-lg border border-gray-100 bg-gray-50/50 p-4 text-center transition-colors hover:bg-gray-50">
+                <figure class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-3" aria-hidden="true">
+                    <i data-lucide="shield-check" class="w-5 h-5" aria-hidden="true"></i>
+                </figure>
+                <h3 class="font-semibold text-ink mb-1.5">Güvenlik Önceliği</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">CE uyumlu ve uluslararası standartlara uygun malzemelerle üretim; çocuk güvenliği her zaman ön planda.</p>
+            </li>
+            <li class="rounded-lg border border-gray-100 bg-gray-50/50 p-4 text-center transition-colors hover:bg-gray-50">
+                <figure class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-3" aria-hidden="true">
+                    <i data-lucide="award" class="w-5 h-5" aria-hidden="true"></i>
+                </figure>
+                <h3 class="font-semibold text-ink mb-1.5">Kalite Garantisi</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Seçkin hammadde ve kontrollü üretimle uzun ömürlü, dayanıklı ürünler.</p>
+            </li>
+            <li class="rounded-lg border border-gray-100 bg-gray-50/50 p-4 text-center transition-colors hover:bg-gray-50">
+                <figure class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-3" aria-hidden="true">
+                    <i data-lucide="users" class="w-5 h-5" aria-hidden="true"></i>
+                </figure>
+                <h3 class="font-semibold text-ink mb-1.5">Uzman Ekip</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Alanında uzman kadromuzla doğru ürün önerisi ve satış sonrası teknik destek.</p>
+            </li>
+            <li class="rounded-lg border border-gray-100 bg-gray-50/50 p-4 text-center transition-colors hover:bg-gray-50">
+                <figure class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-3" aria-hidden="true">
+                    <i data-lucide="headset" class="w-5 h-5" aria-hidden="true"></i>
+                </figure>
+                <h3 class="font-semibold text-ink mb-1.5">Müşteri Desteği</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Sipariş öncesi ve sonrası hızlı yanıt ve çözüm odaklı iletişim.</p>
+            </li>
+        </ul>
+    </section>
 
-.breadcrumb-title {
-    color: white;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.breadcrumb {
-    margin-bottom: 0;
-}
-
-.breadcrumb-item a {
-    color: rgba(255,255,255,0.8);
-    text-decoration: none;
-}
-
-.breadcrumb-item a:hover {
-    color: white;
-}
-
-.breadcrumb-item.active {
-    color: white;
-}
-
-/* About Section */
-.about-section {
-    background-color: #f8f9fa;
-}
-
-.section-title h2 {
-    color: #333;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.section-subtitle {
-    color: #666;
-    font-size: 1.1rem;
-}
-
-/* Info Cards */
-.info-card {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    height: 100%;
-    display: flex;
-    align-items: flex-start;
-    gap: 1.5rem;
-}
-
-.info-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.info-content h3 {
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.info-content p {
-    color: #666;
-    line-height: 1.6;
-    margin: 0;
-}
-
-/* Vision Card */
-.vision-card {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    text-align: center;
-}
-
-.vision-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #28a745, #20c997);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 2rem;
-    flex-shrink: 0;
-}
-
-.vision-content h3 {
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.vision-content p {
-    color: #666;
-    line-height: 1.6;
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-/* Features Section */
-.features-section {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-.features-title {
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.feature-card {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 1.5rem;
-    text-align: center;
-    height: 100%;
-    transition: all 0.3s ease;
-    border: 1px solid #e9ecef;
-}
-
-.feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-}
-
-.feature-card .feature-icon {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    color: white;
-    font-size: 1.2rem;
-}
-
-.feature-card h4 {
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.feature-card p {
-    color: #666;
-    margin: 0;
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-/* Contact Section */
-.contact-section {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.contact-title {
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.contact-text {
-    color: #666;
-    margin-bottom: 2rem;
-}
-
-.contact-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.contact-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border: none;
-}
-
-.whatsapp-btn {
-    background-color: #25d366;
-    color: white;
-}
-
-.whatsapp-btn:hover {
-    background-color: #128c7e;
-    color: white;
-    transform: translateY(-2px);
-}
-
-.phone-btn {
-    background-color: #007bff;
-    color: white;
-}
-
-.phone-btn:hover {
-    background-color: #0056b3;
-    color: white;
-    transform: translateY(-2px);
-}
-
-.contact-page-btn {
-    background-color: #6c757d;
-    color: white;
-}
-
-.contact-page-btn:hover {
-    background-color: #545b62;
-    color: white;
-    transform: translateY(-2px);
-}
-
-/* Responsive Design */
-@@media (max-width: 768px) {
-    .info-card {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-    }
-    
-    .vision-card {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .contact-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .contact-btn {
-        width: 200px;
-        justify-content: center;
-    }
-}
-</style>
-}
+    <section aria-labelledby="contact-heading" class="rounded-xl border border-gray-100 bg-white p-6 text-center shadow-sm md:p-8">
+        <h2 id="contact-heading" class="text-xl font-semibold text-ink mb-2">Bizimle İletişime Geçin</h2>
+        <p class="text-gray-600 mb-6 max-w-xl mx-auto">Fiyat teklifi, toplu sipariş veya ürün detayları için aşağıdaki kanallardan bize yazabilir veya arayabilirsiniz.</p>
+        <nav class="flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row" aria-label="İletişim kanalları">
+            @if (!string.IsNullOrEmpty(settings?.WhatsApp))
+            {
+                <a href="https://wa.me/@(new string(settings.WhatsApp.Where(c => char.IsDigit(c) || c == '+').ToArray()))" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-green-500 text-white font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                    <i data-lucide="message-circle" class="w-5 h-5" aria-hidden="true"></i>
+                    <span>WhatsApp</span>
+                </a>
+            }
+            @if (!string.IsNullOrEmpty(settings?.PhoneNumber))
+            {
+                <a href="tel:@(new string(settings.PhoneNumber.Where(c => char.IsDigit(c) || c == '+').ToArray()))" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                    <i data-lucide="phone" class="w-5 h-5" aria-hidden="true"></i>
+                    <span>Telefon</span>
+                </a>
+            }
+            <a asp-page="/Iletisim" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gray-100 text-ink font-medium hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                <i data-lucide="mail" class="w-5 h-5" aria-hidden="true"></i>
+                <span>İletişim Formu</span>
+            </a>
+        </nav>
+    </section>
+</article>

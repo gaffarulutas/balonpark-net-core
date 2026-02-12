@@ -9,478 +9,173 @@
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
 
-<!-- Sitemap Section Start -->
-<div class="section-b-space">
-    <!-- Breadcrumb Navigation -->
-    <nav class="breadcrumb-nav">
-        <div class="breadcrumb-container">
-            <a href="/" class="breadcrumb-item">
-                <i data-lucide="home" class="w-4 h-4"></i>
-                <span>Ana Sayfa</span>
-            </a>
-            <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-item active">Site Haritası</span>
-        </div>
+<article class="space-y-12 md:space-y-16 pb-10" id="sitemap-page-content">
+    <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+            <li>
+                <a asp-page="/Index" class="text-gray-500 hover:text-primary rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">Ana Sayfa</a>
+            </li>
+            <li class="flex items-center gap-2" aria-hidden="true">
+                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true"></i>
+                <span class="text-ink font-medium" aria-current="page">Site Haritası</span>
+            </li>
+        </ol>
     </nav>
-    
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Main Pages -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="sitemap-card">
-                    <div class="sitemap-card-header">
-                        <i data-lucide="home" class="w-4 h-4"></i>
-                        <h3>Ana Sayfalar</h3>
-                    </div>
-                    <ul class="sitemap-list">
-                        <li><a asp-page="/Index"><i data-lucide="chevron-right" class="w-4 h-4"></i> Ana Sayfa</a></li>
-                        <li><a asp-page="/Hakkimizda"><i data-lucide="chevron-right" class="w-4 h-4"></i> Hakkımızda</a></li>
-                        <li><a asp-page="/Iletisim"><i data-lucide="chevron-right" class="w-4 h-4"></i> İletişim</a></li>
-                        <li><a asp-page="/Blog"><i data-lucide="chevron-right" class="w-4 h-4"></i> Blog</a></li>
-                        <li><a asp-page="/Privacy"><i data-lucide="chevron-right" class="w-4 h-4"></i> Gizlilik Politikası</a></li>
-                        <li><a asp-page="/KullanimKosullari"><i data-lucide="chevron-right" class="w-4 h-4"></i> Kullanım Koşulları</a></li>
-                    </ul>
-                </div>
-            </div>
 
-            <!-- Categories -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="sitemap-card">
-                    <div class="sitemap-card-header">
-                        <i data-lucide="folder-open" class="w-5 h-5"></i>
-                        <h3>Kategoriler</h3>
-                        <span class="badge">@Model.Categories.Count</span>
-                    </div>
-                    <ul class="sitemap-list scrollable">
-                        @foreach (var category in Model.Categories)
-                        {
-                            <li>
-                                <a href="/category/@category.Slug">
-                                    <i data-lucide="chevron-right" class="w-4 h-4"></i> @Html.Raw(category.Name)
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+    <header class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-ink sm:text-4xl">Site Haritası</h1>
+                <p class="mt-2 text-gray-600 max-w-2xl">Tüm sayfalar, kategoriler, ürünler ve blog yazılarına buradan ulaşabilirsiniz.</p>
             </div>
-
-            <!-- Subcategories -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="sitemap-card">
-                    <div class="sitemap-card-header">
-                        <i data-lucide="folder" class="w-5 h-5"></i>
-                        <h3>Alt Kategoriler</h3>
-                        <span class="badge">@Model.SubCategories.Count</span>
-                    </div>
-                    <ul class="sitemap-list scrollable">
-                        @foreach (var subCategory in Model.SubCategories)
-                        {
-                            <li>
-                                <a href="/category/@subCategory.CategorySlug/@subCategory.Slug">
-                                    <i data-lucide="chevron-right" class="w-4 h-4"></i> @Html.Raw(subCategory.Name)
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Blog Posts -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="sitemap-card">
-                    <div class="sitemap-card-header">
-                        <i data-lucide="book-open" class="w-5 h-5"></i>
-                        <h3>Blog Yazıları</h3>
-                        <span class="badge">@Model.Blogs.Count</span>
-                    </div>
-                    <ul class="sitemap-list scrollable">
-                        @foreach (var blog in Model.Blogs.Take(50))
-                        {
-                            <li>
-                                <a href="/blog/@blog.Slug">
-                                    <i data-lucide="chevron-right" class="w-4 h-4"></i> @Html.Raw(blog.Title)
-                                </a>
-                            </li>
-                        }
-                        @if (Model.Blogs.Count > 50)
-                        {
-                            <li class="more-link">
-                                <a asp-page="/Blog">
-                                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Tüm Blog Yazıları (@Model.Blogs.Count)
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
+            <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                <i data-lucide="file-code" class="w-4 h-4" aria-hidden="true"></i>
+                XML Site Haritası
+            </a>
         </div>
+    </header>
 
-        <!-- Products Section -->
-        @if (Model.Products.Any())
-        {
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="sitemap-card sitemap-card-full">
-                        <div class="sitemap-card-header">
-                            <i data-lucide="package-open" class="w-5 h-5"></i>
-                            <h3>Ürünlerimiz</h3>
-                            <span class="badge">@Model.Products.Count</span>
-                        </div>
-                        
-                        <!-- Group products by category -->
-                        @foreach (var categoryGroup in Model.Products.GroupBy(p => p.CategoryName).OrderBy(g => g.Key))
-                        {
-                            <div class="product-category-group">
-                                <h4 class="category-group-title">
-                                    <i data-lucide="tag" class="w-4 h-4"></i> @Html.Raw(categoryGroup.Key)
-                                    <span class="count">(@categoryGroup.Count())</span>
-                                </h4>
-                                <div class="row">
-                                    @foreach (var product in categoryGroup.Take(20))
-                                    {
-                                        <div class="col-lg-3 col-md-4 col-sm-6 mb-2">
-                                            <a href="/category/@product.CategorySlug/@product.SubCategorySlug/@product.Slug" class="product-link">
-                                                <i data-lucide="chevron-right" class="w-4 h-4"></i> @Html.Raw(product.Name)
-                                            </a>
-                                        </div>
-                                    }
-                                    @if (categoryGroup.Count() > 20)
-                                    {
-                                        <div class="col-12">
-                                            <a href="/category/@categoryGroup.First().CategorySlug" class="more-products-link">
-                                                <i data-lucide="plus-circle" class="w-4 h-4"></i> @categoryGroup.Key kategorisindeki tüm ürünleri gör (+@(categoryGroup.Count() - 20))
-                                            </a>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        }
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Ana Sayfalar -->
+        <section aria-labelledby="sitemap-main-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 id="sitemap-main-heading" class="mb-4 flex items-center gap-3 text-xl font-semibold text-ink">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                </span>
+                Ana Sayfalar
+            </h2>
+            <ul class="space-y-1" role="list">
+                <li><a asp-page="/Index" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"><i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 text-gray-400"></i> Ana Sayfa</a></li>
+                <li><a asp-page="/Hakkimizda" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"><i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 text-gray-400"></i> Hakkımızda</a></li>
+                <li><a asp-page="/Iletisim" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"><i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 text-gray-400"></i> İletişim</a></li>
+                <li><a asp-page="/Blog" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"><i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 text-gray-400"></i> Blog</a></li>
+                <li><a asp-page="/Privacy" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"><i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 text-gray-400"></i> Gizlilik Politikası</a></li>
+                <li><a asp-page="/KullanimKosullari" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"><i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 text-gray-400"></i> Kullanım Koşulları</a></li>
+            </ul>
+        </section>
 
-        <!-- SEO Info -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="seo-info-box">
-                    <div class="seo-icon">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                    </div>
-                    <div class="seo-content">
-                        <h3>Site Haritası Hakkında</h3>
-                        <p>
-                            Bu HTML site haritası sayfası, web sitemizde yer alan tüm içeriklere kolay erişim sağlamak için tasarlanmıştır. 
-                            Arama motorları için XML sitemap'imize <a href="/sitemap.xml" target="_blank">buradan ulaşabilirsiniz</a>.
-                        </p>
-                        <p class="mb-0">
-                            <strong>Toplam:</strong> 
-                            @Model.Categories.Count Kategori, 
-                            @Model.SubCategories.Count Alt Kategori, 
-                            @Model.Products.Count Ürün, 
-                            @Model.Blogs.Count Blog Yazısı
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Kategoriler -->
+        <section aria-labelledby="sitemap-categories-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 id="sitemap-categories-heading" class="mb-4 flex items-center gap-3 text-xl font-semibold text-ink">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="folder-open" class="w-5 h-5"></i>
+                </span>
+                Kategoriler
+                <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">@Model.Categories.Count</span>
+            </h2>
+            <ul class="max-h-80 space-y-1 overflow-y-auto pr-1" role="list">
+                @foreach (var category in Model.Categories)
+                {
+                    <li>
+                        <a href="/category/@category.Slug" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">@category.Name</a>
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <!-- Alt Kategoriler -->
+        <section aria-labelledby="sitemap-subcategories-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 id="sitemap-subcategories-heading" class="mb-4 flex items-center gap-3 text-xl font-semibold text-ink">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="folder" class="w-5 h-5"></i>
+                </span>
+                Alt Kategoriler
+                <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">@Model.SubCategories.Count</span>
+            </h2>
+            <ul class="max-h-80 space-y-1 overflow-y-auto pr-1" role="list">
+                @foreach (var subCategory in Model.SubCategories)
+                {
+                    <li>
+                        <a href="/category/@subCategory.CategorySlug/@subCategory.Slug" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">@subCategory.Name</a>
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <!-- Blog Yazıları -->
+        <section aria-labelledby="sitemap-blogs-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 id="sitemap-blogs-heading" class="mb-4 flex items-center gap-3 text-xl font-semibold text-ink">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                </span>
+                Blog Yazıları
+                <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">@Model.Blogs.Count</span>
+            </h2>
+            <ul class="max-h-80 space-y-1 overflow-y-auto pr-1" role="list">
+                @foreach (var blog in Model.Blogs.Take(50))
+                {
+                    <li>
+                        <a href="/blog/@blog.Slug" class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">@blog.Title</a>
+                    </li>
+                }
+                @if (Model.Blogs.Count > 50)
+                {
+                    <li>
+                        <a asp-page="/Blog" class="flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-primary transition-colors hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                            <i data-lucide="plus-circle" class="w-4 h-4 flex-shrink-0"></i>
+                            Tüm Blog Yazıları (@Model.Blogs.Count)
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
     </div>
-</div>
 
-@section Styles {
-<style>
-
-/* Sitemap Intro */
-.sitemap-intro {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.sitemap-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #6262a6, #4a4a8a);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.5rem;
-    color: white;
-    font-size: 2rem;
-    box-shadow: 0 10px 30px rgba(98, 98, 166, 0.3);
-}
-
-.sitemap-intro h2 {
-    color: #333;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.sitemap-intro p {
-    color: #666;
-    font-size: 1.1rem;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-/* Sitemap Card */
-.sitemap-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    height: 100%;
-    transition: all 0.3s ease;
-}
-
-.sitemap-card:hover {
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
-}
-
-.sitemap-card-full {
-    padding: 2rem;
-}
-
-.sitemap-card-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.sitemap-card-header i {
-    color: #6262a6;
-    font-size: 1.5rem;
-}
-
-.sitemap-card-header h3 {
-    color: #333;
-    font-weight: 600;
-    margin: 0;
-    font-size: 1.2rem;
-    flex: 1;
-}
-
-.sitemap-card-header .badge {
-    background: #6262a6;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-/* Sitemap List */
-.sitemap-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sitemap-list.scrollable {
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-}
-
-.sitemap-list.scrollable::-webkit-scrollbar {
-    width: 6px;
-}
-
-.sitemap-list.scrollable::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.sitemap-list.scrollable::-webkit-scrollbar-thumb {
-    background: #6262a6;
-    border-radius: 10px;
-}
-
-.sitemap-list.scrollable::-webkit-scrollbar-thumb:hover {
-    background: #4a4a8a;
-}
-
-.sitemap-list li {
-    margin-bottom: 0.75rem;
-}
-
-.sitemap-list a {
-    color: #555;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-    padding: 0.5rem;
-    border-radius: 6px;
-}
-
-.sitemap-list a:hover {
-    color: #6262a6;
-    background: #f8f9fa;
-    padding-left: 1rem;
-}
-
-.sitemap-list a i {
-    font-size: 0.75rem;
-    color: #6262a6;
-}
-
-.sitemap-list .more-link a {
-    color: #6262a6;
-    font-weight: 600;
-}
-
-/* Product Category Group */
-.product-category-group {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.product-category-group:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.category-group-title {
-    color: #333;
-    font-weight: 600;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.category-group-title i {
-    color: #6262a6;
-}
-
-.category-group-title .count {
-    color: #666;
-    font-size: 0.9rem;
-    font-weight: 400;
-}
-
-.product-link {
-    color: #555;
-    text-decoration: none;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-    padding: 0.5rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-}
-
-.product-link:hover {
-    color: #6262a6;
-    background: #f8f9fa;
-    padding-left: 1rem;
-}
-
-.product-link i {
-    font-size: 0.65rem;
-    color: #6262a6;
-    margin-top: 0.35rem;
-    flex-shrink: 0;
-}
-
-.more-products-link {
-    color: #6262a6;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    padding: 0.75rem 1.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.more-products-link:hover {
-    background: #6262a6;
-    color: white;
-    transform: translateX(5px);
-}
-
-/* SEO Info Box */
-.seo-info-box {
-    background: linear-gradient(135deg, #6262a6, #4a4a8a);
-    border-radius: 12px;
-    padding: 2rem;
-    color: white;
-    display: flex;
-    align-items: flex-start;
-    gap: 2rem;
-    box-shadow: 0 10px 30px rgba(98, 98, 166, 0.3);
-}
-
-.seo-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.seo-content h3 {
-    color: white;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.seo-content p {
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.6;
-    margin-bottom: 1rem;
-}
-
-.seo-content a {
-    color: white;
-    text-decoration: underline;
-}
-
-.seo-content a:hover {
-    text-decoration: none;
-}
-
-/* Responsive */
-@@media (max-width: 768px) {
-    .breadcrumb-title {
-        font-size: 1.5rem;
+    @if (Model.Products.Any())
+    {
+        <section aria-labelledby="sitemap-products-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 id="sitemap-products-heading" class="mb-6 flex items-center gap-3 text-xl font-semibold text-ink">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="package-open" class="w-5 h-5"></i>
+                </span>
+                Ürünlerimiz
+                <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">@Model.Products.Count</span>
+            </h2>
+            <div class="space-y-8">
+                @foreach (var categoryGroup in Model.Products.GroupBy(p => p.CategoryName).OrderBy(g => g.Key))
+                {
+                    <div class="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                        <h3 class="mb-3 flex items-center gap-2 text-base font-semibold text-ink">
+                            <i data-lucide="tag" class="w-4 h-4 text-primary" aria-hidden="true"></i>
+                            @categoryGroup.Key
+                            <span class="text-sm font-normal text-gray-500">(@categoryGroup.Count())</span>
+                        </h3>
+                        <ul class="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3" role="list">
+                            @foreach (var product in categoryGroup.Take(20))
+                            {
+                                <li>
+                                    <a href="/category/@product.CategorySlug/@product.SubCategorySlug/@product.Slug" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">@product.Name</a>
+                                </li>
+                            }
+                        </ul>
+                        @if (categoryGroup.Count() > 20)
+                        {
+                            <a href="/category/@categoryGroup.First().CategorySlug" class="mt-3 inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                                <i data-lucide="plus-circle" class="w-4 h-4" aria-hidden="true"></i>
+                                @categoryGroup.Key kategorisindeki tüm ürünler (+@(categoryGroup.Count() - 20))
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
     }
-    
-    .sitemap-card {
-        margin-bottom: 1.5rem;
-    }
-    
-    .sitemap-list.scrollable {
-        max-height: 300px;
-    }
-    
-    .seo-info-box {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .product-link {
-        font-size: 0.85rem;
-    }
-}
-</style>
-}
 
+    <!-- SEO / XML bilgisi -->
+    <section aria-labelledby="sitemap-about-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <div class="flex flex-col gap-6 sm:flex-row sm:items-start">
+            <span class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white" aria-hidden="true">
+                <i data-lucide="search" class="w-6 h-6"></i>
+            </span>
+            <div class="min-w-0 flex-1">
+                <h2 id="sitemap-about-heading" class="text-xl font-semibold text-ink">Site Haritası Hakkında</h2>
+                <p class="mt-2 text-gray-600 leading-relaxed">
+                    Bu sayfa, sitedeki tüm içeriklere kolay erişim sağlamak için hazırlanmıştır. Arama motorları için XML site haritamıza <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" class="font-medium text-primary underline transition-colors hover:text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 rounded">buradan</a> ulaşabilirsiniz.
+                </p>
+                <p class="mt-3 text-sm text-gray-500">
+                    Toplam: @Model.Categories.Count kategori, @Model.SubCategories.Count alt kategori, @Model.Products.Count ürün, @Model.Blogs.Count blog yazısı.
+                </p>
+            </div>
+        </div>
+    </section>
+</article>

@@ -18,7 +18,7 @@
     "name": "@Html.Raw(companyName)",
     "alternateName": "@Html.Raw(companyName.Replace(" ", ""))",
     "url": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/")",
-    "description": "@Html.Raw(settings?.About ?? "Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları üreticisi")",
+    "description": "@Html.Raw(settings?.About ?? "Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları fabrikası")",
     "potentialAction": {
         "@@type": "SearchAction",
         "target": "@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl("/Search") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Search")?q={search_term_string}",
@@ -39,90 +39,22 @@
 
 <div class="space-y-4 sm:space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 overflow-visible md:items-stretch">
-        <!-- Kategoriler: solda liste, hover ile sağda tek mega panel (hero ile aynı yükseklik) -->
-        <nav class="mega-menu-nav relative z-20 rounded-xl bg-white border border-gray-200 p-0 order-2 md:order-1 shadow-sm js-category-popover-nav overflow-visible flex flex-col md:flex-row md:min-h-0 md:h-full" aria-label="Kategoriler">
-            <div class="mega-menu-list flex-shrink-0 w-full px-3 py-2.5 md:px-4 md:py-3">
-                <ul class="list-none p-0 m-0 divide-y divide-gray-50">
-                    @if (Model.Categories != null && Model.Categories.Count > 0)
-                    {
-                        @foreach (var category in Model.Categories)
-                        {
-                            var hasSubCategories = category.SubCategories != null && category.SubCategories.Count > 0;
-                            <li class="category-popover-trigger group relative" data-category-id="@category.Id" aria-haspopup="true" aria-expanded="false">
-                                <a href="/category/@category.Slug" class="category-link flex items-center gap-2.5 py-2.5 px-3 rounded-lg hover:bg-gray-50 transition text-sm w-full min-w-0" data-category-slug="@category.Slug">
-                                    @if (!string.IsNullOrEmpty(category.FirstProductImage))
-                                    {
-                                        <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(category.FirstProductImage) ?? category.FirstProductImage)" alt="" class="lazy-image w-8 h-8 rounded object-cover flex-shrink-0" loading="lazy">
-                                    }
-                                    else
-                                    {
-                                        <span class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400"><i data-lucide="folder" class="w-4 h-4"></i></span>
-                                    }
-                                    <span class="category-name font-medium text-ink truncate whitespace-nowrap text-[15px] flex-1 min-w-0">@Html.Raw(category.Name)</span>
-                                    @if (hasSubCategories)
-                                    {
-                                        <span class="category-arrow w-5 h-5 flex-shrink-0 flex items-center justify-center text-gray-400 ml-auto" aria-hidden="true"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></span>
-                                    }
-                                </a>
-                            </li>
-                        }
-                    }
-                    else
-                    {
-                        <li class="py-2 text-xs text-gray-500">Kategoriler yükleniyor...</li>
-                    }
-                </ul>
-            </div>
-            <!-- Tek mega panel: soldaki liste ile aynı yükseklik, bitişik (border-l yok), grid içerik -->
-            <div class="mega-menu-panel category-popover-panel absolute left-full top-0 bottom-0 z-[9999] min-h-0 md:min-h-[inherit] bg-white border border-l-0 border-gray-200 rounded-r-xl shadow-xl overflow-hidden flex flex-col transition-all duration-150 ease-out"
-                 style="opacity:0;visibility:hidden;pointer-events:none;margin-left:0;"
-                 role="menu"
-                 aria-label="Kategori alt menüsü">
-                <div class="mega-menu-panel-inner flex-1 overflow-y-auto px-5 py-4">
-                    @{
-                        var urlService = (IUrlService?)ViewData["UrlService"];
-                    }
-                    @if (Model.Categories != null && Model.Categories.Count > 0)
-                    {
-                        @foreach (var category in Model.Categories)
-                        {
-                            var hasSubCategories = category.SubCategories != null && category.SubCategories.Count > 0;
-                            var subs = category.SubCategories ?? Enumerable.Empty<SubCategory>();
-                            <div class="mega-panel-content hidden" data-category-id="@category.Id" role="none" aria-hidden="true">
-                                @if (hasSubCategories)
-                                {
-                                    <div class="mega-menu-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" role="none">
-                                        @foreach (var subCategory in subs)
-                                        {
-                                            var imagePath = !string.IsNullOrEmpty(subCategory.FirstProductImage)
-                                                ? (urlService?.GetImageUrl(subCategory.FirstProductImage) ?? subCategory.FirstProductImage)
-                                                : null;
-                                            <a href="/category/@category.Slug/@subCategory.Slug" class="subcategory-link group flex flex-col gap-2.5 p-3 rounded-lg border border-gray-100 bg-white text-sm text-ink no-underline transition hover:border-primary/40 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40" role="menuitem" data-category-slug="@category.Slug" data-subcategory-slug="@subCategory.Slug">
-                                                <span class="relative block overflow-hidden rounded-md bg-gray-50 aspect-[4/3]">
-                                                    @if (!string.IsNullOrEmpty(imagePath))
-                                                    {
-                                                        <img src="@imagePath" alt="@subCategory.Name" class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.03]" loading="lazy">
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="absolute inset-0 flex items-center justify-center text-gray-300">
-                                                            <i data-lucide="image-off" class="w-6 h-6"></i>
-                                                        </span>
-                                                    }
-                                                </span>
-                                                <span class="font-medium text-center leading-snug text-[13px] whitespace-nowrap">@Html.Raw(subCategory.Name)</span>
-                                            </a>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        }
-                    }
+        <!-- Sol panel: left_image.jpg + overlay (sağdaki swiper ile aynı overlay yapısı) -->
+        <div class="hero-left-panel order-2 md:order-1 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm flex flex-col md:h-full min-h-[200px] md:min-h-0">
+            <div class="relative flex-1 min-h-[180px] md:min-h-0 md:h-full">
+                <img src="~/assets/images/left_image.jpg" alt="Balon Park - İç Mekan Şişme Oyun Parkı" class="absolute inset-0 w-full h-full object-cover" loading="eager" width="280" height="400">
+                <div class="hero-left-overlay">
+                    <span class="text-primary font-medium text-sm sm:text-base">İç Mekan Oyun Parkı</span>
+                    <h2 class="text-white text-xl sm:text-2xl font-bold mt-1 leading-tight">Hareket, Oyun, Güven</h2>
+                    <p class="text-white/90 text-sm mt-2 line-clamp-2 hidden sm:block">İç mekan şişme parklarımızla çocuklarınız güvenle oynasın; doğum günü ve etkinlikler için ideal.</p>
+                    <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
+                        Keşfet <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
                 </div>
             </div>
-        </nav>
+        </div>
 
-        <!-- Hero: Swiper slider (assets/images/slider), kategori ile aynı yükseklik -->
+        <!-- Hero: Swiper slider (assets/images/slider) -->
         <div class="hero-row order-1 md:order-2 min-w-0 w-full md:h-full">
             <div class="hero-panel relative rounded-xl overflow-hidden bg-gray-100 min-w-0 w-full h-full">
                 <div class="hero-aspect w-full h-full relative hero-swiper-wrap">
@@ -269,16 +201,16 @@
     .hero-aspect {
         display: block;
         width: 100%;
-        min-height: 160px;
+        min-height: 220px;
         position: relative;
     }
-    /* Mobil: sabit oran, dar yükseklik */
+    /* Mobil: daha yüksek hero (2:1 oran, max 420px) */
     .hero-aspect {
-        aspect-ratio: 3 / 1;
-        max-height: 280px;
+        aspect-ratio: 2 / 1;
+        max-height: 420px;
     }
-    @@supports not (aspect-ratio: 3/1) {
-        .hero-aspect { height: 0; padding-bottom: 33.33%; }
+    @@supports not (aspect-ratio: 2/1) {
+        .hero-aspect { height: 0; padding-bottom: 50%; }
         .hero-aspect > * { position: absolute; inset: 0; }
     }
     @@media (min-width: 768px) {
@@ -286,10 +218,16 @@
             aspect-ratio: auto;
             max-height: none;
             height: 100%;
+            min-height: 420px;
         }
     }
     @@media (max-width: 767px) {
-        .hero-aspect { max-height: 280px; }
+        .hero-aspect { max-height: 420px; }
+    }
+    /* Sol panel: resim üzerinde koyu overlay (metin okunaklılığı) */
+    .hero-left-overlay {
+        background: rgba(0, 0, 0, 0.35);
+        pointer-events: none;
     }
     /* Hero Swiper: container tam doldurur, slide içerik absolute */
     .hero-swiper-wrap { overflow: hidden; }
@@ -300,7 +238,7 @@
         position: relative;
         width: 100%;
         height: 100%;
-        min-height: 160px;
+        min-height: 220px;
     }
     .hero-slide-img {
         position: absolute;
@@ -329,6 +267,24 @@
     @@media (min-width: 640px) {
         .hero-slide-overlay { padding: 2rem 2.25rem 2rem 2rem; }
         .hero-slide-overlay > * { margin-bottom: 0.5em; }
+    }
+    /* Sol panel overlay: sağdaki swiper ile aynı yapı (padding, hiyerarşi), alttan üste gradient */
+    .hero-left-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 45%, transparent 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-end;
+        padding: 1.5rem 1.75rem 1.5rem 1.5rem;
+        text-align: left;
+    }
+    .hero-left-overlay > * { margin-bottom: 0.5rem; }
+    .hero-left-overlay > *:last-child { margin-bottom: 0; }
+    @@media (min-width: 640px) {
+        .hero-left-overlay { padding: 2rem 2.25rem 2rem 2rem; }
+        .hero-left-overlay > * { margin-bottom: 0.5em; }
     }
     /* Hero nav: Swiper CDN .swiper-button-prev/next (position:absolute; left/right:10px) ile çakışmasın */
     .hero-swiper-nav-group {
@@ -446,33 +402,9 @@
         box-sizing: border-box;
     }
     .mostViewedSwiper .swiper-slide .product-card { height: 100%; }
-    /* Kategori trigger vurgusu */
-    .category-popover-trigger.is-dropdown-open .category-link { background-color: rgb(249 250 251); }
-    .category-popover-trigger.is-dropdown-open .category-name { color: rgb(0 168 232); }
-    /* Mega menü: panel açıkken soldaki nav sağ köşesi düz (bitişik panel görünümü) */
+    /* Sol panel: slider ile aynı yükseklik (md) */
     @@media (min-width: 768px) {
-        .mega-menu-nav.mega-menu-open { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-        .mega-menu-panel {
-            height: 100%;
-            min-height: 100%;
-            width: min(940px, calc(100vw - 372px));
-            max-width: min(940px, calc(100vw - 372px));
-        }
-    }
-    /* Mega panel grid: alt kategoriler düzeni */
-    .mega-menu-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1rem;
-    }
-    @@media (min-width: 640px) {
-        .mega-menu-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    }
-    @@media (min-width: 768px) {
-        .mega-menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    }
-    @@media (min-width: 1024px) {
-        .mega-menu-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        .hero-left-panel .relative { min-height: 100%; }
     }
 </style>
 }

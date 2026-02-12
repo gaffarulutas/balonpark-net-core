@@ -1,0 +1,67 @@
+/**
+ * Layout: header mega menü, mobil overlay, arama dropdown, GTM
+ */
+
+/* Proje genelinde Inter fontu */
+html,
+body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* Header mega menü: açık durumda görünür */
+#header-mega-menu.header-mega-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Mobil menü overlay: açıkken görünür */
+#header-mobile-menu-overlay.mobile-menu-overlay-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+@media (min-width: 768px) {
+    #header-mobile-menu-overlay.mobile-menu-overlay-open {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+}
+
+/* Arama autocomplete: açılma animasyonu */
+#header-search-dropdown {
+    transform-origin: 50% 0;
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
+    max-height: min(70vh, 420px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 10px 20px -4px rgb(0 0 0 / 0.08);
+}
+
+#header-search-dropdown.header-search-dropdown-closed {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scaleY(0.96);
+}
+
+#header-search-dropdown.header-search-dropdown-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scaleY(1);
+}
+
+#header-search-suggestions {
+    max-height: 320px;
+}
+
+.header-search-input-expanded {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* GTM noscript iframe */
+.gtm-noscript-iframe {
+    display: none;
+    visibility: hidden;
+}

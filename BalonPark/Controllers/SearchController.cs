@@ -14,9 +14,12 @@ namespace BalonPark.Controllers
         IUrlService urlService) : ControllerBase
     {
 
+        private const int MaxSearchLimit = 50;
+
         [HttpGet("products")]
         public async Task<IActionResult> SearchProducts([FromQuery] string q, [FromQuery] int limit = 10)
         {
+            limit = Math.Clamp(limit, 1, MaxSearchLimit);
             if (string.IsNullOrWhiteSpace(q))
                 return Ok(new { results = new List<object>() });
 
@@ -41,6 +44,7 @@ namespace BalonPark.Controllers
         [HttpGet("categories")]
         public async Task<IActionResult> SearchCategories([FromQuery] string q, [FromQuery] int limit = 10)
         {
+            limit = Math.Clamp(limit, 1, MaxSearchLimit);
             if (string.IsNullOrWhiteSpace(q))
                 return Ok(new { results = new List<object>() });
 
@@ -62,6 +66,7 @@ namespace BalonPark.Controllers
         [HttpGet("subcategories")]
         public async Task<IActionResult> SearchSubCategories([FromQuery] string q, [FromQuery] int limit = 10)
         {
+            limit = Math.Clamp(limit, 1, MaxSearchLimit);
             if (string.IsNullOrWhiteSpace(q))
                 return Ok(new { results = new List<object>() });
 
@@ -84,6 +89,7 @@ namespace BalonPark.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> SearchAll([FromQuery] string q, [FromQuery] int limit = 10)
         {
+            limit = Math.Clamp(limit, 1, MaxSearchLimit);
             if (string.IsNullOrWhiteSpace(q))
                 return Ok(new { results = new List<object>() });
 
@@ -151,6 +157,37 @@ namespace BalonPark.Controllers
             return Ok(new { results = limitedResults });
         }
 
+        /// <summary>
+        /// Trend / popüler aramalar (kategori isimleri + statik öneriler).
+        /// Autocomplete boşken veya odaklandığında gösterilir.
+        /// </summary>
+        [HttpGet("trending")]
+        public async Task<IActionResult> GetTrending([FromQuery] int limit = 10)
+        {
+            limit = Math.Clamp(limit, 1, 50);
+            var categories = await categoryRepository.GetAllAsync();
+            var terms = categories
+                .Take(limit)
+                .Select(c => new { text = c.Name, url = $"/category/{c.Slug}" })
+                .ToList();
 
+            // Statik popüler arama ifadeleri (kategori dışı)
+            var extra = new[]
+            {
+                new { text = "Şişme kaydırak", url = "/Search?q=şişme+kaydırak" },
+                new { text = "Top havuzu", url = "/Search?q=top+havuzu" },
+                new { text = "Softplay", url = "/Search?q=softplay" },
+                new { text = "Çocuk oyun parkı", url = "/Search?q=çocuk+oyun+parkı" }
+            };
+
+            foreach (var e in extra)
+            {
+                if (terms.Count >= limit) break;
+                if (terms.Any(t => string.Equals(t.text, e.text, StringComparison.OrdinalIgnoreCase))) continue;
+                terms.Add(e);
+            }
+
+            return Ok(new { terms = terms.Take(limit).ToList() });
+        }
     }
 }
