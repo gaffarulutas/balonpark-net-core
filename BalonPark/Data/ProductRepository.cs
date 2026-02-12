@@ -200,10 +200,12 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
         var query = @"
             INSERT INTO Products (CategoryId, SubCategoryId, Name, Slug, Description, TechnicalDescription, Summary, Price, Stock, DisplayOrder, IsActive, CreatedAt,
                 InflatedLength, InflatedWidth, InflatedHeight, UserCount, AssemblyTime, RequiredPersonCount, FanDescription, FanWeightKg,
-                PackagedLength, PackagedDepth, PackagedWeightKg, PackagePalletCount, HasCertificate, WarrantyDescription, AfterSalesService)
+                PackagedLength, PackagedDepth, PackagedWeightKg, PackagePalletCount, HasCertificate, WarrantyDescription, AfterSalesService,
+                IsDiscounted, IsPopular, IsProjectSpecial, DeliveryDays, DeliveryDaysMin, DeliveryDaysMax, IsFireResistant, MaterialWeight, MaterialWeightGrm2, ColorOptions, InflatedWeightKg)
             VALUES (@CategoryId, @SubCategoryId, @Name, @Slug, @Description, @TechnicalDescription, @Summary, @Price, @Stock, @DisplayOrder, @IsActive, @CreatedAt,
                 @InflatedLength, @InflatedWidth, @InflatedHeight, @UserCount, @AssemblyTime, @RequiredPersonCount, @FanDescription, @FanWeightKg,
-                @PackagedLength, @PackagedDepth, @PackagedWeightKg, @PackagePalletCount, @HasCertificate, @WarrantyDescription, @AfterSalesService);
+                @PackagedLength, @PackagedDepth, @PackagedWeightKg, @PackagePalletCount, @HasCertificate, @WarrantyDescription, @AfterSalesService,
+                @IsDiscounted, @IsPopular, @IsProjectSpecial, @DeliveryDays, @DeliveryDaysMin, @DeliveryDaysMax, @IsFireResistant, @MaterialWeight, @MaterialWeightGrm2, @ColorOptions, @InflatedWeightKg);
             SELECT CAST(SCOPE_IDENTITY() as int)";
         
         using var connection = context.CreateConnection();
@@ -253,7 +255,18 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
                 PackagePalletCount = @PackagePalletCount,
                 HasCertificate = @HasCertificate,
                 WarrantyDescription = @WarrantyDescription,
-                AfterSalesService = @AfterSalesService
+                AfterSalesService = @AfterSalesService,
+                IsDiscounted = @IsDiscounted,
+                IsPopular = @IsPopular,
+                IsProjectSpecial = @IsProjectSpecial,
+                DeliveryDays = @DeliveryDays,
+                DeliveryDaysMin = @DeliveryDaysMin,
+                DeliveryDaysMax = @DeliveryDaysMax,
+                IsFireResistant = @IsFireResistant,
+                MaterialWeight = @MaterialWeight,
+                MaterialWeightGrm2 = @MaterialWeightGrm2,
+                ColorOptions = @ColorOptions,
+                InflatedWeightKg = @InflatedWeightKg
             WHERE Id = @Id";
         
         using var connection = context.CreateConnection();

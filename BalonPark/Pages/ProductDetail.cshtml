@@ -145,6 +145,27 @@
             }
             <!-- Ürün adı (fiyatın üstünde) -->
             <h1 class="text-ink text-xl font-medium">@Html.Raw(Model.Product?.Name)</h1>
+            <!-- Ürün etiketleri (badge'ler) -->
+            @{
+                var hasBadges = Model.Product?.IsDiscounted == true || Model.Product?.IsPopular == true || Model.Product?.IsProjectSpecial == true;
+            }
+            @if (hasBadges)
+            {
+                <div class="flex flex-wrap gap-2 mt-2">
+                    @if (Model.Product?.IsDiscounted == true)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-sky-100 text-sky-800">İndirimli Ürün</span>
+                    }
+                    @if (Model.Product?.IsPopular == true)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-amber-100 text-amber-800">Popüler</span>
+                    }
+                    @if (Model.Product?.IsProjectSpecial == true)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-violet-100 text-violet-800">Projeye özel</span>
+                    }
+                </div>
+            }
             <!-- Price -->
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4">
                 <div>
@@ -194,6 +215,84 @@
                     </div>
                 }
             </div>
+
+            <!-- Teslimat (otomatik metin: Min–Max iş günü) -->
+            @{
+                var deliveryMin = Model.Product?.DeliveryDaysMin;
+                var deliveryMax = Model.Product?.DeliveryDaysMax;
+                var deliveryText = (deliveryMin != null && deliveryMax != null)
+                    ? (deliveryMin == deliveryMax ? $"{deliveryMin} iş günü" : $"{deliveryMin}-{deliveryMax} iş günü")
+                    : (deliveryMin != null ? $"{deliveryMin} iş günü" : (deliveryMax != null ? $"{deliveryMax} iş günü" : null));
+                if (string.IsNullOrEmpty(deliveryText) && !string.IsNullOrEmpty(Model.Product?.DeliveryDays)) { deliveryText = Model.Product.DeliveryDays; }
+            }
+            @if (!string.IsNullOrEmpty(deliveryText))
+            {
+                <div class="py-3 border-b border-gray-100">
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <i data-lucide="truck" class="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true"></i>
+                        <span>Teslimat: @deliveryText</span>
+                    </div>
+                </div>
+            }
+
+            <!-- Özellik etiketleri (boyut, ağırlık, renk, ateşe dayanıklı, kumaş, üfleyici) - metinler otomatik -->
+            @{
+                var dimParts = new[] { Model.Product?.InflatedLength, Model.Product?.InflatedWidth, Model.Product?.InflatedHeight }.Where(s => !string.IsNullOrEmpty(s)).ToList();
+                var dimensionsStr = dimParts.Count >= 3 ? $"{dimParts[0]} x {dimParts[1]} x {dimParts[2]} m" : (dimParts.Count > 0 ? string.Join(" x ", dimParts) + " m" : null);
+                var hasWeight = (Model.Product?.InflatedWeightKg ?? Model.Product?.PackagedWeightKg) != null;
+                var weightKg = Model.Product?.InflatedWeightKg ?? Model.Product?.PackagedWeightKg;
+                var materialText = Model.Product?.MaterialWeightGrm2 != null ? $"{Model.Product.MaterialWeightGrm2} gr/m² kumaş" : (!string.IsNullOrEmpty(Model.Product?.MaterialWeight) ? Model.Product.MaterialWeight + " kumaş" : null);
+                var hasFeatures = !string.IsNullOrEmpty(dimensionsStr) || hasWeight || !string.IsNullOrEmpty(Model.Product?.ColorOptions) || Model.Product?.IsFireResistant == true || !string.IsNullOrEmpty(materialText) || !string.IsNullOrEmpty(Model.Product?.FanDescription);
+            }
+            @if (hasFeatures)
+            {
+                <div class="py-3 border-b border-gray-100">
+                    <div class="flex flex-wrap gap-2">
+                        @if (!string.IsNullOrEmpty(dimensionsStr))
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-ink font-medium" title="Boyutlar">
+                                <i data-lucide="ruler" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                                @dimensionsStr
+                            </span>
+                        }
+                        @if (hasWeight && weightKg != null)
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-ink font-medium" title="Ağırlık">
+                                <i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                                @weightKg kg
+                            </span>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Product?.ColorOptions))
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-ink font-medium cursor-default" title="Renk seçenekleri">
+                                <i data-lucide="palette" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                                @Model.Product.ColorOptions
+                            </span>
+                        }
+                        @if (Model.Product?.IsFireResistant == true)
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-ink font-medium" title="Ateşe dayanıklı">
+                                <i data-lucide="flame" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                                Ateşe Dayanıklı
+                            </span>
+                        }
+                        @if (!string.IsNullOrEmpty(materialText))
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-ink font-medium cursor-default" title="Kumaş ağırlığı">
+                                <i data-lucide="layers" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                                @materialText
+                            </span>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Product?.FanDescription))
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-ink font-medium" title="Üfleyici">
+                                <i data-lucide="wind" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
+                                Üfleyici dahil
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
 
             <!-- CTA -->
             <div class="flex flex-wrap gap-2">
@@ -278,9 +377,9 @@
                             Şişmiş ürün
                         </h4>
                         <dl class="space-y-2.5 text-sm">
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedLength)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-horizontal" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold">@Model.Product.InflatedLength</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedWidth)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move" class="w-4 h-4 text-primary flex-shrink-0"></i>Genişlik</dt><dd class="text-ink font-semibold">@Model.Product.InflatedWidth</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedHeight)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-vertical" class="w-4 h-4 text-primary flex-shrink-0"></i>Yükseklik</dt><dd class="text-ink font-semibold">@Model.Product.InflatedHeight</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedLength)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-horizontal" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold">@Model.Product.InflatedLength m</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedWidth)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move" class="w-4 h-4 text-primary flex-shrink-0"></i>Genişlik</dt><dd class="text-ink font-semibold">@Model.Product.InflatedWidth m</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedHeight)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-vertical" class="w-4 h-4 text-primary flex-shrink-0"></i>Yükseklik</dt><dd class="text-ink font-semibold">@Model.Product.InflatedHeight m</dd></div> }
                             @if (Model.Product?.UserCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="users" class="w-4 h-4 text-primary flex-shrink-0"></i>Kullanıcı Sayısı</dt><dd class="text-ink font-semibold">@Model.Product.UserCount</dd></div> }
                         </dl>
                     </div>
@@ -296,7 +395,7 @@
                             @if (Model.Product?.AssemblyTime != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="clock" class="w-4 h-4 text-primary flex-shrink-0"></i>Montaj ve demontaj süresi</dt><dd class="text-ink font-semibold">@(Model.Product.AssemblyTime) saat</dd></div> }
                             @if (Model.Product?.RequiredPersonCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="users" class="w-4 h-4 text-primary flex-shrink-0"></i>Gerekli kişi sayısı</dt><dd class="text-ink font-semibold">@(Model.Product.RequiredPersonCount) kişi</dd></div> }
                             @if (!string.IsNullOrEmpty(Model.Product?.FanDescription)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="wind" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan</dt><dd class="text-ink font-semibold">@Model.Product.FanDescription</dd></div> }
-                            @if (Model.Product?.FanWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan ağırlığı</dt><dd class="text-ink font-semibold">@Model.Product.FanWeightKg kg</dd></div> }
+                            @if (Model.Product?.FanWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan ağırlığı</dt><dd class="text-ink font-semibold">@(Model.Product.FanWeightKg) kg</dd></div> }
                         </dl>
                     </div>
                 }
@@ -308,9 +407,9 @@
                             Paketlenmiş ürünün özellikleri
                         </h4>
                         <dl class="space-y-2.5 text-sm">
-                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedLength)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="ruler" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold">@Model.Product.PackagedLength</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedDepth)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="box" class="w-4 h-4 text-primary flex-shrink-0"></i>Derinlik</dt><dd class="text-ink font-semibold">@Model.Product.PackagedDepth</dd></div> }
-                            @if (Model.Product?.PackagedWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Ağırlık</dt><dd class="text-ink font-semibold">@Model.Product.PackagedWeightKg kg</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedLength)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="ruler" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold">@Model.Product.PackagedLength cm</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedDepth)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="box" class="w-4 h-4 text-primary flex-shrink-0"></i>Derinlik</dt><dd class="text-ink font-semibold">@Model.Product.PackagedDepth cm</dd></div> }
+                            @if (Model.Product?.PackagedWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Ağırlık</dt><dd class="text-ink font-semibold">@(Model.Product.PackagedWeightKg) kg</dd></div> }
                             @if (Model.Product?.PackagePalletCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="layers" class="w-4 h-4 text-primary flex-shrink-0"></i>Paket / palet sayısı</dt><dd class="text-ink font-semibold">@Model.Product.PackagePalletCount</dd></div> }
                         </dl>
                     </div>

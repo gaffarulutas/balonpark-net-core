@@ -204,20 +204,20 @@
                         <h4 class="text-sm font-medium text-gray-700 mb-2">Şişmiş ürün</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
-                                <label asp-for="Product.InflatedLength" class="block text-xs text-gray-600 mb-1">Uzunluk</label>
-                                <input type="text" asp-for="Product.InflatedLength" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 12 m">
+                                <label asp-for="Product.InflatedLength" class="block text-xs text-gray-600 mb-1">Uzunluk (m)</label>
+                                <input type="number" asp-for="Product.InflatedLength" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 12">
                             </div>
                             <div>
-                                <label asp-for="Product.InflatedWidth" class="block text-xs text-gray-600 mb-1">Genişlik</label>
-                                <input type="text" asp-for="Product.InflatedWidth" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 3 m">
+                                <label asp-for="Product.InflatedWidth" class="block text-xs text-gray-600 mb-1">Genişlik (m)</label>
+                                <input type="number" asp-for="Product.InflatedWidth" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 3">
                             </div>
                             <div>
-                                <label asp-for="Product.InflatedHeight" class="block text-xs text-gray-600 mb-1">Yükseklik</label>
-                                <input type="text" asp-for="Product.InflatedHeight" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 3 m">
+                                <label asp-for="Product.InflatedHeight" class="block text-xs text-gray-600 mb-1">Yükseklik (m)</label>
+                                <input type="number" asp-for="Product.InflatedHeight" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 3">
                             </div>
                             <div>
                                 <label asp-for="Product.UserCount" class="block text-xs text-gray-600 mb-1">Kullanıcı Sayısı</label>
-                                <input type="number" asp-for="Product.UserCount" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
+                                <input type="number" asp-for="Product.UserCount" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
                             </div>
                         </div>
                     </div>
@@ -227,11 +227,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
                                 <label asp-for="Product.AssemblyTime" class="block text-xs text-gray-600 mb-1">Montaj ve demontaj süresi (saat)</label>
-                                <input type="number" asp-for="Product.AssemblyTime" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
+                                <input type="number" asp-for="Product.AssemblyTime" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
                             </div>
                             <div>
                                 <label asp-for="Product.RequiredPersonCount" class="block text-xs text-gray-600 mb-1">Gerekli kişi sayısı</label>
-                                <input type="number" asp-for="Product.RequiredPersonCount" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
+                                <input type="number" asp-for="Product.RequiredPersonCount" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
                             </div>
                             <div>
                                 <label asp-for="Product.FanDescription" class="block text-xs text-gray-600 mb-1">Fan</label>
@@ -239,7 +239,7 @@
                             </div>
                             <div>
                                 <label asp-for="Product.FanWeightKg" class="block text-xs text-gray-600 mb-1">Fan ağırlığı (kg)</label>
-                                <input type="number" asp-for="Product.FanWeightKg" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 20">
+                                <input type="number" asp-for="Product.FanWeightKg" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 20">
                             </div>
                         </div>
                     </div>
@@ -248,20 +248,20 @@
                         <h4 class="text-sm font-medium text-gray-700 mb-2">Paketlenmiş ürünün özellikleri</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
-                                <label asp-for="Product.PackagedLength" class="block text-xs text-gray-600 mb-1">Uzunluk</label>
-                                <input type="text" asp-for="Product.PackagedLength" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 80 cm">
+                                <label asp-for="Product.PackagedLength" class="block text-xs text-gray-600 mb-1">Uzunluk (cm)</label>
+                                <input type="number" asp-for="Product.PackagedLength" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 80">
                             </div>
                             <div>
-                                <label asp-for="Product.PackagedDepth" class="block text-xs text-gray-600 mb-1">Derinlik</label>
-                                <input type="text" asp-for="Product.PackagedDepth" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 70 cm">
+                                <label asp-for="Product.PackagedDepth" class="block text-xs text-gray-600 mb-1">Derinlik (cm)</label>
+                                <input type="number" asp-for="Product.PackagedDepth" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 70">
                             </div>
                             <div>
                                 <label asp-for="Product.PackagedWeightKg" class="block text-xs text-gray-600 mb-1">Ağırlık (kg)</label>
-                                <input type="number" asp-for="Product.PackagedWeightKg" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 95">
+                                <input type="number" asp-for="Product.PackagedWeightKg" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 95">
                             </div>
                             <div>
                                 <label asp-for="Product.PackagePalletCount" class="block text-xs text-gray-600 mb-1">Paket / palet sayısı</label>
-                                <input type="number" asp-for="Product.PackagePalletCount" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
+                                <input type="number" asp-for="Product.PackagePalletCount" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 2">
                             </div>
                         </div>
                     </div>
@@ -270,6 +270,7 @@
                         <h4 class="text-sm font-medium text-gray-700 mb-2">Genel</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="flex items-center gap-2">
+                                <input type="hidden" name="Product.HasCertificate" value="false" />
                                 <input type="checkbox" id="Product_HasCertificate" name="Product.HasCertificate" value="true" @(Model.Product.HasCertificate == true ? "checked" : "") class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
                                 <input type="hidden" name="Product.HasCertificate" value="false">
                                 <label for="Product_HasCertificate" class="text-sm text-gray-700">Sertifika var</label>
@@ -282,6 +283,62 @@
                                 <label asp-for="Product.AfterSalesService" class="block text-xs text-gray-600 mb-1">Garanti sonrası hizmet</label>
                                 <input type="text" asp-for="Product.AfterSalesService" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 5 yıllık servis ve bakım desteği">
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3b. Ürün Etiketleri ve Detay Özellikleri (detay sayfası badge/feature) -->
+            <section class="border border-gray-200 rounded-lg p-5 bg-white">
+                <h2 class="text-base font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">Ürün Etiketleri ve Detay Özellikleri</h2>
+                <p class="text-sm text-gray-500 mb-4">Bu alanlar ürün detay sayfasında etiket ve özellik etiketleri olarak gösterilir.</p>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Etiketler</h4>
+                        <div class="flex flex-wrap gap-4">
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" name="Product.IsDiscounted" value="false" />
+                                <input type="checkbox" id="Product_IsDiscounted" name="Product.IsDiscounted" value="true" @(Model.Product.IsDiscounted == true ? "checked" : "") class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                                <label for="Product_IsDiscounted" class="text-sm text-gray-700">İndirimli Ürün</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" name="Product.IsPopular" value="false" />
+                                <input type="checkbox" id="Product_IsPopular" name="Product.IsPopular" value="true" @(Model.Product.IsPopular == true ? "checked" : "") class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                                <label for="Product_IsPopular" class="text-sm text-gray-700">Popüler</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" name="Product.IsProjectSpecial" value="false" />
+                                <input type="checkbox" id="Product_IsProjectSpecial" name="Product.IsProjectSpecial" value="true" @(Model.Product.IsProjectSpecial == true ? "checked" : "") class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                                <label for="Product_IsProjectSpecial" class="text-sm text-gray-700">Projeye özel</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Teslimat süresi (iş günü)</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" asp-for="Product.DeliveryDaysMin" step="1" min="0" class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Min">
+                                <span class="text-gray-500">–</span>
+                                <input type="number" asp-for="Product.DeliveryDaysMax" step="1" min="0" class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Max">
+                                <span class="text-sm text-gray-500">iş günü (detayda otomatik metin)</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 pt-7">
+                            <input type="hidden" name="Product.IsFireResistant" value="false" />
+                            <input type="checkbox" id="Product_IsFireResistant" name="Product.IsFireResistant" value="true" @(Model.Product.IsFireResistant == true ? "checked" : "") class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
+                            <label for="Product_IsFireResistant" class="text-sm text-gray-700">Ateşe dayanıklı</label>
+                        </div>
+                        <div>
+                            <label asp-for="Product.MaterialWeightGrm2" class="block text-sm font-medium text-gray-700 mb-1">Kumaş ağırlığı (gr/m²)</label>
+                            <input type="number" asp-for="Product.MaterialWeightGrm2" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 650">
+                        </div>
+                        <div>
+                            <label asp-for="Product.ColorOptions" class="block text-sm font-medium text-gray-700 mb-1">Renk seçenekleri</label>
+                            <input type="text" asp-for="Product.ColorOptions" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: Seçtiğiniz renkler">
+                        </div>
+                        <div>
+                            <label asp-for="Product.InflatedWeightKg" class="block text-sm font-medium text-gray-700 mb-1">Şişmiş ürün ağırlığı (kg)</label>
+                            <input type="number" asp-for="Product.InflatedWeightKg" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Örn: 95">
                         </div>
                     </div>
                 </div>
