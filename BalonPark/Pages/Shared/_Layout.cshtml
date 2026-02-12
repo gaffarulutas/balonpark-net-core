@@ -236,103 +236,101 @@
 
 <div class="main-wrapper flex flex-col min-h-screen flex-1">
 
-    <!-- Top bar: slogan + promo | telefon (favori ve karşılaştır ana header'da) -->
     @{
         var topBarSlogan = siteSettings?.MetaTitle ?? "Eğlence Burada, Hareket Oyun Güven";
+        var logoUrl = siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png");
     }
-    <div id="header-promo-bar" class="hidden md:block bg-ink text-white py-2 text-xs sm:text-sm font-medium" role="banner">
-        <div class="w-full flex items-center justify-between gap-3 flex-wrap px-3 sm:px-4 lg:px-6">
-            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <span class="inline-flex items-center gap-1.5 text-primary font-semibold">
-                    <i data-lucide="sparkles" class="w-4 h-4 flex-shrink-0" aria-hidden="true"></i>
+
+    <!-- Commerce header: promo bar + main (logo, nav, search, actions) -->
+    <header class="site-header" id="main-header" role="banner">
+        <!-- Promo / trust bar -->
+        <div class="site-header__promo" id="header-promo-bar">
+            <div class="site-header__inner">
+                <p class="site-header__promo-text">
+                    <i data-lucide="sparkles" class="site-header__promo-icon" aria-hidden="true"></i>
                     @topBarSlogan
-                </span>
-            </div>
-            <div class="flex items-center gap-2 sm:gap-4">
-                @if (!string.IsNullOrEmpty(siteSettings?.PhoneNumber))
-                {
-                    var telHref = "tel:" + new string(siteSettings.PhoneNumber.Where(c => char.IsDigit(c) || c == '+').ToArray());
-                    <a href="@telHref" class="inline-flex items-center gap-1.5 py-1 px-2 rounded hover:bg-white/10 text-white transition-colors font-medium" aria-label="Bizi arayın">
-                        <i data-lucide="phone" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
-                        <span class="hidden sm:inline">@siteSettings.PhoneNumber</span>
-                    </a>
-                }
-                else
-                {
-                    <a asp-page="/Iletisim" class="inline-flex items-center gap-1.5 py-1 px-2 rounded hover:bg-white/10 text-white transition-colors" aria-label="İletişim">
-                        <i data-lucide="phone" class="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true"></i>
-                        <span class="hidden sm:inline">İletişim</span>
-                    </a>
-                }
+                </p>
+                <div class="site-header__promo-actions">
+                    @if (!string.IsNullOrEmpty(siteSettings?.PhoneNumber))
+                    {
+                        var telHref = "tel:" + new string(siteSettings.PhoneNumber.Where(c => char.IsDigit(c) || c == '+').ToArray());
+                        <a href="@telHref" class="site-header__promo-link" aria-label="Bizi arayın: @siteSettings.PhoneNumber">
+                            <i data-lucide="phone" class="site-header__promo-link-icon" aria-hidden="true"></i>
+                            <span class="site-header__promo-link-label">@siteSettings.PhoneNumber</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-page="/Iletisim" class="site-header__promo-link" aria-label="İletişim sayfası">
+                            <i data-lucide="phone" class="site-header__promo-link-icon" aria-hidden="true"></i>
+                            <span class="site-header__promo-link-label">İletişim</span>
+                        </a>
+                    }
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Main header: full width, logo + arama + nav -->
-    <header class="bg-white border-b border-gray-100 sticky top-0 z-[50] shadow-sm" id="main-header">
-        <div class="w-full px-3 sm:px-4 lg:px-6">
-            <div class="flex items-center justify-between gap-3 py-3">
-                <div class="flex items-center gap-3 min-w-0 flex-shrink-0">
-                    <button type="button" id="header-sidebar-toggle" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 text-ink hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2" aria-label="Kategori menüsünü aç" aria-expanded="false" aria-controls="layout-sidebar">
-                        <i data-lucide="menu" class="w-5 h-5" aria-hidden="true"></i>
+        <!-- Main header row -->
+        <div class="site-header__main">
+            <div class="site-header__inner site-header__row">
+                <div class="site-header__start">
+                    <button type="button" id="header-sidebar-toggle" class="site-header__menu-btn" aria-label="Kategori menüsünü aç" aria-expanded="false" aria-controls="layout-sidebar">
+                        <i data-lucide="menu" class="site-header__menu-icon" aria-hidden="true"></i>
                     </button>
-                    <a asp-page="/Index" class="flex items-center flex-shrink-0" aria-label="@Html.Raw(companyName) Ana Sayfa">
-                        <img src="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" alt="@Html.Raw(companyName) Logo" class="h-8 sm:h-9 w-auto max-h-12 object-contain" loading="eager">
-                    </a>
-                    <nav class="hidden md:flex items-center gap-0.5 border-l border-gray-200 pl-3 ml-1" aria-label="Site menüsü">
-                        <a asp-page="/Index" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors" title="Ana Sayfa">Ana Sayfa</a>
-                        <a asp-page="/Hakkimizda" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors" title="Hakkımızda">Hakkımızda</a>
-                        <a asp-page="/Blog" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors" title="Blog">Blog</a>
-                        <a asp-page="/Iletisim" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors" title="İletişim">İletişim</a>
+                    <nav class="site-header__nav" aria-label="Ana sayfa menüsü">
+                        <a asp-page="/Index" class="site-header__nav-link" title="Ana Sayfa">Ana Sayfa</a>
+                        <a asp-page="/Hakkimizda" class="site-header__nav-link" title="Hakkımızda">Hakkımızda</a>
+                        <a asp-page="/Blog" class="site-header__nav-link" title="Blog">Blog</a>
+                        <a asp-page="/Iletisim" class="site-header__nav-link" title="İletişim">İletişim</a>
                     </nav>
                 </div>
-                <div class="flex-1 min-w-0 max-w-xl mx-2 sm:mx-4 relative" id="header-search-wrap-desktop">
-                    <form action="/Search" method="get" class="relative" role="search">
-                        <div class="relative">
-                            <input type="search" name="q" id="header-search-input-desktop" class="header-search-input w-full rounded-lg border border-gray-200 pl-4 pr-10 py-2.5 text-sm text-ink placeholder-gray-400 transition focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-gray-300" placeholder="Ürün veya kategori ara..." autocomplete="off" aria-label="Site içi arama" aria-autocomplete="list" aria-expanded="false" aria-controls="header-search-dropdown" aria-haspopup="listbox" aria-activedescendant="">
-                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors" aria-label="Ara">
-                                <i data-lucide="search" class="w-5 h-5"></i>
-                            </button>
+
+                <div class="site-header__search" id="header-search-wrap-desktop">
+                    <form action="/Search" method="get" class="site-header__search-form" role="search" aria-label="Ürün veya kategori ara">
+                        <label for="header-search-input-desktop" class="sr-only">Arama</label>
+                        <input type="search" name="q" id="header-search-input-desktop" class="header-search-input site-header__search-input" placeholder="Ürün veya kategori ara..." autocomplete="off" aria-label="Arama" aria-autocomplete="list" aria-expanded="false" aria-controls="header-search-dropdown" aria-haspopup="listbox" aria-activedescendant="">
+                        <button type="submit" class="site-header__search-btn" aria-label="Ara">
+                            <i data-lucide="search" class="site-header__search-icon" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                    <div id="header-search-dropdown" class="site-header__search-dropdown header-search-dropdown-closed" role="listbox" aria-label="Arama önerileri">
+                        <div id="header-search-trending" class="site-header__search-dropdown-section hidden">
+                            <p class="site-header__search-dropdown-title">Trend aramalar</p>
+                            <div id="header-search-trending-list" class="site-header__search-dropdown-tags"></div>
                         </div>
-                    </form>
+                        <div id="header-search-recent" class="site-header__search-dropdown-section hidden">
+                            <p class="site-header__search-dropdown-title">Son aramalar</p>
+                            <ul id="header-search-recent-list" class="site-header__search-dropdown-list" role="list"></ul>
+                        </div>
+                        <div id="header-search-suggestions" class="site-header__search-dropdown-section hidden">
+                            <p class="site-header__search-dropdown-title">Öneriler</p>
+                            <ul id="header-search-suggestions-list" class="site-header__search-dropdown-list" role="list"></ul>
+                        </div>
+                        <p id="header-search-loading" class="site-header__search-dropdown-loading hidden">Yükleniyor...</p>
+                        <p id="header-search-empty" class="site-header__search-dropdown-empty hidden">Sonuç bulunamadı.</p>
+                    </div>
                 </div>
-                <div class="sm:hidden flex-shrink-0">
-                    <form action="/Search" method="get" class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200" role="search" aria-label="Ara">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                    </form>
-                </div>
-                <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                    <a href="#" id="header-favorites-btn" class="inline-flex items-center justify-center gap-1.5 w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-primary transition-colors" aria-label="Favoriler" title="Favoriler">
-                        <i data-lucide="heart" class="w-5 h-5 lucide-fav-header"></i>
-                        <span class="favorites-count-text hidden sm:inline text-sm font-medium text-gray-500">0</span>
+
+                <a href="/Search" class="site-header__search-mob" aria-label="Arama sayfasına git">
+                    <i data-lucide="search" class="site-header__search-mob-icon" aria-hidden="true"></i>
+                </a>
+
+                <div class="site-header__actions">
+                    <a href="#" id="header-favorites-btn" class="site-header__action" aria-label="Favorilerim" title="Favoriler">
+                        <i data-lucide="heart" class="site-header__action-icon lucide-fav-header" aria-hidden="true"></i>
+                        <span class="site-header__action-badge favorites-count-text" aria-hidden="true">0</span>
                     </a>
-                    <a href="#" id="header-compare-btn" class="inline-flex items-center justify-center gap-1.5 w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-primary transition-colors" aria-label="Karşılaştır" title="Karşılaştır">
-                        <i data-lucide="shuffle" class="w-5 h-5"></i>
-                        <span class="compare-count-text hidden sm:inline text-sm font-medium text-gray-500">0</span>
+                    <a href="#" id="header-compare-btn" class="site-header__action" aria-label="Ürün karşılaştır" title="Karşılaştır">
+                        <i data-lucide="shuffle" class="site-header__action-icon" aria-hidden="true"></i>
+                        <span class="site-header__action-badge compare-count-text" aria-hidden="true">0</span>
                     </a>
-                    <div class="hidden lg:flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 ml-1">
-                        <button type="button" class="currency-btn w-8 h-8 rounded-md inline-flex items-center justify-center text-xs transition-colors @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "bg-ink text-white" : "text-gray-600 hover:bg-gray-200")" data-currency="TL" aria-label="TL"><i data-lucide="badge-turkish-lira" class="w-4 h-4"></i></button>
-                        <button type="button" class="currency-btn w-8 h-8 rounded-md inline-flex items-center justify-center text-xs transition-colors @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "bg-ink text-white" : "text-gray-600 hover:bg-gray-200")" data-currency="USD" aria-label="USD"><i data-lucide="dollar-sign" class="w-4 h-4"></i></button>
-                        <button type="button" class="currency-btn w-8 h-8 rounded-md inline-flex items-center justify-center text-xs transition-colors @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "bg-ink text-white" : "text-gray-600 hover:bg-gray-200")" data-currency="EUR" aria-label="EUR"><i data-lucide="euro" class="w-4 h-4"></i></button>
+                    <div class="site-header__currency" role="group" aria-label="Para birimi seçin">
+                        <button type="button" class="currency-btn site-header__currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "site-header__currency-btn--active" : "")" data-currency="TL" aria-label="Türk Lirası" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "TL")"><i data-lucide="badge-turkish-lira" class="site-header__currency-icon" aria-hidden="true"></i></button>
+                        <button type="button" class="currency-btn site-header__currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "site-header__currency-btn--active" : "")" data-currency="USD" aria-label="Amerikan Doları" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "USD")"><i data-lucide="dollar-sign" class="site-header__currency-icon" aria-hidden="true"></i></button>
+                        <button type="button" class="currency-btn site-header__currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "site-header__currency-btn--active" : "")" data-currency="EUR" aria-label="Euro" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "EUR")"><i data-lucide="euro" class="site-header__currency-icon" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="header-search-dropdown" role="listbox" aria-label="Arama önerileri" class="hidden absolute left-0 right-0 top-full z-[70] bg-white rounded-b-xl border border-gray-200 border-t-0 shadow-xl overflow-hidden header-search-dropdown-closed mx-3 sm:mx-4 lg:mx-6 max-w-xl">
-            <div id="header-search-trending" class="p-2 border-b border-gray-100 hidden">
-                <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Trend aramalar</p>
-                <div id="header-search-trending-list" class="flex flex-wrap gap-1.5"></div>
-            </div>
-            <div id="header-search-recent" class="p-2 border-b border-gray-100 hidden">
-                <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Son aramalar</p>
-                <ul id="header-search-recent-list" class="space-y-0.5" role="list"></ul>
-            </div>
-            <div id="header-search-suggestions" class="p-2 overflow-y-auto hidden">
-                <p class="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Öneriler</p>
-                <ul id="header-search-suggestions-list" class="space-y-0.5" role="list"></ul>
-            </div>
-            <p id="header-search-loading" class="hidden px-4 py-3 text-sm text-gray-500">Yükleniyor...</p>
-            <p id="header-search-empty" class="hidden px-4 py-3 text-sm text-gray-500">Sonuç bulunamadı.</p>
         </div>
     </header>
 
@@ -341,6 +339,9 @@
         <!-- Sidebar: Kategoriler (parent-children tree) -->
         <aside id="layout-sidebar" class="layout-sidebar" aria-label="Kategori menüsü">
             <div class="layout-sidebar-inner">
+                <a asp-page="/Index" class="layout-sidebar-logo" aria-label="@Html.Raw(companyName) - Ana Sayfa">
+                    <img src="@logoUrl" alt="@Html.Raw(companyName)" loading="eager" class="layout-sidebar-logo__img">
+                </a>
                 <div class="layout-sidebar-header">
                     <h2 class="layout-sidebar-title">Kategoriler</h2>
                     <button type="button" id="layout-sidebar-close" class="layout-sidebar-close" aria-label="Menüyü kapat">
@@ -358,31 +359,21 @@
                             {
                                 var hasSubs = cat.SubCategories != null && cat.SubCategories.Count > 0;
                                 <li class="category-tree-item" data-category-id="@cat.Id">
-                                    <div class="category-tree-parent">
-                                        <a href="/category/@cat.Slug" class="category-tree-link">
-                                            @if (!string.IsNullOrEmpty(cat.FirstProductImage))
-                                            {
-                                                <span class="category-tree-icon category-tree-icon-img">
-                                                    <img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="" loading="lazy">
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="category-tree-icon category-tree-icon-default"><i data-lucide="folder" class="w-5 h-5"></i></span>
-                                            }
-                                            <span class="category-tree-label">@Html.Raw(cat.Name)</span>
-                                        </a>
-                                        @if (hasSubs)
+                                    <a href="/category/@cat.Slug" class="category-tree-link">
+                                        @if (!string.IsNullOrEmpty(cat.FirstProductImage))
                                         {
-                                            <button type="button" class="category-tree-toggle" aria-expanded="false" aria-controls="category-children-@cat.Id" data-toggle-for="category-children-@cat.Id">
-                                                <i data-lucide="chevron-right" class="category-tree-chevron"></i>
-                                            </button>
+                                            <span class="category-tree-icon category-tree-icon-img"><img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="" loading="lazy"></span>
                                         }
                                         else
                                         {
-                                            <span class="category-tree-toggle-placeholder" aria-hidden="true"></span>
+                                            <span class="category-tree-icon category-tree-icon-default"><i data-lucide="folder" class="w-5 h-5"></i></span>
                                         }
-                                    </div>
+                                        <span class="category-tree-label">@Html.Raw(cat.Name)</span>
+                                        @if (hasSubs)
+                                        {
+                                            <span class="category-tree-chevron" role="button" tabindex="0" aria-expanded="false" aria-controls="category-children-@cat.Id" title="Alt kategorileri aç/kapat"><i data-lucide="chevron-right" class="category-tree-chevron-icon"></i></span>
+                                        }
+                                    </a>
                                     @if (hasSubs)
                                     {
                                         <ul id="category-children-@cat.Id" class="category-tree-children hidden" role="group" aria-label="@cat.Name alt kategorileri">

@@ -20,7 +20,7 @@
         var mainHeader = document.getElementById('main-header');
         if (mainHeader) {
             function onScrollHeader() {
-                mainHeader.classList.toggle('shadow-md', window.scrollY > 8);
+                mainHeader.classList.toggle('is-scrolled', window.scrollY > 8);
             }
             window.addEventListener('scroll', onScrollHeader, { passive: true });
             onScrollHeader();
@@ -66,17 +66,25 @@
     }
 
     function initCategoryTree() {
-        document.querySelectorAll('.category-tree-toggle').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var targetId = btn.getAttribute('data-toggle-for');
-                var expanded = btn.getAttribute('aria-expanded') === 'true';
-                var target = targetId ? document.getElementById(targetId) : null;
-                if (!target) return;
-                target.classList.toggle('hidden', expanded);
-                btn.setAttribute('aria-expanded', !expanded);
-            });
+        var nav = document.querySelector('.category-tree');
+        if (!nav) return;
+        nav.addEventListener('click', function (e) {
+            var chevron = e.target.closest('.category-tree-chevron');
+            if (!chevron) return;
+            e.preventDefault();
+            var id = chevron.getAttribute('aria-controls');
+            var children = id ? document.getElementById(id) : null;
+            if (!children) return;
+            var open = chevron.getAttribute('aria-expanded') !== 'true';
+            children.classList.toggle('hidden', !open);
+            chevron.setAttribute('aria-expanded', open);
+        });
+        nav.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            var chevron = e.target.closest('.category-tree-chevron');
+            if (!chevron) return;
+            e.preventDefault();
+            chevron.click();
         });
     }
 
