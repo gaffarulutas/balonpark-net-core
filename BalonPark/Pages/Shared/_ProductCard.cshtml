@@ -34,13 +34,6 @@
         {
             <div class="flex-1 min-h-[2.5rem]"></div>
         }
-        @if (product.ViewCount > 0)
-        {
-            <p class="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
-                <i data-lucide="eye" class="w-3.5 h-3.5 flex-shrink-0"></i>
-                <span>@product.ViewCount görüntülenme</span>
-            </p>
-        }
         <div class="mt-auto pt-2.5">
             @if (product.Price <= 0)
             {
