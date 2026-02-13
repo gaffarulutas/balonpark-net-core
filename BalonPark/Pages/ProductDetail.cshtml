@@ -875,17 +875,24 @@
     }
     .product-detail-gallery .product-gallery-pagination .swiper-pagination-current { font-weight: 600; }
 
-    /* Thumbnail strip: wrapper – absolute nav butonları için relative, padding ile resim kenarları açıkta */
+    /* Thumbnail strip: wrapper – absolute nav için relative */
     .product-detail-gallery .product-gallery-thumbs-wrap {
         position: relative;
         margin-top: 0;
-        padding: 0 44px 12px;
+        padding: 0 0 12px;
+        padding-left: 10px;
+        padding-right: 10px;
     }
-    .product-detail-gallery .product-gallery-thumbs {
+    .product-detail-gallery .product-gallery-thumbs-wrap .product-gallery-thumbs,
+    .product-detail-gallery .product-gallery-thumbs-wrap .productThumbsSwiper {
+        width: 100% !important;
+        max-width: 100%;
         margin-top: 0;
+        margin-left: 0;
+        margin-right: 0;
         padding: 0;
         overflow: hidden;
-        width: 100%;
+        box-sizing: border-box;
     }
     .product-detail-gallery .productThumbsSwiper .swiper-wrapper {
         align-items: center;
@@ -934,7 +941,7 @@
         border-color: #00A8E8;
         box-shadow: 0 0 0 1px #00A8E8;
     }
-    /* Thumb strip nav: absolute, strip'in üstünde (ana galeri nav gibi), padding alanında – resim kenarları görünür */
+    /* Thumb strip nav: absolute, strip'in dışında sol/sağ – ilk/son thumb kenarları tam görünür */
     .product-detail-gallery .product-gallery-thumbs-prev,
     .product-detail-gallery .product-gallery-thumbs-next {
         position: absolute;
@@ -953,10 +960,10 @@
         transition: background 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s;
     }
     .product-detail-gallery .product-gallery-thumbs-prev {
-        left: 8px;
+        left: 4px;
     }
     .product-detail-gallery .product-gallery-thumbs-next {
-        right: 8px;
+        right: 4px;
     }
     .product-detail-gallery .product-gallery-thumbs-next::after,
     .product-detail-gallery .product-gallery-thumbs-prev::after {

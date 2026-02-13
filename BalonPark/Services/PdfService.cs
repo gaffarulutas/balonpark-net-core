@@ -238,7 +238,7 @@ public class PdfService(
             var productUrl = urlService.GetProductUrl(product.CategorySlug ?? "", product.SubCategorySlug ?? "", product.Slug);
 
             // —— Başlık (büyük) + altında tablo ile boşluk ——
-            document.Add(new Paragraph(product.Name ?? "Ürün", titleFont) { SpacingAfter = 10 });
+            document.Add(new Paragraph(product.Name ?? "Ürün", titleFont) { SpacingAfter = 16 });
             var pageContentWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin;
             var topTable = new PdfPTable(2)
             {
@@ -317,6 +317,12 @@ public class PdfService(
             var priceFont = GetTurkishFont(8, Font.BOLD, BaseColor.DARK_GRAY);
             AddInfoRow(infoTable, "Fiyatlar", $"₺ {product.Price:N2}  ·  $ {product.UsdPrice:N2}  ·  € {product.EuroPrice:N2}", labelFont, priceFont, false, null);
             AddInfoRow(infoTable, "Stok", product.Stock > 0 ? product.Stock.ToString() : "Stok yok", labelFont, cellFont, false, null);
+            var badges = new List<string>();
+            if (product.IsDiscounted) badges.Add("İndirimli");
+            if (product.IsPopular) badges.Add("Popüler");
+            if (product.IsProjectSpecial) badges.Add("Projeye özel");
+            if (badges.Count > 0)
+                AddInfoRow(infoTable, "Özellikler", string.Join(", ", badges), labelFont, cellFont, false, null);
             infoCell.AddElement(infoTable);
             topTable.AddCell(infoCell);
             document.Add(topTable);
@@ -334,20 +340,32 @@ public class PdfService(
                 if (plainDesc.Length > 2500) plainDesc = plainDesc[..2500] + "…";
                 document.Add(new Paragraph(plainDesc, cellFont) { SpacingAfter = CompactSectionSpacing });
             }
+            if (!string.IsNullOrEmpty(product.TechnicalDescription))
+            {
+                AddSectionTitleCompact(document, "Teknik Açıklama", sectionFont);
+                var plainTech = StripHtml(product.TechnicalDescription);
+                if (plainTech.Length > 2500) plainTech = plainTech[..2500] + "…";
+                document.Add(new Paragraph(plainTech, cellFont) { SpacingAfter = CompactSectionSpacing });
+            }
 
-            // —— Sayfa 2: Ürün Görselleri (ayrı sayfa) ——
+            // —— Sayfa 2: Ürün Görselleri — sayfa genişliği kadar, kenarda boşluk yok, aralarında margin ——
             if (allImages.Count > 0)
             {
                 document.NewPage();
                 AddHeaderToDocument(document);
                 AddSectionTitleCompact(document, "Ürün Görselleri", sectionFont);
                 const int cols = 3;
-                var imgSize = GalleryImageSizePt;
+                var galleryPageWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin;
+                var margin = GalleryCellMarginPt;
+                var cellTotal = galleryPageWidth / cols;
+                var imgSize = (float)(cellTotal - 2 * margin);
+                if (imgSize < 80) imgSize = 80;
+                var cellHeight = (float)cellTotal;
                 var imgTable = new PdfPTable(cols)
                 {
-                    TotalWidth = cols * imgSize,
+                    TotalWidth = galleryPageWidth,
                     LockedWidth = true,
-                    HorizontalAlignment = Element.ALIGN_CENTER,
+                    HorizontalAlignment = Element.ALIGN_LEFT,
                     SpacingAfter = CompactSectionSpacing
                 };
                 imgTable.SetWidths([1f, 1f, 1f]);
@@ -357,8 +375,8 @@ public class PdfService(
                     {
                         HorizontalAlignment = Element.ALIGN_CENTER,
                         VerticalAlignment = Element.ALIGN_MIDDLE,
-                        Padding = 0,
-                        FixedHeight = imgSize,
+                        Padding = margin,
+                        FixedHeight = cellHeight,
                         Border = iTextSharp.text.Rectangle.BOX,
                         BorderColor = CatalogBorder,
                         BorderWidth = 0.5f,
@@ -380,7 +398,7 @@ public class PdfService(
                         try
                         {
                             var im = iTextSharp.text.Image.GetInstance(squareBytes);
-                            AddScaledImageToCell(c, im, GalleryImageSizePt, GalleryImageSizePt, fixedCellHeightPt: null);
+                            AddScaledImageToCell(c, im, (float)imgSize, (float)imgSize, fixedCellHeightPt: null);
                             added = true;
                         }
                         catch { /* placeholder below */ }
@@ -391,8 +409,8 @@ public class PdfService(
                 while (imgTable.Size % cols != 0)
                     imgTable.AddCell(new PdfPCell(new Phrase(" "))
                     {
-                        FixedHeight = imgSize,
-                        Padding = 0,
+                        FixedHeight = cellHeight,
+                        Padding = margin,
                         Border = iTextSharp.text.Rectangle.BOX,
                         BorderColor = CatalogBorder,
                         BorderWidth = 0.5f,
@@ -405,7 +423,8 @@ public class PdfService(
             var hasInflated = !string.IsNullOrEmpty(product.InflatedLength) || !string.IsNullOrEmpty(product.InflatedWidth) || !string.IsNullOrEmpty(product.InflatedHeight) || product.UserCount != null || product.InflatedWeightKg != null;
             var hasAssembly = product.AssemblyTime != null || product.RequiredPersonCount != null || !string.IsNullOrEmpty(product.FanDescription) || product.FanWeightKg != null;
             var hasPackaged = !string.IsNullOrEmpty(product.PackagedLength) || !string.IsNullOrEmpty(product.PackagedDepth) || product.PackagedWeightKg != null || product.PackagePalletCount != null;
-            var hasGeneral = product.HasCertificate || !string.IsNullOrEmpty(product.WarrantyDescription) || !string.IsNullOrEmpty(product.AfterSalesService);
+            var hasGeneral = product.HasCertificate || !string.IsNullOrEmpty(product.WarrantyDescription) || !string.IsNullOrEmpty(product.AfterSalesService)
+                || product.IsFireResistant || product.MaterialWeightGrm2 != null || !string.IsNullOrEmpty(product.MaterialWeight);
             if (hasInflated || hasAssembly || hasPackaged || hasGeneral)
             {
                 document.NewPage();
@@ -451,17 +470,24 @@ public class PdfService(
                     if (product.HasCertificate) AddKeyValueRow(specTable, "Sertifika", "Var", cellFont, null, pad);
                     if (!string.IsNullOrEmpty(product.WarrantyDescription)) AddKeyValueRow(specTable, "Garanti", product.WarrantyDescription, cellFont, null, pad);
                     if (!string.IsNullOrEmpty(product.AfterSalesService)) AddKeyValueRow(specTable, "Satış sonrası", product.AfterSalesService, cellFont, null, pad);
+                    if (product.IsFireResistant) AddKeyValueRow(specTable, "Ateşe dayanıklı", "Evet", cellFont, null, pad);
+                    if (product.MaterialWeightGrm2 != null) AddKeyValueRow(specTable, "Kumaş ağırlığı", $"{product.MaterialWeightGrm2} gr/m²", cellFont, null, pad);
+                    else if (!string.IsNullOrEmpty(product.MaterialWeight)) AddKeyValueRow(specTable, "Kumaş ağırlığı", product.MaterialWeight, cellFont, null, pad);
                 }
                 document.Add(specTable);
             }
 
-            if (product.DeliveryDaysMin != null || product.DeliveryDaysMax != null || !string.IsNullOrEmpty(product.ColorOptions))
+            var hasOther = product.DeliveryDaysMin != null || product.DeliveryDaysMax != null || !string.IsNullOrEmpty(product.DeliveryDays)
+                || !string.IsNullOrEmpty(product.ColorOptions);
+            if (hasOther)
             {
                 AddSectionTitleCompact(document, "Diğer", sectionFont);
                 if (product.DeliveryDaysMin != null || product.DeliveryDaysMax != null)
-                    document.Add(new Paragraph($"Teslimat: {product.DeliveryDaysMin ?? 0}-{product.DeliveryDaysMax ?? 0} gün", cellFont) { SpacingAfter = 1 });
+                    document.Add(new Paragraph($"Teslimat: {product.DeliveryDaysMin ?? 0}-{product.DeliveryDaysMax ?? 0} iş günü", cellFont) { SpacingAfter = 1 });
+                else if (!string.IsNullOrEmpty(product.DeliveryDays))
+                    document.Add(new Paragraph($"Teslimat: {product.DeliveryDays}", cellFont) { SpacingAfter = 1 });
                 if (!string.IsNullOrEmpty(product.ColorOptions))
-                    document.Add(new Paragraph($"Renk: {product.ColorOptions}", cellFont) { SpacingAfter = 1 });
+                    document.Add(new Paragraph($"Renk seçenekleri: {product.ColorOptions}", cellFont) { SpacingAfter = 1 });
             }
             document.Add(new Paragraph(" ", cellFont) { SpacingAfter = 4 });
             var linkChunk = new Chunk("Ürün sayfası: " + productUrl, GetTurkishFont(8, Font.UNDERLINE, BaseColor.BLUE));
@@ -498,8 +524,8 @@ public class PdfService(
     /// <summary>Sol kolon — resim alanı geniş.</summary>
     private const float MainImageMaxWidthPt = 240f;
     private const float MainImageMaxHeightPt = 220f;
-    /// <summary>Ürün detay PDF: galeri resim ve hücre boyutu (kare, pt) — tablo tam resim kadar.</summary>
-    private const float GalleryImageSizePt = 160f;
+    /// <summary>Ürün Görselleri: resimler arası margin (pt).</summary>
+    private const float GalleryCellMarginPt = 6f;
     /// <summary>Tablo satırları: thumbnail hücre sabit yükseklik (pt).</summary>
     private const float ThumbnailCellHeightPt = 70f;
     /// <summary>Tablo satırları: thumbnail resim max boyut (pt).</summary>
@@ -802,12 +828,12 @@ public class PdfService(
             var settings = settingsRepository.GetFirstAsync().GetAwaiter().GetResult();
             var companyName = settings?.CompanyName ?? "BALON PARK";
             
-            // Header: kompakt yükseklik
+            // Header: dar (düşük) yükseklik, resim alanı geniş kalsın
             var headerTable = new PdfPTable(2)
             {
                 WidthPercentage = 100,
                 SpacingBefore = 0,
-                SpacingAfter = 4
+                SpacingAfter = 2
             };
             headerTable.SetWidths([0.4f, 0.6f]);
 
@@ -816,7 +842,7 @@ public class PdfService(
                 Border = iTextSharp.text.Rectangle.NO_BORDER,
                 VerticalAlignment = Element.ALIGN_MIDDLE,
                 HorizontalAlignment = Element.ALIGN_LEFT,
-                Padding = 2
+                Padding = 1
             };
 
             try
@@ -838,7 +864,7 @@ public class PdfService(
                 if (File.Exists(logoPath))
                 {
                     var logo = iTextSharp.text.Image.GetInstance(logoPath);
-                    logo.ScaleToFit(120, 44);
+                    logo.ScaleAbsolute(150, 30);
                     logoCell.AddElement(logo);
                     logger.LogInformation("Logo başarıyla yüklendi: {Path}", logoPath);
                 }
@@ -846,14 +872,14 @@ public class PdfService(
                 {
                     // Logo yoksa metin ekle
                     logger.LogWarning("Logo dosyası bulunamadı: {Path}", logoPath);
-                    var logoTextFont = GetTurkishFont(14, Font.BOLD, BaseColor.DARK_GRAY);
+                    var logoTextFont = GetTurkishFont(11, Font.BOLD, BaseColor.DARK_GRAY);
                     logoCell.AddElement(new Paragraph(companyName, logoTextFont));
                 }
             }
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Logo yüklenirken hata, metin kullanılıyor");
-                var logoTextFont = GetTurkishFont(14, Font.BOLD, BaseColor.DARK_GRAY);
+                var logoTextFont = GetTurkishFont(11, Font.BOLD, BaseColor.DARK_GRAY);
                 logoCell.AddElement(new Paragraph(companyName, logoTextFont));
             }
 
@@ -864,13 +890,13 @@ public class PdfService(
                 Border = iTextSharp.text.Rectangle.NO_BORDER,
                 VerticalAlignment = Element.ALIGN_MIDDLE,
                 HorizontalAlignment = Element.ALIGN_RIGHT,
-                Padding = 2
+                Padding = 1
             };
 
-            // İletişim bilgileri için modern font hiyerarşisi
-            var contactTitleFont = GetTurkishFont(10, Font.BOLD, BaseColor.DARK_GRAY);
-            var contactFont = GetTurkishFont(9, Font.NORMAL, BaseColor.DARK_GRAY);
-            var contactSmallFont = GetTurkishFont(8, Font.NORMAL, BaseColor.GRAY);
+            // İletişim: küçük fontlarla dar header
+            var contactTitleFont = GetTurkishFont(9, Font.BOLD, BaseColor.DARK_GRAY);
+            var contactFont = GetTurkishFont(8, Font.NORMAL, BaseColor.DARK_GRAY);
+            var contactSmallFont = GetTurkishFont(7, Font.NORMAL, BaseColor.GRAY);
 
             var contactInfo = new Paragraph();
             
@@ -907,10 +933,10 @@ public class PdfService(
             headerTable.AddCell(contactCell);
 
             document.Add(headerTable);
-            document.Add(new Paragraph(" ", GetTurkishFont(8)) { SpacingAfter = 3 });
+            document.Add(new Paragraph(" ", GetTurkishFont(8)) { SpacingAfter = 2 });
             var line = new LineSeparator(0.5f, 100f, CatalogBorder, Element.ALIGN_CENTER, -1);
             document.Add(new Chunk(line));
-            document.Add(new Paragraph(" ", GetTurkishFont(8)) { SpacingAfter = 4 });
+            document.Add(new Paragraph(" ", GetTurkishFont(8)) { SpacingAfter = 2 });
         }
         catch (Exception ex)
         {
