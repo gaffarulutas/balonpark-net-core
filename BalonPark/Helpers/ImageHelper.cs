@@ -53,11 +53,11 @@ public static class ImageHelper
             await image.SaveAsync(largePath, encoderLarge);
         }
 
-        // Thumbnail (350px) – aynı kalite ayarları
+        // Thumbnail (450px) – aynı kalite ayarları
         using (var stream = file.OpenReadStream())
         using (var image = await Image.LoadAsync(stream))
         {
-            var thumbWidth = 350;
+            var thumbWidth = 450;
             var aspectRatio = (double)image.Height / image.Width;
             var thumbHeight = (int)(thumbWidth * aspectRatio);
 
