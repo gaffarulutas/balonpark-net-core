@@ -135,8 +135,9 @@ public class ProductDetailModel : BasePage
         product.EuroPrice = Math.Round(euroPrice, 2);
 
         var mainImage = await _productImageRepository.GetMainImageAsync(product.Id);
+        var allImages = (await _productImageRepository.GetByProductIdAsync(product.Id)).ToList();
 
-        var pdfBytes = await _pdfService.GenerateProductDetailPdfAsync(product, mainImage);
+        var pdfBytes = await _pdfService.GenerateProductDetailPdfAsync(product, mainImage, allImages);
         var fileName = $"Urun-{product.Slug}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
         return File(pdfBytes, "application/pdf", fileName);
     }
