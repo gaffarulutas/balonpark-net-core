@@ -461,6 +461,22 @@
                 $('#mobileMenuOverlay').addClass('hidden');
             });
 
+            // Karakter sayacı: .char-counter önceki kardeş input/textarea ile eşleştir
+            document.querySelectorAll('.char-counter').forEach(function (counterEl) {
+                var el = counterEl.previousElementSibling;
+                if (!el || (!el.matches('input') && !el.matches('textarea'))) return;
+                var max = counterEl.getAttribute('data-max') || el.getAttribute('maxlength') || '';
+                function update() {
+                    var len = (el.value || '').length;
+                    counterEl.textContent = len + ' / ' + max;
+                    if (max && len >= parseInt(max, 10)) counterEl.classList.add('text-amber-600');
+                    else counterEl.classList.remove('text-amber-600');
+                }
+                update();
+                el.addEventListener('input', update);
+                el.addEventListener('change', update);
+            });
+
             // Form submit loading
             $('form').on('submit', function (e) {
                 const $form = $(this);

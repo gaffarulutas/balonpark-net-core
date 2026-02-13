@@ -64,4 +64,20 @@ public class IndexModel : BaseAdminPage
             log.Properties
         });
     }
+
+    /// <summary>
+    /// Tüm hata loglarını veritabanından siler (AJAX).
+    /// </summary>
+    public async Task<IActionResult> OnPostDeleteAllAsync()
+    {
+        try
+        {
+            var deleted = await _errorLogRepository.DeleteAllAsync();
+            return new JsonResult(new { success = true, message = $"{deleted} hata kaydı silindi.", deleted });
+        }
+        catch (Exception ex)
+        {
+            return new JsonResult(new { success = false, message = "Silme işlemi başarısız: " + ex.Message }) { StatusCode = 500 };
+        }
+    }
 }

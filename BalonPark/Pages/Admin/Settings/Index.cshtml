@@ -1,5 +1,6 @@
 @page
 @model BalonPark.Pages.Admin.Settings.IndexModel
+@using BalonPark.Models
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Genel Ayarlar";
@@ -62,15 +63,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label asp-for="Settings.UserName" class="block text-sm font-medium text-gray-700 mb-2">
-                    Kullanıcı Adı <span class="text-red-500">*</span>
+                    Kullanıcı Adı <span class="text-red-500">*</span> <span class="text-gray-500 font-normal">(max @Settings.UserNameMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.UserName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.UserName" maxlength="@Settings.UserNameMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
             </div>
             <div>
                 <label asp-for="Settings.Password" class="block text-sm font-medium text-gray-700 mb-2">
-                    Şifre <span class="text-red-500">*</span>
+                    Şifre <span class="text-red-500">*</span> <span class="text-gray-500 font-normal">(max @Settings.PasswordMaxLength)</span>
                 </label>
-                <input type="password" asp-for="Settings.Password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Değiştirmek için yeni şifre girin" />
+                <input type="password" asp-for="Settings.Password" maxlength="@Settings.PasswordMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Değiştirmek için yeni şifre girin" />
                 <p class="text-xs text-gray-500 mt-1">Boş bırakırsanız mevcut şifre korunur</p>
             </div>
         </div>
@@ -87,9 +88,10 @@
         <div class="space-y-6">
             <div>
                 <label asp-for="Settings.CompanyName" class="block text-sm font-medium text-gray-700 mb-2">
-                    Şirket Adı <span class="text-red-500">*</span>
+                    Şirket Adı <span class="text-red-500">*</span> <span class="text-gray-500 font-normal">(max @Settings.CompanyNameMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.CompanyName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.CompanyName" maxlength="@Settings.CompanyNameMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Settings.CompanyNameMaxLength">@((Model.Settings?.CompanyName ?? "").Length) / @Settings.CompanyNameMaxLength</span>
             </div>
             <div>
                 <label asp-for="Settings.About" class="block text-sm font-medium text-gray-700 mb-2">
@@ -102,11 +104,11 @@
                     Logo
                 </label>
                 
-                @if (!string.IsNullOrEmpty(Model.Settings.Logo))
+                @if (!string.IsNullOrEmpty(Model.Settings?.Logo))
                 {
                     <div class="mb-3">
                         <p class="text-sm text-gray-600 mb-2">Mevcut Logo:</p>
-                        <img src="@Model.Settings.Logo" alt="Logo" class="lazy-image h-20 object-contain border border-gray-300 rounded p-2 bg-white" loading="lazy" />
+                        <img src="@(Model.Settings?.Logo)" alt="Logo" class="lazy-image h-20 object-contain border border-gray-300 rounded p-2 bg-white" loading="lazy" />
                     </div>
                 }
                 
@@ -136,39 +138,40 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label asp-for="Settings.Email" class="block text-sm font-medium text-gray-700 mb-2">
-                    E-posta <span class="text-red-500">*</span>
+                    E-posta <span class="text-red-500">*</span> <span class="text-gray-500 font-normal">(max @Settings.EmailMaxLength)</span>
                 </label>
-                <input type="email" asp-for="Settings.Email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="email" asp-for="Settings.Email" maxlength="@Settings.EmailMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
             </div>
             <div>
                 <label asp-for="Settings.PhoneNumber" class="block text-sm font-medium text-gray-700 mb-2">
-                    Telefon 1
+                    Telefon 1 <span class="text-gray-500 font-normal">(max @Settings.PhoneMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.PhoneNumber" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="+90 212 555 01 23" />
+                <input type="text" asp-for="Settings.PhoneNumber" maxlength="@Settings.PhoneMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="+90 212 555 01 23" />
             </div>
             <div>
                 <label asp-for="Settings.PhoneNumber2" class="block text-sm font-medium text-gray-700 mb-2">
-                    Telefon 2
+                    Telefon 2 <span class="text-gray-500 font-normal">(max @Settings.PhoneMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.PhoneNumber2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="+90 212 555 01 24" />
+                <input type="text" asp-for="Settings.PhoneNumber2" maxlength="@Settings.PhoneMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="+90 212 555 01 24" />
             </div>
             <div>
                 <label asp-for="Settings.Fax" class="block text-sm font-medium text-gray-700 mb-2">
-                    Faks
+                    Faks <span class="text-gray-500 font-normal">(max @Settings.FaxMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.Fax" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.Fax" maxlength="@Settings.FaxMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
             </div>
             <div>
                 <label asp-for="Settings.WhatsApp" class="block text-sm font-medium text-gray-700 mb-2">
-                    WhatsApp
+                    WhatsApp <span class="text-gray-500 font-normal">(max @Settings.PhoneMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.WhatsApp" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="+90 532 555 01 23" />
+                <input type="text" asp-for="Settings.WhatsApp" maxlength="@Settings.PhoneMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="+90 532 555 01 23" />
             </div>
             <div>
                 <label asp-for="Settings.WorkingHours" class="block text-sm font-medium text-gray-700 mb-2">
-                    Çalışma Saatleri
+                    Çalışma Saatleri <span class="text-gray-500 font-normal">(max @Settings.WorkingHoursMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.WorkingHours" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Pazartesi-Cuma: 09:00-18:00" />
+                <input type="text" asp-for="Settings.WorkingHours" maxlength="@Settings.WorkingHoursMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Pazartesi-Cuma: 09:00-18:00" />
+                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Settings.WorkingHoursMaxLength">@((Model.Settings?.WorkingHours ?? "").Length) / @Settings.WorkingHoursMaxLength</span>
             </div>
         </div>
     </div>
@@ -185,33 +188,34 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="md:col-span-2">
                 <label asp-for="Settings.Address" class="block text-sm font-medium text-gray-700 mb-2">
-                    Adres
+                    Adres <span class="text-gray-500 font-normal">(max @Settings.AddressMaxLength)</span>
                 </label>
-                <textarea asp-for="Settings.Address" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent"></textarea>
+                <textarea asp-for="Settings.Address" maxlength="@Settings.AddressMaxLength" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent"></textarea>
+                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Settings.AddressMaxLength">@((Model.Settings?.Address ?? "").Length) / @Settings.AddressMaxLength</span>
             </div>
             <div>
                 <label asp-for="Settings.City" class="block text-sm font-medium text-gray-700 mb-2">
-                    Şehir
+                    Şehir <span class="text-gray-500 font-normal">(max @Settings.CityMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.City" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.City" maxlength="@Settings.CityMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
             </div>
             <div>
                 <label asp-for="Settings.District" class="block text-sm font-medium text-gray-700 mb-2">
-                    İlçe
+                    İlçe <span class="text-gray-500 font-normal">(max @Settings.DistrictMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.District" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.District" maxlength="@Settings.DistrictMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
             </div>
             <div>
                 <label asp-for="Settings.PostalCode" class="block text-sm font-medium text-gray-700 mb-2">
-                    Posta Kodu
+                    Posta Kodu <span class="text-gray-500 font-normal">(max @Settings.PostalCodeMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.PostalCode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.PostalCode" maxlength="@Settings.PostalCodeMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
             </div>
             <div>
                 <label asp-for="Settings.Country" class="block text-sm font-medium text-gray-700 mb-2">
-                    Ülke
+                    Ülke <span class="text-gray-500 font-normal">(max @Settings.CountryMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.Country" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.Country" maxlength="@Settings.CountryMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
             </div>
         </div>
     </div>
@@ -227,33 +231,33 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label asp-for="Settings.Facebook" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i data-lucide="facebook" class="w-4 h-4 mr-1"></i> Facebook
+                    <i data-lucide="facebook" class="w-4 h-4 mr-1"></i> Facebook <span class="text-gray-500 font-normal">(max @Settings.SocialUrlMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.Facebook" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://facebook.com/balonpark" />
+                <input type="text" asp-for="Settings.Facebook" maxlength="@Settings.SocialUrlMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://facebook.com/balonpark" />
             </div>
             <div>
                 <label asp-for="Settings.Instagram" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i data-lucide="instagram" class="w-4 h-4 mr-1"></i> Instagram
+                    <i data-lucide="instagram" class="w-4 h-4 mr-1"></i> Instagram <span class="text-gray-500 font-normal">(max @Settings.SocialUrlMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.Instagram" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://instagram.com/balonpark" />
+                <input type="text" asp-for="Settings.Instagram" maxlength="@Settings.SocialUrlMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://instagram.com/balonpark" />
             </div>
             <div>
                 <label asp-for="Settings.Twitter" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i data-lucide="twitter" class="w-4 h-4 mr-1"></i> Twitter
+                    <i data-lucide="twitter" class="w-4 h-4 mr-1"></i> Twitter <span class="text-gray-500 font-normal">(max @Settings.SocialUrlMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.Twitter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://twitter.com/balonpark" />
+                <input type="text" asp-for="Settings.Twitter" maxlength="@Settings.SocialUrlMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://twitter.com/balonpark" />
             </div>
             <div>
                 <label asp-for="Settings.LinkedIn" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i data-lucide="linkedin" class="w-4 h-4 mr-1"></i> LinkedIn
+                    <i data-lucide="linkedin" class="w-4 h-4 mr-1"></i> LinkedIn <span class="text-gray-500 font-normal">(max @Settings.SocialUrlMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.LinkedIn" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://linkedin.com/company/balonpark" />
+                <input type="text" asp-for="Settings.LinkedIn" maxlength="@Settings.SocialUrlMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://linkedin.com/company/balonpark" />
             </div>
             <div>
                 <label asp-for="Settings.YouTube" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i data-lucide="youtube" class="w-4 h-4 mr-1"></i> YouTube
+                    <i data-lucide="youtube" class="w-4 h-4 mr-1"></i> YouTube <span class="text-gray-500 font-normal">(max @Settings.SocialUrlMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.YouTube" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://youtube.com/balonpark" />
+                <input type="text" asp-for="Settings.YouTube" maxlength="@Settings.SocialUrlMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="https://youtube.com/balonpark" />
             </div>
         </div>
     </div>
@@ -269,23 +273,26 @@
         <div class="space-y-6">
             <div>
                 <label asp-for="Settings.MetaTitle" class="block text-sm font-medium text-gray-700 mb-2">
-                    Meta Başlık
+                    Meta Başlık <span class="text-gray-500 font-normal">(max @Settings.MetaTitleMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.MetaTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.MetaTitle" maxlength="@Settings.MetaTitleMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Settings.MetaTitleMaxLength">@((Model.Settings?.MetaTitle ?? "").Length) / @Settings.MetaTitleMaxLength</span>
                 <p class="text-xs text-gray-500 mt-1">Arama motorlarında görünecek başlık (60 karakter önerilir)</p>
             </div>
             <div>
                 <label asp-for="Settings.MetaDescription" class="block text-sm font-medium text-gray-700 mb-2">
-                    Meta Açıklama
+                    Meta Açıklama <span class="text-gray-500 font-normal">(max @Settings.MetaDescriptionMaxLength)</span>
                 </label>
-                <textarea asp-for="Settings.MetaDescription" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent"></textarea>
+                <textarea asp-for="Settings.MetaDescription" maxlength="@Settings.MetaDescriptionMaxLength" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent"></textarea>
+                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Settings.MetaDescriptionMaxLength">@((Model.Settings?.MetaDescription ?? "").Length) / @Settings.MetaDescriptionMaxLength</span>
                 <p class="text-xs text-gray-500 mt-1">Arama motorlarında görünecek açıklama (160 karakter önerilir)</p>
             </div>
             <div>
                 <label asp-for="Settings.MetaKeywords" class="block text-sm font-medium text-gray-700 mb-2">
-                    Meta Anahtar Kelimeler
+                    Meta Anahtar Kelimeler <span class="text-gray-500 font-normal">(max @Settings.MetaKeywordsMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.MetaKeywords" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <input type="text" asp-for="Settings.MetaKeywords" maxlength="@Settings.MetaKeywordsMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Settings.MetaKeywordsMaxLength">@((Model.Settings?.MetaKeywords ?? "").Length) / @Settings.MetaKeywordsMaxLength</span>
                 <p class="text-xs text-gray-500 mt-1">Virgülle ayrılmış anahtar kelimeler</p>
             </div>
         </div>
@@ -302,23 +309,23 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label asp-for="Settings.GoogleTag" class="block text-sm font-medium text-gray-700 mb-2">
-                    Google Tag (gtag.js Ölçüm ID)
+                    Google Tag (gtag.js Ölçüm ID) <span class="text-gray-500 font-normal">(max @Settings.GoogleTagMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.GoogleTag" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="G-XXXXXXXXXX" />
+                <input type="text" asp-for="Settings.GoogleTag" maxlength="@Settings.GoogleTagMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="G-XXXXXXXXXX" />
                 <p class="text-xs text-gray-500 mt-1">Google Analytics 4 ölçüm kimliği. Boş bırakırsanız script yüklenmez.</p>
             </div>
             <div>
                 <label asp-for="Settings.GoogleTagManager" class="block text-sm font-medium text-gray-700 mb-2">
-                    Google Tag Manager (Container ID)
+                    Google Tag Manager (Container ID) <span class="text-gray-500 font-normal">(max @Settings.GoogleTagManagerMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.GoogleTagManager" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="GTM-XXXXXXX" />
+                <input type="text" asp-for="Settings.GoogleTagManager" maxlength="@Settings.GoogleTagManagerMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="GTM-XXXXXXX" />
                 <p class="text-xs text-gray-500 mt-1">GTM container kimliği. Boş bırakırsanız GTM scripti yüklenmez.</p>
             </div>
             <div>
                 <label asp-for="Settings.GoogleSiteVerification" class="block text-sm font-medium text-gray-700 mb-2">
-                    Google Site Verification
+                    Google Site Verification <span class="text-gray-500 font-normal">(max @Settings.GoogleSiteVerificationMaxLength)</span>
                 </label>
-                <input type="text" asp-for="Settings.GoogleSiteVerification" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Meta content değeri" />
+                <input type="text" asp-for="Settings.GoogleSiteVerification" maxlength="@Settings.GoogleSiteVerificationMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Meta content değeri" />
                 <p class="text-xs text-gray-500 mt-1">Google Search Console doğrulama meta etiketindeki content değeri.</p>
             </div>
         </div>

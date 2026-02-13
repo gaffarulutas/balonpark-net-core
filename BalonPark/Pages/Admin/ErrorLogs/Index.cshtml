@@ -8,6 +8,7 @@
 }
 
 <div class="p-6">
+    @Html.AntiForgeryToken()
     <!-- Header -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -20,9 +21,18 @@
                 </h1>
                 <p class="text-gray-600 mt-1">Uygulama hatalarını detaylı inceleyin (Error seviyesi, Serilog → ErrorLogs tablosu)</p>
             </div>
-            <div class="flex items-center gap-2 text-sm text-gray-500">
-                <span class="font-medium text-gray-700">Toplam:</span>
-                <span>@Model.TotalCount kayıt</span>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                    <span class="font-medium text-gray-700">Toplam:</span>
+                    <span>@Model.TotalCount kayıt</span>
+                </div>
+                @if (Model.TotalCount > 0)
+                {
+                    <button type="button" id="btnDeleteAll" class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        Toplu Sil
+                    </button>
+                }
             </div>
         </div>
     </div>
@@ -179,6 +189,44 @@
     var modal = document.getElementById('detailModal');
     var backdrop = document.getElementById('detailModalBackdrop');
     var closeBtn = document.getElementById('detailModalClose');
+
+    // Toplu sil: onay sonrası tüm hata loglarını siler
+    var btnDeleteAll = document.getElementById('btnDeleteAll');
+    if (btnDeleteAll) {
+        btnDeleteAll.addEventListener('click', function () {
+            var confirmOptions = {
+                title: 'Tüm hata loglarını sil',
+                text: 'Veritabanındaki tüm hata kayıtları kalıcı olarak silinecek. Bu işlem geri alınamaz.',
+                icon: 'warning',
+                confirmButtonText: 'Evet, hepsini sil'
+            };
+            (window.swalConfirm || function (opts) {
+                var msg = (opts && (opts.title || opts.text)) || 'Devam etmek istiyor musunuz?';
+                return Promise.resolve({ isConfirmed: window.confirm(msg) });
+            })(confirmOptions).then(function (result) {
+                if (!result.isConfirmed) return;
+                var tokenEl = document.querySelector('input[name="__RequestVerificationToken"]');
+                var url = '/Admin/ErrorLogs?handler=DeleteAll';
+                var headers = { 'Content-Type': 'application/json' };
+                if (tokenEl) headers['RequestVerificationToken'] = tokenEl.value;
+                fetch(url, { method: 'POST', headers: headers })
+                    .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+                    .then(function (res) {
+                        if (res.ok && res.data.success) {
+                            if (window.Swal && window.Swal.fire) {
+                                window.Swal.fire({ icon: 'success', title: 'Tamamlandı', text: res.data.message || 'Kayıtlar silindi.' });
+                            } else {
+                                alert(res.data.message || 'Kayıtlar silindi.');
+                            }
+                            window.location.reload();
+                        } else {
+                            alert(res.data.message || 'Silme işlemi başarısız.');
+                        }
+                    })
+                    .catch(function () { alert('İstek gönderilemedi.'); });
+            });
+        });
+    }
 
     function openModal(data) {
         document.getElementById('detailId').textContent = 'Id: ' + data.id;

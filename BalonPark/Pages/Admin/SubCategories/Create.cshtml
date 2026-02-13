@@ -1,5 +1,6 @@
 @page
 @model BalonPark.Pages.Admin.SubCategories.CreateModel
+@using BalonPark.Models
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Yeni Alt Kategori";
@@ -48,17 +49,19 @@
 
             <div>
                 <label asp-for="SubCategory.Name" class="block text-sm font-medium text-gray-700 mb-2">
-                    Alt Kategori Adı <span class="text-red-500">*</span>
+                    Alt Kategori Adı <span class="text-red-500">*</span> <span class="text-gray-500 font-normal">(max @SubCategory.NameMaxLength karakter)</span>
                 </label>
-                <input type="text" asp-for="SubCategory.Name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Örn: Akıllı Telefonlar">
+                <input type="text" asp-for="SubCategory.Name" maxlength="@SubCategory.NameMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Örn: Akıllı Telefonlar">
+                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@SubCategory.NameMaxLength">0 / @SubCategory.NameMaxLength</span>
                 <span asp-validation-for="SubCategory.Name" class="text-red-500 text-sm mt-1 block"></span>
             </div>
 
             <div>
                 <label asp-for="SubCategory.Description" class="block text-sm font-medium text-gray-700 mb-2">
-                    Açıklama
+                    Açıklama <span class="text-gray-500 font-normal">(max @SubCategory.DescriptionMaxLength karakter)</span>
                 </label>
-                <textarea asp-for="SubCategory.Description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Alt kategori hakkında açıklama..."></textarea>
+                <textarea asp-for="SubCategory.Description" maxlength="@SubCategory.DescriptionMaxLength" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" placeholder="Alt kategori hakkında açıklama..."></textarea>
+                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@SubCategory.DescriptionMaxLength">0 / @SubCategory.DescriptionMaxLength</span>
             </div>
 
             <div class="flex items-center">

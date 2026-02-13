@@ -1,5 +1,6 @@
 @page
 @model BalonPark.Pages.Admin.Products.CreateModel
+@using BalonPark.Models
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Yeni Ürün";
@@ -85,8 +86,9 @@
                         </div>
                     </div>
                     <div>
-                        <label asp-for="Product.Name" class="block text-sm font-medium text-gray-700 mb-2">Ürün Adı <span class="text-red-500">*</span></label>
-                        <input type="text" asp-for="Product.Name" class="@inputClass" placeholder="Örn: Şişme Oyun Parkı 5x5">
+                        <label asp-for="Product.Name" class="block text-sm font-medium text-gray-700 mb-2">Ürün Adı <span class="text-red-500">*</span> <span class="text-gray-500 font-normal">(max @Product.NameMaxLength karakter)</span></label>
+                        <input type="text" asp-for="Product.Name" maxlength="@Product.NameMaxLength" class="@inputClass" placeholder="Örn: Şişme Oyun Parkı 5x5">
+                        <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Product.NameMaxLength">0 / @Product.NameMaxLength</span>
                         <span asp-validation-for="Product.Name" class="text-red-500 text-sm mt-1 block"></span>
                     </div>
                 </div>
@@ -120,8 +122,9 @@
                         <span asp-validation-for="Product.Description" class="text-red-500 text-sm mt-1 block"></span>
                     </div>
                     <div>
-                        <label asp-for="Product.Summary" class="block text-sm font-medium text-gray-700 mb-2">Özet</label>
-                        <textarea asp-for="Product.Summary" rows="3" class="@inputClass" placeholder="Kısa özet (isteğe bağlı)"></textarea>
+                        <label asp-for="Product.Summary" class="block text-sm font-medium text-gray-700 mb-2">Özet <span class="text-gray-500 font-normal">(max @Product.SummaryMaxLength karakter)</span></label>
+                        <textarea asp-for="Product.Summary" maxlength="@Product.SummaryMaxLength" rows="3" class="@inputClass" placeholder="Kısa özet (isteğe bağlı)"></textarea>
+                        <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Product.SummaryMaxLength">0 / @Product.SummaryMaxLength</span>
                         <small class="text-gray-500 text-sm mt-1 block">Kart ve detay sayfasında görünür.</small>
                     </div>
                     <div>
@@ -168,8 +171,9 @@
                                 <input type="number" asp-for="Product.RequiredPersonCount" step="1" min="0" class="@inputClass" placeholder="Örn: 2">
                             </div>
                             <div>
-                                <label asp-for="Product.FanDescription" class="block text-sm font-medium text-gray-700 mb-2">Fan Açıklaması</label>
-                                <input type="text" asp-for="Product.FanDescription" class="@inputClass" placeholder="Örn: 1 x türbin">
+                                <label asp-for="Product.FanDescription" class="block text-sm font-medium text-gray-700 mb-2">Fan Açıklaması <span class="text-gray-500 font-normal">(max @Product.FanDescriptionMaxLength)</span></label>
+                                <input type="text" asp-for="Product.FanDescription" maxlength="@Product.FanDescriptionMaxLength" class="@inputClass" placeholder="Örn: 1 x türbin">
+                                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Product.FanDescriptionMaxLength">0 / @Product.FanDescriptionMaxLength</span>
                             </div>
                             <div>
                                 <label asp-for="Product.FanWeightKg" class="block text-sm font-medium text-gray-700 mb-2">Fan Ağırlığı (kg)</label>
@@ -202,12 +206,14 @@
                         <h3 class="text-sm font-semibold text-gray-700 mb-3">Sertifika ve Garanti</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label asp-for="Product.WarrantyDescription" class="block text-sm font-medium text-gray-700 mb-2">Garanti Süresi</label>
-                                <input type="text" asp-for="Product.WarrantyDescription" class="@inputClass" placeholder="Örn: 2 yıl garanti">
+                                <label asp-for="Product.WarrantyDescription" class="block text-sm font-medium text-gray-700 mb-2">Garanti Süresi <span class="text-gray-500 font-normal">(max @Product.WarrantyDescriptionMaxLength)</span></label>
+                                <input type="text" asp-for="Product.WarrantyDescription" maxlength="@Product.WarrantyDescriptionMaxLength" class="@inputClass" placeholder="Örn: 2 yıl garanti">
+                                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Product.WarrantyDescriptionMaxLength">0 / @Product.WarrantyDescriptionMaxLength</span>
                             </div>
                             <div>
-                                <label asp-for="Product.AfterSalesService" class="block text-sm font-medium text-gray-700 mb-2">Garanti Sonrası Hizmet</label>
-                                <input type="text" asp-for="Product.AfterSalesService" class="@inputClass" placeholder="Örn: 5 yıllık servis ve bakım desteği">
+                                <label asp-for="Product.AfterSalesService" class="block text-sm font-medium text-gray-700 mb-2">Garanti Sonrası Hizmet <span class="text-gray-500 font-normal">(max @Product.AfterSalesServiceMaxLength)</span></label>
+                                <input type="text" asp-for="Product.AfterSalesService" maxlength="@Product.AfterSalesServiceMaxLength" class="@inputClass" placeholder="Örn: 5 yıllık servis ve bakım desteği">
+                                <span class="char-counter text-sm text-gray-500 mt-1 block" data-max="@Product.AfterSalesServiceMaxLength">0 / @Product.AfterSalesServiceMaxLength</span>
                             </div>
                         </div>
                     </div>

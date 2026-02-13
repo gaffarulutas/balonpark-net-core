@@ -94,6 +94,28 @@ public class ErrorLogRepository(DapperContext context, ILogger<ErrorLogRepositor
     }
 
     /// <summary>
+    /// Tüm hata loglarını veritabanından siler (geri alınamaz).
+    /// </summary>
+    /// <returns>Silinen kayıt sayısı.</returns>
+    public async Task<int> DeleteAllAsync()
+    {
+        try
+        {
+            using var connection = context.CreateConnection();
+            var sql = $@"DELETE FROM [{TableName}]";
+            var deleted = await connection.ExecuteAsync(sql);
+            if (deleted > 0)
+                logger.LogInformation("ErrorLogs: {Count} kayıt silindi.", deleted);
+            return deleted;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "ErrorLogs toplu silme hatası.");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Seviyeye göre log sayıları (özet).
     /// </summary>
     public async Task<Dictionary<string, int>> GetCountByLevelAsync()
