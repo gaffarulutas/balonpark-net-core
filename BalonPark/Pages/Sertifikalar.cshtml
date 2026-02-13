@@ -1,0 +1,133 @@
+@page "/certificates"
+@model SertifikalarModel
+@using System.Text.Json
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    var urlService = (IUrlService?)ViewData["UrlService"];
+    var baseUrl = urlService?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/";
+    var pageUrl = urlService?.GetPageUrl("/certificates") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/certificates";
+    var logoUrl = settings?.Logo != null ? (urlService?.GetImageUrl(settings.Logo) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{settings.Logo}") : (urlService?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
+
+    ViewData["Title"] = $"Sertifikalarımız | {companyName}";
+    ViewData["Description"] = "Balon Park CE ve EN 14960 güvenlik sertifikaları. 650 gr/m² birinci sınıf PVC branda, 2 yıl garanti, stoktan hızlı teslimat ve ücretsiz 3D tasarım desteği.";
+    ViewData["Keywords"] = "sertifika, CE sertifikası, EN 14960, şişme oyun parkı güvenlik, PVC branda, garanti, Balon Park sertifikaları";
+    ViewData["Image"] = logoUrl;
+}
+
+<!-- WebPage + BreadcrumbList JSON-LD -->
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "WebPage",
+    "name": @Html.Raw(JsonSerializer.Serialize("Sertifikalarımız - " + companyName)),
+    "description": @Html.Raw(JsonSerializer.Serialize("Balon Park CE ve EN 14960 güvenlik sertifikaları. Kalite ve güvenlik belgelerimiz.")),
+    "url": @Html.Raw(JsonSerializer.Serialize(pageUrl)),
+    "publisher": { "@@type": "Organization", "name": @Html.Raw(JsonSerializer.Serialize(companyName)) }
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [
+        { "@@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": @Html.Raw(JsonSerializer.Serialize(baseUrl)) },
+        { "@@type": "ListItem", "position": 2, "name": "Sertifikalarımız", "item": @Html.Raw(JsonSerializer.Serialize(pageUrl)) }
+    ]
+}
+</script>
+
+<article class="space-y-10 md:space-y-14 pb-10" id="sertifikalar-page-content">
+    @await Html.PartialAsync("Shared/_Breadcrumb", new List<BreadcrumbItem>
+    {
+        BreadcrumbItem.Link("Ana Sayfa", "/"),
+        BreadcrumbItem.Current("Sertifikalarımız")
+    })
+
+    <header class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <figure class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary" aria-hidden="true">
+                <i data-lucide="award" class="h-7 w-7" aria-hidden="true"></i>
+            </figure>
+            <div>
+                <h1 class="text-3xl font-bold text-ink sm:text-4xl">Sertifikalarımız</h1>
+                <p class="mt-1 text-lg text-gray-600 max-w-3xl">Kalite ve güvenlik belgelerimiz; CE ve EN 14960 uyumluluğu.</p>
+            </div>
+        </div>
+    </header>
+
+    <section aria-labelledby="cert-intro-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="cert-intro-heading" class="text-xl font-semibold text-ink mb-4">Güvenlik ve Uyumluluk</h2>
+        <p class="text-gray-600 leading-relaxed">
+            @Html.Raw("Balon Park tarafından üretilen tüm şişme oyun parkları, uluslararası CE ve EN 14960 güvenlik sertifikalarına tam uyumludur. Sektördeki tecrübemizle, EN 14960 standartlarına uygun olarak çift ve dörtlü dikiş sistemleriyle güçlendirilmiş, Türkiye'nin lider şişme oyun parkı imalatçısıyız.")
+        </p>
+    </section>
+
+    <section aria-labelledby="malzeme-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="malzeme-heading" class="text-xl font-semibold text-ink mb-4 flex items-center gap-2">
+            <i data-lucide="layers" class="w-5 h-5 text-primary" aria-hidden="true"></i>
+            Malzeme Detayı
+        </h2>
+        <p class="text-gray-600 leading-relaxed">
+            Üretimimizde 650 gr/m² ağırlığında, 0,55 mm kalınlığında, solma ve alev yürütmez özellikli birinci sınıf PVC branda kullanılmaktadır. Bu bilgi, profesyonel kiralama firmaları için kritiktir.
+        </p>
+    </section>
+
+    <section aria-labelledby="garanti-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="garanti-heading" class="text-xl font-semibold text-ink mb-4 flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-5 h-5 text-primary" aria-hidden="true"></i>
+            Garanti
+        </h2>
+        <p class="text-gray-600 leading-relaxed">
+            Tüm ürünlerimiz imalat hatalarına karşı 2 yıl garantilidir.
+        </p>
+    </section>
+
+    <section aria-labelledby="teslimat-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="teslimat-heading" class="text-xl font-semibold text-ink mb-4 flex items-center gap-2">
+            <i data-lucide="truck" class="w-5 h-5 text-primary" aria-hidden="true"></i>
+            Hızlı Teslimat ve Stok
+        </h2>
+        <p class="text-gray-600 leading-relaxed">
+            Stoktan hızlı teslimat veya projenize özel hızlı üretim seçenekleri sunuyoruz.
+        </p>
+    </section>
+
+    <section aria-labelledby="destek-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="destek-heading" class="text-xl font-semibold text-ink mb-4 flex items-center gap-2">
+            <i data-lucide="layout" class="w-5 h-5 text-primary" aria-hidden="true"></i>
+            3D Tasarım ve Teknik Destek
+        </h2>
+        <p class="text-gray-600 leading-relaxed">
+            Projelerinizi gerçeğe dönüştürmek için ücretsiz 3D tasarım ve teknik destek hizmeti sunuyoruz; her aşamada profesyonel çözüm ortağınız oluyoruz. Kaliteli malzeme, dayanıklı yapı ve yenilikçi tasarımlarımızla eğlenceyi güvenle inşa ediyoruz.
+        </p>
+    </section>
+
+    @if (Model.CertificateImagePaths != null && Model.CertificateImagePaths.Count > 0)
+    {
+        <section aria-labelledby="cert-images-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 id="cert-images-heading" class="text-xl font-semibold text-ink mb-6">Sertifika Görselleri</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" role="list">
+                @foreach (var path in Model.CertificateImagePaths)
+                {
+                    var imgSrc = path.StartsWith("/") ? path : "/" + path;
+                    var fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+                    <li class="rounded-lg border border-gray-100 overflow-hidden bg-gray-50/50 hover:shadow-md transition-shadow">
+                        <a href="@imgSrc" target="_blank" rel="noopener noreferrer" class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                            <img src="@imgSrc" alt="@(fileName)" class="w-full h-48 object-contain object-center" loading="lazy">
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    <section aria-labelledby="contact-cert-heading" class="rounded-xl border border-gray-100 bg-white p-6 text-center shadow-sm md:p-8">
+        <h2 id="contact-cert-heading" class="text-xl font-semibold text-ink mb-2">Detaylı Bilgi İçin</h2>
+        <p class="text-gray-600 mb-6">Sertifikalar ve teknik şartnameler hakkında bilgi almak için bizimle iletişime geçebilirsiniz.</p>
+        <a asp-page="/Iletisim" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-medium hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+            <i data-lucide="mail" class="w-5 h-5" aria-hidden="true"></i>
+            <span>İletişime Geçin</span>
+        </a>
+    </section>
+</article>

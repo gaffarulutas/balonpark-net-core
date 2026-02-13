@@ -1,4 +1,4 @@
-@page
+@page "/about"
 @model HakkimizdaModel
 @using System.Text.Json
 @{
@@ -6,7 +6,7 @@
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
     var urlService = (IUrlService?)ViewData["UrlService"];
     var baseUrl = urlService?.GetPageUrl("/") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/";
-    var pageUrl = urlService?.GetPageUrl("/Hakkimizda") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Hakkimizda";
+    var pageUrl = urlService?.GetPageUrl("/about") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/about";
     var logoUrl = settings?.Logo != null ? (urlService?.GetImageUrl(settings.Logo) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{settings.Logo}") : (urlService?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 
     ViewData["Title"] = $"Hakkımızda | {companyName}";

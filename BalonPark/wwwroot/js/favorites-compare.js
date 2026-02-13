@@ -335,12 +335,12 @@ class FavoritesAndCompare {
     // Karşılaştırma URL'i oluştur
     getCompareUrl() {
         const slugs = this.compareList.map(p => p.slug).filter(s => s).join(':');
-        return slugs ? `/Compare/${slugs}` : '/Compare';
+        return slugs ? `/compare/${slugs}` : '/compare';
     }
 
     // URL'i localStorage ile senkronize et (Compare sayfasında header sayacı doğru görünsün)
     syncUrlWithStorage() {
-        if (!window.location.pathname.startsWith('/Compare/')) return;
+        if (!window.location.pathname.startsWith('/compare/')) return;
         const pathParts = window.location.pathname.split('/').filter(Boolean);
         const slugsParam = pathParts[1]; // Compare sonrası ilk segment (slugs:slugs:slugs)
         if (!slugsParam) return;
@@ -486,7 +486,7 @@ class FavoritesAndCompare {
             this.showNotification('Ürün bilgileri eksik. Lütfen tekrar deneyin.', 'error');
             return;
         }
-        window.location.href = `/Compare/${slugs.join(':')}`;
+        window.location.href = `/compare/${slugs.join(':')}`;
     }
 
     // Karşılaştırma tablosunu oluştur

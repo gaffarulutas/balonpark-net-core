@@ -1,4 +1,4 @@
-@page "/Compare/{slugs?}"
+@page "/compare/{slugs?}"
 @model CompareModel
 @{
     var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
@@ -375,7 +375,7 @@
                     window.location.href = '/';
                 } else {
                     var newSlugs = compareList.map(function(p) { return p.slug; }).filter(function(s) { return s; }).join(':');
-                    window.location.href = '/Compare/' + newSlugs;
+                    window.location.href = '/compare/' + newSlugs;
                 }
             });
         }

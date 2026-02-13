@@ -1,0 +1,215 @@
+@page
+@model BalonPark.Pages.Admin.ErrorLogs.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Hata Logları";
+    ViewData["AdminUserName"] = Model.AdminUserName;
+    ViewData["AdminEmail"] = Model.AdminEmail;
+}
+
+<div class="p-6">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Hata Logları
+                </h1>
+                <p class="text-gray-600 mt-1">Uygulama hatalarını detaylı inceleyin (Error seviyesi, Serilog → ErrorLogs tablosu)</p>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+                <span class="font-medium text-gray-700">Toplam:</span>
+                <span>@Model.TotalCount kayıt</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seviye özeti -->
+    @if (Model.CountByLevel.Any())
+    {
+        <div class="flex flex-wrap gap-2 mb-4">
+            @foreach (var kv in Model.CountByLevel.OrderByDescending(x => x.Value))
+            {
+                <a href="?level=@Uri.EscapeDataString(kv.Key)"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium @(Model.Level == kv.Key ? "bg-red-600 text-white" : "bg-red-50 text-red-800 hover:bg-red-100")">
+                    @kv.Key: @kv.Value
+                </a>
+            }
+            @if (!string.IsNullOrEmpty(Model.Level))
+            {
+                <a href="@(Url.Page("", new { currentPage = 1, level = (string?)null, from = Model.From, to = Model.To }))" class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Tümü</a>
+            }
+        </div>
+    }
+
+    <!-- Filtreler -->
+    <form method="get" class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap items-end gap-4">
+        <input type="hidden" name="currentPage" value="1" />
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Seviye</label>
+            <select name="level" class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                <option value="">Tümü</option>
+                <option value="Error" selected="@(Model.Level == "Error")">Error</option>
+                <option value="Fatal" selected="@(Model.Level == "Fatal")">Fatal</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Başlangıç</label>
+            <input type="datetime-local" name="from" value="@(Model.From?.ToString("yyyy-MM-ddTHH:mm"))" class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Bitiş</label>
+            <input type="datetime-local" name="to" value="@(Model.To?.ToString("yyyy-MM-ddTHH:mm"))" class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-gray-800 focus:border-transparent" />
+        </div>
+        <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800">Filtrele</button>
+    </form>
+
+    <!-- Tablo -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        @if (!Model.Logs.Any())
+        {
+            <div class="p-12 text-center text-gray-500">
+                <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p>Henüz hata kaydı yok veya filtreye uyan kayıt bulunamadı.</p>
+                <p class="text-sm mt-1">Hatalar Serilog ile ErrorLogs tablosuna yazılır.</p>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Id</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarih</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seviye</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mesaj</th>
+                            <th class="px-4 py-3 w-24 text-center text-xs font-medium text-gray-500 uppercase">Detay</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach (var log in Model.Logs)
+                        {
+                            var msgPreview = log.Message != null && log.Message.Length > 120 ? log.Message.Substring(0, 120) + "…" : log.Message;
+                            var levelClass = log.Level == "Fatal" ? "bg-red-700 text-white" : "bg-red-100 text-red-800";
+                            <tr class="hover:bg-gray-50" data-log-id="@log.Id">
+                                <td class="px-4 py-3 text-sm text-gray-900">@log.Id</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">@(log.TimeStamp?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-")</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium @levelClass">@(log.Level ?? "-")</span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 max-w-md">
+                                    <span class="line-clamp-2">@(msgPreview ?? "-")</span>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <button type="button" class="detail-btn inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200" data-id="@log.Id">
+                                        Detay
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <!-- Sayfalama -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="mt-4 flex items-center justify-between">
+            <p class="text-sm text-gray-600">
+                Sayfa @Model.CurrentPage / @Model.TotalPages · Toplam @Model.TotalCount kayıt
+            </p>
+            <div class="flex gap-2">
+                @if (Model.CurrentPage > 1)
+                {
+                    <a href="?currentPage=@(Model.CurrentPage - 1)&level=@Model.Level&from=@(Model.From?.ToString("yyyy-MM-ddTHH:mm"))&to=@(Model.To?.ToString("yyyy-MM-ddTHH:mm"))" class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Önceki</a>
+                }
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <a href="?currentPage=@(Model.CurrentPage + 1)&level=@Model.Level&from=@(Model.From?.ToString("yyyy-MM-ddTHH:mm"))&to=@(Model.To?.ToString("yyyy-MM-ddTHH:mm"))" class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Sonraki</a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Detay modal -->
+<div id="detailModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-modal="true">
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50" id="detailModalBackdrop"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Hata detayı · <span id="detailId"></span> · <span id="detailTime"></span></h3>
+                <button type="button" id="detailModalClose" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 space-y-4">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-1">Mesaj</h4>
+                    <pre id="detailMessage" class="p-3 bg-gray-50 rounded-md text-sm text-gray-800 whitespace-pre-wrap break-words font-sans"></pre>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-1">Message Template</h4>
+                    <pre id="detailTemplate" class="p-3 bg-gray-50 rounded-md text-sm text-gray-600 whitespace-pre-wrap break-words font-sans"></pre>
+                </div>
+                <div id="detailExceptionBlock">
+                    <h4 class="text-sm font-medium text-red-700 mb-1">Exception</h4>
+                    <pre id="detailException" class="p-3 bg-red-50 rounded-md text-sm text-red-900 whitespace-pre-wrap break-words font-mono"></pre>
+                </div>
+                <div id="detailPropsBlock">
+                    <h4 class="text-sm font-medium text-gray-700 mb-1">Properties</h4>
+                    <pre id="detailProps" class="p-3 bg-gray-50 rounded-md text-sm text-gray-600 whitespace-pre-wrap break-words font-mono max-h-48 overflow-y-auto"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var modal = document.getElementById('detailModal');
+    var backdrop = document.getElementById('detailModalBackdrop');
+    var closeBtn = document.getElementById('detailModalClose');
+
+    function openModal(data) {
+        document.getElementById('detailId').textContent = 'Id: ' + data.id;
+        document.getElementById('detailTime').textContent = data.timeStamp || '-';
+        document.getElementById('detailMessage').textContent = data.message || '-';
+        document.getElementById('detailTemplate').textContent = data.messageTemplate || '-';
+        document.getElementById('detailException').textContent = data.exception || '-';
+        document.getElementById('detailProps').textContent = data.properties || '-';
+        document.getElementById('detailExceptionBlock').style.display = (data.exception && data.exception.length > 0) ? 'block' : 'none';
+        document.getElementById('detailPropsBlock').style.display = (data.properties && data.properties.length > 0) ? 'block' : 'none';
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+    }
+
+    document.querySelectorAll('.detail-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = parseInt(btn.getAttribute('data-id'), 10);
+            if (!id) return;
+            var url = '/Admin/ErrorLogs?handler=Detail&id=' + id;
+            fetch(url)
+                .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+                .then(function (data) { openModal(data); })
+                .catch(function () { alert('Detay yüklenemedi.'); });
+        });
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+})();
+</script>
+}

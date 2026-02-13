@@ -78,13 +78,14 @@ public class SitemapController(
         {
             new { Url = "/", Priority = "1.0", ChangeFreq = "daily", LastMod = DateTime.Now },
             new { Url = "/Index", Priority = "1.0", ChangeFreq = "daily", LastMod = DateTime.Now },
-            new { Url = "/Products", Priority = "0.9", ChangeFreq = "daily", LastMod = DateTime.Now },
+            new { Url = "/products", Priority = "0.9", ChangeFreq = "daily", LastMod = DateTime.Now },
             new { Url = "/Blog", Priority = "0.8", ChangeFreq = "weekly", LastMod = DateTime.Now },
-            new { Url = "/Hakkimizda", Priority = "0.8", ChangeFreq = "monthly", LastMod = DateTime.Now },
-            new { Url = "/Iletisim", Priority = "0.8", ChangeFreq = "monthly", LastMod = DateTime.Now },
-            new { Url = "/Privacy", Priority = "0.5", ChangeFreq = "yearly", LastMod = DateTime.Now },
-            new { Url = "/KullanimKosullari", Priority = "0.5", ChangeFreq = "yearly", LastMod = DateTime.Now },
-            new { Url = "/Search", Priority = "0.6", ChangeFreq = "weekly", LastMod = DateTime.Now }
+            new { Url = "/about", Priority = "0.8", ChangeFreq = "monthly", LastMod = DateTime.Now },
+            new { Url = "/contact", Priority = "0.8", ChangeFreq = "monthly", LastMod = DateTime.Now },
+            new { Url = "/certificates", Priority = "0.7", ChangeFreq = "monthly", LastMod = DateTime.Now },
+            new { Url = "/privacy", Priority = "0.5", ChangeFreq = "yearly", LastMod = DateTime.Now },
+            new { Url = "/terms-of-use", Priority = "0.5", ChangeFreq = "yearly", LastMod = DateTime.Now },
+            new { Url = "/search", Priority = "0.6", ChangeFreq = "weekly", LastMod = DateTime.Now }
         };
 
         foreach (var page in staticPages)

@@ -38,16 +38,16 @@
 <!-- Hero + Kategoriler (solda) + Product Section -->
 <h1 class="sr-only">Şişme Oyun Parkları ve Çocuk Oyun Grupları - Balon Park</h1>
 <div class="space-y-4 sm:space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 overflow-visible md:items-stretch">
+    <div class="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 overflow-visible md:items-stretch">
         <!-- Sol panel: left_image.jpg + overlay (sağdaki swiper ile aynı overlay yapısı) -->
-        <div class="hero-left-panel order-2 md:order-1 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm flex flex-col md:h-full min-h-[200px] md:min-h-0">
-            <div class="relative flex-1 min-h-[180px] md:min-h-0 md:h-full">
+        <div class="hero-left-panel order-2 md:order-1 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm flex flex-col md:h-full min-h-[160px] md:min-h-0">
+            <div class="relative flex-1 min-h-[140px] md:min-h-0 md:h-full">
                 <img src="~/assets/images/left_image.jpg" alt="Balon Park - İç Mekan Şişme Oyun Parkı" class="absolute inset-0 w-full h-full object-cover" loading="eager" width="280" height="400">
                 <div class="hero-left-overlay">
                     <span class="text-primary font-medium text-sm sm:text-base">İç Mekan Oyun Parkı</span>
                     <h2 class="text-white text-xl sm:text-2xl font-bold mt-1 leading-tight">Hareket, Oyun, Güven</h2>
-                    <p class="text-white/90 text-sm mt-2 line-clamp-2 hidden sm:block">İç mekan şişme parklarımızla çocuklarınız güvenle oynasın; doğum günü ve etkinlikler için ideal.</p>
-                    <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
+                    <p class="text-white/90 text-sm mt-2 line-clamp-1 hidden sm:block">Doğum günü ve etkinlikler için ideal.</p>
+                    <a href="/category/siseme-parklar/sisme-oyun-parki" class="hero-left-overlay-link inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
                         Keşfet <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </a>
                 </div>
@@ -205,16 +205,16 @@
     .hero-aspect {
         display: block;
         width: 100%;
-        min-height: 220px;
+        min-height: 180px;
         position: relative;
     }
-    /* Mobil: daha yüksek hero (2:1 oran, max 420px) */
+    /* Mobil: daha dar hero (2.5:1 oran, max 320px) */
     .hero-aspect {
-        aspect-ratio: 2 / 1;
-        max-height: 420px;
+        aspect-ratio: 2.5 / 1;
+        max-height: 320px;
     }
-    @@supports not (aspect-ratio: 2/1) {
-        .hero-aspect { height: 0; padding-bottom: 50%; }
+    @@supports not (aspect-ratio: 2.5/1) {
+        .hero-aspect { height: 0; padding-bottom: 40%; }
         .hero-aspect > * { position: absolute; inset: 0; }
     }
     @@media (min-width: 768px) {
@@ -222,17 +222,18 @@
             aspect-ratio: auto;
             max-height: none;
             height: 100%;
-            min-height: 420px;
+            min-height: 320px;
         }
     }
     @@media (max-width: 767px) {
-        .hero-aspect { max-height: 420px; }
+        .hero-aspect { max-height: 320px; }
     }
     /* Sol panel: resim üzerinde koyu overlay (metin okunaklılığı) */
     .hero-left-overlay {
         background: rgba(0, 0, 0, 0.35);
         pointer-events: none;
     }
+    .hero-left-overlay-link { pointer-events: auto; }
     /* Hero Swiper: container tam doldurur, slide içerik absolute */
     .hero-swiper-wrap { overflow: hidden; }
     .heroSwiper { width: 100%; height: 100%; }
@@ -242,7 +243,7 @@
         position: relative;
         width: 100%;
         height: 100%;
-        min-height: 220px;
+        min-height: 180px;
     }
     .hero-slide-img {
         position: absolute;

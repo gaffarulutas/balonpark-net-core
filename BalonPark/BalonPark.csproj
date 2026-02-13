@@ -19,6 +19,7 @@
       <PackageReference Include="MimeKit" Version="4.9.0" />
       <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
       <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+      <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="9.0.2" />
       <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
     <PackageReference Include="System.ServiceModel.Syndication" Version="9.0.9" />
   </ItemGroup>

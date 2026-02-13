@@ -4,6 +4,7 @@ using BalonPark.Services;
 using BalonPark.Pages.Admin;
 using BalonPark.Middleware;
 using Serilog;
+using Serilog.Sinks.MSSqlServer;
 
 // Serilog Yapılandırması - appsettings.json'dan okuyacak ama önce basic config
 Log.Logger = new LoggerConfiguration()
@@ -24,16 +25,35 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     // Serilog'u ASP.NET Core'a entegre et ve appsettings.json'dan yapılandırmayı oku
-    builder.Host.UseSerilog((context, services, configuration) => configuration
-        .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .WriteTo.File(
-            path: "logs/error-.txt",
-            rollingInterval: RollingInterval.Day,
-            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}",
-            retainedFileCountLimit: 30,
-            restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error));
+    builder.Host.UseSerilog((context, services, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .WriteTo.File(
+                path: "logs/error-.txt",
+                rollingInterval: RollingInterval.Day,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}",
+                retainedFileCountLimit: 30,
+                restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error);
+
+        // Error seviyesindeki logları SQL Server'a yaz (ConnectionString varsa)
+        var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+        if (!string.IsNullOrWhiteSpace(connectionString))
+        {
+            var sinkOptions = new MSSqlServerSinkOptions
+            {
+                TableName = "ErrorLogs",
+                SchemaName = "dbo",
+                AutoCreateSqlTable = true
+            };
+            configuration.WriteTo.MSSqlServer(
+                connectionString: connectionString,
+                sinkOptions: sinkOptions,
+                restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error);
+        }
+    });
 
     // Add services to the container.
     builder.Services.AddRazorPages();
@@ -67,6 +87,7 @@ try
     builder.Services.AddScoped<ProductRepository>();
     builder.Services.AddScoped<ProductImageRepository>();
     builder.Services.AddScoped<BlogRepository>();
+    builder.Services.AddScoped<ErrorLogRepository>();
 
     // Services
     builder.Services.AddHttpClient<CurrencyService>();

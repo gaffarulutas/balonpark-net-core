@@ -1,8 +1,9 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using BalonPark.Services;
 using BalonPark.Data;
+using BalonPark.Services;
 
 namespace BalonPark.Pages;
 
@@ -14,21 +15,34 @@ public class ErrorModel : BasePage
 
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
+    /// <summary>
+    /// Development ortamında true; Production'da kullanıcıya farklı mesaj gösterilir.
+    /// </summary>
+    public bool IsDevelopment { get; set; }
+
     private readonly ILogger<ErrorModel> _logger;
 
-    public ErrorModel(ILogger<ErrorModel> logger, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, SettingsRepository settingsRepository, IUrlService urlService, ICurrencyCookieService currencyCookieService)
+    public ErrorModel(
+        ILogger<ErrorModel> logger,
+        IWebHostEnvironment env,
+        CategoryRepository categoryRepository,
+        SubCategoryRepository subCategoryRepository,
+        SettingsRepository settingsRepository,
+        IUrlService urlService,
+        ICurrencyCookieService currencyCookieService)
         : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
     {
         _logger = logger;
+        IsDevelopment = env.IsDevelopment();
     }
 
     public void OnGet()
     {
         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-        
-        // Hata sayfası görüntülendiğinde log
-        _logger.LogError("Hata sayfası görüntülendi. RequestId: {RequestId}, Path: {Path}", 
-            RequestId, 
+
+        _logger.LogError(
+            "Hata sayfası görüntülendi. RequestId: {RequestId}, Path: {Path}",
+            RequestId,
             HttpContext.Request.Path);
     }
 }
