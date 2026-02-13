@@ -11,6 +11,7 @@ public class ProductDetailModel : BasePage
     private readonly ProductRepository _productRepository;
     private readonly ProductImageRepository _productImageRepository;
     private readonly CurrencyService _currencyService;
+    private readonly PdfService _pdfService;
 
     public Product? Product { get; set; }
     public ProductImage? MainImage { get; set; }
@@ -27,12 +28,14 @@ public class ProductDetailModel : BasePage
         ProductRepository productRepository,
         ProductImageRepository productImageRepository,
         CurrencyService currencyService,
+        PdfService pdfService,
         IUrlService urlService,
         ICurrencyCookieService currencyCookieService) : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
     {
         _productRepository = productRepository;
         _productImageRepository = productImageRepository;
         _currencyService = currencyService;
+        _pdfService = pdfService;
     }
 
     public async Task<IActionResult> OnGetAsync(string categorySlug, string subCategorySlug, string productSlug)
@@ -110,6 +113,32 @@ public class ProductDetailModel : BasePage
 
         // Google Shopping gereksinimleri: Sayfa başarıyla yüklendi
         return Page();
+    }
+
+    /// <summary>
+    /// Sayfadaki ürünün kendisini PDF olarak indirir (public ürün detay sayfası).
+    /// </summary>
+    public async Task<IActionResult> OnGetExportRelatedProductsPdfAsync(string categorySlug, string subCategorySlug, string productSlug)
+    {
+        if (string.IsNullOrEmpty(productSlug))
+            return NotFound();
+
+        var product = await _productRepository.GetBySlugAsync(productSlug);
+        if (product == null)
+            return NotFound();
+
+        if (product.CategorySlug != categorySlug || product.SubCategorySlug != subCategorySlug)
+            return RedirectToPagePermanent("/ProductDetail", new { categorySlug = product.CategorySlug, subCategorySlug = product.SubCategorySlug, productSlug = product.Slug });
+
+        var (usdPrice, euroPrice) = await _currencyService.CalculatePricesAsync(product.Price);
+        product.UsdPrice = Math.Round(usdPrice, 2);
+        product.EuroPrice = Math.Round(euroPrice, 2);
+
+        var mainImage = await _productImageRepository.GetMainImageAsync(product.Id);
+
+        var pdfBytes = await _pdfService.GenerateProductDetailPdfAsync(product, mainImage);
+        var fileName = $"Urun-{product.Slug}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+        return File(pdfBytes, "application/pdf", fileName);
     }
 }
 

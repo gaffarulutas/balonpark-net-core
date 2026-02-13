@@ -422,15 +422,9 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# ========================
-# BalonPark Project Specific
-# ========================
 
-# Connection strings and sensitive settings
-appsettings.Development.json
-appsettings.Production.json
-**/appsettings.*.json
-!**/appsettings.json
+# Google / servis hesap anahtarı klasörü
+**/Keys/
 
 # Uploaded files – do not push user uploads
 wwwroot/uploads/

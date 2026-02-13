@@ -42,7 +42,15 @@ public class EditModel(
     {
         try
         {
-            // Resim yükleme işlemi
+            // Mevcut blogu al (resim/slug vb. korumak için)
+            var existingBlog = await blogRepository.GetByIdForAdminAsync(Blog.Id);
+            if (existingBlog == null)
+            {
+                ErrorMessage = "Blog yazısı bulunamadı!";
+                return RedirectToPage("Index");
+            }
+
+            // Yeni resim yüklendiyse güncelle; yoksa mevcut resmi koru (formda FeaturedImage post edilmez)
             if (Request.Form.Files.Count > 0)
             {
                 var featuredImageFile = Request.Form.Files["FeaturedImageFile"];
@@ -51,20 +59,29 @@ public class EditModel(
                     var imagePath = await ImageHelper.SaveBlogImageAsync(featuredImageFile);
                     Blog.FeaturedImage = imagePath;
                 }
+                else
+                    Blog.FeaturedImage = existingBlog.FeaturedImage;
             }
-            
+            else
+                Blog.FeaturedImage = existingBlog.FeaturedImage;
+
             // Slug oluştur (eğer boşsa)
             if (string.IsNullOrEmpty(Blog.Slug))
             {
                 Blog.Slug = await blogService.GenerateSlugAsync(Blog.Title);
             }
             
-            // Meta description oluştur (eğer boşsa)
-            if (string.IsNullOrEmpty(Blog.MetaDescription))
+            // Excerpt oluştur (eğer boşsa)
+            if (string.IsNullOrEmpty(Blog.Excerpt))
             {
-                Blog.MetaDescription = await blogService.GenerateMetaDescriptionAsync(Blog.Content);
+                Blog.Excerpt = await blogService.GenerateMetaDescriptionAsync(Blog.Content, 200);
             }
-            
+
+            // Meta Açıklama (SEO): özetten al, max 300 karakter
+            Blog.MetaDescription = string.IsNullOrEmpty(Blog.Excerpt)
+                ? string.Empty
+                : (Blog.Excerpt.Length <= Blog.MetaDescriptionMaxLength ? Blog.Excerpt : Blog.Excerpt[..Blog.MetaDescriptionMaxLength]);
+
             // Meta keywords oluştur (eğer boşsa)
             if (string.IsNullOrEmpty(Blog.MetaKeywords))
             {
@@ -77,13 +94,7 @@ public class EditModel(
             {
                 Blog.MetaTitle = Blog.Title;
             }
-            
-            // Excerpt oluştur (eğer boşsa)
-            if (string.IsNullOrEmpty(Blog.Excerpt))
-            {
-                Blog.Excerpt = await blogService.GenerateMetaDescriptionAsync(Blog.Content, 200);
-            }
-            
+
             // UpdatedAt ayarla
             Blog.UpdatedAt = DateTime.Now;
             

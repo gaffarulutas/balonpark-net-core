@@ -4,6 +4,7 @@ using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.draw;
 using System.Globalization;
 using BalonPark.Data;
+using BalonPark.Models;
 
 namespace BalonPark.Services;
 
@@ -62,7 +63,181 @@ public class PdfService(
         }
     }
 
+    /// <summary>
+    /// Ürün detay sayfasındaki ilgili ürünler listesini PDF kataloğu olarak üretir (public sayfa export).
+    /// </summary>
+    public async Task<byte[]> GenerateRelatedProductsCatalogPdfAsync(IReadOnlyList<ProductWithImage> relatedProducts, string currentProductName)
+    {
+        return await Task.Run(() =>
+        {
+            using var memoryStream = new MemoryStream();
+            var document = new Document(PageSize.A4, 36, 36, 36, 36);
+            PdfWriter.GetInstance(document, memoryStream);
+            document.Open();
 
+            AddHeaderToDocument(document);
+
+            var titleFont = GetTurkishFont(14, Font.BOLD, BaseColor.DARK_GRAY);
+            document.Add(new Paragraph($"İlgili Ürünler – {currentProductName}", titleFont));
+            document.Add(new Paragraph(" "));
+
+            if (relatedProducts.Count == 0)
+            {
+                document.Add(new Paragraph("Bu ürün için ilgili ürün listesi boş.", GetTurkishFont(10)));
+                document.Close();
+                return memoryStream.ToArray();
+            }
+
+            var table = new PdfPTable(7)
+            {
+                WidthPercentage = 100,
+                HeaderRows = 1
+            };
+            table.SetWidths([1f, 0.8f, 2.5f, 1.2f, 1f, 1f, 1f]);
+
+            var headerFont = GetTurkishFont(9, Font.BOLD, BaseColor.WHITE);
+            var headers = new[] { "Resim", "Kod", "Ürün Adı", "Kategori", "Fiyat (TL)", "Fiyat (USD)", "Fiyat (EUR)" };
+            foreach (var h in headers)
+            {
+                var cell = new PdfPCell(new Phrase(h, headerFont))
+                {
+                    BackgroundColor = new BaseColor(98, 98, 166),
+                    HorizontalAlignment = Element.ALIGN_CENTER,
+                    VerticalAlignment = Element.ALIGN_MIDDLE,
+                    Padding = 4
+                };
+                table.AddCell(cell);
+            }
+
+            var cellFont = GetTurkishFont(9);
+            var webRoot = environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+            foreach (var item in relatedProducts)
+            {
+                var p = item.Product;
+
+                // Resim
+                var imgCell = new PdfPCell { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_MIDDLE, Padding = 4 };
+                if (item.MainImage != null && !string.IsNullOrEmpty(item.MainImage.ThumbnailPath))
+                {
+                    var thumbPath = Path.Combine(webRoot, item.MainImage.ThumbnailPath.TrimStart('/', '\\'));
+                    if (File.Exists(thumbPath))
+                    {
+                        try
+                        {
+                            var img = iTextSharp.text.Image.GetInstance(thumbPath);
+                            img.ScaleToFit(50, 50);
+                            imgCell.AddElement(img);
+                        }
+                        catch { AddPlaceholderImage(imgCell); }
+                    }
+                    else { AddPlaceholderImage(imgCell); }
+                }
+                else { AddPlaceholderImage(imgCell); }
+                table.AddCell(imgCell);
+
+                // Kod (tıklanabilir)
+                var productUrl = urlService.GetProductUrl(p.CategorySlug ?? "", p.SubCategorySlug ?? "", p.Slug);
+                var codePhrase = new Phrase();
+                var codeChunk = new Chunk($"U-{p.Id}", GetTurkishFont(9, Font.UNDERLINE, BaseColor.BLUE));
+                codeChunk.SetAction(new PdfAction(productUrl));
+                codePhrase.Add(codeChunk);
+                table.AddCell(new PdfPCell(codePhrase) { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_MIDDLE, Padding = 4 });
+
+                // Ürün adı (tıklanabilir)
+                var namePhrase = new Phrase();
+                var nameChunk = new Chunk(p.Name ?? "", GetTurkishFont(9, Font.UNDERLINE, BaseColor.BLUE));
+                nameChunk.SetAction(new PdfAction(productUrl));
+                namePhrase.Add(nameChunk);
+                table.AddCell(new PdfPCell(namePhrase) { VerticalAlignment = Element.ALIGN_MIDDLE, Padding = 4 });
+
+                // Kategori
+                table.AddCell(new PdfPCell(new Phrase(p.CategoryName ?? "-", cellFont)) { VerticalAlignment = Element.ALIGN_MIDDLE, Padding = 4 });
+
+                // Fiyatlar
+                table.AddCell(new PdfPCell(new Phrase(p.Price.ToString("N2", CultureInfo.InvariantCulture), cellFont)) { HorizontalAlignment = Element.ALIGN_RIGHT, VerticalAlignment = Element.ALIGN_MIDDLE, Padding = 4 });
+                table.AddCell(new PdfPCell(new Phrase(p.UsdPrice.ToString("N2", CultureInfo.InvariantCulture), cellFont)) { HorizontalAlignment = Element.ALIGN_RIGHT, VerticalAlignment = Element.ALIGN_MIDDLE, Padding = 4 });
+                table.AddCell(new PdfPCell(new Phrase(p.EuroPrice.ToString("N2", CultureInfo.InvariantCulture), cellFont)) { HorizontalAlignment = Element.ALIGN_RIGHT, VerticalAlignment = Element.ALIGN_MIDDLE, Padding = 4 });
+            }
+
+            document.Add(table);
+            document.Close();
+            return memoryStream.ToArray();
+        });
+    }
+
+    /// <summary>
+    /// Ürün detay sayfasındaki ürünün kendisini PDF olarak üretir (tek ürün kartı).
+    /// </summary>
+    public async Task<byte[]> GenerateProductDetailPdfAsync(Product product, ProductImage? mainImage)
+    {
+        return await Task.Run(() =>
+        {
+            using var memoryStream = new MemoryStream();
+            var document = new Document(PageSize.A4, 36, 36, 36, 36);
+            PdfWriter.GetInstance(document, memoryStream);
+            document.Open();
+
+            AddHeaderToDocument(document);
+
+            var titleFont = GetTurkishFont(16, Font.BOLD, BaseColor.DARK_GRAY);
+            document.Add(new Paragraph(product.Name ?? "Ürün", titleFont));
+            document.Add(new Paragraph(" "));
+
+            var webRoot = environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var cellFont = GetTurkishFont(10);
+            var labelFont = GetTurkishFont(10, Font.BOLD, BaseColor.DARK_GRAY);
+
+            // Resim + bilgiler yan yana (2 sütun)
+            var table = new PdfPTable(2) { WidthPercentage = 100 };
+            table.SetWidths([0.35f, 0.65f]);
+
+            // Sol: Ürün görseli (large veya thumbnail)
+            var imgCell = new PdfPCell { HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_TOP, Padding = 8 };
+            string? imagePath = null;
+            if (mainImage != null && !string.IsNullOrEmpty(mainImage.LargePath))
+                imagePath = Path.Combine(webRoot, mainImage.LargePath.TrimStart('/', '\\'));
+            if (string.IsNullOrEmpty(imagePath) && mainImage != null && !string.IsNullOrEmpty(mainImage.ThumbnailPath))
+                imagePath = Path.Combine(webRoot, mainImage.ThumbnailPath.TrimStart('/', '\\'));
+            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+            {
+                try
+                {
+                    var img = iTextSharp.text.Image.GetInstance(imagePath);
+                    img.ScaleToFit(220, 220);
+                    imgCell.AddElement(img);
+                }
+                catch { AddPlaceholderImage(imgCell); }
+            }
+            else { AddPlaceholderImage(imgCell); }
+            table.AddCell(imgCell);
+
+            // Sağ: Kod, kategori, özet, fiyatlar
+            var infoCell = new PdfPCell { VerticalAlignment = Element.ALIGN_TOP, Padding = 8 };
+            var productUrl = urlService.GetProductUrl(product.CategorySlug ?? "", product.SubCategorySlug ?? "", product.Slug);
+            infoCell.AddElement(new Paragraph("Kod: ", labelFont));
+            var codeChunk = new Chunk($"U-{product.Id}", GetTurkishFont(10, Font.UNDERLINE, BaseColor.BLUE));
+            codeChunk.SetAction(new PdfAction(productUrl));
+            var codeP = new Paragraph(); codeP.Add(codeChunk); infoCell.AddElement(codeP);
+            infoCell.AddElement(new Paragraph($"Kategori: {product.CategoryName ?? "-"} / {product.SubCategoryName ?? "-"}", cellFont));
+            infoCell.AddElement(new Paragraph(" "));
+            if (!string.IsNullOrEmpty(product.Summary))
+            {
+                infoCell.AddElement(new Paragraph("Özet:", labelFont));
+                var summary = product.Summary.Length > 400 ? product.Summary[..400] + "…" : product.Summary;
+                infoCell.AddElement(new Paragraph(summary, cellFont));
+                infoCell.AddElement(new Paragraph(" "));
+            }
+            infoCell.AddElement(new Paragraph("Fiyat (TL):", labelFont));
+            infoCell.AddElement(new Paragraph($"₺ {product.Price:N2}", GetTurkishFont(12, Font.BOLD, BaseColor.DARK_GRAY)));
+            infoCell.AddElement(new Paragraph($"USD $ {product.UsdPrice:N2}  |  EUR € {product.EuroPrice:N2}", cellFont));
+            table.AddCell(infoCell);
+
+            document.Add(table);
+            document.Close();
+            return memoryStream.ToArray();
+        });
+    }
 
     private Font GetTurkishFont(int size, int style = Font.NORMAL, BaseColor? color = null)
     {

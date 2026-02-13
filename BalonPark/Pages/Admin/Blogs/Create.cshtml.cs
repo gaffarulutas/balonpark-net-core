@@ -53,13 +53,18 @@ public class CreateModel(
             
             // Slug oluştur
             Blog.Slug = await blogService.GenerateSlugAsync(Blog.Title);
-            
-            // Meta description oluştur (eğer boşsa)
-            if (string.IsNullOrEmpty(Blog.MetaDescription))
+
+            // Excerpt oluştur (eğer boşsa) - Meta Açıklama özetten alınacak
+            if (string.IsNullOrEmpty(Blog.Excerpt))
             {
-                Blog.MetaDescription = await blogService.GenerateMetaDescriptionAsync(Blog.Content);
+                Blog.Excerpt = await blogService.GenerateMetaDescriptionAsync(Blog.Content, 200);
             }
-            
+
+            // Meta Açıklama (SEO): özetten al, max 300 karakter
+            Blog.MetaDescription = string.IsNullOrEmpty(Blog.Excerpt)
+                ? string.Empty
+                : (Blog.Excerpt.Length <= Blog.MetaDescriptionMaxLength ? Blog.Excerpt : Blog.Excerpt[..Blog.MetaDescriptionMaxLength]);
+
             // Meta keywords oluştur (eğer boşsa)
             if (string.IsNullOrEmpty(Blog.MetaKeywords))
             {
@@ -71,12 +76,6 @@ public class CreateModel(
             if (string.IsNullOrEmpty(Blog.MetaTitle))
             {
                 Blog.MetaTitle = Blog.Title;
-            }
-            
-            // Excerpt oluştur (eğer boşsa)
-            if (string.IsNullOrEmpty(Blog.Excerpt))
-            {
-                Blog.Excerpt = await blogService.GenerateMetaDescriptionAsync(Blog.Content, 200);
             }
             
             // PublishedAt ayarla

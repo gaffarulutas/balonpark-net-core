@@ -1,4 +1,3 @@
-using System.Net;
 using Serilog;
 
 namespace BalonPark.Middleware;
@@ -30,10 +29,9 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
                 context.Request.Method,
                 context.Request.QueryString);
 
-            // Hata sayfasına yönlendir
+            // Hata sayfasına yönlendir (Redirect 302 döner; status code set etmeye gerek yok)
             if (!context.Response.HasStarted)
             {
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 context.Response.Redirect("/Error");
             }
         }

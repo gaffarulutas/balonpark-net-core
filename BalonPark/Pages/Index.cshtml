@@ -9,6 +9,10 @@
     ViewData["Keywords"] = "şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı, eğlence parkı, çocuk eğlence merkezi";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
+@section Head {
+    <!-- LCP (Largest Contentful Paint) iyileştirmesi: hero slider ilk görsel öncelikli yüklensin -->
+    <link rel="preload" as="image" href="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/slider/1.jpeg") ?? Url.Content("~/assets/images/slider/1.jpeg"))">
+}
 
 <!-- Additional SEO Structured Data for Homepage -->
 <script type="application/ld+json">
@@ -62,7 +66,7 @@
                         <div class="swiper-wrapper">
                             <div class="swiper-slide">
                                 <div class="hero-slide-inner">
-                                    <img src="~/assets/images/slider/1.jpeg" class="hero-slide-img" alt="Şişme Oyun Parkları - Balon Park" loading="eager" width="800" height="400">
+                                    <img src="~/assets/images/slider/1.jpeg" class="hero-slide-img" alt="Şişme Oyun Parkları - Balon Park" loading="eager" fetchpriority="high" width="800" height="400">
                                     <div class="hero-slide-overlay">
                                         <span class="text-primary font-medium text-sm sm:text-base">Şişme Oyun Parkları</span>
                                         <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">Eğlence ve Güven Bir Arada</h2>

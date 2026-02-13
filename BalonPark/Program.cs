@@ -79,8 +79,7 @@ try
     // SQL Migration Runner (uygulama başlarken Migrations/*.sql çalıştırılır)
     builder.Services.AddScoped<SqlMigrationRunner>();
 
-    // Repositories (Örnek)
-    builder.Services.AddScoped<ExampleRepository>();
+    // Repositories
     builder.Services.AddScoped<SettingsRepository>();
     builder.Services.AddScoped<CategoryRepository>();
     builder.Services.AddScoped<SubCategoryRepository>();
@@ -172,9 +171,33 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseStaticFiles();
+
+    // Static files: cache + security headers (Lighthouse cache-insight iyileştirmesi)
+    var staticFileOptions = new StaticFileOptions
+    {
+        OnPrepareResponse = ctx =>
+        {
+            var path = ctx.Context.Request.Path.Value ?? "";
+            // CSS, JS, images, fonts: 1 yıl (dosya adında versiyon/hash ile cache busting yapın)
+            if (path.StartsWith("/css/", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/js/", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/assets/", StringComparison.OrdinalIgnoreCase))
+            {
+                ctx.Context.Response.Headers.CacheControl = "public,max-age=31536000,immutable";
+            }
+            // uploads (user content): kısa cache
+            else if (path.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+            {
+                ctx.Context.Response.Headers.CacheControl = "public,max-age=86400"; // 1 gün
+            }
+            // Security headers for static files
+            ctx.Context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+        }
+    };
+    app.UseStaticFiles(staticFileOptions);
 
     app.UseRouting();
+    app.UseSecurityHeaders();
 
     // 404 ve diğer hata kodları için özel sayfa (404 = NotFound.cshtml)
     app.UseStatusCodePagesWithReExecute("/NotFound", "?statusCode={0}");
