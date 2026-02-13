@@ -263,74 +263,76 @@
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            <nav class="category-tree" role="navigation" aria-label="Ürün kategorileri">
-                @{
-                    var urlService = (IUrlService?)ViewData["UrlService"];
-                }
-                @if (headerCategories.Count > 0)
-                {
-                    var activeCatSlug = ViewData["ActiveCategorySlug"]?.ToString() ?? "";
-                    var activeSubSlug = ViewData["ActiveSubCategorySlug"]?.ToString() ?? "";
-                    <ul class="category-tree-list">
-                        @foreach (var cat in headerCategories)
-                        {
-                            var hasSubs = cat.SubCategories != null && cat.SubCategories.Count > 0;
-                            var isCatActive = string.Equals(cat.Slug, activeCatSlug, StringComparison.OrdinalIgnoreCase);
-                            var isChildActive = hasSubs && cat.SubCategories!.Any(sc => string.Equals(sc.Slug, activeSubSlug, StringComparison.OrdinalIgnoreCase));
-                            var childrenExpanded = isCatActive || isChildActive;
-                            <li class="category-tree-item" data-category-id="@cat.Id">
-                                <a href="/category/@cat.Slug" class="category-tree-link @(isCatActive && string.IsNullOrEmpty(activeSubSlug) ? "category-tree-link-active" : "")">
-                                    @if (!string.IsNullOrEmpty(cat.FirstProductImage))
-                                    {
-                                        <span class="category-tree-icon category-tree-icon-img"><img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="" loading="lazy"></span>
-                                    }
-                                    else
-                                    {
-                                        <span class="category-tree-icon category-tree-icon-default"><i data-lucide="folder" class="w-5 h-5"></i></span>
-                                    }
-                                    <span class="category-tree-label">@Html.Raw(cat.Name)</span>
+            <div class="layout-sidebar-scroll">
+                <nav class="category-tree" role="navigation" aria-label="Ürün kategorileri">
+                    @{
+                        var urlService = (IUrlService?)ViewData["UrlService"];
+                    }
+                    @if (headerCategories.Count > 0)
+                    {
+                        var activeCatSlug = ViewData["ActiveCategorySlug"]?.ToString() ?? "";
+                        var activeSubSlug = ViewData["ActiveSubCategorySlug"]?.ToString() ?? "";
+                        <ul class="category-tree-list">
+                            @foreach (var cat in headerCategories)
+                            {
+                                var hasSubs = cat.SubCategories != null && cat.SubCategories.Count > 0;
+                                var isCatActive = string.Equals(cat.Slug, activeCatSlug, StringComparison.OrdinalIgnoreCase);
+                                var isChildActive = hasSubs && cat.SubCategories!.Any(sc => string.Equals(sc.Slug, activeSubSlug, StringComparison.OrdinalIgnoreCase));
+                                var childrenExpanded = isCatActive || isChildActive;
+                                <li class="category-tree-item" data-category-id="@cat.Id">
+                                    <a href="/category/@cat.Slug" class="category-tree-link @(isCatActive && string.IsNullOrEmpty(activeSubSlug) ? "category-tree-link-active" : "")">
+                                        @if (!string.IsNullOrEmpty(cat.FirstProductImage))
+                                        {
+                                            <span class="category-tree-icon category-tree-icon-img"><img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="" loading="lazy"></span>
+                                        }
+                                        else
+                                        {
+                                            <span class="category-tree-icon category-tree-icon-default"><i data-lucide="folder" class="w-5 h-5"></i></span>
+                                        }
+                                        <span class="category-tree-label">@Html.Raw(cat.Name)</span>
+                                        @if (hasSubs)
+                                        {
+                                            <span class="category-tree-chevron" role="button" tabindex="0" aria-expanded="@(childrenExpanded ? "true" : "false")" aria-controls="category-children-@cat.Id" title="Alt kategorileri aç/kapat"><i data-lucide="chevron-right" class="category-tree-chevron-icon"></i></span>
+                                        }
+                                    </a>
                                     @if (hasSubs)
                                     {
-                                        <span class="category-tree-chevron" role="button" tabindex="0" aria-expanded="@(childrenExpanded ? "true" : "false")" aria-controls="category-children-@cat.Id" title="Alt kategorileri aç/kapat"><i data-lucide="chevron-right" class="category-tree-chevron-icon"></i></span>
+                                        <ul id="category-children-@cat.Id" class="category-tree-children @(childrenExpanded ? "" : "hidden")" role="group" aria-label="@cat.Name alt kategorileri">
+                                            @foreach (var sub in cat.SubCategories!)
+                                            {
+                                                var isSubActive = string.Equals(sub.Slug, activeSubSlug, StringComparison.OrdinalIgnoreCase);
+                                                <li class="category-tree-child">
+                                                    <a href="/category/@cat.Slug/@sub.Slug" class="category-tree-child-link @(isSubActive ? "category-tree-child-link-active" : "")">
+                                                        <i data-lucide="chevron-right" class="category-tree-child-chevron"></i>
+                                                        <span class="category-tree-child-label">@Html.Raw(sub.Name)</span>
+                                                    </a>
+                                                </li>
+                                            }
+                                        </ul>
                                     }
-                                </a>
-                                @if (hasSubs)
-                                {
-                                    <ul id="category-children-@cat.Id" class="category-tree-children @(childrenExpanded ? "" : "hidden")" role="group" aria-label="@cat.Name alt kategorileri">
-                                        @foreach (var sub in cat.SubCategories!)
-                                        {
-                                            var isSubActive = string.Equals(sub.Slug, activeSubSlug, StringComparison.OrdinalIgnoreCase);
-                                            <li class="category-tree-child">
-                                                <a href="/category/@cat.Slug/@sub.Slug" class="category-tree-child-link @(isSubActive ? "category-tree-child-link-active" : "")">
-                                                    <i data-lucide="chevron-right" class="category-tree-child-chevron"></i>
-                                                    <span class="category-tree-child-label">@Html.Raw(sub.Name)</span>
-                                                </a>
-                                            </li>
-                                        }
-                                    </ul>
-                                }
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p class="category-tree-empty">Kategori bulunamadı.</p>
-                }
-            </nav>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="category-tree-empty">Kategori bulunamadı.</p>
+                    }
+                </nav>
 
-            <!-- Sertifikalarımız kutusu – kategorilerin altında, Sertifikalar sayfasına link -->
-            <a asp-page="/Sertifikalar" class="sidebar-certificates-box" aria-label="Sertifikalarımız sayfası">
-                <div class="sidebar-certificates-box__inner">
-                    <span class="sidebar-certificates-box__icon" aria-hidden="true">
-                        <i data-lucide="award" class="sidebar-certificates-box__icon-svg"></i>
-                    </span>
-                    <div class="sidebar-certificates-box__content">
-                        <h3 class="sidebar-certificates-box__title">Sertifikalarımız</h3>
-                        <p class="sidebar-certificates-box__desc">Kalite ve güvenlik belgelerimiz</p>
+                <!-- Sertifikalarımız kutusu – kategorilerle aynı scroll alanında -->
+                <a asp-page="/Sertifikalar" class="sidebar-certificates-box" aria-label="Sertifikalarımız sayfası">
+                    <div class="sidebar-certificates-box__inner">
+                        <span class="sidebar-certificates-box__icon" aria-hidden="true">
+                            <i data-lucide="award" class="sidebar-certificates-box__icon-svg"></i>
+                        </span>
+                        <div class="sidebar-certificates-box__content">
+                            <h3 class="sidebar-certificates-box__title">Sertifikalarımız</h3>
+                            <p class="sidebar-certificates-box__desc">Kalite ve güvenlik belgelerimiz</p>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+            </div>
         </div>
     </aside>
     <div id="layout-sidebar-overlay" class="layout-sidebar-overlay" aria-hidden="true"></div>
@@ -444,7 +446,6 @@
                     <a asp-page="/Sitemap" class="text-gray-600 hover:text-primary" title="Site Haritası">Site Haritası</a>
                     <a asp-page="/Privacy" class="text-gray-600 hover:text-primary" title="Gizlilik Politikası">Gizlilik</a>
                     <a asp-page="/KullanimKosullari" class="text-gray-600 hover:text-primary" title="Kullanım Koşulları">Kullanım Koşulları</a>
-                    <button type="button" id="footer-currency-disclaimer-btn" class="text-gray-500 hover:text-primary text-xs border-0 bg-transparent p-0 cursor-pointer underline underline-offset-1" title="Döviz kurları hakkında">Döviz kurları</button>
                 </nav>
                 @if (!string.IsNullOrEmpty(siteSettings?.Facebook) || !string.IsNullOrEmpty(siteSettings?.Instagram) || !string.IsNullOrEmpty(siteSettings?.Twitter) || !string.IsNullOrEmpty(siteSettings?.LinkedIn) || !string.IsNullOrEmpty(siteSettings?.YouTube))
                 {
@@ -493,22 +494,6 @@
 
     <!-- Generic Tailwind modal (best practices: focus trap, Escape, backdrop, aria) -->
     <script src="~/js/modal-helper.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var btn = document.getElementById('footer-currency-disclaimer-btn');
-            if (btn && typeof window.openModal === 'function') {
-                btn.addEventListener('click', function () {
-                    window.openModal({
-                        title: 'Döviz kurları',
-                        titleId: 'currency-disclaimer-title',
-                        content: '<p class="text-xs text-gray-600 leading-relaxed">USD ve EUR fiyatları, Türkiye Cumhuriyet Merkez Bankası (TCMB) tarafından açıklanan güncel döviz kurlarına göre otomatik hesaplanmaktadır. Kurlar gün içinde değişebileceğinden döviz cinsinden gösterilen tutarlar anlık olarak güncellenir. Kesin fiyat bilgisi için lütfen bizimle iletişime geçiniz.</p>',
-                        contentClassName: 'bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col focus:outline-none modal-panel',
-                        closeLabel: 'Kapat'
-                    });
-                });
-            }
-        });
-    </script>
 
     <!-- SweetAlert2 + swal-helper (confirm yerine) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

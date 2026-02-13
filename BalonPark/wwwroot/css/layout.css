@@ -774,6 +774,26 @@ body {
     height: 100%;
 }
 
+/* Sidebar scroll alanı: kategoriler + sertifika kutusu birlikte scroll olur */
+.layout-sidebar-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.layout-sidebar-scroll .category-tree {
+    flex: 0 0 auto;
+    overflow-y: visible;
+}
+
+.layout-sidebar-scroll .sidebar-certificates-box {
+    margin-top: 1rem;
+    flex-shrink: 0;
+}
+
 /* Logo kategorilerin üzerinde */
 .layout-sidebar-logo {
     display: flex;
@@ -1055,6 +1075,7 @@ body {
 }
 
 /* ========== Kategori tree – Header ile aynı stil, sağ/sol sıfır (bitişik) ========== */
+/* .layout-sidebar-scroll içinde scroll wrapper sorumlu; burada varsayılan (scroll alanı yoksa) */
 .category-tree {
     flex: 1 1 0;
     min-height: 0;

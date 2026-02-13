@@ -20,3 +20,14 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
 div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):hover {
     background-color: var(--swal2-primary-hover) !important;
 }
+
+/* Para birimi seçim diyaloğundaki döviz açıklaması */
+.swal2-html-container .swal-currency-disclaimer {
+    margin: 0.75rem 0 0;
+    padding: 0.5rem 0 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: #64748b;
+    text-align: left;
+}

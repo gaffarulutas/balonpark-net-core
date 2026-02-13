@@ -129,8 +129,16 @@
                 if (btn.getAttribute('aria-pressed') === 'true') return;
                 var labels = { TL: 'Türk Lirası (₺)', USD: 'Amerikan Doları ($)', EUR: 'Euro (€)' };
                 var label = labels[currency] || currency;
-                var confirmFn = typeof window.swalConfirm === 'function' ? window.swalConfirm : function (opts) { return Promise.resolve({ isConfirmed: confirm(opts.title || opts.text || 'Onaylıyor musunuz?') }); };
-                confirmFn({ title: 'Para birimini değiştir', text: 'Fiyatlar ' + label + ' cinsinden gösterilecek. Sayfa yenilenecektir.', icon: 'info' }).then(function (r) {
+                var mainMsg = 'Tüm fiyatlar <strong>' + label + '</strong> cinsinden gösterilecektir. Onaylarsanız sayfa yenilenecektir.';
+                var disclaimer = '<p class="swal-currency-disclaimer">USD ve EUR tutarları, TCMB günlük kurlarına göre hesaplanır. Kesin fiyat için lütfen bizimle iletişime geçiniz.</p>';
+                var confirmFn = typeof window.swalConfirm === 'function' ? window.swalConfirm : function (opts) { return Promise.resolve({ isConfirmed: confirm(opts.title || (opts.html && opts.html.replace(/<[^>]+>/g, '')) || 'Onaylıyor musunuz?') }); };
+                confirmFn({
+                    title: 'Para birimi seçimi',
+                    html: '<p class="text-left mb-0">' + mainMsg + '</p>' + disclaimer,
+                    icon: 'info',
+                    confirmButtonText: 'Onayla',
+                    cancelButtonText: 'İptal'
+                }).then(function (r) {
                     if (r && r.isConfirmed) window.setCurrency(currency);
                 });
             });

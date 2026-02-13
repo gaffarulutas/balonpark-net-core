@@ -343,6 +343,9 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task InvalidateCategoriesAsync()
     {
+        // Scoped CacheService: _trackedKeys sadece bu istekte set edilen key'leri tutar.
+        // "categories_all" başka istekte set edildiği için prefix ile bulunmaz; doğrudan kaldır.
+        cache.Remove(CATEGORIES_KEY);
         RemoveByPrefix("categor");
         await Task.CompletedTask;
     }
@@ -363,6 +366,8 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task InvalidateSubCategoriesAsync()
     {
+        // Scoped CacheService: liste key'i başka istekte set edilmiş olabilir; doğrudan kaldır.
+        cache.Remove(SUBCATEGORIES_KEY);
         RemoveByPrefix("subcategor");
         await Task.CompletedTask;
     }
