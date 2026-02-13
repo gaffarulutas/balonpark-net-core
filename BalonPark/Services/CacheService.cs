@@ -414,6 +414,15 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task InvalidateAllAsync()
     {
+        // Scoped CacheService: _trackedKeys sadece bu istekte set edilen key'leri tutar.
+        // Diğer isteklerde set edilen key'leri silmek için bilinen ana key'leri doğrudan kaldır.
+        cache.Remove(SETTINGS_KEY);
+        cache.Remove(CATEGORIES_KEY);
+        cache.Remove(SUBCATEGORIES_KEY);
+        cache.Remove(PRODUCTS_KEY);
+        cache.Remove(BLOGS_KEY);
+        cache.Remove(FEATURED_BLOGS_KEY);
+        cache.Remove(LATEST_BLOGS_KEY);
         RemoveByPrefix(null);
         await Task.CompletedTask;
     }

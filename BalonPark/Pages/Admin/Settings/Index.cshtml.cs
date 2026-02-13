@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BalonPark.Data;
 using BalonPark.Models;
-using BalonPark.Helpers;
 using BalonPark.Services;
 
 namespace BalonPark.Pages.Admin.Settings;
@@ -19,10 +18,7 @@ public class IndexModel : BaseAdminPage
 
     [BindProperty]
     public Models.Settings Settings { get; set; } = new();
-    
-    [BindProperty]
-    public IFormFile? LogoFile { get; set; }
-    
+
     [TempData]
     public string? SuccessMessage { get; set; }
     
@@ -73,24 +69,9 @@ public class IndexModel : BaseAdminPage
                 return Page();
             }
             
-            // Logo dosyası yüklenmişse işle
-            if (LogoFile != null && LogoFile.Length > 0)
-            {
-                // Eski logoyu sil (eğer varsa ve uploads/logo klasöründeyse)
-                if (!string.IsNullOrEmpty(existingSettings.Logo))
-                {
-                    ImageHelper.DeleteLogo(existingSettings.Logo);
-                }
-                
-                // Yeni logoyu kaydet
-                Settings.Logo = await ImageHelper.SaveLogoAsync(LogoFile);
-            }
-            else
-            {
-                // Logo değişmemişse mevcut logoyu koru
-                Settings.Logo = existingSettings.Logo;
-            }
-            
+            // Logo alanı formda yok; mevcut logoyu koru
+            Settings.Logo = existingSettings.Logo;
+
             // Şifre boşsa mevcut şifreyi koru
             if (string.IsNullOrWhiteSpace(Settings.Password))
             {
@@ -103,9 +84,11 @@ public class IndexModel : BaseAdminPage
             var result = await _settingsRepository.UpdateAsync(Settings);
             if (result)
             {
-                // Tüm cache'leri temizle çünkü Settings her yerde kullanılıyor
+                // Settings cache'ini doğrudan temizle (Scoped CacheService'de InvalidateAllAsync
+                // bu istekte set edilmeyen key'leri silemez; Settings mutlaka temizlenmeli)
+                await _cacheService.InvalidateSettingsAsync();
                 await _cacheService.InvalidateAllAsync();
-                
+
                 SuccessMessage = "Ayarlar başarıyla güncellendi!";
             }
             else
