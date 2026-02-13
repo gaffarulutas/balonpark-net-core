@@ -21,35 +21,23 @@ public class BlogService(
 
     public async Task<IEnumerable<Blog>> GetFeaturedBlogsAsync(int limit = 5)
     {
-        // Önce cache'den kontrol et
         var cachedBlogs = await cacheService.GetFeaturedBlogsAsync();
         if (cachedBlogs != null)
-        {
             return cachedBlogs.Take(limit);
-        }
 
         var blogs = await blogRepository.GetFeaturedAsync(limit);
-        
-        // Cache'e kaydet
-        await cacheService.SetBlogsAsync(blogs);
-        
+        await cacheService.SetFeaturedBlogsAsync(blogs);
         return blogs;
     }
 
     public async Task<IEnumerable<Blog>> GetLatestBlogsAsync(int limit = 10)
     {
-        // Önce cache'den kontrol et
         var cachedBlogs = await cacheService.GetLatestBlogsAsync();
         if (cachedBlogs != null)
-        {
             return cachedBlogs.Take(limit);
-        }
 
         var blogs = await blogRepository.GetLatestAsync(limit);
-        
-        // Cache'e kaydet
-        await cacheService.SetBlogsAsync(blogs);
-        
+        await cacheService.SetLatestBlogsAsync(blogs);
         return blogs;
     }
 
@@ -68,18 +56,12 @@ public class BlogService(
 
     public async Task<IEnumerable<Blog>> SearchBlogsAsync(string query, int limit = 10)
     {
-        // Önce cache'den kontrol et
         var cachedBlogs = await cacheService.SearchBlogsAsync(query);
         if (cachedBlogs != null)
-        {
             return cachedBlogs.Take(limit);
-        }
 
         var blogs = await blogRepository.SearchAsync(query, limit);
-        
-        // Cache'e kaydet
-        await cacheService.SetBlogsAsync(blogs);
-        
+        await cacheService.SetSearchBlogsAsync(query, blogs);
         return blogs;
     }
 

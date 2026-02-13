@@ -181,11 +181,12 @@
         }
         else
         {
-            <div class="text-center py-12 px-4 bg-gray-50 rounded-xl border border-gray-100">
-                <i data-lucide="newspaper" class="w-12 h-12 text-gray-300 mb-3"></i>
-                <h3 class="text-base font-medium text-ink">Henüz blog yazısı bulunmuyor</h3>
-                <p class="text-sm text-gray-500 mt-1">Yakında güncel blog yazılarımızı paylaşacağız.</p>
-            </div>
+            @await Html.PartialAsync("Shared/_ResultNotFound", new ResultNotFoundViewModel
+            {
+                Icon = "newspaper",
+                Title = "Henüz blog yazısı bulunmuyor",
+                Description = "Yakında güncel blog yazılarımızı paylaşacağız."
+            })
         }
     </div>
 

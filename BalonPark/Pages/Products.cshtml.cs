@@ -88,6 +88,9 @@ public class ProductsModel : BasePage
             });
         }
 
+        ViewData["ActiveCategorySlug"] = CategorySlug;
+        ViewData["ActiveSubCategorySlug"] = SubCategory?.Slug;
+
         return Page();
     }
 }

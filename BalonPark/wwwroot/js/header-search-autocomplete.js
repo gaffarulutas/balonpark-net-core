@@ -329,17 +329,28 @@
     }
 
     function onInputKeydown(e) {
-        if (!dropdown || dropdown.classList.contains('hidden')) return;
         var key = e.key;
+        if (key === 'Enter') {
+            /* Dropdown açıksa ve seçili öneri varsa ona git; yoksa formun submit olmasına izin ver */
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                var options = dropdown.querySelectorAll('[role="option"]');
+                if (options.length && activeIndex >= 0 && activeIndex < options.length) {
+                    e.preventDefault();
+                    selectCurrent();
+                    return;
+                }
+            }
+            /* Seçili öneri yok: default davranış (form submit) çalışsın; arama metnini kaydet */
+            if (activeInput && activeInput.value && activeInput.value.trim()) {
+                saveRecentSearch(activeInput.value.trim());
+            }
+            return;
+        }
+        if (!dropdown || dropdown.classList.contains('hidden')) return;
         var options = dropdown.querySelectorAll('[role="option"]');
         if (key === 'Escape') {
             e.preventDefault();
             hideDropdown();
-            return;
-        }
-        if (key === 'Enter') {
-            e.preventDefault();
-            selectCurrent();
             return;
         }
         if (key === 'ArrowDown') {

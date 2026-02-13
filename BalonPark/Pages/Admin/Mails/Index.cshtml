@@ -1124,7 +1124,7 @@
             event.preventDefault();
             event.stopPropagation();
 
-            showDeleteConfirm('Bu mesajı silmek istediğinize emin misiniz?', async function () {
+            showDeleteConfirm('Bu mesaj çöp kutusuna taşınacak. Devam etmek istiyor musunuz?', async function () {
                 try {
                     showLoading('Mesaj siliniyor...');
                     const response = await fetch('/api/mails/delete', {

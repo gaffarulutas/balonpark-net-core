@@ -45,6 +45,9 @@ public interface ICacheService
     Task SetSubCategoriesAsync(IEnumerable<SubCategory> subCategories);
     Task SetSubCategoryAsync(SubCategory subCategory);
     Task SetBlogsAsync(IEnumerable<Blog> blogs);
+    Task SetFeaturedBlogsAsync(IEnumerable<Blog> blogs);
+    Task SetLatestBlogsAsync(IEnumerable<Blog> blogs);
+    Task SetSearchBlogsAsync(string query, IEnumerable<Blog> blogs);
     Task SetBlogAsync(Blog blog);
     
     // Cache Invalidation

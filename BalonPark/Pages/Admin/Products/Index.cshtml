@@ -44,22 +44,30 @@
     </div>
 }
 
-<!-- Filter Form -->
+<!-- Filtreler (en üstte, tek kart) -->
 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-    <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-        <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-        </svg>
-        Filtreleme
-    </h3>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+            </svg>
+            Filtreler
+        </h3>
+        @if (Model.Products.Any() || Model.TotalProducts > 0)
+        {
+            <p class="text-sm text-gray-500">
+                <span class="font-medium text-gray-700">@Model.TotalProducts</span> ürün bulundu
+            </p>
+        }
+    </div>
     
     <form method="get" id="filterForm">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4 items-end">
             <!-- Categories Custom Select - Tailwind UI Style -->
-            <div>
-                <label class="block text-sm font-medium text-gray-900 mb-2">Kategoriler</label>
+            <div class="flex flex-col">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kategoriler</label>
                 <div class="relative" id="categorySelectWrapper">
-                    <button type="button" id="categorySelectBtn" class="relative w-full cursor-default rounded-lg bg-white py-2.5 pl-3 pr-10 text-left border border-gray-300 shadow-sm focus:border-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-800 sm:text-sm transition-all duration-200 hover:border-gray-400">
+                    <button type="button" id="categorySelectBtn" class="admin-filter-control relative w-full h-11 cursor-default rounded-lg bg-white pl-4 pr-10 text-left border border-gray-300 shadow-sm focus:border-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-800 text-sm transition-all duration-200 hover:border-gray-400 flex items-center">
                         <span class="flex items-center">
                             <span class="block truncate text-gray-900 font-medium" id="categorySelectText">Tüm Kategoriler</span>
                         </span>
@@ -103,10 +111,10 @@
             </div>
             
             <!-- SubCategories Custom Select - Tailwind UI Style -->
-            <div>
-                <label class="block text-sm font-medium text-gray-900 mb-2">Alt Kategoriler</label>
+            <div class="flex flex-col">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Alt Kategoriler</label>
                 <div class="relative" id="subCategorySelectWrapper">
-                    <button type="button" id="subCategorySelectBtn" class="relative w-full cursor-default rounded-lg bg-white py-2.5 pl-3 pr-10 text-left border border-gray-300 shadow-sm focus:border-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-800 sm:text-sm transition-all duration-200 hover:border-gray-400">
+                    <button type="button" id="subCategorySelectBtn" class="admin-filter-control relative w-full h-11 cursor-default rounded-lg bg-white pl-4 pr-10 text-left border border-gray-300 shadow-sm focus:border-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-800 text-sm transition-all duration-200 hover:border-gray-400 flex items-center">
                         <span class="flex items-center">
                             <span class="block truncate text-gray-900 font-medium" id="subCategorySelectText">Tüm Alt Kategoriler</span>
                         </span>
@@ -149,31 +157,69 @@
                 </div>
             </div>
             
-            <div>
+            <div class="flex flex-col">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Ürün Adı</label>
-                <input type="text" name="ProductNameFilter" value="@Model.ProductNameFilter" placeholder="Ürün adı ara..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                <input type="text" name="ProductNameFilter" value="@Model.ProductNameFilter" placeholder="Ürün adı ara..." class="admin-filter-control w-full h-11 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
             </div>
             
-            <div>
+            <div class="flex flex-col">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Ürün ID</label>
-                <input type="number" name="ProductIdFilter" value="@Model.ProductIdFilter" placeholder="Ürün ID ara..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                <input type="number" name="ProductIdFilter" value="@Model.ProductIdFilter" placeholder="ID" class="admin-filter-control w-full h-11 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+            </div>
+            
+            <div class="flex flex-col">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Durum</label>
+                <select name="StatusFilter" class="admin-filter-control w-full h-11 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                    @if (string.IsNullOrEmpty(Model.StatusFilter) || Model.StatusFilter == "all")
+                    {<option value="all" selected>Tümü</option>} else {<option value="all">Tümü</option>}
+                    @if (Model.StatusFilter == "active")
+                    {<option value="active" selected>Aktif</option>} else {<option value="active">Aktif</option>}
+                    @if (Model.StatusFilter == "inactive")
+                    {<option value="inactive" selected>Pasif</option>} else {<option value="inactive">Pasif</option>}
+                </select>
+            </div>
+            
+            <div class="flex flex-col">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sırala</label>
+                <select name="SortBy" class="admin-filter-control w-full h-11 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
+                    @if (string.IsNullOrEmpty(Model.SortBy) || Model.SortBy == "newest")
+                    {<option value="newest" selected>En yeni</option>} else {<option value="newest">En yeni</option>}
+                    @if (Model.SortBy == "oldest")
+                    {<option value="oldest" selected>En eski</option>} else {<option value="oldest">En eski</option>}
+                    @if (Model.SortBy == "name")
+                    {<option value="name" selected>Ad (A-Z)</option>} else {<option value="name">Ad (A-Z)</option>}
+                    @if (Model.SortBy == "nameDesc")
+                    {<option value="nameDesc" selected>Ad (Z-A)</option>} else {<option value="nameDesc">Ad (Z-A)</option>}
+                    @if (Model.SortBy == "price")
+                    {<option value="price" selected>Fiyat (düşük → yüksek)</option>} else {<option value="price">Fiyat (düşük → yüksek)</option>}
+                    @if (Model.SortBy == "priceDesc")
+                    {<option value="priceDesc" selected>Fiyat (yüksek → düşük)</option>} else {<option value="priceDesc">Fiyat (yüksek → düşük)</option>}
+                    @if (Model.SortBy == "stock")
+                    {<option value="stock" selected>Stok</option>} else {<option value="stock">Stok</option>}
+                </select>
             </div>
         </div>
         
         <div class="flex items-center gap-3 flex-wrap">
-            <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
+            <button type="submit" class="inline-flex items-center px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 text-base">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
                 Filtrele
             </button>
-            <button type="button" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200" id="exportPdfBtn">
+            <a href="/admin/products" class="inline-flex items-center px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 text-base">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Temizle
+            </a>
+            <button type="button" class="inline-flex items-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 text-base" id="exportPdfBtn">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
                 PDF Çıktısı
             </button>
-            <button type="button" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors duration-200" id="exportExcelBtn">
+            <button type="button" class="inline-flex items-center px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors duration-200 text-base" id="exportExcelBtn">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
@@ -322,28 +368,19 @@
                 <div class="flex-1 flex justify-between sm:hidden">
                     @if (Model.PageNumber > 1)
                     {
-                        <a href="?PageNumber=@(Model.PageNumber - 1)@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Önceki
-                        </a>
+                        <a href="/admin/products@(Model.GetFilterQueryString(Model.PageNumber - 1))" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Önceki</a>
                     }
                     else
                     {
-                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
-                            Önceki
-                        </span>
+                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">Önceki</span>
                     }
-                    
                     @if (Model.PageNumber < Model.TotalPages)
                     {
-                        <a href="?PageNumber=@(Model.PageNumber + 1)@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Sonraki
-                        </a>
+                        <a href="/admin/products@(Model.GetFilterQueryString(Model.PageNumber + 1))" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Sonraki</a>
                     }
                     else
                     {
-                        <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
-                            Sonraki
-                        </span>
+                        <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">Sonraki</span>
                     }
                 </div>
                 
@@ -360,7 +397,7 @@
                             <!-- Previous Button -->
                             @if (Model.PageNumber > 1)
                             {
-                                <a href="?PageNumber=@(Model.PageNumber - 1)@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <a href="/admin/products@(Model.GetFilterQueryString(Model.PageNumber - 1))" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                                     </svg>
@@ -382,9 +419,7 @@
                                 
                                 if (startPage > 1)
                                 {
-                                    <a href="?PageNumber=1@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                        1
-                                    </a>
+                                    <a href="/admin/products@(Model.GetFilterQueryString(1))" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">1</a>
                                     if (startPage > 2)
                                     {
                                         <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
@@ -395,15 +430,11 @@
                                 {
                                     if (i == Model.PageNumber)
                                     {
-                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-800 bg-indigo-50 text-sm font-medium text-gray-900 z-10">
-                                            @i
-                                        </span>
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-800 bg-gray-100 text-sm font-medium text-gray-900 z-10">@i</span>
                                     }
                                     else
                                     {
-                                        <a href="?PageNumber=@i@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                            @i
-                                        </a>
+                                        <a href="/admin/products@(Model.GetFilterQueryString(i))" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">@i</a>
                                     }
                                 }
                                 
@@ -413,16 +444,14 @@
                                     {
                                         <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
                                     }
-                                    <a href="?PageNumber=@Model.TotalPages@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                        @Model.TotalPages
-                                    </a>
+                                    <a href="/admin/products@(Model.GetFilterQueryString(Model.TotalPages))" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">@Model.TotalPages</a>
                                 }
                             }
                             
                             <!-- Next Button -->
                             @if (Model.PageNumber < Model.TotalPages)
                             {
-                                <a href="?PageNumber=@(Model.PageNumber + 1)@(Model.SelectedCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedCategoryIds.Select(id => $"SelectedCategoryIds={id}")) : "")@(Model.SelectedSubCategoryIds.Any() ? "&" + string.Join("&", Model.SelectedSubCategoryIds.Select(id => $"SelectedSubCategoryIds={id}")) : "")@(!string.IsNullOrEmpty(Model.ProductNameFilter) ? $"&ProductNameFilter={Model.ProductNameFilter}" : "")@(!string.IsNullOrEmpty(Model.ProductIdFilter) ? $"&ProductIdFilter={Model.ProductIdFilter}" : "")" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <a href="/admin/products@(Model.GetFilterQueryString(Model.PageNumber + 1))" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                                     </svg>
@@ -656,14 +685,17 @@
                 SelectedCategoryIds: $('.category-checkbox:checked').map(function() { return $(this).val(); }).get(),
                 SelectedSubCategoryIds: $('.subcategory-checkbox:checked').map(function() { return $(this).val(); }).get(),
                 ProductNameFilter: $('input[name="ProductNameFilter"]').val() || '',
-                ProductIdFilter: $('input[name="ProductIdFilter"]').val() || ''
+                ProductIdFilter: $('input[name="ProductIdFilter"]').val() || '',
+                StatusFilter: $('select[name="StatusFilter"]').val() || '',
+                SortBy: $('select[name="SortBy"]').val() || ''
             };
-            
             const queryParams = new URLSearchParams();
             filterData.SelectedCategoryIds.forEach(id => queryParams.append('SelectedCategoryIds', id));
             filterData.SelectedSubCategoryIds.forEach(id => queryParams.append('SelectedSubCategoryIds', id));
             if (filterData.ProductNameFilter) queryParams.append('ProductNameFilter', filterData.ProductNameFilter);
             if (filterData.ProductIdFilter) queryParams.append('ProductIdFilter', filterData.ProductIdFilter);
+            if (filterData.StatusFilter) queryParams.append('StatusFilter', filterData.StatusFilter);
+            if (filterData.SortBy) queryParams.append('SortBy', filterData.SortBy);
             
             fetch(`/admin/products?handler=ExportPdf&${queryParams.toString()}`)
                 .then(response => response.blob())
@@ -697,14 +729,17 @@
                 SelectedCategoryIds: $('.category-checkbox:checked').map(function() { return $(this).val(); }).get(),
                 SelectedSubCategoryIds: $('.subcategory-checkbox:checked').map(function() { return $(this).val(); }).get(),
                 ProductNameFilter: $('input[name="ProductNameFilter"]').val() || '',
-                ProductIdFilter: $('input[name="ProductIdFilter"]').val() || ''
+                ProductIdFilter: $('input[name="ProductIdFilter"]').val() || '',
+                StatusFilter: $('select[name="StatusFilter"]').val() || '',
+                SortBy: $('select[name="SortBy"]').val() || ''
             };
-            
             const queryParams = new URLSearchParams();
             filterData.SelectedCategoryIds.forEach(id => queryParams.append('SelectedCategoryIds', id));
             filterData.SelectedSubCategoryIds.forEach(id => queryParams.append('SelectedSubCategoryIds', id));
             if (filterData.ProductNameFilter) queryParams.append('ProductNameFilter', filterData.ProductNameFilter);
             if (filterData.ProductIdFilter) queryParams.append('ProductIdFilter', filterData.ProductIdFilter);
+            if (filterData.StatusFilter) queryParams.append('StatusFilter', filterData.StatusFilter);
+            if (filterData.SortBy) queryParams.append('SortBy', filterData.SortBy);
             
             fetch(`/admin/products?handler=ExportExcel&${queryParams.toString()}`)
                 .then(response => response.blob())
@@ -734,7 +769,7 @@
             const $form = $btn.closest('.delete-form');
             
             showDeleteConfirm(
-                `<strong>${productName}</strong> adlı ürünü silmek istediğinize emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>`,
+                `<strong>${productName}</strong> adlı ürün kalıcı olarak silinecek. Bu işlem geri alınamaz.`,
                 function() {
                     showLoading('Ürün siliniyor...');
                     $form.submit();

@@ -280,7 +280,7 @@
             const $form = $btn.closest('form');
             
             showDeleteConfirm(
-                `<strong>${blogTitle}</strong> blog yazısını silmek istediğinizden emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>`,
+                `<strong>${blogTitle}</strong> adlı blog yazısı kalıcı olarak silinecek. Bu işlem geri alınamaz.`,
                 function() {
                     showLoading('Blog siliniyor...');
                     $form.submit();

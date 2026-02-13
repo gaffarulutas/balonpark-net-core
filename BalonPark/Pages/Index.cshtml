@@ -143,9 +143,13 @@
             }
             else
             {
-                <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="text-base font-medium text-ink">Şu anda ürün bulunmamaktadır</h3>
-                    <p class="text-sm text-gray-500 mt-1">Lütfen daha sonra tekrar kontrol edin veya bizimle iletişime geçin.</p>
+                <div class="col-span-full">
+                    @await Html.PartialAsync("Shared/_ResultNotFound", new ResultNotFoundViewModel
+                    {
+                        Icon = "package-open",
+                        Title = "Şu anda ürün bulunmamaktadır",
+                        Description = "Lütfen daha sonra tekrar kontrol edin veya bizimle iletişime geçin."
+                    })
                 </div>
             }
         </div>

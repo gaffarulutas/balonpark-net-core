@@ -86,15 +86,18 @@
         BreadcrumbItem.Current(Model.SubCategory?.Name ?? "Ürünler")
     })
 
-    <div class="pt-1 pb-2.5 border-b border-gray-100">
-        <h2 class="text-ink text-base font-medium">@Html.Raw(Model.SubCategory?.CategoryName) &gt; @Html.Raw(Model.SubCategory?.Name) <span class="text-gray-400 font-normal">(@Model.TotalProducts ürün)</span></h2>
+    <div class="category-intro">
+        <h2 class="category-intro__title">
+            <span class="category-intro__title-icon" aria-hidden="true"><i data-lucide="layers" class="w-5 h-5"></i></span>
+            @Html.Raw(Model.SubCategory?.CategoryName) &gt; @Html.Raw(Model.SubCategory?.Name)
+        </h2>
         @if (!string.IsNullOrEmpty(Model.SubCategory?.Description))
         {
-            <p class="text-gray-500 text-xs mt-0.5">@Html.Raw(Model.SubCategory.Description)</p>
+            <div class="category-intro__desc">@Html.Raw(Model.SubCategory.Description)</div>
         }
         else
         {
-            <p class="text-gray-500 text-xs mt-0.5">@Html.Raw(Model.SubCategory?.Name) kategorisindeki harika ürünlerimizi keşfedin</p>
+            <p class="category-intro__desc">@Html.Raw(Model.SubCategory?.Name) kategorisindeki harika ürünlerimizi keşfedin.</p>
         }
     </div>
 
@@ -109,14 +112,16 @@
     }
     else
     {
-        <div class="text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
-            <i data-lucide="package-open" class="w-12 h-12 text-gray-300 mb-3"></i>
-            <h3 class="text-base font-medium text-ink">Ürün bulunmamaktadır</h3>
-            <p class="text-sm text-gray-500 mt-1">Bu kategoride henüz ürün bulunmamaktadır. Lütfen daha sonra tekrar kontrol edin.</p>
-            <a href="/category/@Model.CategorySlug" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 border border-gray-200 text-ink font-medium text-sm rounded-lg hover:bg-gray-50 transition w-fit">
-                <i data-lucide="arrow-left" class="w-4 h-4 inline-block align-middle"></i> @Model.SubCategory?.CategoryName'e Dön
-            </a>
-        </div>
+        @await Html.PartialAsync("Shared/_ResultNotFound", new ResultNotFoundViewModel
+        {
+            Icon = "package-open",
+            Title = "Ürün bulunmamaktadır",
+            Description = "Bu kategoride henüz ürün bulunmamaktadır. Lütfen daha sonra tekrar kontrol edin.",
+            PrimaryActionText = Model.SubCategory?.CategoryName + "'e Dön",
+            PrimaryActionUrl = $"/category/{Model.CategorySlug}",
+            PrimaryActionIcon = "arrow-left",
+            PrimaryActionIsPrimary = false
+        })
     }
 
     @if (Model.TotalPages > 1)

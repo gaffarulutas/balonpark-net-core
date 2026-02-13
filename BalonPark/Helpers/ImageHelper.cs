@@ -1,10 +1,28 @@
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Processing;
 
 namespace BalonPark.Helpers;
 
 public static class ImageHelper
 {
+    /// <summary>Ürün resimleri için yüksek JPEG kalitesi (net görüntü, az sıkıştırma).</summary>
+    private const int JpegQuality = 95;
+
+    /// <summary>Dosya uzantısına göre yüksek kaliteli encoder döndürür.</summary>
+    private static IImageEncoder GetEncoderForPath(string filePath)
+    {
+        var ext = Path.GetExtension(filePath).ToLowerInvariant();
+        return ext switch
+        {
+            ".png" => new PngEncoder { CompressionLevel = PngCompressionLevel.BestCompression },
+            ".jpg" or ".jpeg" => new JpegEncoder { Quality = JpegQuality },
+            _ => new JpegEncoder { Quality = JpegQuality }
+        };
+    }
+
     public static async Task<(string originalPath, string largePath, string thumbnailPath)> SaveProductImageAsync(
         IFormFile file, 
         string productFolderPath,
@@ -14,13 +32,16 @@ public static class ImageHelper
         var largePath = Path.Combine(productFolderPath, $"large_{fileName}");
         var thumbnailPath = Path.Combine(productFolderPath, $"thumb_{fileName}");
 
-        // Save original
+        // Orijinali olduğu gibi kaydet (kalite kaybı yok)
         using (var stream = new FileStream(originalPath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        // Resize and save large (1000px)
+        var encoderLarge = GetEncoderForPath(largePath);
+        var encoderThumb = GetEncoderForPath(thumbnailPath);
+
+        // Large (1000px) – Lanczos3 ile keskin resize, yüksek kalite kayıt
         using (var stream = file.OpenReadStream())
         using (var image = await Image.LoadAsync(stream))
         {
@@ -28,11 +49,11 @@ public static class ImageHelper
             var aspectRatio = (double)image.Height / image.Width;
             var largeHeight = (int)(largeWidth * aspectRatio);
 
-            image.Mutate(x => x.Resize(largeWidth, largeHeight));
-            await image.SaveAsync(largePath);
+            image.Mutate(x => x.Resize(largeWidth, largeHeight, KnownResamplers.Lanczos3));
+            await image.SaveAsync(largePath, encoderLarge);
         }
 
-        // Resize and save thumbnail (350px)
+        // Thumbnail (350px) – aynı kalite ayarları
         using (var stream = file.OpenReadStream())
         using (var image = await Image.LoadAsync(stream))
         {
@@ -40,8 +61,8 @@ public static class ImageHelper
             var aspectRatio = (double)image.Height / image.Width;
             var thumbHeight = (int)(thumbWidth * aspectRatio);
 
-            image.Mutate(x => x.Resize(thumbWidth, thumbHeight));
-            await image.SaveAsync(thumbnailPath);
+            image.Mutate(x => x.Resize(thumbWidth, thumbHeight, KnownResamplers.Lanczos3));
+            await image.SaveAsync(thumbnailPath, encoderThumb);
         }
 
         return (originalPath, largePath, thumbnailPath);
@@ -192,9 +213,10 @@ public static class ImageHelper
             // Watermark'ı resme ekle
             image.Mutate(x => x.DrawImage(watermark, point, 1f));
 
-            // Resmi kaydet (orijinalin üzerine yaz)
-            await image.SaveAsync(imagePath);
-            
+            // Resmi yüksek kaliteli encoder ile kaydet (kalite kaybı olmasın)
+            var encoder = GetEncoderForPath(imagePath);
+            await image.SaveAsync(imagePath, encoder);
+
             Console.WriteLine("Watermark başarıyla eklendi!");
         }
         catch (Exception ex)

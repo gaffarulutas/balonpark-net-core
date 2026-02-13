@@ -105,24 +105,32 @@
     }
     else if (!string.IsNullOrEmpty(Model.Query))
     {
-        <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
-            <i data-lucide="search" class="w-12 h-12 text-gray-300 mb-3"></i>
-            <h3 class="text-base font-medium text-ink">"@Model.Query" için ürün bulunamadı</h3>
-            <p class="text-sm text-gray-500 mt-1">Farklı anahtar kelimelerle arama yapmayı deneyin veya kategorilerimizi inceleyin.</p>
-            <a href="/" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
-                <i data-lucide="home" class="w-4 h-4 inline-block align-middle"></i> Ana Sayfaya Dön
-            </a>
+        <div class="col-span-full">
+            @await Html.PartialAsync("Shared/_ResultNotFound", new ResultNotFoundViewModel
+            {
+                Icon = "search",
+                Title = "\"" + Model.Query + "\" için ürün bulunamadı",
+                Description = "Farklı anahtar kelimelerle arama yapmayı deneyin veya kategorilerimizi inceleyin.",
+                PrimaryActionText = "Ana Sayfaya Dön",
+                PrimaryActionUrl = "/",
+                PrimaryActionIcon = "home",
+                PrimaryActionIsPrimary = true
+            })
         </div>
     }
     else
     {
-        <div class="col-span-full text-center py-12 px-4 bg-gray-50 rounded border border-gray-100">
-            <i data-lucide="alert-triangle" class="w-12 h-12 text-gray-300 mb-3"></i>
-            <h3 class="text-base font-medium text-ink">Arama terimi gerekli</h3>
-            <p class="text-sm text-gray-500 mt-1">Lütfen arama yapmak için bir kelime girin.</p>
-            <a href="/" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
-                <i data-lucide="home" class="w-4 h-4 inline-block align-middle"></i> Ana Sayfaya Dön
-            </a>
+        <div class="col-span-full">
+            @await Html.PartialAsync("Shared/_ResultNotFound", new ResultNotFoundViewModel
+            {
+                Icon = "alert-triangle",
+                Title = "Arama terimi gerekli",
+                Description = "Lütfen arama yapmak için bir kelime girin.",
+                PrimaryActionText = "Ana Sayfaya Dön",
+                PrimaryActionUrl = "/",
+                PrimaryActionIcon = "home",
+                PrimaryActionIsPrimary = true
+            })
         </div>
     }
 </div>

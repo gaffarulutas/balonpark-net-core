@@ -40,11 +40,11 @@ try
     builder.Services.AddControllers();
     builder.Services.AddHttpContextAccessor();
 
-    // Session Configuration
+    // Session Configuration - Admin oturumu çıkış yapılana kadar açık kalsın
     builder.Services.AddDistributedMemoryCache();
     builder.Services.AddSession(options =>
     {
-        options.IdleTimeout = TimeSpan.FromMinutes(30);
+        options.IdleTimeout = TimeSpan.FromDays(30); // 30 gün; çıkış yapılana kadar oturum düşmez
         options.Cookie.HttpOnly = true;
         options.Cookie.IsEssential = true;
         options.Cookie.Name = ".BalonPark.Session";

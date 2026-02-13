@@ -44,8 +44,8 @@
             </a>
             
             <!-- Cache Temizleme Butonu -->
-            <form method="post" asp-page-handler="ClearCache" class="inline">
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" onclick="return confirm('Cache temizlensin mi?')">
+            <form method="post" asp-page-handler="ClearCache" class="inline" id="clearCacheForm">
+                <button type="button" id="btnClearCache" class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -221,12 +221,19 @@
             const $form = $btn.closest('.delete-form');
             
             showDeleteConfirm(
-                `<strong>${subCategoryName}</strong> adlı alt kategoriyi silmek istediğinize emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>`,
+                `<strong>${subCategoryName}</strong> adlı alt kategori kalıcı olarak silinecek. Bu işlem geri alınamaz.`,
                 function() {
                     showLoading('Alt kategori siliniyor...');
                     $form.submit();
                 }
             );
+        });
+
+        // Cache temizle: SweetAlert2 onayı sonrası form submit
+        $('#btnClearCache').on('click', function() {
+            showConfirm({ title: 'Önbelleği temizle', text: 'Kategori önbelleği temizlenecek. Devam etmek istiyor musunuz?', icon: 'question' }).then(function(r) {
+                if (r && r.isConfirmed) document.getElementById('clearCacheForm').submit();
+            });
         });
 
         // Reorder Mode Toggle

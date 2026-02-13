@@ -1071,8 +1071,8 @@ else
 
     async function moveToSpam() {
         const result = await showConfirm({
-            title: 'Spam\'e taşınsın mı?',
-            text: 'Bu mesajı spam klasörüne taşımak istediğinize emin misiniz?',
+            title: 'Spam klasörüne taşı',
+            text: 'Bu mesaj spam klasörüne taşınacak. Devam etmek istiyor musunuz?',
             icon: 'warning'
         });
         
@@ -1105,7 +1105,7 @@ else
     }
 
     async function deleteMessage() {
-        showDeleteConfirm('Bu mesajı silmek istediğinize emin misiniz? Mesaj çöp kutusuna taşınacak.', async function() {
+        showDeleteConfirm('Bu mesaj çöp kutusuna taşınacak. Devam etmek istiyor musunuz?', async function() {
             try {
                 showLoading('Siliniyor...');
                 const response = await fetch('/api/mails/delete', {

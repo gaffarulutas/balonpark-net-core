@@ -94,6 +94,9 @@ public class ProductDetailModel : BasePage
             RelatedProducts.Add(new ProductWithImage { Product = p, MainImage = mainImg });
         }
 
+        ViewData["ActiveCategorySlug"] = Product.CategorySlug;
+        ViewData["ActiveSubCategorySlug"] = Product.SubCategorySlug;
+
         // Popüler ürünler (görüntülenme / IsPopular)
         var popular = await _productRepository.GetPopularProductsAsync(Product.Id, 6);
         foreach (var p in popular)

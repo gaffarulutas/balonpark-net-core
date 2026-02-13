@@ -68,6 +68,9 @@
         })();
     </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.css" />
+    <!-- SweetAlert2: onay diyaloğu (confirm yerine) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link rel="stylesheet" href="~/css/swal-theme.css" />
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.526.0/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
 </head>
 
@@ -381,6 +384,8 @@
     <!-- Snackbar (Material Design notifications) -->
     <script src="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.js"></script>
     <script src="~/js/snackbar-helper.js"></script>
+    <!-- SweetAlert2 (showConfirm / showDeleteConfirm) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
         // Loading Functions
@@ -395,19 +400,36 @@
 
         // Snackbar: tek toast/bildirim sistemi (showSnackbar msg, 'success'|'error'|'warning'|'info')
         function showDeleteConfirm(message, callback) {
-            var text = (typeof message === 'string') ? message : (message || 'Emin misiniz?');
-            if (confirm(text)) {
-                if (typeof callback === 'function') callback();
+            var opts = { icon: 'warning', showCancelButton: true, confirmButtonText: 'Evet', cancelButtonText: 'İptal', focusCancel: true };
+            if (typeof message === 'string') {
+                opts.title = 'İşlemi onayla';
+                opts.html = message.indexOf('<') !== -1 ? message : null;
+                opts.text = message.indexOf('<') === -1 ? message : null;
+            } else {
+                opts.title = 'İşlemi onayla';
+                opts.text = message || 'Bu işlem geri alınamaz. Devam etmek istiyor musunuz?';
+            }
+            if (typeof window.Swal !== 'undefined') {
+                window.Swal.fire(opts).then(function (r) {
+                    if (r.isConfirmed && typeof callback === 'function') callback();
+                });
+            } else {
+                if (confirm(opts.text || opts.title)) { if (typeof callback === 'function') callback(); }
             }
         }
         function showSuccessAlert(message) { if (typeof showSnackbar === 'function') showSnackbar(message, 'success'); }
         function showErrorAlert(message) { if (typeof showSnackbar === 'function') showSnackbar(message, 'error'); }
 
         function showConfirm(options) {
-            var msg = options.html || options.text || options.title || 'Emin misiniz?';
-            if (typeof msg !== 'string') msg = 'Emin misiniz?';
-            msg = msg.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-            return Promise.resolve({ isConfirmed: confirm(msg) });
+            var opts = options || {};
+            var title = opts.title || 'Onay';
+            var text = opts.text || null;
+            var html = opts.html || null;
+            var swalOpts = { icon: opts.icon || 'question', showCancelButton: true, confirmButtonText: 'Evet', cancelButtonText: 'İptal', focusCancel: true, title: title };
+            if (html) swalOpts.html = html;
+            else if (text) swalOpts.text = text;
+            if (typeof window.Swal !== 'undefined') return window.Swal.fire(swalOpts);
+            return Promise.resolve({ isConfirmed: confirm(title + (text ? ': ' + text.replace(/<[^>]*>/g, '') : '')) });
         }
 
         // Mobile Menu Toggle

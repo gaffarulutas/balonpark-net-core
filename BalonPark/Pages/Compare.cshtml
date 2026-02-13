@@ -366,24 +366,30 @@
     (function() {
         function removeFromCompare(slug) {
             if (!window.favoritesAndCompare) return;
-            if (!confirm('Bu ürünü karşılaştırmadan kaldırmak istediğinize emin misiniz?')) return;
-            window.favoritesAndCompare.removeFromCompareBySlug(slug);
-            var compareList = window.favoritesAndCompare.getCompareList();
-            if (compareList.length === 0) {
-                window.location.href = '/';
-            } else {
-                var newSlugs = compareList.map(function(p) { return p.slug; }).filter(function(s) { return s; }).join(':');
-                window.location.href = '/Compare/' + newSlugs;
-            }
+            var confirmFn = typeof window.swalConfirm === 'function' ? window.swalConfirm : function (opts) { return Promise.resolve({ isConfirmed: confirm(opts.text || opts.title) }); };
+            confirmFn({ title: 'Ürünü listeden kaldır', text: 'Bu ürün karşılaştırma listesinden çıkarılacak.', icon: 'question' }).then(function (r) {
+                if (!r || !r.isConfirmed) return;
+                window.favoritesAndCompare.removeFromCompareBySlug(slug);
+                var compareList = window.favoritesAndCompare.getCompareList();
+                if (compareList.length === 0) {
+                    window.location.href = '/';
+                } else {
+                    var newSlugs = compareList.map(function(p) { return p.slug; }).filter(function(s) { return s; }).join(':');
+                    window.location.href = '/Compare/' + newSlugs;
+                }
+            });
         }
         function clearAllCompare() {
             if (!window.favoritesAndCompare) {
                 window.location.href = '/';
                 return;
             }
-            if (!confirm('Tüm karşılaştırma listesini temizlemek istediğinize emin misiniz?')) return;
-            window.favoritesAndCompare.clearCompare();
-            window.location.href = '/';
+            var confirmFn = typeof window.swalConfirm === 'function' ? window.swalConfirm : function (opts) { return Promise.resolve({ isConfirmed: confirm(opts.text || opts.title) }); };
+            confirmFn({ title: 'Listeyi temizle', text: 'Tüm ürünler karşılaştırma listesinden kaldırılacak. Devam etmek istiyor musunuz?', icon: 'warning' }).then(function (r) {
+                if (!r || !r.isConfirmed) return;
+                window.favoritesAndCompare.clearCompare();
+                window.location.href = '/';
+            });
         }
         document.addEventListener('DOMContentLoaded', function() {
             if (window.favoritesAndCompare) {

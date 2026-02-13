@@ -93,6 +93,9 @@ public class CategoryModel : BasePage
             ProductsBySubCategory[group.Key] = productsWithImages;
         }
 
+        ViewData["ActiveCategorySlug"] = slug;
+        ViewData["ActiveSubCategorySlug"] = null;
+
         return Page();
     }
 }

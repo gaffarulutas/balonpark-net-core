@@ -34,6 +34,12 @@ public class IndexModel(
     public string? ProductIdFilter { get; set; }
     
     [BindProperty(SupportsGet = true)]
+    public string? StatusFilter { get; set; } // "all" | "active" | "inactive"
+    
+    [BindProperty(SupportsGet = true)]
+    public string? SortBy { get; set; } // "name" | "nameDesc" | "price" | "priceDesc" | "stock" | "newest" | "oldest"
+    
+    [BindProperty(SupportsGet = true)]
     public int PageNumber { get; set; } = 1;
     
     public int PageSize { get; set; } = 20;
@@ -42,6 +48,29 @@ public class IndexModel(
     
     [TempData]
     public string? SuccessMessage { get; set; }
+
+    /// <summary>
+    /// Mevcut filtreleri koruyarak sayfa ve link için query string üretir.
+    /// </summary>
+    public string GetFilterQueryString(int? pageNumber = null)
+    {
+        var q = new List<string>();
+        if (pageNumber.HasValue && pageNumber.Value > 1)
+            q.Add($"PageNumber={pageNumber.Value}");
+        foreach (var id in SelectedCategoryIds)
+            q.Add($"SelectedCategoryIds={id}");
+        foreach (var id in SelectedSubCategoryIds)
+            q.Add($"SelectedSubCategoryIds={id}");
+        if (!string.IsNullOrWhiteSpace(ProductNameFilter))
+            q.Add($"ProductNameFilter={Uri.EscapeDataString(ProductNameFilter)}");
+        if (!string.IsNullOrWhiteSpace(ProductIdFilter))
+            q.Add($"ProductIdFilter={Uri.EscapeDataString(ProductIdFilter)}");
+        if (!string.IsNullOrWhiteSpace(StatusFilter) && StatusFilter != "all")
+            q.Add($"StatusFilter={Uri.EscapeDataString(StatusFilter)}");
+        if (!string.IsNullOrWhiteSpace(SortBy))
+            q.Add($"SortBy={Uri.EscapeDataString(SortBy)}");
+        return q.Count > 0 ? "?" + string.Join("&", q) : "";
+    }
 
     public async Task OnGetAsync()
     {
@@ -82,6 +111,25 @@ public class IndexModel(
                 allProducts = allProducts.Where(p => p.Id == productId).ToList();
             }
         }
+        
+        // Durum filtresi (Aktif / Pasif)
+        if (!string.IsNullOrWhiteSpace(StatusFilter) && StatusFilter != "all")
+        {
+            bool isActive = StatusFilter.Equals("active", StringComparison.OrdinalIgnoreCase);
+            allProducts = allProducts.Where(p => p.IsActive == isActive).ToList();
+        }
+        
+        // Sıralama
+        allProducts = SortBy switch
+        {
+            "name" => allProducts.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase).ToList(),
+            "nameDesc" => allProducts.OrderByDescending(p => p.Name, StringComparer.OrdinalIgnoreCase).ToList(),
+            "price" => allProducts.OrderBy(p => p.Price).ToList(),
+            "priceDesc" => allProducts.OrderByDescending(p => p.Price).ToList(),
+            "stock" => allProducts.OrderBy(p => p.Stock).ToList(),
+            "oldest" => allProducts.OrderBy(p => p.CreatedAt).ToList(),
+            "newest" or _ => allProducts.OrderByDescending(p => p.CreatedAt).ToList()
+        };
         
         // Pagination
         TotalProducts = allProducts.Count;
@@ -161,6 +209,12 @@ public class IndexModel(
                     allProducts = allProducts.Where(p => p.Id == productId).ToList();
                 }
             }
+            
+            if (!string.IsNullOrWhiteSpace(StatusFilter) && StatusFilter != "all")
+            {
+                bool isActive = StatusFilter.Equals("active", StringComparison.OrdinalIgnoreCase);
+                allProducts = allProducts.Where(p => p.IsActive == isActive).ToList();
+            }
 
             var productImages = new Dictionary<int, ProductImage?>();
             foreach (var product in allProducts)
@@ -224,6 +278,12 @@ public class IndexModel(
                 {
                     allProducts = allProducts.Where(p => p.Id == productId).ToList();
                 }
+            }
+            
+            if (!string.IsNullOrWhiteSpace(StatusFilter) && StatusFilter != "all")
+            {
+                bool isActive = StatusFilter.Equals("active", StringComparison.OrdinalIgnoreCase);
+                allProducts = allProducts.Where(p => p.IsActive == isActive).ToList();
             }
 
             var productsWithImages = new List<ProductWithImage>();

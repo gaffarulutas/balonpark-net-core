@@ -405,8 +405,7 @@ else
         }
 
         function deleteProduct() {
-            if (!confirm('Bu ürünü Google Shopping\'dan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) return;
-
+            showDeleteConfirm('Bu ürün Google Shopping listesinden kaldırılacak. Bu işlem geri alınamaz.', function () {
             showLoading('Ürün siliniyor...');
             fetch('/admin/googleshopping?handler=DeleteProduct&productId=@Model.ProductId', {
                 method: 'DELETE',
@@ -428,6 +427,7 @@ else
             .catch(error => {
                 hideLoading();
                 if (typeof showSnackbar === 'function') showSnackbar('Bir hata oluştu: ' + error.message, 'error');
+            });
             });
         }
     </script>

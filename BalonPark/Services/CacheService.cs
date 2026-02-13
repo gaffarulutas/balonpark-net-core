@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Caching.Memory;
 using BalonPark.Models;
 
@@ -6,20 +7,55 @@ namespace BalonPark.Services;
 /// <summary>
 /// Bellek tabanlı cache servisi. TTL sonunda kayıt silinir;
 /// bir sonraki istekte cache miss olur, veri DB'den yeniden yüklenir ve tekrar cache'lenir.
+/// InvalidateAllAsync tüm key'leri temizlemek için key takibi yapar.
 /// </summary>
 public class CacheService(IMemoryCache cache) : ICacheService
 {
     /// <summary>Cache TTL: 3 saat. Süre dolunca entry kaldırılır, sonraki istekte veri baştan yüklenir.</summary>
     private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(3);
 
-    /// <summary>Absolute expiration kullanılır (sliding yok). TTL sonunda entry silinir, bir sonraki istekte cache miss → DB'den yükle → tekrar cache'le.</summary>
-    private static MemoryCacheEntryOptions CreateEntryOptions(CacheItemPriority priority = CacheItemPriority.Normal)
+    /// <summary>Set edilen tüm key'ler; InvalidateAllAsync ve prefix ile temizleme için kullanılır. Eviction'da otomatik çıkarılır.</summary>
+    private readonly ConcurrentDictionary<string, byte> _trackedKeys = new();
+
+    /// <summary>Absolute expiration + eviction callback (trackedKeys'den kaldırma).</summary>
+    private MemoryCacheEntryOptions CreateEntryOptionsWithEviction(string key, CacheItemPriority priority = CacheItemPriority.Normal)
     {
-        return new MemoryCacheEntryOptions
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = CacheTtl,
             Priority = priority
         };
+        options.RegisterPostEvictionCallback((k, _, _, s) =>
+        {
+            if (s is CacheService cs && k != null)
+                cs._trackedKeys.TryRemove(k.ToString() ?? string.Empty, out _);
+        }, this);
+        return options;
+    }
+
+    /// <summary>Prefix ile eşleşen tüm key'leri cache ve trackedKeys'den kaldırır. prefix null/empty ise tümü.</summary>
+    private void RemoveByPrefix(string? prefix)
+    {
+        var toRemove = string.IsNullOrEmpty(prefix)
+            ? _trackedKeys.Keys.ToList()
+            : _trackedKeys.Keys.Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).ToList();
+        foreach (var k in toRemove)
+        {
+            cache.Remove(k);
+            _trackedKeys.TryRemove(k, out _);
+        }
+    }
+
+    private void TrackAndSet<T>(string key, T value, CacheItemPriority priority = CacheItemPriority.Normal)
+    {
+        _trackedKeys.TryAdd(key, 0);
+        cache.Set(key, value, CreateEntryOptionsWithEviction(key, priority));
+    }
+
+    private void RemoveTracked(string key)
+    {
+        cache.Remove(key);
+        _trackedKeys.TryRemove(key, out _);
     }
 
     // Cache Keys
@@ -84,17 +120,16 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetProductsAsync(IEnumerable<Product> products)
     {
-        cache.Set(PRODUCTS_KEY, products, CreateEntryOptions());
+        TrackAndSet(PRODUCTS_KEY, products);
         await Task.CompletedTask;
     }
 
     public async Task SetProductAsync(Product product)
     {
-        var options = CreateEntryOptions();
         var idKey = string.Format(PRODUCT_BY_ID_KEY, product.Id);
         var slugKey = string.Format(PRODUCT_BY_SLUG_KEY, product.Slug);
-        cache.Set(idKey, product, options);
-        cache.Set(slugKey, product, options);
+        TrackAndSet(idKey, product);
+        TrackAndSet(slugKey, product);
         await Task.CompletedTask;
     }
 
@@ -121,17 +156,16 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetCategoriesAsync(IEnumerable<Category> categories)
     {
-        cache.Set(CATEGORIES_KEY, categories, CreateEntryOptions());
+        TrackAndSet(CATEGORIES_KEY, categories);
         await Task.CompletedTask;
     }
 
     public async Task SetCategoryAsync(Category category)
     {
-        var options = CreateEntryOptions();
         var idKey = string.Format(CATEGORY_BY_ID_KEY, category.Id);
         var slugKey = string.Format(CATEGORY_BY_SLUG_KEY, category.Slug);
-        cache.Set(idKey, category, options);
-        cache.Set(slugKey, category, options);
+        TrackAndSet(idKey, category);
+        TrackAndSet(slugKey, category);
         await Task.CompletedTask;
     }
 
@@ -170,17 +204,16 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetSubCategoriesAsync(IEnumerable<SubCategory> subCategories)
     {
-        cache.Set(SUBCATEGORIES_KEY, subCategories, CreateEntryOptions());
+        TrackAndSet(SUBCATEGORIES_KEY, subCategories);
         await Task.CompletedTask;
     }
 
     public async Task SetSubCategoryAsync(SubCategory subCategory)
     {
-        var options = CreateEntryOptions();
         var idKey = string.Format(SUBCATEGORY_BY_ID_KEY, subCategory.Id);
         var slugKey = string.Format(SUBCATEGORY_BY_SLUG_KEY, subCategory.Slug);
-        cache.Set(idKey, subCategory, options);
-        cache.Set(slugKey, subCategory, options);
+        TrackAndSet(idKey, subCategory);
+        TrackAndSet(slugKey, subCategory);
         await Task.CompletedTask;
     }
 
@@ -223,17 +256,35 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetBlogsAsync(IEnumerable<Blog> blogs)
     {
-        cache.Set(BLOGS_KEY, blogs, CreateEntryOptions());
+        TrackAndSet(BLOGS_KEY, blogs);
+        await Task.CompletedTask;
+    }
+
+    public async Task SetFeaturedBlogsAsync(IEnumerable<Blog> blogs)
+    {
+        TrackAndSet(FEATURED_BLOGS_KEY, blogs);
+        await Task.CompletedTask;
+    }
+
+    public async Task SetLatestBlogsAsync(IEnumerable<Blog> blogs)
+    {
+        TrackAndSet(LATEST_BLOGS_KEY, blogs);
+        await Task.CompletedTask;
+    }
+
+    public async Task SetSearchBlogsAsync(string query, IEnumerable<Blog> blogs)
+    {
+        var key = string.Format(BLOGS_SEARCH_KEY, query.ToLower());
+        TrackAndSet(key, blogs);
         await Task.CompletedTask;
     }
 
     public async Task SetBlogAsync(Blog blog)
     {
-        var options = CreateEntryOptions();
         var idKey = string.Format(BLOG_BY_ID_KEY, blog.Id);
         var slugKey = string.Format(BLOG_BY_SLUG_KEY, blog.Slug);
-        cache.Set(idKey, blog, options);
-        cache.Set(slugKey, blog, options);
+        TrackAndSet(idKey, blog);
+        TrackAndSet(slugKey, blog);
         await Task.CompletedTask;
     }
 
@@ -248,7 +299,7 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task SetSettingsAsync(Settings settings)
     {
-        cache.Set(SETTINGS_KEY, settings, CreateEntryOptions(CacheItemPriority.High));
+        TrackAndSet(SETTINGS_KEY, settings, CacheItemPriority.High);
         await Task.CompletedTask;
     }
 
@@ -258,115 +309,107 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task InvalidateProductsAsync()
     {
-        cache.Remove(PRODUCTS_KEY);
+        RemoveByPrefix("product");
         await Task.CompletedTask;
     }
 
     public async Task InvalidateProductAsync(int id)
     {
         var idKey = string.Format(PRODUCT_BY_ID_KEY, id);
-        cache.Remove(idKey);
+        RemoveTracked(idKey);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateProductBySlugAsync(string slug)
     {
         var slugKey = string.Format(PRODUCT_BY_SLUG_KEY, slug);
-        cache.Remove(slugKey);
+        RemoveTracked(slugKey);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateProductsByCategorySlugAsync(string categorySlug)
     {
         var key = string.Format(PRODUCTS_BY_CATEGORY_KEY, categorySlug);
-        cache.Remove(key);
+        RemoveTracked(key);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateProductsBySubCategorySlugAsync(string subCategorySlug)
     {
         var key = string.Format(PRODUCTS_BY_SUBCATEGORY_KEY, subCategorySlug);
-        cache.Remove(key);
+        RemoveTracked(key);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateCategoriesAsync()
     {
-        cache.Remove(CATEGORIES_KEY);
+        RemoveByPrefix("categor");
         await Task.CompletedTask;
     }
 
     public async Task InvalidateCategoryAsync(int id)
     {
         var idKey = string.Format(CATEGORY_BY_ID_KEY, id);
-        cache.Remove(idKey);
+        RemoveTracked(idKey);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateCategoryBySlugAsync(string slug)
     {
         var slugKey = string.Format(CATEGORY_BY_SLUG_KEY, slug);
-        cache.Remove(slugKey);
+        RemoveTracked(slugKey);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateSubCategoriesAsync()
     {
-        cache.Remove(SUBCATEGORIES_KEY);
+        RemoveByPrefix("subcategor");
         await Task.CompletedTask;
     }
 
     public async Task InvalidateSubCategoryAsync(int id)
     {
         var idKey = string.Format(SUBCATEGORY_BY_ID_KEY, id);
-        cache.Remove(idKey);
+        RemoveTracked(idKey);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateSubCategoryBySlugAsync(string slug)
     {
         var slugKey = string.Format(SUBCATEGORY_BY_SLUG_KEY, slug);
-        cache.Remove(slugKey);
+        RemoveTracked(slugKey);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateBlogsAsync()
     {
-        cache.Remove(BLOGS_KEY);
-        cache.Remove(FEATURED_BLOGS_KEY);
-        cache.Remove(LATEST_BLOGS_KEY);
+        RemoveByPrefix("blog");
         await Task.CompletedTask;
     }
 
     public async Task InvalidateBlogAsync(int id)
     {
         var idKey = string.Format(BLOG_BY_ID_KEY, id);
-        cache.Remove(idKey);
+        RemoveTracked(idKey);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateBlogBySlugAsync(string slug)
     {
         var slugKey = string.Format(BLOG_BY_SLUG_KEY, slug);
-        cache.Remove(slugKey);
+        RemoveTracked(slugKey);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateSettingsAsync()
     {
-        cache.Remove(SETTINGS_KEY);
+        RemoveTracked(SETTINGS_KEY);
         await Task.CompletedTask;
     }
 
     public async Task InvalidateAllAsync()
     {
-        cache.Remove(PRODUCTS_KEY);
-        cache.Remove(CATEGORIES_KEY);
-        cache.Remove(SUBCATEGORIES_KEY);
-        cache.Remove(BLOGS_KEY);
-        cache.Remove(FEATURED_BLOGS_KEY);
-        cache.Remove(LATEST_BLOGS_KEY);
-        cache.Remove(SETTINGS_KEY);
+        RemoveByPrefix(null);
         await Task.CompletedTask;
     }
 

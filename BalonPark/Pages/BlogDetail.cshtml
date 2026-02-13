@@ -271,12 +271,14 @@
 }
 else
 {
-    <div class="text-center py-12 px-4">
-        <i data-lucide="alert-triangle" class="w-12 h-12 text-yellow-500 mb-3"></i>
-        <h2 class="text-xl font-medium text-ink mt-3">Blog yazısı bulunamadı</h2>
-        <p class="text-sm text-gray-500 mt-1">Aradığınız blog yazısı bulunamadı veya yayından kaldırılmış olabilir.</p>
-        <a asp-page="/Blog" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded bg-primary text-white font-medium text-sm hover:bg-primary-dark transition">
-            <i data-lucide="arrow-left" class="w-4 h-4 inline-block align-middle"></i> Blog'a Dön
-        </a>
-    </div>
+    @await Html.PartialAsync("Shared/_ResultNotFound", new ResultNotFoundViewModel
+    {
+        Icon = "alert-triangle",
+        Title = "Blog yazısı bulunamadı",
+        Description = "Aradığınız blog yazısı bulunamadı veya yayından kaldırılmış olabilir.",
+        PrimaryActionText = "Blog'a Dön",
+        PrimaryActionUrl = "/Blog",
+        PrimaryActionIcon = "arrow-left",
+        PrimaryActionIsPrimary = true
+    })
 }

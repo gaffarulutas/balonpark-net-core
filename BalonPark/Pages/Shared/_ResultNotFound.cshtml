@@ -1,0 +1,39 @@
+@model BalonPark.Models.ResultNotFoundViewModel
+@{
+    if (Model == null) return;
+}
+<div class="flex justify-center w-full" role="status" aria-live="polite" aria-label="Sonuç bulunamadı">
+    <div class="flex flex-col items-center gap-6 sm:gap-8 py-12 sm:py-16 px-6 sm:px-8 w-full bg-gray-50/95 rounded-xl border border-gray-100 shadow-sm">
+        <!-- İkon: en üstte ortalı -->
+        <div class="flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100/80 text-gray-400" aria-hidden="true">
+            <i data-lucide="@Model.Icon" class="w-7 h-7 sm:w-8 sm:h-8"></i>
+        </div>
+        <!-- Metin alanı: ortalı -->
+        <div class="w-full min-w-0 text-center">
+            <h2 class="text-lg sm:text-xl font-semibold text-ink tracking-tight">@Model.Title</h2>
+            <p class="mt-2 text-sm text-gray-500 leading-relaxed max-w-md mx-auto">@Model.Description</p>
+            @if (!string.IsNullOrEmpty(Model.PrimaryActionText) && !string.IsNullOrEmpty(Model.PrimaryActionUrl))
+            {
+                <div class="mt-6 flex flex-wrap justify-center gap-3">
+                    <a href="@Model.PrimaryActionUrl" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 @(Model.PrimaryActionIsPrimary ? "bg-primary hover:bg-primary-dark text-white focus:ring-primary shadow-sm" : "border border-gray-200 text-gray-700 hover:bg-gray-100 focus:ring-gray-300")">
+                        @if (!string.IsNullOrEmpty(Model.PrimaryActionIcon))
+                        {
+                            <i data-lucide="@Model.PrimaryActionIcon" class="w-4 h-4 shrink-0" aria-hidden="true"></i>
+                        }
+                        @Model.PrimaryActionText
+                    </a>
+                    @if (!string.IsNullOrEmpty(Model.SecondaryActionText) && !string.IsNullOrEmpty(Model.SecondaryActionUrl))
+                    {
+                        <a href="@Model.SecondaryActionUrl" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300">
+                            @if (!string.IsNullOrEmpty(Model.SecondaryActionIcon))
+                            {
+                                <i data-lucide="@Model.SecondaryActionIcon" class="w-4 h-4 shrink-0" aria-hidden="true"></i>
+                            }
+                            @Model.SecondaryActionText
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

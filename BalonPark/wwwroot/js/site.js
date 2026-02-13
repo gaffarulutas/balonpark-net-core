@@ -125,7 +125,14 @@
         document.querySelectorAll('.currency-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var currency = btn.getAttribute('data-currency');
-                if (currency && typeof window.setCurrency === 'function') window.setCurrency(currency);
+                if (!currency || typeof window.setCurrency !== 'function') return;
+                if (btn.getAttribute('aria-pressed') === 'true') return;
+                var labels = { TL: 'Türk Lirası (₺)', USD: 'Amerikan Doları ($)', EUR: 'Euro (€)' };
+                var label = labels[currency] || currency;
+                var confirmFn = typeof window.swalConfirm === 'function' ? window.swalConfirm : function (opts) { return Promise.resolve({ isConfirmed: confirm(opts.title || opts.text || 'Onaylıyor musunuz?') }); };
+                confirmFn({ title: 'Para birimini değiştir', text: 'Fiyatlar ' + label + ' cinsinden gösterilecek. Sayfa yenilenecektir.', icon: 'info' }).then(function (r) {
+                    if (r && r.isConfirmed) window.setCurrency(currency);
+                });
             });
         });
     }

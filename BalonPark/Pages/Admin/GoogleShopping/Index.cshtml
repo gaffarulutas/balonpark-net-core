@@ -396,7 +396,7 @@ else
         }
 
         async function syncAllProducts() {
-            const result = await showConfirm({ title: 'Onay Gerekli', text: 'Tüm ürünleri Google Shopping\'a senkronize etmek istediğinizden emin misiniz?' });
+            const result = await showConfirm({ title: 'Tümünü senkronize et', text: 'Tüm ürünler Google Shopping ile eşitlenecek. Devam etmek istiyor musunuz?', icon: 'question' });
             if (result.isConfirmed) {
                 await performSync();
             }
@@ -508,7 +508,7 @@ else
                 showSnackbar('Lütfen silinecek ürünleri seçin!', 'warning');
                 return;
             }
-            const result = await showConfirm({ html: 'Seçilen ' + selectedIds.length + ' ürünü Google Shopping\'dan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!' });
+            const result = await showConfirm({ title: 'Seçilen ürünleri kaldır', text: 'Seçilen ' + selectedIds.length + ' ürün Google Shopping listesinden kaldırılacak. Bu işlem geri alınamaz.', icon: 'warning' });
             if (result.isConfirmed) {
                 showLoading();
                 try {
@@ -582,7 +582,7 @@ else
         }
 
         async function submitForApproval() {
-            const result = await showConfirm({ html: 'Tüm ürünleri Google Shopping onayına göndermek istediğinizden emin misiniz? Google 24-48 saat içinde işleyecek.' });
+            const result = await showConfirm({ title: 'Onaya gönder', text: 'Tüm ürünler Google onayına gönderilecek. İşlem genelde 24–48 saat içinde tamamlanır. Devam etmek istiyor musunuz?', icon: 'question' });
             if (result.isConfirmed) {
                 await performSubmitForApproval();
             }
@@ -670,7 +670,7 @@ else
         }
 
         async function deleteProduct(productId) {
-            const result = await showConfirm({ html: 'Bu ürünü Google Shopping\'dan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!' });
+            const result = await showConfirm({ title: 'Ürünü listeden kaldır', text: 'Bu ürün Google Shopping listesinden kaldırılacak. Bu işlem geri alınamaz.', icon: 'warning' });
             if (result.isConfirmed) {
                 await performDelete(productId);
             }

@@ -181,7 +181,7 @@
             const $form = $btn.closest('.delete-form');
             
             showDeleteConfirm(
-                `<strong>${categoryName}</strong> adlı kategoriyi silmek istediğinize emin misiniz?<br><br><small class="text-gray-500">Bu işlem geri alınamaz!</small>`,
+                `<strong>${categoryName}</strong> adlı kategori kalıcı olarak silinecek. Bu işlem geri alınamaz.`,
                 function() {
                     showLoading('Kategori siliniyor...');
                     $form.submit();

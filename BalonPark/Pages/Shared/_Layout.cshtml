@@ -34,7 +34,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -126,6 +126,14 @@
     <meta name="msapplication-TileColor" content="#fdfdfe">
     <link rel="canonical"
         href="@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"{Context.Request.Path}{Context.Request.QueryString}") ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}")">
+    @if (ViewData["PrevUrl"] != null)
+    {
+        <link rel="prev" href="@ViewData["PrevUrl"]">
+    }
+    @if (ViewData["NextUrl"] != null)
+    {
+        <link rel="next" href="@ViewData["NextUrl"]">
+    }
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -215,6 +223,10 @@
 
     @await RenderSectionAsync("Styles", required: false)
 
+    <!-- SweetAlert2: onay diyaloğu (confirm yerine) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link href="~/css/swal-theme.css" rel="stylesheet">
+
     <!-- Blog Structured Data -->
     @if (ViewData["StructuredData"] != null)
     {
@@ -242,7 +254,11 @@
                 <img src="@logoUrl" alt="@Html.Raw(companyName)" width="160" height="48" loading="eager" class="layout-sidebar-logo__img">
             </a>
             <div class="layout-sidebar-header">
-                <h2 class="layout-sidebar-title">Kategoriler</h2>
+                <h2 class="layout-sidebar-title">
+                    <span class="layout-sidebar-title-accent" aria-hidden="true"></span>
+                    <span class="layout-sidebar-title-icon" aria-hidden="true"><i data-lucide="layers" class="w-5 h-5"></i></span>
+                    <span class="layout-sidebar-title-text">Kategoriler</span>
+                </h2>
                 <button type="button" id="layout-sidebar-close" class="layout-sidebar-close" aria-label="Menüyü kapat">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -253,12 +269,17 @@
                 }
                 @if (headerCategories.Count > 0)
                 {
+                    var activeCatSlug = ViewData["ActiveCategorySlug"]?.ToString() ?? "";
+                    var activeSubSlug = ViewData["ActiveSubCategorySlug"]?.ToString() ?? "";
                     <ul class="category-tree-list">
                         @foreach (var cat in headerCategories)
                         {
                             var hasSubs = cat.SubCategories != null && cat.SubCategories.Count > 0;
+                            var isCatActive = string.Equals(cat.Slug, activeCatSlug, StringComparison.OrdinalIgnoreCase);
+                            var isChildActive = hasSubs && cat.SubCategories!.Any(sc => string.Equals(sc.Slug, activeSubSlug, StringComparison.OrdinalIgnoreCase));
+                            var childrenExpanded = isCatActive || isChildActive;
                             <li class="category-tree-item" data-category-id="@cat.Id">
-                                <a href="/category/@cat.Slug" class="category-tree-link">
+                                <a href="/category/@cat.Slug" class="category-tree-link @(isCatActive && string.IsNullOrEmpty(activeSubSlug) ? "category-tree-link-active" : "")">
                                     @if (!string.IsNullOrEmpty(cat.FirstProductImage))
                                     {
                                         <span class="category-tree-icon category-tree-icon-img"><img src="@(urlService?.GetImageUrl(cat.FirstProductImage) ?? cat.FirstProductImage)" alt="" loading="lazy"></span>
@@ -270,16 +291,17 @@
                                     <span class="category-tree-label">@Html.Raw(cat.Name)</span>
                                     @if (hasSubs)
                                     {
-                                        <span class="category-tree-chevron" role="button" tabindex="0" aria-expanded="false" aria-controls="category-children-@cat.Id" title="Alt kategorileri aç/kapat"><i data-lucide="chevron-right" class="category-tree-chevron-icon"></i></span>
+                                        <span class="category-tree-chevron" role="button" tabindex="0" aria-expanded="@(childrenExpanded ? "true" : "false")" aria-controls="category-children-@cat.Id" title="Alt kategorileri aç/kapat"><i data-lucide="chevron-right" class="category-tree-chevron-icon"></i></span>
                                     }
                                 </a>
                                 @if (hasSubs)
                                 {
-                                    <ul id="category-children-@cat.Id" class="category-tree-children hidden" role="group" aria-label="@cat.Name alt kategorileri">
+                                    <ul id="category-children-@cat.Id" class="category-tree-children @(childrenExpanded ? "" : "hidden")" role="group" aria-label="@cat.Name alt kategorileri">
                                         @foreach (var sub in cat.SubCategories!)
                                         {
+                                            var isSubActive = string.Equals(sub.Slug, activeSubSlug, StringComparison.OrdinalIgnoreCase);
                                             <li class="category-tree-child">
-                                                <a href="/category/@cat.Slug/@sub.Slug" class="category-tree-child-link">
+                                                <a href="/category/@cat.Slug/@sub.Slug" class="category-tree-child-link @(isSubActive ? "category-tree-child-link-active" : "")">
                                                     <i data-lucide="chevron-right" class="category-tree-child-chevron"></i>
                                                     <span class="category-tree-child-label">@Html.Raw(sub.Name)</span>
                                                 </a>
@@ -296,6 +318,19 @@
                     <p class="category-tree-empty">Kategori bulunamadı.</p>
                 }
             </nav>
+
+            <!-- Sertifikalarımız kutusu – kategorilerin altında, sidebar ile uyumlu -->
+            <div class="sidebar-certificates-box" aria-label="Sertifikalarımız">
+                <div class="sidebar-certificates-box__inner">
+                    <span class="sidebar-certificates-box__icon" aria-hidden="true">
+                        <i data-lucide="award" class="sidebar-certificates-box__icon-svg"></i>
+                    </span>
+                    <div class="sidebar-certificates-box__content">
+                        <h3 class="sidebar-certificates-box__title">Sertifikalarımız</h3>
+                        <p class="sidebar-certificates-box__desc">Kalite ve güvenlik belgelerimiz</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </aside>
     <div id="layout-sidebar-overlay" class="layout-sidebar-overlay" aria-hidden="true"></div>
@@ -311,6 +346,7 @@
                     </button>
                     <nav class="site-header__nav" aria-label="Ana sayfa menüsü">
                         <a asp-page="/Index" class="site-header__nav-link" title="Ana Sayfa">Ana Sayfa</a>
+                        <a asp-page="/ProductList" class="site-header__nav-link" title="Ürünler">Ürünler</a>
                         <a asp-page="/Hakkimizda" class="site-header__nav-link" title="Hakkımızda">Hakkımızda</a>
                         <a asp-page="/Blog" class="site-header__nav-link" title="Blog">Blog</a>
                         <a asp-page="/Iletisim" class="site-header__nav-link" title="İletişim">İletişim</a>
@@ -343,26 +379,26 @@
                     </div>
                 </div>
 
-                <a href="/Search" class="site-header__search-mob" aria-label="Arama sayfasına git">
-                    <i data-lucide="search" class="site-header__search-mob-icon" aria-hidden="true"></i>
-                </a>
+                <div class="site-header__end">
+                @{
+                    var phoneMobDisplay = siteSettings?.PhoneNumber ?? "";
+                    var showPhoneMob = !string.IsNullOrEmpty(phoneMobDisplay);
+                    var telHrefMob = showPhoneMob ? "tel:" + new string(phoneMobDisplay.Where(c => char.IsDigit(c) || c == '+').ToArray()) : "";
+                }
+                @if (showPhoneMob)
+                {
+                    <a href="@telHrefMob" class="site-header__phone-mob site-header__action" aria-label="Bizi arayın: @phoneMobDisplay" title="@phoneMobDisplay">
+                        <i data-lucide="phone" class="site-header__action-icon" aria-hidden="true"></i>
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/Iletisim" class="site-header__phone-mob site-header__action" aria-label="İletişim sayfası" title="İletişim">
+                        <i data-lucide="phone" class="site-header__action-icon" aria-hidden="true"></i>
+                    </a>
+                }
 
                 <div class="site-header__actions">
-                    @if (!string.IsNullOrEmpty(siteSettings?.PhoneNumber))
-                    {
-                        var telHref = "tel:" + new string(siteSettings.PhoneNumber.Where(c => char.IsDigit(c) || c == '+').ToArray());
-                        <a href="@telHref" class="site-header__action site-header__action--phone" aria-label="Bizi arayın: @siteSettings.PhoneNumber" title="@siteSettings.PhoneNumber">
-                            <i data-lucide="phone" class="site-header__action-icon" aria-hidden="true"></i>
-                            <span class="site-header__phone-label">@siteSettings.PhoneNumber</span>
-                        </a>
-                    }
-                    else
-                    {
-                        <a asp-page="/Iletisim" class="site-header__action site-header__action--phone" aria-label="İletişim sayfası" title="İletişim">
-                            <i data-lucide="phone" class="site-header__action-icon" aria-hidden="true"></i>
-                            <span class="site-header__phone-label">İletişim</span>
-                        </a>
-                    }
                     <a href="#" id="header-favorites-btn" class="site-header__action" aria-label="Favorilerim" title="Favoriler">
                         <i data-lucide="heart" class="site-header__action-icon lucide-fav-header" aria-hidden="true"></i>
                         <span class="site-header__action-badge favorites-count-text" aria-hidden="true">0</span>
@@ -371,11 +407,10 @@
                         <i data-lucide="shuffle" class="site-header__action-icon" aria-hidden="true"></i>
                         <span class="site-header__action-badge compare-count-text" aria-hidden="true">0</span>
                     </a>
-                    <div class="site-header__currency" role="group" aria-label="Para birimi seçin">
-                        <button type="button" class="currency-btn site-header__currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "site-header__currency-btn--active" : "")" data-currency="TL" aria-label="Türk Lirası" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "TL")"><i data-lucide="badge-turkish-lira" class="site-header__currency-icon" aria-hidden="true"></i></button>
-                        <button type="button" class="currency-btn site-header__currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "site-header__currency-btn--active" : "")" data-currency="USD" aria-label="Amerikan Doları" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "USD")"><i data-lucide="dollar-sign" class="site-header__currency-icon" aria-hidden="true"></i></button>
-                        <button type="button" class="currency-btn site-header__currency-btn @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "site-header__currency-btn--active" : "")" data-currency="EUR" aria-label="Euro" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "EUR")"><i data-lucide="euro" class="site-header__currency-icon" aria-hidden="true"></i></button>
-                    </div>
+                    <button type="button" class="currency-btn site-header__action @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "site-header__action--active" : "")" data-currency="TL" aria-label="Türk Lirası" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "TL")" title="TL"><i data-lucide="badge-turkish-lira" class="site-header__action-icon" aria-hidden="true"></i></button>
+                    <button type="button" class="currency-btn site-header__action @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "site-header__action--active" : "")" data-currency="USD" aria-label="Amerikan Doları" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "USD")" title="USD"><i data-lucide="dollar-sign" class="site-header__action-icon" aria-hidden="true"></i></button>
+                    <button type="button" class="currency-btn site-header__action @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "site-header__action--active" : "")" data-currency="EUR" aria-label="Euro" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "EUR")" title="Euro"><i data-lucide="euro" class="site-header__action-icon" aria-hidden="true"></i></button>
+                </div>
                 </div>
             </div>
         </div>
@@ -409,6 +444,7 @@
                     <a asp-page="/Sitemap" class="text-gray-600 hover:text-primary" title="Site Haritası">Site Haritası</a>
                     <a asp-page="/Privacy" class="text-gray-600 hover:text-primary" title="Gizlilik Politikası">Gizlilik</a>
                     <a asp-page="/KullanimKosullari" class="text-gray-600 hover:text-primary" title="Kullanım Koşulları">Kullanım Koşulları</a>
+                    <button type="button" id="footer-currency-disclaimer-btn" class="text-gray-500 hover:text-primary text-xs border-0 bg-transparent p-0 cursor-pointer underline underline-offset-1" title="Döviz kurları hakkında">Döviz kurları</button>
                 </nav>
                 @if (!string.IsNullOrEmpty(siteSettings?.Facebook) || !string.IsNullOrEmpty(siteSettings?.Instagram) || !string.IsNullOrEmpty(siteSettings?.Twitter) || !string.IsNullOrEmpty(siteSettings?.LinkedIn) || !string.IsNullOrEmpty(siteSettings?.YouTube))
                 {
@@ -457,6 +493,26 @@
 
     <!-- Generic Tailwind modal (best practices: focus trap, Escape, backdrop, aria) -->
     <script src="~/js/modal-helper.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('footer-currency-disclaimer-btn');
+            if (btn && typeof window.openModal === 'function') {
+                btn.addEventListener('click', function () {
+                    window.openModal({
+                        title: 'Döviz kurları',
+                        titleId: 'currency-disclaimer-title',
+                        content: '<p class="text-xs text-gray-600 leading-relaxed">USD ve EUR fiyatları, Türkiye Cumhuriyet Merkez Bankası (TCMB) tarafından açıklanan güncel döviz kurlarına göre otomatik hesaplanmaktadır. Kurlar gün içinde değişebileceğinden döviz cinsinden gösterilen tutarlar anlık olarak güncellenir. Kesin fiyat bilgisi için lütfen bizimle iletişime geçiniz.</p>',
+                        contentClassName: 'bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col focus:outline-none modal-panel',
+                        closeLabel: 'Kapat'
+                    });
+                });
+            }
+        });
+    </script>
+
+    <!-- SweetAlert2 + swal-helper (confirm yerine) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/swal-helper.js"></script>
 
     <!-- Favorites & Compare: load first so showFavorites/showCompare are defined -->
     <script src="~/js/favorites-compare.js"></script>
