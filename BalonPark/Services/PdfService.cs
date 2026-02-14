@@ -971,7 +971,7 @@ public class PdfService(
                 document.Add(new Paragraph("Ürün Kataloğu", GetTurkishFont(14, Font.BOLD, new BaseColor(28, 28, 28))) { SpacingAfter = 2 });
                 document.Add(new Paragraph($"{products.Count} ürün listeleniyor.", GetTurkishFont(10, Font.NORMAL, BaseColor.GRAY)) { SpacingAfter = CatalogSectionSpacing });
 
-                var table = new PdfPTable(7)
+                var table = new PdfPTable(6)
                 {
                     WidthPercentage = 100,
                     HeaderRows = 1,
@@ -979,10 +979,10 @@ public class PdfService(
                     SpacingAfter = CatalogSectionSpacing,
                     HorizontalAlignment = Element.ALIGN_LEFT
                 };
-                table.SetWidths([0.9f, 0.9f, 2.6f, 1.2f, 1.2f, 1.2f, 1.2f]);
+                table.SetWidths([0.9f, 0.9f, 2.6f, 1.2f, 1.2f, 1.2f]);
 
                 var headerFont = GetTurkishFont(9, Font.BOLD, BaseColor.WHITE);
-                var headers = new[] { "Resim", "Kod", "Ürün Adı", "Özet", "Fiyat (TL)", "Fiyat (USD)", "Fiyat (EURO)" };
+                var headers = new[] { "Resim", "Kod", "Ürün Adı", "Fiyat (TL)", "Fiyat (USD)", "Fiyat (EURO)" };
                 foreach (var h in headers)
                 {
                     var headerCell = new PdfPCell(new Phrase(h, headerFont))
@@ -1074,16 +1074,6 @@ public class PdfService(
                     };
                     table.AddCell(nameCell);
 
-                    var summaryCell = new PdfPCell(new Phrase(product.Summary ?? "-", cellFont))
-                    {
-                        VerticalAlignment = Element.ALIGN_MIDDLE,
-                        Padding = CatalogTablePadding,
-                        BackgroundColor = rowBg,
-                        BorderColor = CatalogBorder,
-                        BorderWidth = 0.5f
-                    };
-                    table.AddCell(summaryCell);
-
                     var priceCellTl = new PdfPCell(new Phrase($"{product.Price:N2}", priceFont))
                     {
                         HorizontalAlignment = Element.ALIGN_RIGHT,
@@ -1163,10 +1153,10 @@ public class PdfService(
             {
                 var cells = row.SelectNodes("td");
                 logger.LogInformation("Satırda {CellCount} hücre bulundu", cells?.Count ?? 0);
-                if (cells == null || cells.Count < 7)
+                if (cells == null || cells.Count < 6)
                 {
-                    logger.LogWarning("Satırda yeterli hücre yok (minimum 7 gerekli), atlanıyor");
-                    continue; // Resim, Kod, Ad, Ölçü, TL, USD, EUR
+                    logger.LogWarning("Satırda yeterli hücre yok (minimum 6 gerekli), atlanıyor");
+                    continue; // Resim, Kod, Ad, TL, USD, EUR
                 }
                 var product = new ProductInfo();
                 
@@ -1262,11 +1252,8 @@ public class PdfService(
                     product.SubCategorySlug = "tum-urunler";
                 }
 
-                // Özet (4. hücre)
-                product.Summary = cells[3].InnerText.Trim();
-
-                // Fiyat TL (5. hücre) - Metin formatında parsing
-                var priceText = cells[4].InnerText.Trim();
+                // Fiyat TL (4. hücre) - Metin formatında parsing
+                var priceText = cells[3].InnerText.Trim();
                 logger.LogInformation("TL Fiyat parsing: '{PriceText}'", priceText);
 
                 // Türkçe fiyat formatını temizle (TL, ₺, virgül, nokta)
@@ -1296,8 +1283,8 @@ public class PdfService(
                 {
                     logger.LogWarning("TL Fiyat parse edilemedi: '{CleanPriceText}'", cleanPriceText);
                 }
-                // Fiyat USD (6. hücre) - Metin formatında parsing
-                var usdPriceText = cells[5].InnerText.Trim();
+                // Fiyat USD (5. hücre) - Metin formatında parsing
+                var usdPriceText = cells[4].InnerText.Trim();
                 logger.LogInformation("USD Fiyat parsing: '{PriceText}'", usdPriceText);
 
                 // USD fiyat formatını temizle
@@ -1328,8 +1315,8 @@ public class PdfService(
                     logger.LogWarning("USD Fiyat parse edilemedi: '{CleanPriceText}'", cleanUsdPriceText);
                 }
 
-                // Fiyat EUR (7. hücre) - Metin formatında parsing
-                var euroPriceText = cells[6].InnerText.Trim();
+                // Fiyat EUR (6. hücre) - Metin formatında parsing
+                var euroPriceText = cells[5].InnerText.Trim();
                 logger.LogInformation("EUR Fiyat parsing: '{PriceText}'", euroPriceText);
 
                 // EUR fiyat formatını temizle
@@ -1433,8 +1420,8 @@ public class PdfService(
                     productName.Add(productLink);
                     document.Add(productName);
 
-                    // Ürün detayları
-                    var details = new Paragraph($"  Kod: U-{product.Id} | Özet: {product.Summary ?? "-"}", productFont);
+                    // Ürün detayları (Kod bilgisi)
+                    var details = new Paragraph($"  Kod: U-{product.Id}", productFont);
                     document.Add(details);
 
                     // Fiyatlar

@@ -55,6 +55,18 @@ public class CreateModel : BaseAdminPage
     {
         Categories = (await _categoryRepository.GetAllAsync()).ToList();
         SubCategories = (await _subCategoryRepository.GetAllAsync()).ToList();
+
+        // Varsayılan değerler (yeni ürün eklemede)
+        Product.Stock = Product.Stock == 0 ? 1 : Product.Stock;
+        Product.WarrantyDescription ??= "2 yıl garanti";
+        Product.AfterSalesService ??= "5 yıllık servis ve bakım desteği";
+        Product.MaterialWeightGrm2 ??= 650;
+        Product.DeliveryDaysMin ??= 3;
+        Product.DeliveryDaysMax ??= 15;
+        Product.FanWeightKg ??= 20;
+        Product.FanDescription ??= "1 x türbin";
+        Product.RequiredPersonCount ??= 2;
+        Product.AssemblyTime ??= 1;
     }
 
     public async Task<IActionResult> OnPostAsync()

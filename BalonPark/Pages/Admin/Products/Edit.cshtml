@@ -96,7 +96,7 @@
             </div>
         }
         <p class="text-sm text-gray-500 mb-2">@(Model.ProductImages.Any() ? "Yeni resim ekleyin:" : "Ürün resimleri yükleyin:")</p>
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="productEditForm">
             <input type="hidden" asp-for="Product.Id" />
             <input type="hidden" asp-for="Product.CreatedAt" />
             <div id="editImageDropZone" class="flex justify-center px-6 py-12 border-2 border-gray-300 border-dashed rounded-xl bg-gray-50/80 hover:border-gray-400 hover:bg-gray-100/80 transition-colors duration-200 cursor-pointer relative">
@@ -121,40 +121,56 @@
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Temel Bilgiler</h2>
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @{
+                            var selectedCategoryName = Model.Categories.FirstOrDefault(c => c.Id == Model.Product.CategoryId)?.Name ?? "Kategori seçin...";
+                            var selectedSubCategoryName = Model.SubCategories.FirstOrDefault(s => s.Id == Model.Product.SubCategoryId)?.Name ?? "Alt kategori seçin...";
+                        }
                         <div>
                             <label asp-for="Product.CategoryId" class="block text-sm font-medium text-gray-700 mb-2">Kategori <span class="text-red-500">*</span></label>
-                            <select asp-for="Product.CategoryId" id="categoryDropdown" class="@inputClass">
-                                <option value="0">Kategori seçin...</option>
-                                @foreach (var category in Model.Categories)
-                                {
-                                    @if (category.Id == Model.Product.CategoryId)
-                                    {
-                                        <option value="@category.Id" selected>@Html.Raw(category.Name)</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@category.Id">@Html.Raw(category.Name)</option>
-                                    }
-                                }
-                            </select>
+                            <input type="hidden" asp-for="Product.CategoryId" id="categoryHidden" />
+                            <div class="relative product-select-wrapper" data-select="category">
+                                <button type="button" id="categorySelectBtn" class="product-select-btn w-full h-12 px-4 pr-10 text-left rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-900 shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent flex items-center" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="block truncate" id="categorySelectText">@Html.Raw(selectedCategoryName)</span>
+                                    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clip-rule="evenodd" /></svg>
+                                    </span>
+                                </button>
+                                <div id="categoryDropdownPanel" class="hidden absolute z-50 mt-1 w-full rounded-lg bg-white py-1 shadow-xl ring-1 ring-black ring-opacity-5 border border-gray-200">
+                                    <div class="px-2 py-1.5 border-b border-gray-100">
+                                        <input type="text" id="categorySearch" placeholder="Kategori ara..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-800 focus:border-transparent" autocomplete="off" />
+                                    </div>
+                                    <div id="categoryOptionList" class="max-h-60 overflow-auto py-1">
+                                        @foreach (var category in Model.Categories)
+                                        {
+                                            <div class="product-select-option category-option px-3 py-2.5 text-sm text-gray-900 cursor-pointer hover:bg-gray-100" data-value="@category.Id" data-text="@Html.Raw(category.Name)">@Html.Raw(category.Name)</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                             <span asp-validation-for="Product.CategoryId" class="text-red-500 text-sm mt-1 block"></span>
                         </div>
                         <div>
                             <label asp-for="Product.SubCategoryId" class="block text-sm font-medium text-gray-700 mb-2">Alt Kategori <span class="text-red-500">*</span></label>
-                            <select asp-for="Product.SubCategoryId" id="subCategoryDropdown" class="@inputClass">
-                                <option value="0">Alt kategori seçin...</option>
-                                @foreach (var subCategory in Model.SubCategories)
-                                {
-                                    @if (subCategory.Id == Model.Product.SubCategoryId)
-                                    {
-                                        <option value="@subCategory.Id" selected>@Html.Raw(subCategory.Name)</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@subCategory.Id">@Html.Raw(subCategory.Name)</option>
-                                    }
-                                }
-                            </select>
+                            <input type="hidden" asp-for="Product.SubCategoryId" id="subCategoryHidden" />
+                            <div class="relative product-select-wrapper" data-select="subcategory">
+                                <button type="button" id="subCategorySelectBtn" class="product-select-btn w-full h-12 px-4 pr-10 text-left rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-900 shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent flex items-center" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="block truncate" id="subCategorySelectText">@Html.Raw(selectedSubCategoryName)</span>
+                                    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clip-rule="evenodd" /></svg>
+                                    </span>
+                                </button>
+                                <div id="subCategoryDropdownPanel" class="hidden absolute z-50 mt-1 w-full rounded-lg bg-white py-1 shadow-xl ring-1 ring-black ring-opacity-5 border border-gray-200">
+                                    <div class="px-2 py-1.5 border-b border-gray-100">
+                                        <input type="text" id="subCategorySearch" placeholder="Alt kategori ara..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-gray-800 focus:border-transparent" autocomplete="off" />
+                                    </div>
+                                    <div id="subCategoryOptionList" class="max-h-60 overflow-auto py-1">
+                                        @foreach (var subCategory in Model.SubCategories)
+                                        {
+                                            <div class="product-select-option subcategory-option px-3 py-2.5 text-sm text-gray-900 cursor-pointer hover:bg-gray-100" data-value="@subCategory.Id" data-text="@Html.Raw(subCategory.Name)">@Html.Raw(subCategory.Name)</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                             <span asp-validation-for="Product.SubCategoryId" class="text-red-500 text-sm mt-1 block"></span>
                         </div>
                     </div>
@@ -317,54 +333,87 @@
                     <div class="md:col-span-3">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Renk seçenekleri</label>
                         <input type="hidden" asp-for="Product.ColorOptions" id="Product_ColorOptions" value="@Model.Product?.ColorOptions">
-                        <div class="flex flex-wrap items-end gap-2 mb-2">
-                            <div class="flex items-center gap-2">
-                                <input type="color" id="color-picker-input" value="#1e3a5f" class="h-11 w-16 cursor-pointer rounded border border-gray-300 bg-gray-50 p-1">
-                                <input type="text" id="color-name-input" placeholder="Renk adı (isteğe bağlı)" class="w-44 px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800" maxlength="50">
-                                <button type="button" id="color-add-btn" class="inline-flex items-center gap-1 px-4 py-3 rounded-lg bg-gray-800 text-white text-base font-medium hover:bg-gray-700">Ekle</button>
-                            </div>
+                        <div id="color-checkbox-grid" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                            <!-- Tile checkbox'lar JavaScript ile doldurulacak -->
                         </div>
-                        <div id="color-list" class="flex flex-wrap gap-2 min-h-[2.5rem] p-3 border border-gray-200 rounded-lg bg-gray-50/50"></div>
-                        <p class="mt-1 text-xs text-gray-500">Renk seçin, isteğe bağlı ad yazın ve Ekle'ye tıklayın.</p>
+                        <p class="mt-2 text-xs text-gray-500">Ürünün mevcut olduğu renkleri işaretleyin.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Seçenekler (tüm checkbox'lar) -->
+            <!-- Seçenekler (checkbox tile) -->
             <div class="pb-2">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Seçenekler</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" asp-for="Product.IsActive" class="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
-                        <label asp-for="Product.IsActive" class="text-sm font-medium text-gray-700">Ürün aktif (sitede listelenir)</label>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" asp-for="Product.HasCertificate" class="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
-                        <label asp-for="Product.HasCertificate" class="text-sm font-medium text-gray-700">Sertifikalı ürün</label>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" asp-for="Product.IsDiscounted" class="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
-                        <label asp-for="Product.IsDiscounted" class="text-sm font-medium text-gray-700">İndirimli Ürün</label>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" asp-for="Product.IsPopular" class="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
-                        <label asp-for="Product.IsPopular" class="text-sm font-medium text-gray-700">Popüler</label>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" asp-for="Product.IsProjectSpecial" class="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
-                        <label asp-for="Product.IsProjectSpecial" class="text-sm font-medium text-gray-700">Projeye özel</label>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" asp-for="Product.IsFireResistant" class="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-800">
-                        <label asp-for="Product.IsFireResistant" class="text-sm font-medium text-gray-700">Ateşe dayanıklı</label>
-                    </div>
+                <p class="text-sm text-gray-500 mb-4">Ürün özelliklerini seçmek için ilgili kutucuğa tıklayın.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <label class="option-tile group relative flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 min-h-[100px] transition-all duration-200 ease-out hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm focus-within:ring-2 focus-within:ring-gray-800 focus-within:ring-offset-2 focus-within:border-gray-800 has-[:checked]:border-gray-900 has-[:checked]:bg-gray-100 has-[:checked]:ring-2 has-[:checked]:ring-gray-800 has-[:checked]:ring-offset-2 has-[:checked]:shadow-md">
+                        <input type="checkbox" asp-for="Product.IsActive" class="option-checkbox peer sr-only">
+                        <span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100" aria-hidden="true">
+                            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                        <span class="mb-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-700" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        </span>
+                        <span class="text-center text-xs font-medium text-gray-700 select-none leading-tight">Ürün aktif</span>
+                        <span class="text-center text-[10px] text-gray-500 mt-0.5 select-none">Sitede listelenir</span>
+                    </label>
+                    <label class="option-tile group relative flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 min-h-[100px] transition-all duration-200 ease-out hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm focus-within:ring-2 focus-within:ring-gray-800 focus-within:ring-offset-2 focus-within:border-gray-800 has-[:checked]:border-gray-900 has-[:checked]:bg-gray-100 has-[:checked]:ring-2 has-[:checked]:ring-gray-800 has-[:checked]:ring-offset-2 has-[:checked]:shadow-md">
+                        <input type="checkbox" asp-for="Product.HasCertificate" class="option-checkbox peer sr-only">
+                        <span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100" aria-hidden="true">
+                            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                        <span class="mb-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                        </span>
+                        <span class="text-center text-xs font-medium text-gray-700 select-none leading-tight">Sertifikalı ürün</span>
+                    </label>
+                    <label class="option-tile group relative flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 min-h-[100px] transition-all duration-200 ease-out hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm focus-within:ring-2 focus-within:ring-gray-800 focus-within:ring-offset-2 focus-within:border-gray-800 has-[:checked]:border-gray-900 has-[:checked]:bg-gray-100 has-[:checked]:ring-2 has-[:checked]:ring-gray-800 has-[:checked]:ring-offset-2 has-[:checked]:shadow-md">
+                        <input type="checkbox" asp-for="Product.IsDiscounted" class="option-checkbox peer sr-only">
+                        <span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100" aria-hidden="true">
+                            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                        <span class="mb-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        </span>
+                        <span class="text-center text-xs font-medium text-gray-700 select-none leading-tight">İndirimli Ürün</span>
+                    </label>
+                    <label class="option-tile group relative flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 min-h-[100px] transition-all duration-200 ease-out hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm focus-within:ring-2 focus-within:ring-gray-800 focus-within:ring-offset-2 focus-within:border-gray-800 has-[:checked]:border-gray-900 has-[:checked]:bg-gray-100 has-[:checked]:ring-2 has-[:checked]:ring-gray-800 has-[:checked]:ring-offset-2 has-[:checked]:shadow-md">
+                        <input type="checkbox" asp-for="Product.IsPopular" class="option-checkbox peer sr-only">
+                        <span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100" aria-hidden="true">
+                            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                        <span class="mb-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-yellow-100 text-yellow-700" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </span>
+                        <span class="text-center text-xs font-medium text-gray-700 select-none leading-tight">Popüler</span>
+                    </label>
+                    <label class="option-tile group relative flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 min-h-[100px] transition-all duration-200 ease-out hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm focus-within:ring-2 focus-within:ring-gray-800 focus-within:ring-offset-2 focus-within:border-gray-800 has-[:checked]:border-gray-900 has-[:checked]:bg-gray-100 has-[:checked]:ring-2 has-[:checked]:ring-gray-800 has-[:checked]:ring-offset-2 has-[:checked]:shadow-md">
+                        <input type="checkbox" asp-for="Product.IsProjectSpecial" class="option-checkbox peer sr-only">
+                        <span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100" aria-hidden="true">
+                            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                        <span class="mb-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </span>
+                        <span class="text-center text-xs font-medium text-gray-700 select-none leading-tight">Projeye özel</span>
+                    </label>
+                    <label class="option-tile group relative flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 min-h-[100px] transition-all duration-200 ease-out hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm focus-within:ring-2 focus-within:ring-gray-800 focus-within:ring-offset-2 focus-within:border-gray-800 has-[:checked]:border-gray-900 has-[:checked]:bg-gray-100 has-[:checked]:ring-2 has-[:checked]:ring-gray-800 has-[:checked]:ring-offset-2 has-[:checked]:shadow-md">
+                        <input type="checkbox" asp-for="Product.IsFireResistant" class="option-checkbox peer sr-only">
+                        <span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100" aria-hidden="true">
+                            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                        <span class="mb-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/></svg>
+                        </span>
+                        <span class="text-center text-xs font-medium text-gray-700 select-none leading-tight">Ateşe dayanıklı</span>
+                    </label>
                 </div>
             </div>
         </div>
 
         <div class="border-t border-gray-200 mt-8 pt-6">
             <div class="flex items-center gap-3">
-                <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md text-base" data-loading-text="Ürün güncelleniyor...">
+                <button type="submit" id="productSubmitBtn" class="inline-flex items-center justify-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md text-base disabled:opacity-70 disabled:cursor-not-allowed" data-loading-text="Ürün güncelleniyor...">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -394,31 +443,116 @@
             table: { contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'] }
         }).then(function(editorInstance) { editor = editorInstance; }).catch(function(err) { console.error('CKEditor hatası:', err); });
 
-        $('#categoryDropdown').on('change', function() {
-            var categoryId = $(this).val();
-            var dropdown = $('#subCategoryDropdown');
-            if (categoryId && categoryId != "0") {
-                dropdown.prop('disabled', true).empty().append('<option value="0">Yükleniyor...</option>');
-                $.ajax({
-                    url: '/admin/products/edit?handler=SubCategories&categoryId=' + categoryId,
-                    type: 'GET',
-                    success: function(data) {
-                        dropdown.empty().append('<option value="0">Alt kategori seçin...</option>');
-                        $.each(data, function(i, item) { dropdown.append($('<option></option>').val(item.id).text(item.name)); });
-                        dropdown.prop('disabled', false);
-                    },
-                    error: function() {
-                        dropdown.empty().append('<option value="0">Hata! Tekrar deneyin</option>');
-                        dropdown.prop('disabled', false);
-                    }
-                });
-            } else {
-                dropdown.empty().append('<option value="0">Önce kategori seçin...</option>');
-            }
-        });
+        (function() {
+            var categoryBtn = document.getElementById('categorySelectBtn');
+            var categoryPanel = document.getElementById('categoryDropdownPanel');
+            var categorySearch = document.getElementById('categorySearch');
+            var categoryOptionList = document.getElementById('categoryOptionList');
+            var categoryHidden = document.getElementById('categoryHidden');
+            var categorySelectText = document.getElementById('categorySelectText');
+            var subCategoryBtn = document.getElementById('subCategorySelectBtn');
+            var subCategoryPanel = document.getElementById('subCategoryDropdownPanel');
+            var subCategorySearch = document.getElementById('subCategorySearch');
+            var subCategoryOptionList = document.getElementById('subCategoryOptionList');
+            var subCategoryHidden = document.getElementById('subCategoryHidden');
+            var subCategorySelectText = document.getElementById('subCategorySelectText');
 
-        $('form').on('submit', function() {
+            function filterOptions(listEl, searchInput, optionClass) {
+                var q = (searchInput.value || '').toLowerCase().trim();
+                var options = listEl.querySelectorAll(optionClass || '.product-select-option');
+                options.forEach(function(opt) {
+                    var text = (opt.getAttribute('data-text') || opt.textContent || '').toLowerCase();
+                    opt.style.display = q === '' || text.indexOf(q) !== -1 ? '' : 'none';
+                });
+            }
+
+            function closeAll() {
+                if (categoryPanel) categoryPanel.classList.add('hidden');
+                if (subCategoryPanel) subCategoryPanel.classList.add('hidden');
+                document.removeEventListener('click', closeAll);
+            }
+
+            if (categoryBtn && categoryPanel) {
+                categoryBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    subCategoryPanel.classList.add('hidden');
+                    categoryPanel.classList.toggle('hidden');
+                    if (!categoryPanel.classList.contains('hidden')) {
+                        categorySearch.value = '';
+                        filterOptions(categoryOptionList, { value: '' }, '.category-option');
+                        categorySearch.focus();
+                        setTimeout(function() { document.addEventListener('click', closeAll); }, 0);
+                    } else document.removeEventListener('click', closeAll);
+                });
+            }
+            if (categorySearch && categoryOptionList) {
+                categorySearch.addEventListener('input', function() { filterOptions(categoryOptionList, categorySearch, '.category-option'); });
+                categorySearch.addEventListener('keydown', function(e) { e.stopPropagation(); });
+            }
+            categoryOptionList && categoryOptionList.addEventListener('click', function(e) {
+                var opt = e.target.closest('.category-option');
+                if (!opt) return;
+                var val = opt.getAttribute('data-value');
+                var text = (opt.textContent || opt.getAttribute('data-text') || '').trim();
+                categoryHidden.value = val;
+                categorySelectText.textContent = text;
+                categoryPanel.classList.add('hidden');
+                document.removeEventListener('click', closeAll);
+                subCategorySelectText.textContent = 'Yükleniyor...';
+                subCategoryHidden.value = '0';
+                if (val && val !== '0') {
+                    $.get('/admin/products/edit?handler=SubCategories&categoryId=' + val, function(data) {
+                        subCategoryOptionList.innerHTML = (data || []).map(function(item) {
+                            var name = (item.name || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            return '<div class="product-select-option subcategory-option px-3 py-2.5 text-sm text-gray-900 cursor-pointer hover:bg-gray-100" data-value="' + item.id + '" data-text="' + name + '">' + (item.name || '') + '</div>';
+                        }).join('');
+                        subCategorySelectText.textContent = 'Alt kategori seçin...';
+                    }).fail(function() {
+                        subCategoryOptionList.innerHTML = '';
+                        subCategorySelectText.textContent = 'Hata! Tekrar deneyin';
+                    });
+                } else {
+                    subCategoryOptionList.innerHTML = '';
+                    subCategorySelectText.textContent = 'Önce kategori seçin...';
+                }
+            });
+
+            if (subCategoryBtn && subCategoryPanel) {
+                subCategoryBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    categoryPanel.classList.add('hidden');
+                    subCategoryPanel.classList.toggle('hidden');
+                    if (!subCategoryPanel.classList.contains('hidden')) {
+                        subCategorySearch.value = '';
+                        filterOptions(subCategoryOptionList, { value: '' }, '.subcategory-option');
+                        subCategorySearch.focus();
+                        setTimeout(function() { document.addEventListener('click', closeAll); }, 0);
+                    } else document.removeEventListener('click', closeAll);
+                });
+            }
+            if (subCategorySearch && subCategoryOptionList) {
+                subCategorySearch.addEventListener('input', function() { filterOptions(subCategoryOptionList, subCategorySearch, '.subcategory-option'); });
+                subCategorySearch.addEventListener('keydown', function(e) { e.stopPropagation(); });
+            }
+            subCategoryOptionList && subCategoryOptionList.addEventListener('click', function(e) {
+                var opt = e.target.closest('.subcategory-option');
+                if (!opt) return;
+                var val = opt.getAttribute('data-value');
+                var text = (opt.textContent || opt.getAttribute('data-text') || '').trim();
+                subCategoryHidden.value = val;
+                subCategorySelectText.textContent = text;
+                subCategoryPanel.classList.add('hidden');
+                document.removeEventListener('click', closeAll);
+            });
+        })();
+
+        $('#productEditForm').on('submit', function() {
             if (editor) editor.updateSourceElement();
+            var $btn = $('#productSubmitBtn');
+            if ($btn.length && $btn.data('loading-text')) {
+                showLoading($btn.data('loading-text'));
+                $btn.prop('disabled', true).html('<span class="inline-block w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>' + $btn.data('loading-text'));
+            }
         });
 
         $('.delete-image-btn').on('click', function() {
@@ -511,57 +645,66 @@
 
         $(function() {
             var $colorHidden = $('input[name="Product.ColorOptions"]');
-            var $colorPicker = $('#color-picker-input');
-            var $colorName = $('#color-name-input');
-            var $colorList = $('#color-list');
-            var $colorAddBtn = $('#color-add-btn');
-            if (!$colorHidden.length || !$colorList.length) return;
-            function colorOptionsToArray(val) {
-                if (!val || !String(val).trim()) return [];
-                return String(val).split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-            }
-            function colorOptionsFromArray(arr) {
-                return (arr && arr.length) ? arr.join(', ') : '';
-            }
-            function renderColorList() {
+            var $colorGrid = $('#color-checkbox-grid');
+            if (!$colorHidden.length || !$colorGrid.length) return;
+            var colorList = [
+                { name: 'Kırmızı', hex: '#dc2626' },
+                { name: 'Mavi', hex: '#2563eb' },
+                { name: 'Yeşil', hex: '#16a34a' },
+                { name: 'Sarı', hex: '#eab308' },
+                { name: 'Turuncu', hex: '#ea580c' },
+                { name: 'Mor', hex: '#9333ea' },
+                { name: 'Pembe', hex: '#db2777' },
+                { name: 'Beyaz', hex: '#ffffff' },
+                { name: 'Siyah', hex: '#171717' },
+                { name: 'Gri', hex: '#6b7280' },
+                { name: 'Lacivert', hex: '#1e3a5f' },
+                { name: 'Turkuaz', hex: '#0d9488' },
+                { name: 'Açık Mavi', hex: '#0ea5e9' },
+                { name: 'Amber', hex: '#f59e0b' },
+                { name: 'Kahverengi', hex: '#92400e' },
+                { name: 'Bordo', hex: '#991b1b' }
+            ];
+            function getSelectedEntries() {
                 var raw = $colorHidden.val() || '';
-                var items = colorOptionsToArray(raw);
-                $colorList.empty();
-                items.forEach(function(item, idx) {
-                    var m = item.match(/^(.+?)\s*\(#([0-9A-Fa-f]{6})\)\s*$/);
-                    var namePart = m ? m[1].trim() : item;
-                    var hex = m ? '#' + m[2] : null;
-                    var displayName = namePart || hex || item;
-                    var chipHtml = (hex ? '<span class="w-4 h-4 rounded-full border border-gray-200 flex-shrink-0" style="background-color:' + hex + '"></span>' : '') +
-                        '<span class="text-gray-800">' + (displayName || '').replace(/</g, '&lt;') + '</span>' +
-                        '<button type="button" class="color-remove ml-0.5 text-gray-400 hover:text-red-600 rounded p-0.5" aria-label="Kaldır" data-idx="' + idx + '">&times;</button>';
-                    var $chip = $('<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gray-200 bg-white text-sm shadow-sm">').html(chipHtml);
-                    $chip.find('.color-remove').on('click', function() {
-                        var arr = colorOptionsToArray($colorHidden.val());
-                        var i = parseInt($(this).data('idx'), 10);
-                        if (!isNaN(i) && i >= 0 && i < arr.length) arr.splice(i, 1);
-                        $colorHidden.val(colorOptionsFromArray(arr));
-                        renderColorList();
+                if (!raw.trim()) return [];
+                return raw.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+            }
+            function syncFromHidden() {
+                var selected = getSelectedEntries();
+                $colorGrid.find('input[type="checkbox"]').each(function() {
+                    var $cb = $(this);
+                    var name = $cb.data('name');
+                    var hex = $cb.data('hex');
+                    var entry = name + ' (#' + hex.replace('#', '') + ')';
+                    var checked = selected.some(function(e) {
+                        return e.toLowerCase() === entry.toLowerCase() || (e === hex) || (e === hex.replace('#', ''));
                     });
-                    $colorList.append($chip);
+                    $cb.prop('checked', !!checked);
                 });
             }
-            if ($colorAddBtn.length && $colorPicker.length) {
-                $colorAddBtn.on('click', function() {
-                    var hex = ($colorPicker.val() || '').toLowerCase();
-                    if (hex && hex.indexOf('#') !== 0) hex = '#' + hex;
-                    if (!hex || hex.length < 7) return;
-                    var name = ($colorName.val() || '').trim();
-                    var entry = name ? (name + ' (#') + hex.replace('#', '') + ')' : hex;
-                    var arr = colorOptionsToArray($colorHidden.val());
-                    if (arr.indexOf(entry) === -1) arr.push(entry);
-                    $colorHidden.val(colorOptionsFromArray(arr));
-                    $colorName.val('');
-                    renderColorList();
+            function updateHidden() {
+                var checked = [];
+                $colorGrid.find('input[type="checkbox"]:checked').each(function() {
+                    var name = $(this).data('name');
+                    var hex = $(this).data('hex');
+                    checked.push(name + ' (#' + hex.replace('#', '') + ')');
                 });
+                $colorHidden.val(checked.join(', '));
             }
-            if ($colorName.length) $colorName.on('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); $colorAddBtn.click(); } });
-            renderColorList();
+            colorList.forEach(function(c) {
+                var swatchBorder = (c.hex.toLowerCase() === '#ffffff') ? ' border-2 border-gray-300' : '';
+                var checkSvg = '<svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>';
+                var $label = $('<label class="group relative flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 min-h-[96px] transition-all duration-200 ease-out hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm focus-within:ring-2 focus-within:ring-gray-900 focus-within:ring-offset-2 focus-within:border-gray-900 has-[:checked]:border-gray-900 has-[:checked]:bg-gray-100 has-[:checked]:ring-2 has-[:checked]:ring-gray-900 has-[:checked]:ring-offset-2 has-[:checked]:shadow-md">');
+                var $input = $('<input type="checkbox">').attr({ 'data-name': c.name, 'data-hex': c.hex }).addClass('color-cb peer sr-only');
+                var $checkBadge = $('<span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100">').html(checkSvg);
+                var $swatch = $('<span class="mb-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-inner' + swatchBorder + '" style="background-color:' + c.hex + '" aria-hidden="true">');
+                var $name = $('<span class="text-center text-xs font-medium text-gray-700 select-none leading-tight">').text(c.name);
+                $label.append($input).append($checkBadge).append($swatch).append($name);
+                $colorGrid.append($label);
+            });
+            $colorGrid.on('change', '.color-cb', updateHidden);
+            syncFromHidden();
         });
     </script>
 }

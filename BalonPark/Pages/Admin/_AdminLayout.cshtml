@@ -20,6 +20,9 @@
                 transform: rotate(360deg);
             }
         }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
 
         @@keyframes slideDown {
             from {
@@ -477,27 +480,22 @@
                 el.addEventListener('change', update);
             });
 
-            // Form submit loading
-            $('form').on('submit', function (e) {
+            // Form submit loading - overlay stays until page loads (no premature timeout)
+            $('form').on('submit', function () {
                 const $form = $(this);
-                const $submitBtn = $form.find('button[type="submit"]');
-                
-                // Get custom loading message from button data attribute
+                const $submitBtn = $form.find('button[type="submit"]').first();
                 const loadingText = $submitBtn.data('loading-text') || 'Kaydediliyor...';
-                
-                // Show loading overlay
+
                 showLoading(loadingText);
-                
-                // Disable button
                 $submitBtn.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
-                
-                // Set a timeout to hide loading after 2 seconds as a safety measure
-                setTimeout(function () {
-                    hideLoading();
-                    $submitBtn.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
-                }, 2000);
-                
-                // Allow form to submit normally
+
+                // Update button content with spinner if it has data-loading-text
+                if ($submitBtn.data('loading-text')) {
+                    const $originalHtml = $submitBtn.html();
+                    $submitBtn.data('original-html', $originalHtml);
+                    $submitBtn.html('<span class="inline-block w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>' + loadingText);
+                }
+
                 return true;
             });
             
