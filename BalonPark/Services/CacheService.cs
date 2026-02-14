@@ -309,6 +309,8 @@ public class CacheService(IMemoryCache cache) : ICacheService
 
     public async Task InvalidateProductsAsync()
     {
+        // Paylaşılan cache'teki ana liste; _trackedKeys başka istekte doldurulduğu için doğrudan kaldır
+        cache.Remove(PRODUCTS_KEY);
         RemoveByPrefix("product");
         await Task.CompletedTask;
     }

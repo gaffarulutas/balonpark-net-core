@@ -60,13 +60,13 @@ public class CreateModel : BaseAdminPage
         Product.Stock = Product.Stock == 0 ? 1 : Product.Stock;
         Product.WarrantyDescription ??= "2 yıl garanti";
         Product.AfterSalesService ??= "5 yıllık servis ve bakım desteği";
-        Product.MaterialWeightGrm2 ??= 650;
+        Product.MaterialWeightGrm2 ??= 650m;
         Product.DeliveryDaysMin ??= 3;
         Product.DeliveryDaysMax ??= 15;
-        Product.FanWeightKg ??= 20;
+        Product.FanWeightKg ??= 20m;
         Product.FanDescription ??= "1 x türbin";
         Product.RequiredPersonCount ??= 2;
-        Product.AssemblyTime ??= 1;
+        Product.AssemblyTime ??= 1m;
     }
 
     public async Task<IActionResult> OnPostAsync()

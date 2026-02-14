@@ -168,15 +168,15 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label asp-for="Product.InflatedLength" class="block text-sm font-medium text-gray-700 mb-2">Uzunluk (m)</label>
-                                <input type="number" asp-for="Product.InflatedLength" step="1" min="0" class="@inputClass" placeholder="Örn: 12">
+                                <input type="text" asp-for="Product.InflatedLength" inputmode="decimal" class="@inputClass" placeholder="Örn: 12 veya 3,5">
                             </div>
                             <div>
                                 <label asp-for="Product.InflatedWidth" class="block text-sm font-medium text-gray-700 mb-2">Genişlik (m)</label>
-                                <input type="number" asp-for="Product.InflatedWidth" step="1" min="0" class="@inputClass" placeholder="Örn: 3">
+                                <input type="text" asp-for="Product.InflatedWidth" inputmode="decimal" class="@inputClass" placeholder="Örn: 3 veya 3,5">
                             </div>
                             <div>
                                 <label asp-for="Product.InflatedHeight" class="block text-sm font-medium text-gray-700 mb-2">Yükseklik (m)</label>
-                                <input type="number" asp-for="Product.InflatedHeight" step="1" min="0" class="@inputClass" placeholder="Örn: 3">
+                                <input type="text" asp-for="Product.InflatedHeight" inputmode="decimal" class="@inputClass" placeholder="Örn: 3 veya 3,5">
                             </div>
                             <div>
                                 <label asp-for="Product.UserCount" class="block text-sm font-medium text-gray-700 mb-2">Kullanıcı Sayısı</label>
@@ -189,7 +189,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label asp-for="Product.AssemblyTime" class="block text-sm font-medium text-gray-700 mb-2">Montaj / Demontaj Süresi (saat)</label>
-                                <input type="number" asp-for="Product.AssemblyTime" step="1" min="0" class="@inputClass" placeholder="Örn: 2">
+                                <input type="number" asp-for="Product.AssemblyTime" step="0.01" min="0" data-decimal="true" class="@inputClass" placeholder="Örn: 2 veya 1,5">
                             </div>
                             <div>
                                 <label asp-for="Product.RequiredPersonCount" class="block text-sm font-medium text-gray-700 mb-2">Gerekli Kişi Sayısı</label>
@@ -202,7 +202,7 @@
                             </div>
                             <div>
                                 <label asp-for="Product.FanWeightKg" class="block text-sm font-medium text-gray-700 mb-2">Fan Ağırlığı (kg)</label>
-                                <input type="number" asp-for="Product.FanWeightKg" step="1" min="0" class="@inputClass" placeholder="Örn: 20">
+                                <input type="number" asp-for="Product.FanWeightKg" step="0.01" min="0" data-decimal="true" class="@inputClass" placeholder="Örn: 20 veya 2,5">
                             </div>
                         </div>
                     </div>
@@ -211,15 +211,15 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label asp-for="Product.PackagedLength" class="block text-sm font-medium text-gray-700 mb-2">Uzunluk (cm)</label>
-                                <input type="number" asp-for="Product.PackagedLength" step="1" min="0" class="@inputClass" placeholder="Örn: 80">
+                                <input type="text" asp-for="Product.PackagedLength" inputmode="decimal" class="@inputClass" placeholder="Örn: 80 veya 45,5">
                             </div>
                             <div>
                                 <label asp-for="Product.PackagedDepth" class="block text-sm font-medium text-gray-700 mb-2">Derinlik (cm)</label>
-                                <input type="number" asp-for="Product.PackagedDepth" step="1" min="0" class="@inputClass" placeholder="Örn: 70">
+                                <input type="text" asp-for="Product.PackagedDepth" inputmode="decimal" class="@inputClass" placeholder="Örn: 70 veya 35,5">
                             </div>
                             <div>
                                 <label asp-for="Product.PackagedWeightKg" class="block text-sm font-medium text-gray-700 mb-2">Ağırlık (kg)</label>
-                                <input type="number" asp-for="Product.PackagedWeightKg" step="1" min="0" class="@inputClass" placeholder="Örn: 95">
+                                <input type="number" asp-for="Product.PackagedWeightKg" step="0.01" min="0" data-decimal="true" class="@inputClass" placeholder="Örn: 95 veya 12,5">
                             </div>
                             <div>
                                 <label asp-for="Product.PackagePalletCount" class="block text-sm font-medium text-gray-700 mb-2">Paket / Palet Sayısı</label>
@@ -261,11 +261,11 @@
                     </div>
                     <div>
                         <label asp-for="Product.MaterialWeightGrm2" class="block text-sm font-medium text-gray-700 mb-2">Kumaş ağırlığı (gr/m²)</label>
-                        <input type="number" asp-for="Product.MaterialWeightGrm2" step="1" min="0" class="@inputClass" placeholder="Örn: 650">
+                        <input type="number" asp-for="Product.MaterialWeightGrm2" step="0.01" min="0" data-decimal="true" class="@inputClass" placeholder="Örn: 650 veya 420,5">
                     </div>
                     <div>
                         <label asp-for="Product.InflatedWeightKg" class="block text-sm font-medium text-gray-700 mb-2">Şişmiş ürün ağırlığı (kg)</label>
-                        <input type="number" asp-for="Product.InflatedWeightKg" step="1" min="0" class="@inputClass" placeholder="Örn: 95">
+                        <input type="number" asp-for="Product.InflatedWeightKg" step="0.01" min="0" data-decimal="true" class="@inputClass" placeholder="Örn: 95 veya 12,5">
                     </div>
                     <div class="md:col-span-3">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Renk seçenekleri</label>
@@ -366,6 +366,17 @@
 @section Scripts {
     <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
     <script>
+        // Teknik bilgi küsüratlı alanlar: virgülü noktaya çevir (model binding için)
+        (function() {
+            var form = document.getElementById('productSubmitBtn') && document.getElementById('productSubmitBtn').closest('form');
+            if (form) form.addEventListener('submit', function() {
+                form.querySelectorAll('input[data-decimal="true"]').forEach(function(inp) {
+                    if (inp.value && typeof inp.value === 'string' && inp.value.indexOf(',') !== -1)
+                        inp.value = inp.value.replace(',', '.');
+                });
+            });
+        })();
+
         // Fiyat ve Stok: focus/click ile tüm değeri seç
         document.querySelectorAll('.input-select-all').forEach(function(el) {
             el.addEventListener('focus', function() { this.select(); });

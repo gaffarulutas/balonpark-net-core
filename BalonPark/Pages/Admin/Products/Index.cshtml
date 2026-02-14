@@ -7,6 +7,69 @@
 }
 @section Styles {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.2/css/lightgallery-bundle.min.css" />
+    <style>
+        /* Sıra sütunu: dar, tutamaç her zaman görünür */
+        .admin-table-drag-col {
+            width: 48px;
+            min-width: 48px;
+            max-width: 48px;
+        }
+        .product-drag-handle {
+            width: 48px;
+            min-width: 48px;
+            max-width: 48px;
+            padding: 0.75rem 0.5rem !important;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .product-drag-handle .grip-icon {
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            color: #6b7280;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+        }
+        .product-drag-handle .grip-icon:hover {
+            background: #e5e7eb;
+            color: #374151;
+            border-color: #00A8E8;
+        }
+        .product-drag-handle .grip-icon:active {
+            cursor: grabbing;
+        }
+        /* SortableJS: placeholder (boşalan yerdeki iz) ve seçili satır */
+        #admin-product-gallery .sortable-ghost > td {
+            background: #e0e7ff !important;
+            opacity: 0.7;
+        }
+        #admin-product-gallery .sortable-chosen > td {
+            background: #c7d2fe !important;
+        }
+        /* Sürüklenen satır body'de olduğu için tr'yi tablo gibi göster; hücreler yan yana, ürün kaybolmasın */
+        .sortable-drag {
+            display: table !important;
+            table-layout: fixed !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            background: #fff !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+        .sortable-drag td {
+            display: table-cell !important;
+            vertical-align: middle !important;
+            background: #fff !important;
+            box-sizing: border-box;
+        }
+    </style>
 }
 
 <!-- Header -->
@@ -22,24 +85,6 @@
             <p class="text-gray-600 mt-2">Ürünleri görüntüle, ekle, düzenle ve sil</p>
         </div>
             <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
-            <button type="button" id="toggleReorderMode" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
-                </svg>
-                Sıralamayı Düzenle
-            </button>
-            <button type="button" id="saveReorderBtn" class="hidden inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Sıralamayı Kaydet
-            </button>
-            <button type="button" id="cancelReorderBtn" class="hidden inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                İptal
-            </button>
             <a href="/admin/products/create" id="createProductBtn" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -277,11 +322,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider reorder-handle-header" style="display: none;" aria-hidden="true">
-                            <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-                            </svg>
-                        </th>
+                        <th class="admin-table-drag-col px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col" aria-label="Sıra">⋮</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resim</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ürün Adı</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
@@ -297,9 +338,9 @@
                     @foreach (var product in Model.Products)
                     {
                         <tr class="hover:bg-gray-50 transition-colors duration-150" data-product-id="@product.Id" data-display-order="@product.DisplayOrder">
-                            <td class="px-6 py-4 whitespace-nowrap reorder-handle" style="display: none;" aria-hidden="true">
-                                <span class="cursor-move inline-flex items-center justify-center w-8 h-8 rounded border border-gray-300 bg-gray-50 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-800" role="button" tabindex="0" aria-label="Sıralamak için sürükle">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <td class="product-drag-handle" aria-label="Sıralamak için sürükle">
+                                <span class="grip-icon" role="button" tabindex="0">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
                                     </svg>
                                 </span>
@@ -517,133 +558,109 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
-        // --- Sıralama (sürükle-bırak) ---
-        let productsSortable = null;
-        let isReorderMode = false;
-        let originalProductRows = [];
-
-        $('#toggleReorderMode').on('click', function() {
-            isReorderMode = true;
-            originalProductRows = [];
-            $('#admin-product-gallery tr').each(function() {
-                originalProductRows.push({
-                    element: $(this).clone(true),
-                    id: $(this).data('product-id'),
-                    order: $(this).data('display-order')
-                });
-            });
-            $('.reorder-handle, .reorder-handle-header').show().removeAttr('style');
-            $('#toggleReorderMode, #createProductBtn').hide();
-            $('#saveReorderBtn, #cancelReorderBtn').removeClass('hidden').show();
-            $('.delete-btn, a[href*="edit"]').addClass('opacity-50 pointer-events-none');
-            productsSortable = Sortable.create(document.getElementById('admin-product-gallery'), {
-                animation: 150,
-                handle: '.reorder-handle',
-                ghostClass: 'opacity-75 bg-indigo-50',
-                dragClass: 'bg-indigo-100 shadow-md',
-                chosenClass: 'bg-indigo-50'
-            });
-            if (typeof showNotification === 'function') {
-                showNotification('Sıralama modu aktif. Ürünleri sürükleyip bırakın.', 'info');
-            } else {
-                showSuccessMessage('Sıralama modu aktif. Ürünleri sürükleyip bırakın.');
-            }
-        });
-
-        $('#cancelReorderBtn').on('click', function() {
-            isReorderMode = false;
-            if (productsSortable) {
-                productsSortable.destroy();
-                productsSortable = null;
-            }
-            $('#admin-product-gallery').empty();
-            originalProductRows.forEach(function(item) { $('#admin-product-gallery').append(item.element); });
-            $('.reorder-handle, .reorder-handle-header').hide().css('display', 'none');
-            $('#toggleReorderMode, #createProductBtn').show();
-            $('#saveReorderBtn, #cancelReorderBtn').addClass('hidden').hide();
-            $('.delete-btn, a[href*="edit"]').removeClass('opacity-50 pointer-events-none');
-            showSuccessMessage('Değişiklikler iptal edildi.');
-        });
-
-        $('#saveReorderBtn').on('click', function() {
-            var $tbody = $('#admin-product-gallery');
-            var pageNumber = parseInt($tbody.data('page-number'), 10) || 1;
-            var pageSize = parseInt($tbody.data('page-size'), 10) || 20;
-            var baseOrder = (pageNumber - 1) * pageSize;
-            var products = [];
-            var order = 1;
-            $tbody.find('tr').each(function() {
-                var id = $(this).data('product-id');
-                if (id) {
-                    products.push({ id: id, displayOrder: baseOrder + order++ });
+        // --- Sıralama: SortableJS – tutamaç sütunundan sürükle, bırakınca otomatik kaydet ---
+        (function() {
+            function saveProductOrder() {
+                var tbody = document.getElementById('admin-product-gallery');
+                if (!tbody) return;
+                var pageNumber = parseInt(tbody.getAttribute('data-page-number'), 10) || 1;
+                var pageSize = parseInt(tbody.getAttribute('data-page-size'), 10) || 20;
+                var baseOrder = (pageNumber - 1) * pageSize;
+                var rows = tbody.querySelectorAll('tr[data-product-id]');
+                var products = [];
+                for (var i = 0; i < rows.length; i++) {
+                    var id = rows[i].getAttribute('data-product-id');
+                    if (id) products.push({ id: parseInt(id, 10), displayOrder: baseOrder + i + 1 });
                 }
-            });
-            var $btn = $(this);
-            $btn.prop('disabled', true);
-            fetch('/api/category-order/products/reorder', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(products)
-            })
-            .then(function(r) {
-                if (r.status === 401) {
-                    return { success: false, message: 'Oturum sonlandı. Lütfen tekrar giriş yapın.', unauthorized: true };
-                }
-                return r.json();
-            })
-            .then(function(data) {
-                $btn.prop('disabled', false);
-                if (data.unauthorized) {
-                    showErrorMessage(data.message || 'Oturum sonlandı.');
-                    if (typeof window.location !== 'undefined') {
-                        setTimeout(function() { window.location.href = '/admin/login'; }, 2000);
+                if (products.length === 0) return;
+                fetch('/api/category-order/products/reorder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(products)
+                })
+                .then(function(r) {
+                    if (r.status === 401) {
+                        return { success: false, unauthorized: true, message: 'Oturum sonlandı.' };
                     }
-                    return;
-                }
-                if (data.success) {
-                    if (productsSortable) { productsSortable.destroy(); productsSortable = null; }
-                    $('.reorder-handle, .reorder-handle-header').hide().css('display', 'none');
-                    $('#toggleReorderMode, #createProductBtn').show();
-                    $('#saveReorderBtn, #cancelReorderBtn').addClass('hidden').hide();
-                    $('.delete-btn, a[href*="edit"]').removeClass('opacity-50 pointer-events-none');
-                    var baseOrder = (pageNumber - 1) * pageSize;
-                    $tbody.find('tr').each(function(i) { $(this).attr('data-display-order', baseOrder + i + 1); });
-                    showSuccessMessage(data.message || 'Sıralama kaydedildi.');
-                } else {
-                    showErrorMessage(data.message || 'Sıralama kaydedilemedi.');
-                }
-            })
-            .catch(function(err) {
-                $btn.prop('disabled', false);
-                showErrorMessage('Bir hata oluştu: ' + (err.message || 'Sıralama kaydedilemedi.'));
-            });
-        });
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (data.unauthorized) {
+                        if (typeof showSnackbar === 'function') showSnackbar(data.message || 'Oturum sonlandı.', 'error');
+                        setTimeout(function() { window.location.href = '/admin/login'; }, 2000);
+                        return;
+                    }
+                    if (data.success && typeof showSnackbar === 'function') {
+                        showSnackbar(data.message || 'Sıralama kaydedildi.', 'success');
+                        for (var j = 0; j < rows.length; j++) {
+                            rows[j].setAttribute('data-display-order', baseOrder + j + 1);
+                        }
+                    } else if (data.message && typeof showSnackbar === 'function') {
+                        showSnackbar(data.message, 'error');
+                    }
+                })
+                .catch(function(err) {
+                    if (typeof showSnackbar === 'function') showSnackbar('Sıralama kaydedilemedi: ' + (err.message || 'Bağlantı hatası'), 'error');
+                });
+            }
 
-        // Helper: XSS önleme için mesajı escape et
-        function escapeHtml(text) {
-            if (text == null) return '';
-            var div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+            function initSortable() {
+                if (typeof Sortable === 'undefined') return;
+                var tbody = document.getElementById('admin-product-gallery');
+                if (!tbody || tbody.querySelectorAll('tr[data-product-id]').length === 0) return;
+                var tableEl = tbody.closest('table');
 
-        function showSuccessMessage(message) {
-            var safe = escapeHtml(message);
-            var messageDiv = $('<div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg"><div class="flex items-center"><svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><div><p class="font-semibold text-green-800">İşlem Başarılı</p><p class="text-green-700">' + safe + '</p></div></div></div>');
-            $('main > div').prepend(messageDiv);
-            setTimeout(function() { messageDiv.fadeOut(); }, 5000);
-        }
+                Sortable.create(tbody, {
+                    animation: 180,
+                    draggable: 'tr[data-product-id]',
+                    handle: '.product-drag-handle',
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    dragClass: 'sortable-drag',
+                    forceFallback: false,
+                    fallbackTolerance: 3,
+                    emptyInsertThreshold: 15,
+                    onStart: function(evt) {
+                        if (!tableEl || !evt.item) return;
+                        var w = tableEl.offsetWidth;
+                        evt.item.style.width = w + 'px';
+                        evt.item.style.minWidth = w + 'px';
+                        var headers = tableEl.querySelectorAll('thead th');
+                        var cells = evt.item.querySelectorAll('td');
+                        for (var i = 0; i < headers.length && i < cells.length; i++) {
+                            var cw = headers[i].offsetWidth;
+                            if (cw) {
+                                cells[i].style.width = cw + 'px';
+                                cells[i].style.minWidth = cw + 'px';
+                                cells[i].style.maxWidth = cw + 'px';
+                            }
+                        }
+                    },
+                    onEnd: function(evt) {
+                        if (evt.item) {
+                            evt.item.style.width = '';
+                            evt.item.style.minWidth = '';
+                            evt.item.querySelectorAll('td').forEach(function(td) {
+                                td.style.width = '';
+                                td.style.minWidth = '';
+                                td.style.maxWidth = '';
+                            });
+                        }
+                        saveProductOrder();
+                    }
+                });
+            }
 
-        function showErrorMessage(message) {
-            var safe = escapeHtml(message);
-            var messageDiv = $('<div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg"><div class="flex items-center"><svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg><div><p class="font-semibold text-red-800">Hata</p><p class="text-red-700">' + safe + '</p></div></div></div>');
-            $('main > div').prepend(messageDiv);
-            setTimeout(function() { messageDiv.fadeOut(); }, 8000);
-        }
-        
-        // Auto-hide success messages
-        setTimeout(() => { $('.bg-green-50').fadeOut(); }, 5000);
-        
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initSortable);
+            } else {
+                initSortable();
+            }
+        })();
+
+        // Auto-hide sayfa yüklendiğinde gelen sunucu mesajları (Model.SuccessMessage)
+        setTimeout(function() { $('.bg-green-50').fadeOut(); }, 5000);
+
         // Custom Select Menu Functions
         function updateSelectText(selectId, checkboxClass, defaultText) {
             const checked = $(`.${checkboxClass}:checked`);
@@ -861,10 +878,10 @@
                     link.click();
                     document.body.removeChild(link);
                     window.URL.revokeObjectURL(url);
-                    showSuccessMessage('PDF başarıyla oluşturuldu ve indirildi!');
+                    showSnackbar('PDF başarıyla oluşturuldu ve indirildi!', 'success');
                 })
                 .catch(error => {
-                    showErrorMessage('PDF oluşturulurken hata oluştu: ' + error.message);
+                    showSnackbar('PDF oluşturulurken hata oluştu: ' + error.message, 'error');
                 })
                 .finally(() => {
                     $btn.prop('disabled', false).html(originalHtml);
@@ -905,10 +922,10 @@
                     link.click();
                     document.body.removeChild(link);
                     window.URL.revokeObjectURL(url);
-                    showSuccessMessage('Excel dosyası başarıyla oluşturuldu ve indirildi!');
+                    showSnackbar('Excel dosyası başarıyla oluşturuldu ve indirildi!', 'success');
                 })
                 .catch(error => {
-                    showErrorMessage('Excel oluşturulurken hata oluştu: ' + error.message);
+                    showSnackbar('Excel oluşturulurken hata oluştu: ' + error.message, 'error');
                 })
                 .finally(() => {
                     $btn.prop('disabled', false).html(originalHtml);

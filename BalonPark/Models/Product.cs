@@ -51,20 +51,20 @@ public class Product
     public string? InflatedHeight { get; set; }
     public int? UserCount { get; set; }
 
-    // Montaj / demontaj (Assembly / disassembly) - süre saat (int), kişi sayısı (int)
-    public int? AssemblyTime { get; set; }
+    // Montaj / demontaj (Assembly / disassembly) - süre saat (decimal, örn: 1,5), kişi sayısı (int)
+    public decimal? AssemblyTime { get; set; }
     public int? RequiredPersonCount { get; set; }
 
     [StringLength(FanDescriptionMaxLength, ErrorMessage = "Fan açıklaması en fazla {1} karakter olabilir.")]
     public string? FanDescription { get; set; }
-    public int? FanWeightKg { get; set; }
+    public decimal? FanWeightKg { get; set; }
 
     // Paketlenmiş ürünün özellikleri (Packaged product features)
     [StringLength(PackagedLengthMaxLength)]
     public string? PackagedLength { get; set; }
     [StringLength(PackagedLengthMaxLength)]
     public string? PackagedDepth { get; set; }
-    public int? PackagedWeightKg { get; set; }
+    public decimal? PackagedWeightKg { get; set; }
     public int? PackagePalletCount { get; set; }
 
     // Genel (General)
@@ -88,10 +88,10 @@ public class Product
     public bool IsFireResistant { get; set; }
     [StringLength(MaterialWeightMaxLength)]
     public string? MaterialWeight { get; set; }
-    public int? MaterialWeightGrm2 { get; set; }
+    public decimal? MaterialWeightGrm2 { get; set; }
     [StringLength(ColorOptionsMaxLength)]
     public string? ColorOptions { get; set; }
-    public int? InflatedWeightKg { get; set; }
+    public decimal? InflatedWeightKg { get; set; }
     
     // Navigation properties
     public string? CategoryName { get; set; }
