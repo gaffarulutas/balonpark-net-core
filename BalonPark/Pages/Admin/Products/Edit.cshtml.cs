@@ -3,6 +3,7 @@ using BalonPark.Data;
 using BalonPark.Models;
 using BalonPark.Helpers;
 using BalonPark.Services;
+using Microsoft.Data.SqlClient;
 
 namespace BalonPark.Pages.Admin.Products;
 
@@ -12,7 +13,6 @@ public class EditModel : BaseAdminPage
     private readonly CategoryRepository _categoryRepository;
     private readonly SubCategoryRepository _subCategoryRepository;
     private readonly ProductImageRepository _productImageRepository;
-    private readonly SettingsRepository _settingsRepository;
     private readonly IWebHostEnvironment _environment;
     private readonly ICacheService _cacheService;
 
@@ -21,7 +21,6 @@ public class EditModel : BaseAdminPage
         CategoryRepository categoryRepository,
         SubCategoryRepository subCategoryRepository,
         ProductImageRepository productImageRepository,
-        SettingsRepository settingsRepository,
         IWebHostEnvironment environment,
         ICacheService cacheService)
     {
@@ -29,7 +28,6 @@ public class EditModel : BaseAdminPage
         _categoryRepository = categoryRepository;
         _subCategoryRepository = subCategoryRepository;
         _productImageRepository = productImageRepository;
-        _settingsRepository = settingsRepository;
         _environment = environment;
         _cacheService = cacheService;
     }
@@ -38,11 +36,11 @@ public class EditModel : BaseAdminPage
     public Product Product { get; set; } = new();
 
     [BindProperty]
-    public List<IFormFile> NewImages { get; set; } = new();
+    public List<IFormFile> NewImages { get; set; } = [];
 
-    public new List<Category> Categories { get; set; } = new();
-    public List<SubCategory> SubCategories { get; set; } = new();
-    public List<ProductImage> ProductImages { get; set; } = new();
+    public new List<Category> Categories { get; set; } = [];
+    public List<SubCategory> SubCategories { get; set; } = [];
+    public List<ProductImage> ProductImages { get; set; } = [];
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
@@ -69,19 +67,69 @@ public class EditModel : BaseAdminPage
 
     public async Task<IActionResult> OnPostAsync()
     {
+        if (Product.Id <= 0)
+        {
+            return NotFound();
+        }
+
+        var existingProduct = await _productRepository.GetByIdAsync(Product.Id);
+        if (existingProduct == null)
+        {
+            return NotFound();
+        }
+
+        Categories = (await _categoryRepository.GetAllAsync()).ToList();
+        var allSubCategories = await _subCategoryRepository.GetAllAsync();
+        SubCategories = allSubCategories.Where(sc => sc.CategoryId == Product.CategoryId).ToList();
+        ProductImages = (await _productImageRepository.GetByProductIdAsync(Product.Id)).ToList();
+
         if (string.IsNullOrWhiteSpace(Product.Name))
         {
             ModelState.AddModelError("Product.Name", "Ürün adı gereklidir.");
-            Categories = (await _categoryRepository.GetAllAsync()).ToList();
-            SubCategories = (await _subCategoryRepository.GetAllAsync()).ToList();
-            ProductImages = (await _productImageRepository.GetByProductIdAsync(Product.Id)).ToList();
             return Page();
         }
 
-        // Slug'ı otomatik güncelle
+        if (Product.CategoryId <= 0)
+        {
+            ModelState.AddModelError("Product.CategoryId", "Kategori seçilmelidir.");
+            return Page();
+        }
+
+        if (Product.SubCategoryId <= 0)
+        {
+            ModelState.AddModelError("Product.SubCategoryId", "Alt kategori seçilmelidir.");
+            return Page();
+        }
+
+        var subCategory = await _subCategoryRepository.GetByIdAsync(Product.SubCategoryId);
+        if (subCategory == null)
+        {
+            ModelState.AddModelError("Product.SubCategoryId", "Seçilen alt kategori bulunamadı.");
+            return Page();
+        }
+
+        if (subCategory.CategoryId != Product.CategoryId)
+        {
+            ModelState.AddModelError("Product.SubCategoryId", "Seçilen alt kategori bu kategoriye ait değildir.");
+            return Page();
+        }
+
+        // Over-posting koruması: kullanıcı tarafından değiştirilmemesi gereken alanlar
+        Product.CreatedAt = existingProduct.CreatedAt;
+        Product.ViewCount = existingProduct.ViewCount;
+
         Product.Slug = SlugHelper.GenerateSlug(Product.Name);
         Product.UpdatedAt = DateTime.Now;
-        await _productRepository.UpdateAsync(Product);
+
+        try
+        {
+            await _productRepository.UpdateAsync(Product);
+        }
+        catch (SqlException ex)
+        {
+            ModelState.AddModelError("", $"Veritabanı hatası: {ex.Message}");
+            return Page();
+        }
 
         // Yeni resimleri yükle
         if (NewImages != null && NewImages.Any())

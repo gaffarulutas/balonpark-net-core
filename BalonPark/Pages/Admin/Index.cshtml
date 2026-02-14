@@ -231,144 +231,75 @@
     </div>
 </div>
 
-<!-- Google Analytics Dashboard (anlık, veritabanına kaydetmez) -->
-<div class="mb-6 bg-white rounded-lg shadow overflow-hidden">
-    <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
-        <h2 class="text-lg font-semibold text-gray-900">Google Analytics Raporları</h2>
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-500" id="ga-fetched-at"></span>
-            <button type="button" id="ga-refresh" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                Yenile
-            </button>
-        </div>
-    </div>
-    <div id="ga-dashboard-content" class="p-4 sm:p-6">
-        <div id="ga-loading" class="flex items-center justify-center py-12 text-gray-500">
-            <span class="animate-pulse">Yükleniyor…</span>
-        </div>
-        <div id="ga-error" class="hidden py-6 text-center text-amber-700 bg-amber-50 rounded-lg"></div>
-        <div id="ga-not-configured" class="hidden py-6 text-center text-gray-500">
-            <p>Google Analytics raporları için Admin → Ayarlar bölümünde <strong>Google Analytics 4 Property ID</strong> alanını doldurun ve Service Account’u GA4 property’de Viewer yapın.</p>
-        </div>
-        <div id="ga-cards" class="hidden space-y-6">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="bg-green-50 rounded-lg p-4 border border-green-100">
-                    <p class="text-xs font-medium text-green-800 uppercase tracking-wide">Anlık Kullanıcı</p>
-                    <p class="text-2xl font-bold text-green-900" id="ga-realtime">0</p>
+<!-- Google Analytics özet kartları (üstte: Anlık Kullanıcı, Bugün, Son 7 Gün, Son 30 Gün) -->
+<div id="ga-summary-cards" class="grid grid-cols-2 gap-5 sm:grid-cols-4 xl:grid-cols-4 mb-6">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                    <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Bugün</p>
-                    <p class="text-sm font-semibold text-gray-900" id="ga-today">-</p>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                    <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Son 7 Gün</p>
-                    <p class="text-sm font-semibold text-gray-900" id="ga-7d">-</p>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                    <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Son 30 Gün</p>
-                    <p class="text-sm font-semibold text-gray-900" id="ga-30d">-</p>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Anlık Kullanıcı</dt>
+                        <dd class="flex items-baseline min-h-[2rem] items-center"><div class="text-2xl font-semibold text-gray-900" id="ga-realtime"><span class="ga-spinner-inline" aria-hidden="true"></span></div></dd>
+                    </dl>
                 </div>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-700 mb-2">En Çok Görüntülenen Sayfalar (30 gün)</h3>
-                    <div class="border border-gray-200 rounded-lg overflow-hidden">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-gray-600">Sayfa</th><th class="px-3 py-2 text-right text-gray-600">Görüntülenme</th></tr></thead>
-                            <tbody id="ga-top-pages" class="divide-y divide-gray-100"></tbody>
-                        </table>
-                    </div>
+        </div>
+    </div>
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-700 mb-2">Trafik Kaynakları (30 gün)</h3>
-                    <div class="border border-gray-200 rounded-lg overflow-hidden">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-gray-600">Kaynak</th><th class="px-3 py-2 text-right text-gray-600">Oturum</th><th class="px-3 py-2 text-right text-gray-600">Kullanıcı</th></tr></thead>
-                            <tbody id="ga-sources" class="divide-y divide-gray-100"></tbody>
-                        </table>
-                    </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Bugün</dt>
+                        <dd class="flex items-baseline min-h-[2rem] items-center"><div class="text-lg font-semibold text-gray-900 truncate" id="ga-today"><span class="ga-spinner-inline" aria-hidden="true"></span></div></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Son 7 Gün</dt>
+                        <dd class="flex items-baseline min-h-[2rem] items-center"><div class="text-lg font-semibold text-gray-900 truncate" id="ga-7d"><span class="ga-spinner-inline" aria-hidden="true"></span></div></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Son 30 Gün</dt>
+                        <dd class="flex items-baseline min-h-[2rem] items-center"><div class="text-lg font-semibold text-gray-900 truncate" id="ga-30d"><span class="ga-spinner-inline" aria-hidden="true"></span></div></dd>
+                    </dl>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script>
-(function() {
-    var content = document.getElementById('ga-dashboard-content');
-    var loading = document.getElementById('ga-loading');
-    var error = document.getElementById('ga-error');
-    var notConfigured = document.getElementById('ga-not-configured');
-    var cards = document.getElementById('ga-cards');
-    function show(state) {
-        loading.classList.add('hidden');
-        error.classList.add('hidden');
-        notConfigured.classList.add('hidden');
-        cards.classList.add('hidden');
-        if (state === 'loading') loading.classList.remove('hidden');
-        else if (state === 'error') error.classList.remove('hidden');
-        else if (state === 'not-configured') notConfigured.classList.remove('hidden');
-        else if (state === 'data') cards.classList.remove('hidden');
-    }
-    function formatNum(n) { return n >= 1000 ? (n/1000).toFixed(1) + 'K' : String(n); }
-    function render(d) {
-        if (!d.data) return;
-        var data = d.data;
-        document.getElementById('ga-realtime').textContent = formatNum(data.realtimeActiveUsers || 0);
-        document.getElementById('ga-fetched-at').textContent = data.fetchedAt ? 'Son güncelleme: ' + new Date(data.fetchedAt).toLocaleTimeString('tr-TR') : '';
-        var today = data.today;
-        if (today) document.getElementById('ga-today').textContent = formatNum(today.sessions) + ' oturum, ' + formatNum(today.users) + ' kullanıcı';
-        var last7 = data.last7Days;
-        if (last7) document.getElementById('ga-7d').textContent = formatNum(last7.sessions) + ' oturum, ' + formatNum(last7.screenPageViews) + ' görüntülenme';
-        var last30 = data.last30Days;
-        if (last30) document.getElementById('ga-30d').textContent = formatNum(last30.sessions) + ' oturum, ' + formatNum(last30.screenPageViews) + ' görüntülenme';
-        var tbody = document.getElementById('ga-top-pages');
-        tbody.innerHTML = '';
-        (data.topPages || []).slice(0, 10).forEach(function(r) {
-            var tr = document.createElement('tr');
-            tr.innerHTML = '<td class="px-3 py-2 text-gray-900 truncate max-w-[200px]" title="' + (r.pageTitle || r.pagePath || '').replace(/"/g, '&quot;') + '">' + (r.pageTitle || r.pagePath || '-') + '</td><td class="px-3 py-2 text-right font-medium">' + formatNum(r.views) + '</td>';
-            tbody.appendChild(tr);
-        });
-        var src = document.getElementById('ga-sources');
-        src.innerHTML = '';
-        (data.trafficSources || []).slice(0, 10).forEach(function(r) {
-            var tr = document.createElement('tr');
-            tr.innerHTML = '<td class="px-3 py-2 text-gray-900">' + (r.channel || '-') + '</td><td class="px-3 py-2 text-right font-medium">' + formatNum(r.sessions) + '</td><td class="px-3 py-2 text-right">' + formatNum(r.users) + '</td>';
-            src.appendChild(tr);
-        });
-    }
-    function load(forceRefresh) {
-        show('loading');
-        var url = '/api/analytics/dashboard' + (forceRefresh ? '?refresh=true' : '');
-        fetch(url, { credentials: 'same-origin' })
-            .then(function(r) { return r.json(); })
-            .then(function(json) {
-                if (!json.success) {
-                    show('error');
-                    document.getElementById('ga-error').textContent = json.message || 'Veri alınamadı.';
-                    return;
-                }
-                if (!json.data.configured) {
-                    show('not-configured');
-                    if (json.data.errorMessage) document.getElementById('ga-not-configured').innerHTML = '<p class="text-amber-700">' + json.data.errorMessage + '</p>';
-                    return;
-                }
-                render(json);
-                show('data');
-                if (json.data.errorMessage) {
-                    var errEl = document.getElementById('ga-error');
-                    errEl.classList.remove('hidden');
-                    errEl.textContent = 'Not: ' + json.data.errorMessage;
-                }
-            })
-            .catch(function(e) {
-                show('error');
-                document.getElementById('ga-error').textContent = 'Bağlantı hatası: ' + (e.message || 'Yüklenemedi.');
-            });
-    }
-    document.getElementById('ga-refresh').addEventListener('click', function() { load(true); });
-    load(false);
-})();
-</script>
+<style>
+/* GA spinner: veriler yüklenene kadar dönen daire */
+.ga-spinner-inline { display: inline-block; width: 1.25rem; height: 1.25rem; border: 2px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: ga-spin 0.7s linear infinite; vertical-align: middle; }
+.ga-loading-spinner { display: inline-block; width: 2rem; height: 2rem; border: 2px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: ga-spin 0.7s linear infinite; }
+@@keyframes ga-spin { to { transform: rotate(360deg); } }
+</style>
 
 <!-- Content Grid -->
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -583,3 +514,136 @@
         </div>
     </div>
 </div>
+
+<!-- Google Analytics Raporları (en alta: tablolar ve Yenile) -->
+<div class="mt-6 mb-6 bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
+        <h2 class="text-lg font-semibold text-gray-900">Google Analytics Raporları</h2>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-500" id="ga-fetched-at"></span>
+            <button type="button" id="ga-refresh" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                Yenile
+            </button>
+        </div>
+    </div>
+    <div id="ga-dashboard-content" class="p-4 sm:p-6">
+        <div id="ga-loading" class="flex flex-col items-center justify-center py-12 text-gray-500 gap-3">
+            <span class="ga-loading-spinner" aria-hidden="true"></span>
+            <span class="animate-pulse">Yükleniyor…</span>
+        </div>
+        <div id="ga-error" class="hidden py-6 text-center text-amber-700 bg-amber-50 rounded-lg"></div>
+        <div id="ga-not-configured" class="hidden py-6 text-center text-gray-500">
+            <p>Google Analytics raporları için Admin → Ayarlar bölümünde <strong>Google Analytics 4 Property ID</strong> alanını doldurun ve Service Account'u GA4 property'de Viewer yapın.</p>
+        </div>
+        <div id="ga-cards" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 mb-2">En Çok Görüntülenen Sayfalar (30 gün)</h3>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-gray-600">Sayfa</th><th class="px-3 py-2 text-right text-gray-600">Görüntülenme</th></tr></thead>
+                            <tbody id="ga-top-pages" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 mb-2">Trafik Kaynakları (30 gün)</h3>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-gray-600">Kaynak</th><th class="px-3 py-2 text-right text-gray-600">Oturum</th><th class="px-3 py-2 text-right text-gray-600">Kullanıcı</th></tr></thead>
+                            <tbody id="ga-sources" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    var loading = document.getElementById('ga-loading');
+    var error = document.getElementById('ga-error');
+    var notConfigured = document.getElementById('ga-not-configured');
+    var cards = document.getElementById('ga-cards');
+    function show(state) {
+        loading.classList.add('hidden');
+        error.classList.add('hidden');
+        notConfigured.classList.add('hidden');
+        cards.classList.add('hidden');
+        if (state === 'loading') loading.classList.remove('hidden');
+        else if (state === 'error') {
+            error.classList.remove('hidden');
+            setSummaryPlaceholders();
+        } else if (state === 'not-configured') {
+            notConfigured.classList.remove('hidden');
+            setSummaryPlaceholders();
+        } else if (state === 'data') cards.classList.remove('hidden');
+    }
+    function setSummaryPlaceholders() {
+        document.getElementById('ga-realtime').textContent = '0';
+        document.getElementById('ga-today').textContent = '-';
+        document.getElementById('ga-7d').textContent = '-';
+        document.getElementById('ga-30d').textContent = '-';
+    }
+    function formatNum(n) { return n >= 1000 ? (n/1000).toFixed(1) + 'K' : String(n); }
+    function render(d) {
+        if (!d.data) return;
+        var data = d.data;
+        var elRealtime = document.getElementById('ga-realtime');
+        var elToday = document.getElementById('ga-today');
+        var el7d = document.getElementById('ga-7d');
+        var el30d = document.getElementById('ga-30d');
+        if (elRealtime) elRealtime.textContent = formatNum(data.realtimeActiveUsers || 0);
+        if (elToday) elToday.textContent = data.today ? (formatNum(data.today.sessions) + ' oturum, ' + formatNum(data.today.users) + ' kullanıcı') : '-';
+        if (el7d) el7d.textContent = data.last7Days ? (formatNum(data.last7Days.sessions) + ' oturum, ' + formatNum(data.last7Days.screenPageViews) + ' görüntülenme') : '-';
+        if (el30d) el30d.textContent = data.last30Days ? (formatNum(data.last30Days.sessions) + ' oturum, ' + formatNum(data.last30Days.screenPageViews) + ' görüntülenme') : '-';
+        var fetchedAtEl = document.getElementById('ga-fetched-at');
+        if (fetchedAtEl) fetchedAtEl.textContent = data.fetchedAt ? 'Son güncelleme: ' + new Date(data.fetchedAt).toLocaleTimeString('tr-TR') : '';
+        var tbody = document.getElementById('ga-top-pages');
+        tbody.innerHTML = '';
+        (data.topPages || []).slice(0, 10).forEach(function(r) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td class="px-3 py-2 text-gray-900 truncate max-w-[200px]" title="' + (r.pageTitle || r.pagePath || '').replace(/"/g, '&quot;') + '">' + (r.pageTitle || r.pagePath || '-') + '</td><td class="px-3 py-2 text-right font-medium">' + formatNum(r.views) + '</td>';
+            tbody.appendChild(tr);
+        });
+        var src = document.getElementById('ga-sources');
+        src.innerHTML = '';
+        (data.trafficSources || []).slice(0, 10).forEach(function(r) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td class="px-3 py-2 text-gray-900">' + (r.channel || '-') + '</td><td class="px-3 py-2 text-right font-medium">' + formatNum(r.sessions) + '</td><td class="px-3 py-2 text-right">' + formatNum(r.users) + '</td>';
+            src.appendChild(tr);
+        });
+    }
+    function load(forceRefresh) {
+        show('loading');
+        var url = '/api/analytics/dashboard' + (forceRefresh ? '?refresh=true' : '');
+        fetch(url, { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(json) {
+                if (!json.success) {
+                    show('error');
+                    document.getElementById('ga-error').textContent = json.message || 'Veri alınamadı.';
+                    return;
+                }
+                if (!json.data.configured) {
+                    show('not-configured');
+                    if (json.data.errorMessage) document.getElementById('ga-not-configured').innerHTML = '<p class="text-amber-700">' + json.data.errorMessage + '</p>';
+                    return;
+                }
+                render(json);
+                show('data');
+                if (json.data.errorMessage) {
+                    var errEl = document.getElementById('ga-error');
+                    errEl.classList.remove('hidden');
+                    errEl.textContent = 'Not: ' + json.data.errorMessage;
+                }
+            })
+            .catch(function(e) {
+                show('error');
+                document.getElementById('ga-error').textContent = 'Bağlantı hatası: ' + (e.message || 'Yüklenemedi.');
+            });
+    }
+    document.getElementById('ga-refresh').addEventListener('click', function() { load(true); });
+    load(false);
+})();
+</script>

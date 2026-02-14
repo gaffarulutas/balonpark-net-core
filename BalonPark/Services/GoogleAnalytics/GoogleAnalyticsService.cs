@@ -46,10 +46,9 @@ public class GoogleAnalyticsService(
             if (!string.IsNullOrWhiteSpace(json))
             {
                 using var ms = new MemoryStream(Encoding.UTF8.GetBytes(json));
-#pragma warning disable CS0618 // Tür veya üye eski - Google.Apis.Auth uyarısı; proje GoogleShoppingService ile aynı deseni kullanıyor
-                credential = GoogleCredential.FromStream(ms)
+                var serviceAccount = CredentialFactory.FromStream<ServiceAccountCredential>(ms);
+                credential = GoogleCredential.FromServiceAccountCredential(serviceAccount)
                     .CreateScoped("https://www.googleapis.com/auth/analytics.readonly");
-#pragma warning restore CS0618
             }
             else
             {
@@ -69,25 +68,25 @@ public class GoogleAnalyticsService(
                         ErrorMessage = "Service account anahtarı bulunamadı. Ayarlarda JSON key girin veya Keys/ klasörüne koyun."
                     };
                 }
-#pragma warning disable CS0618
-                credential = GoogleCredential.FromFile(credentialPath)
+                var serviceAccount = CredentialFactory.FromFile<ServiceAccountCredential>(credentialPath);
+                credential = GoogleCredential.FromServiceAccountCredential(serviceAccount)
                     .CreateScoped("https://www.googleapis.com/auth/analytics.readonly");
-#pragma warning restore CS0618
             }
 
             var client = new BetaAnalyticsDataClientBuilder { GoogleCredential = credential }.Build();
             var result = new GoogleAnalyticsDashboardDto { Configured = true, FetchedAt = DateTime.UtcNow };
 
-            // Realtime: anlık aktif kullanıcı
+            // Realtime: anlık aktif kullanıcı (API en az 1 dimension istiyor; satırlardan toplam alıyoruz)
             try
             {
                 var realtimeRequest = new RunRealtimeReportRequest
                 {
                     Property = propertyName,
+                    Dimensions = { new Dimension { Name = "country" } },
                     Metrics = { new Metric { Name = "activeUsers" } }
                 };
                 var realtimeResponse = await client.RunRealtimeReportAsync(realtimeRequest, cancellationToken: cancellationToken);
-                result.RealtimeActiveUsers = GetMetricValue(realtimeResponse, "activeUsers", 0);
+                result.RealtimeActiveUsers = GetRealtimeActiveUsersTotal(realtimeResponse);
             }
             catch (Exception ex)
             {
@@ -279,19 +278,38 @@ public class GoogleAnalyticsService(
                "Link: " + enableUrl;
     }
 
-    private static int GetMetricValue(RunRealtimeReportResponse response, string metricName, int defaultVal)
+    /// <summary>
+    /// Realtime yanıtından toplam aktif kullanıcı sayısını alır. Önce Totals varsa onu kullanır,
+    /// yoksa tüm satırlardaki activeUsers değerlerini toplar (API dimension zorunlu olduğu için).
+    /// </summary>
+    private static int GetRealtimeActiveUsersTotal(RunRealtimeReportResponse response)
     {
-        if (response.Totals.Count == 0) return defaultVal;
-        var row = response.Totals[0];
-        for (var i = 0; i < response.MetricHeaders.Count; i++)
+        if (response.Totals.Count > 0)
         {
-            if (string.Equals(response.MetricHeaders[i].Name, metricName, StringComparison.OrdinalIgnoreCase)
-                && i < row.MetricValues.Count)
-            {
-                return int.TryParse(row.MetricValues[i].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var v) ? v : defaultVal;
-            }
+            var fromTotal = GetMetricValueFromRealtimeRow(response.Totals[0], "activeUsers", response.MetricHeaders);
+            if (fromTotal >= 0) return fromTotal;
         }
-        return defaultVal;
+        var total = 0;
+        foreach (var row in response.Rows)
+        {
+            var v = GetMetricValueFromRealtimeRow(row, "activeUsers", response.MetricHeaders);
+            if (v >= 0) total += v;
+        }
+        return total;
+    }
+
+    private static int GetMetricValueFromRealtimeRow(Row row, string metricName, IEnumerable<MetricHeader> headers)
+    {
+        var idx = 0;
+        foreach (var h in headers)
+        {
+            if (string.Equals(h.Name, metricName, StringComparison.OrdinalIgnoreCase) && idx < row.MetricValues.Count)
+            {
+                return int.TryParse(row.MetricValues[idx].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var v) ? v : -1;
+            }
+            idx++;
+        }
+        return -1;
     }
 
     private static double GetMetricValueFromRow(Row row, string metricName, IEnumerable<MetricHeader> headers)

@@ -43,7 +43,8 @@ namespace BalonPark.Services
                     try
                     {
                         using var ms = new MemoryStream(Encoding.UTF8.GetBytes(serviceAccountKeyJson));
-                        credential = GoogleCredential.FromStream(ms)
+                        var serviceAccount = CredentialFactory.FromStream<ServiceAccountCredential>(ms);
+                        credential = GoogleCredential.FromServiceAccountCredential(serviceAccount)
                             .CreateScoped(ShoppingContentService.Scope.Content);
                         logger.LogInformation("Google Shopping: Using credentials from Admin Settings");
                     }
@@ -83,7 +84,8 @@ namespace BalonPark.Services
                         return false;
                     }
 
-                    credential = GoogleCredential.FromFile(credentialPath)
+                    var serviceAccount = CredentialFactory.FromFile<ServiceAccountCredential>(credentialPath);
+                    credential = GoogleCredential.FromServiceAccountCredential(serviceAccount)
                         .CreateScoped(ShoppingContentService.Scope.Content);
                     logger.LogInformation("Google Shopping: Using credentials from file {Path}", credentialPath);
                 }
