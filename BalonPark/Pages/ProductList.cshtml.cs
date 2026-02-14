@@ -104,7 +104,8 @@ public class ProductListModel : BasePage
             "price" => allProducts.OrderBy(p => p.Price).ToList(),
             "priceDesc" => allProducts.OrderByDescending(p => p.Price).ToList(),
             "oldest" => allProducts.OrderBy(p => p.CreatedAt).ToList(),
-            "newest" or _ => allProducts.OrderByDescending(p => p.CreatedAt).ToList()
+            "newest" => allProducts.OrderByDescending(p => p.CreatedAt).ToList(),
+            "displayOrder" or _ => allProducts.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id).ToList()
         };
 
         TotalProducts = allProducts.Count;

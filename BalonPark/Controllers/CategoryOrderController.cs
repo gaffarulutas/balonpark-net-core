@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using BalonPark.Attributes;
 using BalonPark.Data;
 using BalonPark.Services;
 
@@ -6,9 +7,11 @@ namespace BalonPark.Controllers
 {
     [ApiController]
     [Route("api/category-order")]
+    [RequireAdminSession]
     public class CategoryOrderController(
         CategoryRepository categoryRepository,
         SubCategoryRepository subCategoryRepository,
+        ProductRepository productRepository,
         ICacheService cacheService,
         ILogger<CategoryOrderController> logger) : ControllerBase
     {
@@ -135,6 +138,41 @@ namespace BalonPark.Controllers
             catch (Exception ex)
             {
                 logger.LogError(ex, "Alt kategori sırası güncelleme hatası: {Id}", id);
+                return StatusCode(500, new { success = false, message = $"Hata: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// Ürünleri yeniden sıralar (admin sürükle-bırak).
+        /// </summary>
+        [HttpPost("products/reorder")]
+        public async Task<IActionResult> ReorderProducts([FromBody] List<CategoryOrderDto> products)
+        {
+            try
+            {
+                if (products == null || !products.Any())
+                {
+                    return BadRequest(new { success = false, message = "Ürün listesi boş olamaz" });
+                }
+
+                // Aynı Id tekrar gelirse ilk değeri kullan (duplicate key hatası önleme)
+                var orderMap = products
+                    .GroupBy(p => p.Id)
+                    .ToDictionary(g => g.Key, g => g.First().DisplayOrder);
+                var success = await productRepository.ReorderProductsAsync(orderMap);
+
+                if (success)
+                {
+                    await cacheService.InvalidateProductsAsync();
+                    logger.LogInformation("Ürünler başarıyla yeniden sıralandı. Toplam: {Count}", products.Count);
+                    return Ok(new { success = true, message = $"{products.Count} ürün başarıyla sıralandı" });
+                }
+
+                return BadRequest(new { success = false, message = "Sıralama işlemi başarısız" });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ürün sıralama hatası");
                 return StatusCode(500, new { success = false, message = $"Hata: {ex.Message}" });
             }
         }

@@ -37,7 +37,7 @@ public class IndexModel(
     public string? StatusFilter { get; set; } // "all" | "active" | "inactive"
     
     [BindProperty(SupportsGet = true)]
-    public string? SortBy { get; set; } // "name" | "nameDesc" | "price" | "priceDesc" | "stock" | "newest" | "oldest"
+    public string? SortBy { get; set; } // "displayOrder" | "name" | "nameDesc" | "price" | "priceDesc" | "stock" | "newest" | "oldest"
     
     [BindProperty(SupportsGet = true)]
     public int PageNumber { get; set; } = 1;
@@ -119,7 +119,7 @@ public class IndexModel(
             allProducts = allProducts.Where(p => p.IsActive == isActive).ToList();
         }
         
-        // Sıralama
+        // Sıralama (varsayılan: sitede kullanılan DisplayOrder sırası)
         allProducts = SortBy switch
         {
             "name" => allProducts.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase).ToList(),
@@ -128,7 +128,8 @@ public class IndexModel(
             "priceDesc" => allProducts.OrderByDescending(p => p.Price).ToList(),
             "stock" => allProducts.OrderBy(p => p.Stock).ToList(),
             "oldest" => allProducts.OrderBy(p => p.CreatedAt).ToList(),
-            "newest" or _ => allProducts.OrderByDescending(p => p.CreatedAt).ToList()
+            "newest" => allProducts.OrderByDescending(p => p.CreatedAt).ToList(),
+            "displayOrder" or _ => allProducts.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id).ToList()
         };
         
         // Pagination

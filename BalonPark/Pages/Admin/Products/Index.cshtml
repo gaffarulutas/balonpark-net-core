@@ -21,8 +21,26 @@
             </h1>
             <p class="text-gray-600 mt-2">Ürünleri görüntüle, ekle, düzenle ve sil</p>
         </div>
-        <div class="mt-4 md:mt-0">
-            <a href="/admin/products/create" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+            <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
+            <button type="button" id="toggleReorderMode" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                </svg>
+                Sıralamayı Düzenle
+            </button>
+            <button type="button" id="saveReorderBtn" class="hidden inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Sıralamayı Kaydet
+            </button>
+            <button type="button" id="cancelReorderBtn" class="hidden inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                İptal
+            </button>
+            <a href="/admin/products/create" id="createProductBtn" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -186,7 +204,9 @@
             <div class="flex flex-col">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Sırala</label>
                 <select name="SortBy" class="admin-filter-control w-full h-11 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent">
-                    @if (string.IsNullOrEmpty(Model.SortBy) || Model.SortBy == "newest")
+                    @if (string.IsNullOrEmpty(Model.SortBy) || Model.SortBy == "displayOrder")
+                    {<option value="displayOrder" selected>Site sırası (sürükle-bırak)</option>} else {<option value="displayOrder">Site sırası (sürükle-bırak)</option>}
+                    @if (Model.SortBy == "newest")
                     {<option value="newest" selected>En yeni</option>} else {<option value="newest">En yeni</option>}
                     @if (Model.SortBy == "oldest")
                     {<option value="oldest" selected>En eski</option>} else {<option value="oldest">En eski</option>}
@@ -257,6 +277,11 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider reorder-handle-header" style="display: none;" aria-hidden="true">
+                            <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                            </svg>
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resim</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ürün Adı</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
@@ -268,10 +293,17 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
                     </tr>
                 </thead>
-                <tbody id="admin-product-gallery" class="bg-white divide-y divide-gray-200">
+                <tbody id="admin-product-gallery" class="bg-white divide-y divide-gray-200" data-page-number="@Model.PageNumber" data-page-size="@Model.PageSize">
                     @foreach (var product in Model.Products)
                     {
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                        <tr class="hover:bg-gray-50 transition-colors duration-150" data-product-id="@product.Id" data-display-order="@product.DisplayOrder">
+                            <td class="px-6 py-4 whitespace-nowrap reorder-handle" style="display: none;" aria-hidden="true">
+                                <span class="cursor-move inline-flex items-center justify-center w-8 h-8 rounded border border-gray-300 bg-gray-50 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-800" role="button" tabindex="0" aria-label="Sıralamak için sürükle">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                                    </svg>
+                                </span>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if (Model.MainImages.ContainsKey(product.Id) && Model.MainImages[product.Id] != null)
                                 {
@@ -483,18 +515,130 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
-        // Helper functions
-        function showSuccessMessage(message) {
-            const messageDiv = $('<div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg"><div class="flex items-center"><svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><div><p class="font-semibold text-green-800">İşlem Başarılı</p><p class="text-green-700">' + message + '</p></div></div></div>');
-            $('main > div').prepend(messageDiv);
-            setTimeout(() => messageDiv.fadeOut(), 5000);
+        // --- Sıralama (sürükle-bırak) ---
+        let productsSortable = null;
+        let isReorderMode = false;
+        let originalProductRows = [];
+
+        $('#toggleReorderMode').on('click', function() {
+            isReorderMode = true;
+            originalProductRows = [];
+            $('#admin-product-gallery tr').each(function() {
+                originalProductRows.push({
+                    element: $(this).clone(true),
+                    id: $(this).data('product-id'),
+                    order: $(this).data('display-order')
+                });
+            });
+            $('.reorder-handle, .reorder-handle-header').show().removeAttr('style');
+            $('#toggleReorderMode, #createProductBtn').hide();
+            $('#saveReorderBtn, #cancelReorderBtn').removeClass('hidden').show();
+            $('.delete-btn, a[href*="edit"]').addClass('opacity-50 pointer-events-none');
+            productsSortable = Sortable.create(document.getElementById('admin-product-gallery'), {
+                animation: 150,
+                handle: '.reorder-handle',
+                ghostClass: 'opacity-75 bg-indigo-50',
+                dragClass: 'bg-indigo-100 shadow-md',
+                chosenClass: 'bg-indigo-50'
+            });
+            if (typeof showNotification === 'function') {
+                showNotification('Sıralama modu aktif. Ürünleri sürükleyip bırakın.', 'info');
+            } else {
+                showSuccessMessage('Sıralama modu aktif. Ürünleri sürükleyip bırakın.');
+            }
+        });
+
+        $('#cancelReorderBtn').on('click', function() {
+            isReorderMode = false;
+            if (productsSortable) {
+                productsSortable.destroy();
+                productsSortable = null;
+            }
+            $('#admin-product-gallery').empty();
+            originalProductRows.forEach(function(item) { $('#admin-product-gallery').append(item.element); });
+            $('.reorder-handle, .reorder-handle-header').hide().css('display', 'none');
+            $('#toggleReorderMode, #createProductBtn').show();
+            $('#saveReorderBtn, #cancelReorderBtn').addClass('hidden').hide();
+            $('.delete-btn, a[href*="edit"]').removeClass('opacity-50 pointer-events-none');
+            showSuccessMessage('Değişiklikler iptal edildi.');
+        });
+
+        $('#saveReorderBtn').on('click', function() {
+            var $tbody = $('#admin-product-gallery');
+            var pageNumber = parseInt($tbody.data('page-number'), 10) || 1;
+            var pageSize = parseInt($tbody.data('page-size'), 10) || 20;
+            var baseOrder = (pageNumber - 1) * pageSize;
+            var products = [];
+            var order = 1;
+            $tbody.find('tr').each(function() {
+                var id = $(this).data('product-id');
+                if (id) {
+                    products.push({ id: id, displayOrder: baseOrder + order++ });
+                }
+            });
+            var $btn = $(this);
+            $btn.prop('disabled', true);
+            fetch('/api/category-order/products/reorder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(products)
+            })
+            .then(function(r) {
+                if (r.status === 401) {
+                    return { success: false, message: 'Oturum sonlandı. Lütfen tekrar giriş yapın.', unauthorized: true };
+                }
+                return r.json();
+            })
+            .then(function(data) {
+                $btn.prop('disabled', false);
+                if (data.unauthorized) {
+                    showErrorMessage(data.message || 'Oturum sonlandı.');
+                    if (typeof window.location !== 'undefined') {
+                        setTimeout(function() { window.location.href = '/admin/login'; }, 2000);
+                    }
+                    return;
+                }
+                if (data.success) {
+                    if (productsSortable) { productsSortable.destroy(); productsSortable = null; }
+                    $('.reorder-handle, .reorder-handle-header').hide().css('display', 'none');
+                    $('#toggleReorderMode, #createProductBtn').show();
+                    $('#saveReorderBtn, #cancelReorderBtn').addClass('hidden').hide();
+                    $('.delete-btn, a[href*="edit"]').removeClass('opacity-50 pointer-events-none');
+                    var baseOrder = (pageNumber - 1) * pageSize;
+                    $tbody.find('tr').each(function(i) { $(this).attr('data-display-order', baseOrder + i + 1); });
+                    showSuccessMessage(data.message || 'Sıralama kaydedildi.');
+                } else {
+                    showErrorMessage(data.message || 'Sıralama kaydedilemedi.');
+                }
+            })
+            .catch(function(err) {
+                $btn.prop('disabled', false);
+                showErrorMessage('Bir hata oluştu: ' + (err.message || 'Sıralama kaydedilemedi.'));
+            });
+        });
+
+        // Helper: XSS önleme için mesajı escape et
+        function escapeHtml(text) {
+            if (text == null) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-        
-        function showErrorMessage(message) {
-            const messageDiv = $('<div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg"><div class="flex items-center"><svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg><div><p class="font-semibold text-red-800">Hata</p><p class="text-red-700">' + message + '</p></div></div></div>');
+
+        function showSuccessMessage(message) {
+            var safe = escapeHtml(message);
+            var messageDiv = $('<div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg"><div class="flex items-center"><svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><div><p class="font-semibold text-green-800">İşlem Başarılı</p><p class="text-green-700">' + safe + '</p></div></div></div>');
             $('main > div').prepend(messageDiv);
-            setTimeout(() => messageDiv.fadeOut(), 8000);
+            setTimeout(function() { messageDiv.fadeOut(); }, 5000);
+        }
+
+        function showErrorMessage(message) {
+            var safe = escapeHtml(message);
+            var messageDiv = $('<div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg"><div class="flex items-center"><svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg><div><p class="font-semibold text-red-800">Hata</p><p class="text-red-700">' + safe + '</p></div></div></div>');
+            $('main > div').prepend(messageDiv);
+            setTimeout(function() { messageDiv.fadeOut(); }, 8000);
         }
         
         // Auto-hide success messages

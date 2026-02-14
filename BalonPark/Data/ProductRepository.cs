@@ -24,7 +24,7 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
             FROM Products p
             INNER JOIN Categories c ON p.CategoryId = c.Id
             INNER JOIN SubCategories sc ON p.SubCategoryId = sc.Id
-            ORDER BY p.CreatedAt DESC";
+            ORDER BY p.DisplayOrder ASC, p.CreatedAt DESC, p.Id ASC";
         
         using var connection = context.CreateConnection();
         var products = await connection.QueryAsync<Product>(query);
@@ -391,10 +391,44 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
             FROM Products p
             INNER JOIN Categories c ON p.CategoryId = c.Id
             INNER JOIN SubCategories sc ON p.SubCategoryId = sc.Id
-            ORDER BY p.CreatedAt DESC";
+            ORDER BY p.DisplayOrder ASC, p.CreatedAt DESC, p.Id ASC";
         
         using var connection = context.CreateConnection();
         return await connection.QueryAsync<Product>(query);
+    }
+
+    /// <summary>
+    /// Ürünlerin DisplayOrder değerlerini toplu günceller (admin sürükle-bırak sıralama).
+    /// </summary>
+    public async Task<bool> ReorderProductsAsync(Dictionary<int, int> orderMap)
+    {
+        if (orderMap == null || orderMap.Count == 0)
+            return false;
+
+        using var connection = context.CreateConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            foreach (var (productId, displayOrder) in orderMap)
+            {
+                var query = @"UPDATE Products SET DisplayOrder = @DisplayOrder, UpdatedAt = @UpdatedAt WHERE Id = @Id";
+                await connection.ExecuteAsync(query,
+                    new { Id = productId, DisplayOrder = displayOrder, UpdatedAt = DateTime.UtcNow },
+                    transaction);
+            }
+
+            transaction.Commit();
+            await cacheService.InvalidateProductsAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            transaction.Rollback();
+            logger.LogError(ex, "Ürün sıralama hatası");
+            return false;
+        }
     }
 
     /// <summary>

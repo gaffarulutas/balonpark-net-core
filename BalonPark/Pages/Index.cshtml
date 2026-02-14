@@ -3,15 +3,18 @@
 @{
     var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
-    
+    // Single canonical URL for LCP image so preload and img/poster use the same href (avoids "preloaded but not used" warning)
+    var heroSlider1Url = ((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/slider/1.jpeg") ?? Url.Content("~/assets/images/slider/1.jpeg");
+    var heroVideoUrl = Url.Content("~/assets/video/slider_video.mp4");
+
     ViewData["Title"] = $"Şişme Oyun Parkları ve Çocuk Oyun Grupları | {settings?.MetaTitle ?? companyName}";
     ViewData["Description"] = "Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları. Güvenli, dayanıklı ve eğlenceli ürünler. Hızlı teslimat ve uygun fiyatlar. Çocuklarınız için en iyi oyun deneyimi!";
     ViewData["Keywords"] = "şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı, eğlence parkı, çocuk eğlence merkezi";
     ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
 }
 @section Head {
-    <!-- LCP (Largest Contentful Paint) iyileştirmesi: hero slider ilk görsel öncelikli yüklensin -->
-    <link rel="preload" as="image" href="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/slider/1.jpeg") ?? Url.Content("~/assets/images/slider/1.jpeg"))">
+    <!-- LCP: preload poster (first visible hero) -->
+    <link rel="preload" as="image" href="@heroSlider1Url">
 }
 
 <!-- Additional SEO Structured Data for Homepage -->
@@ -44,8 +47,8 @@
 <div class="space-y-4 sm:space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 overflow-visible md:items-stretch">
         <!-- Sol panel: left_image.jpg + overlay (sağdaki swiper ile aynı overlay yapısı) -->
-        <div class="hero-left-panel order-2 md:order-1 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm flex flex-col md:h-full min-h-[160px] md:min-h-0">
-            <div class="relative flex-1 min-h-[140px] md:min-h-0 md:h-full">
+        <div class="hero-left-panel order-2 md:order-1 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm flex flex-col md:h-full min-h-[220px] md:min-h-0">
+            <div class="relative flex-1 min-h-[200px] md:min-h-0 md:h-full">
                 <img src="~/assets/images/left_image.jpg" alt="Balon Park - İç Mekan Şişme Oyun Parkı" class="absolute inset-0 w-full h-full object-cover" loading="eager" width="280" height="400">
                 <div class="hero-left-overlay">
                     <span class="text-primary font-medium text-sm sm:text-base">İç Mekan Oyun Parkı</span>
@@ -61,12 +64,28 @@
         <!-- Hero: Swiper slider (assets/images/slider) -->
         <div class="hero-row order-1 md:order-2 min-w-0 w-full md:h-full">
             <div class="hero-panel relative rounded-xl overflow-hidden bg-gray-100 min-w-0 w-full h-full">
-                <div class="hero-aspect w-full h-full relative hero-swiper-wrap">
-                    <div class="swiper heroSwiper" aria-label="Ana sayfa banner slider">
+                <div class="hero-aspect w-full h-full relative">
+                    <div class="hero-swiper-wrap">
+                        <div class="swiper heroSwiper" aria-label="Ana sayfa banner slider">
                         <div class="swiper-wrapper">
+                            <!-- Video slide: poster gösterilir, yüklenince video oynar, bitene kadar sonraki slide'a geçilmez -->
+                            <div class="swiper-slide hero-slide-video" data-hero-video-slide>
+                                <div class="hero-slide-inner hero-slide-video-inner">
+                                    <video class="hero-slide-video-el"
+                                        poster="@heroSlider1Url"
+                                        preload="auto"
+                                        muted
+                                        autoplay
+                                        playsinline
+                                        webkit-playsinline
+                                        aria-label="Balon Park tanıtım videosu">
+                                        <source src="@heroVideoUrl" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
                             <div class="swiper-slide">
                                 <div class="hero-slide-inner">
-                                    <img src="~/assets/images/slider/1.jpeg" class="hero-slide-img" alt="Şişme Oyun Parkları - Balon Park" loading="eager" fetchpriority="high" width="800" height="400">
+                                    <img src="@heroSlider1Url" class="hero-slide-img" alt="Şişme Oyun Parkları - Balon Park" loading="eager" fetchpriority="high" width="800" height="400">
                                     <div class="hero-slide-overlay">
                                         <span class="text-primary font-medium text-sm sm:text-base">Şişme Oyun Parkları</span>
                                         <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">Eğlence ve Güven Bir Arada</h2>
@@ -95,6 +114,7 @@
                             <button type="button" class="swiper-button-prev hero-swiper-prev" aria-label="Önceki slide"></button>
                             <button type="button" class="swiper-button-next hero-swiper-next" aria-label="Sonraki slide"></button>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -204,33 +224,37 @@
 @section Styles {
 <style>
     /* Hero: kategori ile aynı yükseklik (md’de), mobilde sabit oran */
-    .hero-row { width: 100%; }
-    .hero-panel { isolation: isolate; width: 100%; }
+    .hero-row { width: 100%; min-height: 260px; }
+    .hero-panel { isolation: isolate; width: 100%; min-height: 260px; height: 100%; }
     .hero-aspect {
         display: block;
         width: 100%;
-        min-height: 180px;
+        min-height: 260px;
         position: relative;
+        overflow: hidden;
     }
-    /* Mobil: daha dar hero (2.5:1 oran, max 320px) */
-    .hero-aspect {
-        aspect-ratio: 2.5 / 1;
-        max-height: 320px;
-    }
+    .hero-aspect { aspect-ratio: 2.5 / 1; }
     @@supports not (aspect-ratio: 2.5/1) {
-        .hero-aspect { height: 0; padding-bottom: 40%; }
-        .hero-aspect > * { position: absolute; inset: 0; }
+        .hero-aspect { height: 0; padding-bottom: 40%; min-height: 0; }
+        .hero-aspect .hero-swiper-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+    }
+    @@media (max-width: 479px) {
+        .hero-row { min-height: 240px; }
+        .hero-panel { min-height: 240px; }
+        .hero-aspect { min-height: 240px; max-height: 420px; }
+    }
+    @@media (min-width: 480px) and (max-width: 767px) {
+        .hero-aspect { min-height: 280px; max-height: 420px; }
     }
     @@media (min-width: 768px) {
+        .hero-row { min-height: 0; }
+        .hero-panel { min-height: 380px; }
         .hero-aspect {
             aspect-ratio: auto;
             max-height: none;
             height: 100%;
-            min-height: 320px;
+            min-height: 380px;
         }
-    }
-    @@media (max-width: 767px) {
-        .hero-aspect { max-height: 320px; }
     }
     /* Sol panel: resim üzerinde koyu overlay (metin okunaklılığı) */
     .hero-left-overlay {
@@ -238,8 +262,14 @@
         pointer-events: none;
     }
     .hero-left-overlay-link { pointer-events: auto; }
-    /* Hero Swiper: container tam doldurur, slide içerik absolute */
-    .hero-swiper-wrap { overflow: hidden; }
+    /* Hero Swiper: hero-aspect içinde tam alan kaplar (hero-aspect yükseklik verir) */
+    .hero-swiper-wrap {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    }
     .heroSwiper { width: 100%; height: 100%; }
     .heroSwiper .swiper-wrapper { align-items: stretch; }
     .heroSwiper .swiper-slide { height: 100%; }
@@ -247,7 +277,7 @@
         position: relative;
         width: 100%;
         height: 100%;
-        min-height: 180px;
+        min-height: 240px;
     }
     .hero-slide-img {
         position: absolute;
@@ -255,6 +285,19 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+    /* Video slide: native poster + video full-cover */
+    .hero-slide-video .hero-slide-inner { position: relative; }
+    .hero-slide-video .hero-slide-video-el {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        display: block;
+        z-index: 2;
     }
     .hero-slide-overlay {
         position: absolute;
@@ -404,13 +447,15 @@
     .most-viewed-swiper-nav .swiper-button-disabled { opacity: 0.4; cursor: not-allowed; }
     .mostViewedSwiper {
         overflow: hidden;
+        min-height: 320px;
     }
     .mostViewedSwiper .swiper-wrapper { align-items: stretch; }
     .mostViewedSwiper .swiper-slide {
         height: auto;
+        min-height: 300px;
         box-sizing: border-box;
     }
-    .mostViewedSwiper .swiper-slide .product-card { height: 100%; }
+    .mostViewedSwiper .swiper-slide .product-card { height: 100%; min-height: 280px; }
     /* Sol panel: slider ile aynı yükseklik (md) */
     @@media (min-width: 768px) {
         .hero-left-panel .relative { min-height: 100%; }
@@ -422,7 +467,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var urlParams = new URLSearchParams(window.location.search);
-        // Hero Swiper
+        // Hero Swiper (video slide: autoplay duraklar, video bitince sonraki slide)
         function runHeroSwiper() {
             if (typeof window.Swiper === 'undefined') return;
             var heroEl = document.querySelector('.heroSwiper');
@@ -430,17 +475,65 @@
             var nextEl = heroEl.querySelector('.hero-swiper-next');
             var prevEl = heroEl.querySelector('.hero-swiper-prev');
             var opts = {
-                loop: true,
+                loop: false,
+                initialSlide: 0,
                 speed: 500,
                 autoplay: { delay: 5000, disableOnInteraction: false },
                 grabCursor: true,
                 keyboard: { enabled: true },
                 observer: true,
                 observeParents: true,
-                a11y: { prevSlideMessage: 'Önceki', nextSlideMessage: 'Sonraki' }
+                a11y: { prevSlideMessage: 'Önceki', nextSlideMessage: 'Sonraki' },
+                on: {
+                    init: function(swiper) {
+                        var activeSlide = swiper.slides[swiper.activeIndex];
+                        var v = activeSlide && activeSlide.querySelector('.hero-slide-video-el');
+                        if (activeSlide && activeSlide.querySelector('[data-hero-video-slide]') && v) {
+                            swiper.autoplay.stop();
+                            initVideoSlide(v, swiper);
+                        }
+                    },
+                    slideChangeTransitionStart: function(swiper) {
+                        var activeSlide = swiper.slides[swiper.activeIndex];
+                        var isVideoSlide = activeSlide && activeSlide.querySelector('[data-hero-video-slide]');
+                        var v = activeSlide && activeSlide.querySelector('.hero-slide-video-el');
+                        if (isVideoSlide && v) {
+                            swiper.autoplay.stop();
+                            v.pause();
+                            initVideoSlide(v, swiper);
+                        } else {
+                            swiper.autoplay.start();
+                            heroEl.querySelectorAll('.hero-slide-video-el').forEach(function(el) { el.pause(); });
+                        }
+                    }
+                }
             };
             if (nextEl && prevEl) opts.navigation = { nextEl: nextEl, prevEl: prevEl };
             new window.Swiper(heroEl, opts);
+        }
+        function initVideoSlide(v, swiper) {
+            var videoEl = v;
+            if (!videoEl) return;
+            videoEl.removeEventListener('canplaythrough', onCanPlay);
+            videoEl.removeEventListener('canplay', onCanPlay);
+            videoEl.removeEventListener('ended', onEnded);
+            videoEl.removeEventListener('error', onError);
+            function onCanPlay() {
+                videoEl.play().catch(function() {});
+            }
+            function onEnded() {
+                swiper.slideNext();
+                swiper.autoplay.start();
+            }
+            function onError() {
+                swiper.slideNext();
+                swiper.autoplay.start();
+            }
+            videoEl.addEventListener('canplaythrough', onCanPlay, { once: true });
+            videoEl.addEventListener('canplay', onCanPlay, { once: true });
+            videoEl.addEventListener('ended', onEnded);
+            videoEl.addEventListener('error', onError);
+            if (videoEl.readyState >= 3) onCanPlay();
         }
         setTimeout(runHeroSwiper, 100);
         window.addEventListener('load', function() { runHeroSwiper(); });

@@ -75,7 +75,8 @@
                 <!-- Sırala: custom menü -->
                 <div class="relative product-list-select-menu" data-select-id="SortBy">
                     <select name="SortBy" id="SortBy" class="sr-only product-list-select-native" aria-label="Sırala" tabindex="-1" aria-hidden="true">
-                        @if (string.IsNullOrEmpty(Model.SortBy) || Model.SortBy == "newest") {<option value="newest" selected>En yeni</option>} else {<option value="newest">En yeni</option>}
+                        @if (string.IsNullOrEmpty(Model.SortBy) || Model.SortBy == "displayOrder") {<option value="displayOrder" selected>Site sırası</option>} else {<option value="displayOrder">Site sırası</option>}
+                        @if (Model.SortBy == "newest") {<option value="newest" selected>En yeni</option>} else {<option value="newest">En yeni</option>}
                         @if (Model.SortBy == "oldest") {<option value="oldest" selected>En eski</option>} else {<option value="oldest">En eski</option>}
                         @if (Model.SortBy == "name") {<option value="name" selected>Ad (A-Z)</option>} else {<option value="name">Ad (A-Z)</option>}
                         @if (Model.SortBy == "nameDesc") {<option value="nameDesc" selected>Ad (Z-A)</option>} else {<option value="nameDesc">Ad (Z-A)</option>}
