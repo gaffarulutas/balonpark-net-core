@@ -77,6 +77,12 @@ public class IndexModel : BaseAdminPage
             {
                 Settings.Password = existingSettings.Password;
             }
+
+            // Google Shopping JSON key boşsa mevcut değeri koru (hassas veri)
+            if (string.IsNullOrWhiteSpace(Settings.GoogleShoppingServiceAccountKeyJson))
+            {
+                Settings.GoogleShoppingServiceAccountKeyJson = existingSettings.GoogleShoppingServiceAccountKeyJson;
+            }
             
             Settings.UpdatedAt = DateTime.Now;
             

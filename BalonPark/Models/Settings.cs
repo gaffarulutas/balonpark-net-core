@@ -27,6 +27,8 @@ public class Settings
     public const int GoogleTagMaxLength = 100;
     public const int GoogleTagManagerMaxLength = 50;
     public const int GoogleSiteVerificationMaxLength = 255;
+    public const int GoogleShoppingMerchantIdMaxLength = 50;
+    public const int GoogleShoppingServiceAccountEmailMaxLength = 255;
 
     public int Id { get; set; }
 
@@ -90,6 +92,13 @@ public class Settings
     public string? GoogleTagManager { get; set; }
     [StringLength(GoogleSiteVerificationMaxLength)]
     public string? GoogleSiteVerification { get; set; }
+
+    [StringLength(GoogleShoppingMerchantIdMaxLength)]
+    public string? GoogleShoppingMerchantId { get; set; }
+    [StringLength(GoogleShoppingServiceAccountEmailMaxLength)]
+    public string? GoogleShoppingServiceAccountEmail { get; set; }
+    /// <summary>Google Cloud Service Account JSON key içeriği (admin panelden yönetilir).</summary>
+    public string? GoogleShoppingServiceAccountKeyJson { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

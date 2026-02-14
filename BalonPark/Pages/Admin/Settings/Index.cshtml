@@ -273,6 +273,40 @@
         </div>
     </div>
 
+    <!-- Google Shopping API -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+            Google Shopping API
+        </h2>
+        <p class="text-sm text-gray-600 mb-4">Merchant Center ürün senkronizasyonu için API kimlik bilgileri. Boş bırakırsanız appsettings.json değerleri kullanılır.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label asp-for="Settings.GoogleShoppingMerchantId" class="block text-sm font-medium text-gray-700 mb-2">
+                    Merchant ID <span class="text-gray-500 font-normal">(max @Settings.GoogleShoppingMerchantIdMaxLength)</span>
+                </label>
+                <input type="text" asp-for="Settings.GoogleShoppingMerchantId" maxlength="@Settings.GoogleShoppingMerchantIdMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="5726164001" />
+                <p class="text-xs text-gray-500 mt-1">Google Merchant Center → Ayarlar → Merchant ID</p>
+            </div>
+            <div>
+                <label asp-for="Settings.GoogleShoppingServiceAccountEmail" class="block text-sm font-medium text-gray-700 mb-2">
+                    Service Account E-posta <span class="text-gray-500 font-normal">(max @Settings.GoogleShoppingServiceAccountEmailMaxLength)</span>
+                </label>
+                <input type="text" asp-for="Settings.GoogleShoppingServiceAccountEmail" maxlength="@Settings.GoogleShoppingServiceAccountEmailMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="xxx@xxx.iam.gserviceaccount.com" />
+                <p class="text-xs text-gray-500 mt-1">Google Cloud Console → Service Accounts</p>
+            </div>
+            <div class="md:col-span-2">
+                <label asp-for="Settings.GoogleShoppingServiceAccountKeyJson" class="block text-sm font-medium text-gray-700 mb-2">
+                    Service Account JSON Key
+                </label>
+                <textarea asp-for="Settings.GoogleShoppingServiceAccountKeyJson" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent font-mono text-sm" placeholder='{"type":"service_account","project_id":"...","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----...","client_email":"xxx@@xxx.iam.gserviceaccount.com",...}'></textarea>
+                <p class="text-xs text-gray-500 mt-1">Google Cloud Console'dan indirilen JSON dosyasının tam içeriği. Boş bırakırsanız mevcut değer korunur. Gizli tutun!</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Google & Doğrulama -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">

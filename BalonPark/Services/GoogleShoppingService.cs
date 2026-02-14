@@ -1,9 +1,9 @@
+using System.Text;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.ShoppingContent.v2_1;
 using Google.Apis.ShoppingContent.v2_1.Data;
 using System.Globalization;
-using System.Net.Security;
 using BalonPark.Data;
 using BalonPark.Models;
 
@@ -14,62 +14,93 @@ namespace BalonPark.Services
         ILogger<GoogleShoppingService> logger,
         ProductRepository productRepository,
         ProductImageRepository productImageRepository,
+        SettingsRepository settingsRepository,
         IUrlService urlService) : IGoogleShoppingService
     {
         private ShoppingContentService? _shoppingService;
-        private readonly string _merchantId = configuration["GoogleShopping:MerchantId"] ?? throw new ArgumentNullException("MerchantId");
-        private readonly string _serviceAccountEmail = configuration["GoogleShopping:ServiceAccountEmail"] ?? throw new ArgumentNullException("ServiceAccountEmail");
-        private readonly string _serviceAccountKeyPath = configuration["GoogleShopping:ServiceAccountKeyPath"] ?? throw new ArgumentNullException("ServiceAccountKeyPath");
+        private string? _merchantId;
         private readonly string _applicationName = configuration["GoogleShopping:ApplicationName"] ?? "BalonPark Shopping API";
 
-        public Task<bool> AuthenticateAsync()
+        public async Task<bool> AuthenticateAsync()
         {
             try
             {
-                var possiblePaths = new[]
-                {
-                    Path.Combine(Directory.GetCurrentDirectory(), _serviceAccountKeyPath.Replace("~/", "")),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _serviceAccountKeyPath.Replace("~/", "")),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Keys", "balonpark-05412680d836.json"),
-                    Path.Combine(Directory.GetCurrentDirectory(), "Keys", "balonpark-05412680d836.json"),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "Keys", "balonpark-05412680d836.json"),
-                    Path.Combine(Directory.GetCurrentDirectory(), "bin", "Keys", "balonpark-05412680d836.json"),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Keys", "balonpark-05412680d836.json"),
-                    Path.Combine(Directory.GetCurrentDirectory(), "..", "Keys", "balonpark-05412680d836.json"),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "Keys", "balonpark-05412680d836.json")
-                };
+                var settings = await settingsRepository.GetFirstAsync();
+                var merchantId = settings?.GoogleShoppingMerchantId ?? configuration["GoogleShopping:MerchantId"];
+                var serviceAccountKeyJson = settings?.GoogleShoppingServiceAccountKeyJson;
 
-                string? credentialPath = null;
-                foreach (var path in possiblePaths)
+                if (string.IsNullOrWhiteSpace(merchantId))
                 {
-                    if (File.Exists(path))
+                    logger.LogError("Google Shopping MerchantId not configured (check Admin Settings or appsettings.json)");
+                    return false;
+                }
+
+                GoogleCredential credential;
+
+                // 1. Önce Admin ayarlarındaki JSON key'i dene
+                if (!string.IsNullOrWhiteSpace(serviceAccountKeyJson))
+                {
+                    try
                     {
-                        credentialPath = path;
-                        break;
+                        using var ms = new MemoryStream(Encoding.UTF8.GetBytes(serviceAccountKeyJson));
+                        credential = GoogleCredential.FromStream(ms)
+                            .CreateScoped(ShoppingContentService.Scope.Content);
+                        logger.LogInformation("Google Shopping: Using credentials from Admin Settings");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Invalid Google Shopping JSON key in Admin Settings");
+                        return false;
                     }
                 }
-
-                if (credentialPath == null)
+                else
                 {
-                    logger.LogError("Service account key file not found");
-                    return Task.FromResult(false);
+                    // 2. Fallback: appsettings.json'daki dosya yolu
+                    var keyPath = configuration["GoogleShopping:ServiceAccountKeyPath"] ?? "";
+                    var possiblePaths = new[]
+                    {
+                        Path.Combine(Directory.GetCurrentDirectory(), keyPath.Replace("~/", "")),
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, keyPath.Replace("~/", "")),
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Keys", "balonpark.json"),
+                        Path.Combine(Directory.GetCurrentDirectory(), "Keys", "balonpark.json"),
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "Keys", "balonpark.json"),
+                        Path.Combine(Directory.GetCurrentDirectory(), "bin", "Keys", "balonpark.json")
+                    };
+
+                    string? credentialPath = null;
+                    foreach (var path in possiblePaths)
+                    {
+                        if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                        {
+                            credentialPath = path;
+                            break;
+                        }
+                    }
+
+                    if (credentialPath == null)
+                    {
+                        logger.LogError("Google Shopping: Service account key not found (add JSON in Admin Settings or place file in Keys/ folder)");
+                        return false;
+                    }
+
+                    credential = GoogleCredential.FromFile(credentialPath)
+                        .CreateScoped(ShoppingContentService.Scope.Content);
+                    logger.LogInformation("Google Shopping: Using credentials from file {Path}", credentialPath);
                 }
 
-                var credential = GoogleCredential.FromFile(credentialPath)
-                    .CreateScoped(ShoppingContentService.Scope.Content);
-
+                _merchantId = merchantId;
                 _shoppingService = new ShoppingContentService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential,
                     ApplicationName = _applicationName
                 });
 
-                return Task.FromResult(true);
+                return true;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to authenticate with Google Shopping API");
-                return Task.FromResult(false);
+                return false;
             }
         }
 
@@ -100,7 +131,7 @@ namespace BalonPark.Services
             try
             {
                 var productData = ConvertToGoogleProduct(product);
-                var request = _shoppingService!.Products.Insert(productData, ulong.Parse(_merchantId));
+                var request = _shoppingService!.Products.Insert(productData, ulong.Parse(_merchantId!));
                 var result = await request.ExecuteAsync();
                 
                 return result.Id?.ToString() ?? string.Empty;
@@ -122,7 +153,7 @@ namespace BalonPark.Services
             try
             {
                 var productData = ConvertToGoogleProduct(product);
-                var request = _shoppingService!.Products.Update(productData, ulong.Parse(_merchantId), product.Id);
+                var request = _shoppingService!.Products.Update(productData, ulong.Parse(_merchantId!), product.Id);
                 var result = await request.ExecuteAsync();
                 
                 return result.Id?.ToString() ?? string.Empty;
@@ -143,7 +174,7 @@ namespace BalonPark.Services
 
             try
             {
-                var request = _shoppingService!.Products.Delete(ulong.Parse(_merchantId), productId);
+                var request = _shoppingService!.Products.Delete(ulong.Parse(_merchantId!), productId);
                 await request.ExecuteAsync();
                 
                 return true;
@@ -164,7 +195,7 @@ namespace BalonPark.Services
 
             try
             {
-                var merchantId = ulong.Parse(_merchantId);
+                var merchantId = ulong.Parse(_merchantId!);
                 var request = _shoppingService!.Products.List(merchantId);
                 request.MaxResults = 250;
 
@@ -204,7 +235,7 @@ namespace BalonPark.Services
 
             try
             {
-                var request = _shoppingService!.Products.Get(ulong.Parse(_merchantId), productId);
+                var request = _shoppingService!.Products.Get(ulong.Parse(_merchantId!), productId);
                 var product = await request.ExecuteAsync();
                 
                 return ConvertFromGoogleProduct(product);
@@ -233,7 +264,7 @@ namespace BalonPark.Services
                     var entry = new ProductsCustomBatchRequestEntry
                     {
                         BatchId = entries.Count,
-                        MerchantId = ulong.Parse(_merchantId),
+                        MerchantId = ulong.Parse(_merchantId!),
                         Method = "insert",
                         Product = ConvertToGoogleProduct(product)
                     };
@@ -281,7 +312,7 @@ namespace BalonPark.Services
                     var entry = new ProductsCustomBatchRequestEntry
                     {
                         BatchId = entries.Count,
-                        MerchantId = ulong.Parse(_merchantId),
+                        MerchantId = ulong.Parse(_merchantId!),
                         Method = "update",
                         Product = ConvertToGoogleProduct(product)
                     };
@@ -319,7 +350,7 @@ namespace BalonPark.Services
                     var entry = new ProductsCustomBatchRequestEntry
                     {
                         BatchId = entries.Count,
-                        MerchantId = ulong.Parse(_merchantId),
+                        MerchantId = ulong.Parse(_merchantId!),
                         Method = "delete",
                         ProductId = productId
                     };

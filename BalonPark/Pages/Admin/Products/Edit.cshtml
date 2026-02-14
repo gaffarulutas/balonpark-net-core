@@ -99,17 +99,20 @@
         <form method="post" enctype="multipart/form-data">
             <input type="hidden" asp-for="Product.Id" />
             <input type="hidden" asp-for="Product.CreatedAt" />
-            <div class="flex justify-center px-6 py-12 border-2 border-gray-300 border-dashed rounded-xl bg-gray-50/80 hover:border-gray-400 transition-colors duration-200">
-                <div class="space-y-1 text-center">
+            <div id="editImageDropZone" class="flex justify-center px-6 py-12 border-2 border-gray-300 border-dashed rounded-xl bg-gray-50/80 hover:border-gray-400 hover:bg-gray-100/80 transition-colors duration-200 cursor-pointer relative">
+                <input type="file" id="editNewImagesInput" name="NewImages" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" aria-label="Yeni ürün resimleri seçin">
+                <div class="space-y-1 text-center pointer-events-none">
                     <svg class="mx-auto h-14 w-14 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    <label class="relative cursor-pointer rounded-md font-medium text-gray-900 hover:text-gray-800 text-base">
-                        <span>Dosya yükle</span>
-                        <input type="file" name="NewImages" accept="image/*" multiple class="sr-only">
-                    </label>
-                    <p class="text-sm text-gray-500">PNG, JPG, GIF – 10MB'a kadar. Birden fazla seçebilirsiniz.</p>
+                    <p class="text-base text-gray-600"><span class="font-medium text-gray-900">Dosya seçin</span> veya sürükleyip bırakın</p>
+                    <p class="text-sm text-gray-500">PNG, JPG, WebP, GIF – 10MB'a kadar. Birden fazla seçebilirsiniz.</p>
                 </div>
+            </div>
+            <div id="editImagePreviewContainer" class="mt-4 hidden" aria-live="polite">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Yüklenecek resimler (<span id="editImagePreviewCount">0</span>)</h3>
+                <div id="editImagePreviewGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                <button type="button" id="editImageClearBtn" class="mt-3 text-sm text-red-600 hover:text-red-700 font-medium">Seçimi temizle</button>
             </div>
 
         <div class="space-y-8 mt-8">
@@ -429,13 +432,82 @@
 
         setTimeout(function() { $('.bg-green-50, .bg-red-50').fadeOut(); }, 5000);
 
-        $('input[type="file"]').on('change', function(e) {
-            var files = e.target.files;
-            if (files.length > 0) {
-                var fileText = files.length === 1 ? files[0].name : files.length + ' dosya seçildi';
-                $(this).siblings('label').find('span').text(fileText);
+        // ----- Yeni resim önizleme (ürün güncelleme) -----
+        (function() {
+            var MAX_FILE_SIZE_MB = 10;
+            var MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+            var dropZone = document.getElementById('editImageDropZone');
+            var fileInput = document.getElementById('editNewImagesInput');
+            var previewContainer = document.getElementById('editImagePreviewContainer');
+            var previewGrid = document.getElementById('editImagePreviewGrid');
+            var previewCountEl = document.getElementById('editImagePreviewCount');
+            var clearBtn = document.getElementById('editImageClearBtn');
+            if (!dropZone || !fileInput) return;
+
+            function renderPreviews(files) {
+                previewGrid.innerHTML = '';
+                if (!files || files.length === 0) {
+                    previewContainer.classList.add('hidden');
+                    return;
+                }
+                previewContainer.classList.remove('hidden');
+                previewCountEl.textContent = files.length;
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    var card = document.createElement('div');
+                    card.className = 'relative rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50 group';
+                    var img = document.createElement('img');
+                    img.className = 'w-full aspect-square object-cover';
+                    img.alt = file.name || '';
+                    var reader = new FileReader();
+                    reader.onload = (function(el) { return function(e) { el.src = e.target.result; }; })(img);
+                    reader.readAsDataURL(file);
+                    var overlay = document.createElement('div');
+                    overlay.className = 'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2';
+                    var label = document.createElement('span');
+                    label.className = 'text-white text-xs font-medium block truncate';
+                    label.textContent = file.name || 'isimsiz';
+                    var badge = document.createElement('span');
+                    badge.className = 'text-[10px] text-gray-200 mt-0.5 block';
+                    badge.textContent = 'Resim ' + (i + 1);
+                    overlay.appendChild(label);
+                    overlay.appendChild(badge);
+                    card.appendChild(img);
+                    card.appendChild(overlay);
+                    previewGrid.appendChild(card);
+                }
             }
-        });
+
+            function handleFiles(fileList) {
+                if (!fileList || fileList.length === 0) { renderPreviews([]); return; }
+                var files = Array.prototype.slice.call(fileList);
+                var valid = [];
+                var tooBig = [];
+                for (var i = 0; i < files.length; i++) {
+                    if (!files[i].type.match(/^image\/(jpeg|png|webp|gif)$/i)) continue;
+                    if (files[i].size > MAX_FILE_SIZE_BYTES) { tooBig.push(files[i].name); continue; }
+                    valid.push(files[i]);
+                }
+                if (tooBig.length && typeof showSnackbar === 'function') showSnackbar('Bazı dosyalar ' + MAX_FILE_SIZE_MB + ' MB\'dan büyük olduğu için atlandı: ' + tooBig.join(', '), 'warning');
+                if (valid.length === 0) { fileInput.value = ''; renderPreviews([]); return; }
+                var dt = new DataTransfer();
+                valid.forEach(function(f) { dt.items.add(f); });
+                fileInput.files = dt.files;
+                renderPreviews(fileInput.files);
+            }
+
+            fileInput.addEventListener('change', function() { handleFiles(this.files); });
+            if (clearBtn) clearBtn.addEventListener('click', function() { fileInput.value = ''; renderPreviews([]); });
+            dropZone.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('border-gray-500', 'bg-gray-100'); });
+            dropZone.addEventListener('dragleave', function(e) { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('border-gray-500', 'bg-gray-100'); });
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('border-gray-500', 'bg-gray-100');
+                var files = e.dataTransfer && e.dataTransfer.files;
+                if (files && files.length) handleFiles(files);
+            });
+        })();
 
         $(function() {
             var $colorHidden = $('input[name="Product.ColorOptions"]');

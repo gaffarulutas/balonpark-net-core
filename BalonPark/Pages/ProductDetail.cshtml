@@ -279,9 +279,16 @@
                 }
                 @if (!string.IsNullOrEmpty(deliveryLabel))
                 {
-                    <p class="flex items-center gap-2 text-sm text-gray-600">
-                        <i data-lucide="truck" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
-                        <span>Teslimat: @deliveryLabel</span>
+                    <p class="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                        <span class="flex items-center gap-2"><i data-lucide="truck" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>Teslimat: @deliveryLabel</span>
+                        <span class="text-gray-500">• Kargo ücreti alıcıya aittir</span>
+                    </p>
+                }
+                else
+                {
+                    <p class="flex items-center gap-2 text-sm text-gray-500">
+                        <i data-lucide="truck" class="w-5 h-5 flex-shrink-0"></i>
+                        <span>Kargo ücreti alıcıya aittir</span>
                     </p>
                 }
             </div>
