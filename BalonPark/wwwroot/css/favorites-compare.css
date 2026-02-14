@@ -219,6 +219,40 @@ header.fixed-header {
     display: none;
 }
 
+/* Ürün kartı: shadow her zaman, border sadece hover, resim zoom custom CSS */
+.product-card {
+    border: 1px solid rgba(229, 231, 235, 0.9);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+.product-card:hover {
+    border-color: #00A8E8;
+}
+.product-card .product-image-wrap {
+    overflow: hidden;
+}
+.product-card .lazy-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease-in-out;
+}
+.product-card:hover .lazy-image {
+    transform: scale(1.1);
+}
+@media (prefers-reduced-motion: reduce) {
+    .product-card,
+    .product-card .lazy-image {
+        transition: none !important;
+    }
+    .product-card:hover {
+        transform: none !important;
+    }
+    .product-card:hover .lazy-image {
+        transform: none !important;
+    }
+}
+
 /* Modern Product Card: Favori/Karşılaştır resmin üstünde sağ üst, hover'da görünür */
 .modern-product-card {
     position: relative;

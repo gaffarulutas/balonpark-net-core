@@ -9,7 +9,7 @@
         : $"{Model.Product?.Name} - {Model.Product?.CategoryName} - {Model.Product?.SubCategoryName} şişme oyun grubu. {companyName}'ta kaliteli şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar.";
     ViewData["Keywords"] = $"{Model.Product?.Name}, {Model.Product?.CategoryName}, {Model.Product?.SubCategoryName}, şişme oyun parkı, şişme kaydırak, şişme havuz, şişme rodeo, top havuzu, iç mekan oyun parkları, trambolin, softplay oyuncaklar, yer balonları, balon tak, fly tüp, şişme kostüm, reklam balonları, balon park, çocuk oyun grupları, şişme oyuncaklar, çocuk parkı, oyun alanı";
     ViewData["Image"] = Model.MainImage != null ? ((IUrlService?)ViewData["UrlService"])?.GetImageUrl(Model.MainImage.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{Model.MainImage.LargePath}" : ((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png";
-    ViewData["ProductPrice"] = Model.Product?.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+    ViewData["ProductPrice"] = Model.Product?.Price.ToString("F0", System.Globalization.CultureInfo.InvariantCulture);
     ViewData["ProductCurrency"] = "TRY";
     ViewData["ProductAvailability"] = Model.Product?.Stock > 0 ? "in stock" : "out of stock";
     ViewData["ProductCondition"] = "new";
@@ -182,9 +182,9 @@
                 else
                 {
                     <div class="flex items-center gap-2 flex-wrap">
-                        <span class="price-main price-tl text-primary text-2xl font-semibold @(selectedCurrency == "TL" ? "block" : "hidden")">₺@Model.Product?.Price.ToString("N2")</span>
-                        <span class="price-main price-usd text-primary text-2xl font-semibold @(selectedCurrency == "USD" ? "block" : "hidden")">$@Model.Product?.UsdPrice.ToString("N2")</span>
-                        <span class="price-main price-eur text-primary text-2xl font-semibold @(selectedCurrency == "EUR" ? "block" : "hidden")">€@Model.Product?.EuroPrice.ToString("N2")</span>
+                        <span class="price-main price-tl text-primary text-2xl font-semibold @(selectedCurrency == "TL" ? "block" : "hidden")">₺@Model.Product?.Price.ToString("N0")</span>
+                        <span class="price-main price-usd text-primary text-2xl font-semibold @(selectedCurrency == "USD" ? "block" : "hidden")">$@Model.Product?.UsdPrice.ToString("N0")</span>
+                        <span class="price-main price-eur text-primary text-2xl font-semibold @(selectedCurrency == "EUR" ? "block" : "hidden")">€@Model.Product?.EuroPrice.ToString("N0")</span>
                         @if (Model.Product?.IsDiscounted == true)
                         {
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">İndirimli</span>
@@ -454,9 +454,9 @@
                             <div class="p-3">
                                 <p class="text-xs text-gray-500 truncate">@Html.Raw(item.Product.CategoryName)</p>
                                 <a href="@purl" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 mt-0.5">@Html.Raw(item.Product.Name)</a>
-                                <p class="mt-1 price-tl text-sm font-semibold text-primary @(selectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N2")</p>
-                                <p class="mt-1 price-usd text-sm font-semibold text-primary @(selectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N2")</p>
-                                <p class="mt-1 price-eur text-sm font-semibold text-primary @(selectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N2")</p>
+                                <p class="mt-1 price-tl text-sm font-semibold text-primary @(selectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N0")</p>
+                                <p class="mt-1 price-usd text-sm font-semibold text-primary @(selectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N0")</p>
+                                <p class="mt-1 price-eur text-sm font-semibold text-primary @(selectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N0")</p>
                             </div>
                         </article>
                     }
@@ -1037,7 +1037,7 @@
         ],
         "offers": {
             "@@type": "Offer",
-            "price": "@Model.Product.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)",
+            "price": "@Model.Product.Price.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)",
             "priceCurrency": "TRY",
             "availability": "@(Model.Product.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")",
             "itemCondition": "https://schema.org/NewCondition",

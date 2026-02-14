@@ -42,7 +42,7 @@
                     @:         "image": "@(urlService?.GetImageUrl(productWithImage.MainImage?.LargePath ?? "/assets/images/logo/logo.png") ?? $"{baseUrl}/{(productWithImage.MainImage?.LargePath ?? "/assets/images/logo/logo.png")}")",
                     @:         "offers": {
                     @:             "@@type": "Offer",
-                    @:             "price": "@product.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)",
+                    @:             "price": "@product.Price.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)",
                     @:             "priceCurrency": "TRY",
                     @:             "availability": "@(product.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")"
                     @:         },

@@ -110,15 +110,15 @@
                                     }
                                     else if (Model.SelectedCurrency == "TL")
                                     {
-                                        <span class="font-semibold text-ink">₺@item.Product.Price.ToString("N2")</span>
+                                        <span class="font-semibold text-ink">₺@item.Product.Price.ToString("N0")</span>
                                     }
                                     else if (Model.SelectedCurrency == "USD")
                                     {
-                                        <span class="font-semibold text-ink">$@item.Product.UsdPrice.ToString("N2")</span>
+                                        <span class="font-semibold text-ink">$@item.Product.UsdPrice.ToString("N0")</span>
                                     }
                                     else if (Model.SelectedCurrency == "EUR")
                                     {
-                                        <span class="font-semibold text-ink">€@item.Product.EuroPrice.ToString("N2")</span>
+                                        <span class="font-semibold text-ink">€@item.Product.EuroPrice.ToString("N0")</span>
                                     }
                                 </td>
                             }

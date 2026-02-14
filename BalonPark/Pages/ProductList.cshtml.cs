@@ -176,7 +176,7 @@ public class ProductListModel : BasePage
                     ["offers"] = new Dictionary<string, object>
                     {
                         ["@type"] = "Offer",
-                        ["price"] = p.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                        ["price"] = p.Price.ToString("F0", System.Globalization.CultureInfo.InvariantCulture),
                         ["priceCurrency"] = "TRY",
                         ["availability"] = p.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
                     }
