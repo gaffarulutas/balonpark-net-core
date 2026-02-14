@@ -108,6 +108,9 @@ try
     // Google Shopping Service
     builder.Services.AddScoped<IGoogleShoppingService, GoogleShoppingService>();
 
+    // Google Analytics Service (anlık raporlar, veritabanına kaydetmez, memory cache)
+    builder.Services.AddScoped<IGoogleAnalyticsService, BalonPark.Services.GoogleAnalytics.GoogleAnalyticsService>();
+
     // Blog Service
     builder.Services.AddScoped<IBlogService, BlogService>();
 

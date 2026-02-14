@@ -108,6 +108,7 @@ public class SettingsRepository(DapperContext context, ICacheService cacheServic
                 GoogleShoppingMerchantId = @GoogleShoppingMerchantId,
                 GoogleShoppingServiceAccountEmail = @GoogleShoppingServiceAccountEmail,
                 GoogleShoppingServiceAccountKeyJson = @GoogleShoppingServiceAccountKeyJson,
+                GoogleAnalyticsPropertyId = @GoogleAnalyticsPropertyId,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id";
         
@@ -131,13 +132,13 @@ public class SettingsRepository(DapperContext context, ICacheService cacheServic
              Fax, WhatsApp, Address, City, District, PostalCode, Country, 
              Facebook, Instagram, Twitter, LinkedIn, YouTube, WorkingHours, 
              MetaTitle, MetaDescription, MetaKeywords, GoogleTag, GoogleTagManager, GoogleSiteVerification, 
-             GoogleShoppingMerchantId, GoogleShoppingServiceAccountEmail, GoogleShoppingServiceAccountKeyJson, CreatedAt)
+             GoogleShoppingMerchantId, GoogleShoppingServiceAccountEmail, GoogleShoppingServiceAccountKeyJson, GoogleAnalyticsPropertyId, CreatedAt)
             VALUES 
             (@UserName, @Password, @CompanyName, @About, @Logo, @Email, @PhoneNumber, @PhoneNumber2, 
              @Fax, @WhatsApp, @Address, @City, @District, @PostalCode, @Country, 
              @Facebook, @Instagram, @Twitter, @LinkedIn, @YouTube, @WorkingHours, 
              @MetaTitle, @MetaDescription, @MetaKeywords, @GoogleTag, @GoogleTagManager, @GoogleSiteVerification, 
-             @GoogleShoppingMerchantId, @GoogleShoppingServiceAccountEmail, @GoogleShoppingServiceAccountKeyJson, @CreatedAt);
+             @GoogleShoppingMerchantId, @GoogleShoppingServiceAccountEmail, @GoogleShoppingServiceAccountKeyJson, @GoogleAnalyticsPropertyId, @CreatedAt);
             SELECT CAST(SCOPE_IDENTITY() as int)";
         
         using var connection = context.CreateConnection();

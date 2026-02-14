@@ -29,6 +29,8 @@ public class Settings
     public const int GoogleSiteVerificationMaxLength = 255;
     public const int GoogleShoppingMerchantIdMaxLength = 50;
     public const int GoogleShoppingServiceAccountEmailMaxLength = 255;
+    /// <summary>GA4 Property ID (numeric, e.g. 432109876). Admin → Property Settings.</summary>
+    public const int GoogleAnalyticsPropertyIdMaxLength = 20;
 
     public int Id { get; set; }
 
@@ -99,6 +101,10 @@ public class Settings
     public string? GoogleShoppingServiceAccountEmail { get; set; }
     /// <summary>Google Cloud Service Account JSON key içeriği (admin panelden yönetilir).</summary>
     public string? GoogleShoppingServiceAccountKeyJson { get; set; }
+
+    /// <summary>Google Analytics 4 Property ID (numeric, e.g. 432109876). Dashboard raporları için.</summary>
+    [StringLength(GoogleAnalyticsPropertyIdMaxLength)]
+    public string? GoogleAnalyticsPropertyId { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
