@@ -1,15 +1,26 @@
 /**
  * Google Translate Integration - Best Practices 2026
- * Public site için dil seçimi dropdown ve otomatik çeviri.
- * Kaynak dil: Türkçe (tr). Google destekli tüm diller desteklenir.
+ * Deprecated widget yerine URL redirect yöntemi kullanılır (%100 güvenilir).
+ * Kaynak dil: Türkçe (tr).
  */
 (function () {
     'use strict';
 
-    var COOKIE_NAME = 'googtrans';
+    var COOKIE_NAME = 'balonpark_translate_lang';
     var COOKIE_PATH = '/';
     var COOKIE_MAX_AGE_DAYS = 365;
     var SOURCE_LANG = 'tr';
+    var GOOGLE_TRANSLATE_URL = 'https://translate.google.com/translate';
+
+    /** Localhost'ta Google Translate çevirisi çalışmaz; feature flag ile devre dışı bırakılır */
+    function isLocalhost() {
+        try {
+            var h = (window.location.hostname || '').toLowerCase();
+            return h === 'localhost' || h === '127.0.0.1' || h === '[::1]';
+        } catch (e) {
+            return false;
+        }
+    }
 
     /**
      * Google Translate destekli diller (ISO-639 + yaygın varyantlar)
@@ -127,12 +138,8 @@
         for (var i = 0; i < cookies.length; i++) {
             var c = cookies[i].trim();
             if (c.indexOf(COOKIE_NAME + '=') === 0) {
-                var val = c.substring(COOKIE_NAME.length + 1);
-                if (val && val !== '/' + SOURCE_LANG + '/' + SOURCE_LANG) {
-                    var m = val.match(/^\/[\w-]+\/([\w-]+)$/);
-                    return m ? m[1] : null;
-                }
-                return null;
+                var val = c.substring(COOKIE_NAME.length + 1).trim();
+                return val || null;
             }
         }
         return null;
@@ -141,20 +148,85 @@
     function setTranslateCookie(targetLang) {
         if (!targetLang || targetLang === SOURCE_LANG) {
             document.cookie = COOKIE_NAME + '=; path=' + COOKIE_PATH + '; max-age=0; SameSite=Lax';
-            return;
+        } else {
+            document.cookie = COOKIE_NAME + '=' + targetLang + '; path=' + COOKIE_PATH +
+                '; max-age=' + (COOKIE_MAX_AGE_DAYS * 86400) + '; SameSite=Lax';
         }
-        var val = '/' + SOURCE_LANG + '/' + targetLang;
-        document.cookie = COOKIE_NAME + '=' + encodeURIComponent(val) + '; path=' + COOKIE_PATH +
-            '; max-age=' + (COOKIE_MAX_AGE_DAYS * 86400) + '; SameSite=Lax';
+    }
+
+    function isOnGoogleTranslate() {
+        try {
+            var h = window.location.hostname;
+            return h.indexOf('translate.google') !== -1 || h.indexOf('translate.googleusercontent') !== -1;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * Google Translate proxy'deyken orijinal sayfa URL'ini bul.
+     * translate.google.com / translate.googleusercontent.com URL formatlarına uyumlu.
+     */
+    function getOriginalPageUrl() {
+        if (!isOnGoogleTranslate()) return window.location.href;
+        var loc = window.location;
+        var s = loc.search || '';
+        var h = loc.hash || '';
+        var fullQuery = s + (h.indexOf('?') === 0 ? h : h.split('?')[1] ? '?' + h.split('?')[1] : '');
+        var match = (s + ' ' + fullQuery).match(/[?&]u=([^&\s#]+)/);
+        if (match) {
+            try {
+                return decodeURIComponent(match[1].replace(/\+/g, ' '));
+            } catch (e) { /* ignore */ }
+        }
+        try {
+            if (window.parent !== window && window.parent.location.href) {
+                var pm = (window.parent.location.search + ' ' + (window.parent.location.hash || '')).match(/[?&]u=([^&\s#]+)/);
+                if (pm) return decodeURIComponent(pm[1].replace(/\+/g, ' '));
+            }
+        } catch (e) { /* cross-origin */ }
+        var body = document.body;
+        if (body && body.getAttribute('data-site-url')) {
+            var url = body.getAttribute('data-site-url').trim();
+            if (url && url.indexOf('http') === 0) return url;
+        }
+        return null;
+    }
+
+    function getSiteBaseUrl() {
+        return window.location.origin || (window.location.protocol + '//' + window.location.host);
+    }
+
+    /** Proxy sayfasında mevcut hedef dili URL'den (tl) al; kendi sitemizde cookie'den */
+    function getCurrentDisplayLang() {
+        if (isOnGoogleTranslate()) {
+            var loc = window.location;
+            var q = (loc.search || '') + (loc.hash || '').split('?')[1] ? '?' + (loc.hash || '').split('?')[1] : '';
+            var m = q.match(/[?&]tl=([^&\s#]+)/);
+            if (m) {
+                try {
+                    var tl = decodeURIComponent(m[1]).trim().toLowerCase();
+                    if (tl === SOURCE_LANG || tl === 'tr') return '';
+                    return tl;
+                } catch (e) { /* ignore */ }
+            }
+            try {
+                if (window.parent !== window && window.parent.location.search) {
+                    var pm = window.parent.location.search.match(/[?&]tl=([^&\s#]+)/);
+                    if (pm) return decodeURIComponent(pm[1]).trim();
+                }
+            } catch (e) { /* cross-origin */ }
+        }
+        return getStoredLang();
     }
 
     function getCurrentDisplayLabel() {
-        var stored = getStoredLang();
-        if (!stored) return 'Türkçe';
+        var code = getCurrentDisplayLang();
+        if (!code) return 'Türkçe';
         for (var i = 0; i < LANGUAGES.length; i++) {
-            if (LANGUAGES[i].code === stored) return LANGUAGES[i].name;
+            if (LANGUAGES[i].code === code) return LANGUAGES[i].name;
         }
-        return stored;
+        return code;
     }
 
     function createDropdown() {
@@ -187,7 +259,8 @@
         LANGUAGES.forEach(function (lang) {
             var li = document.createElement('li');
             li.setAttribute('role', 'option');
-            var isActive = (!lang.code && !getStoredLang()) || (lang.code && lang.code === getStoredLang());
+            var current = getCurrentDisplayLang();
+            var isActive = (!lang.code && !current) || (lang.code && lang.code === current);
             var a = document.createElement('button');
             a.type = 'button';
             a.className = 'translate-dropdown__item' + (isActive ? ' translate-dropdown__item--active' : '');
@@ -245,49 +318,47 @@
     function selectLanguage(targetLang, wrapper) {
         var currentLang = getStoredLang();
         var newLang = targetLang || '';
-        /* Aynı dil seçildiyse sadece kapat */
         if ((!newLang && !currentLang) || (newLang && newLang === currentLang)) {
             return;
         }
-        /* Loading state */
         var dropdown = wrapper || document.querySelector('.translate-dropdown');
         if (dropdown) {
             dropdown.classList.add('translate-dropdown--loading');
-            dropdown.querySelector('.translate-dropdown__trigger').setAttribute('disabled', '');
+            var trigger = dropdown.querySelector('.translate-dropdown__trigger');
+            if (trigger) trigger.setAttribute('disabled', '');
             var panel = dropdown.querySelector('.translate-dropdown__panel');
             if (panel) panel.setAttribute('hidden', '');
         }
         setTranslateCookie(newLang);
-        /* Dil değiştiğinde her zaman sayfa yenile - Google Translate cookie ile çevirir */
-        location.reload();
+        if (isLocalhost()) {
+            /* Localhost: Google Translate erişilemez; sadece cookie güncelle, yönlendirme yapma */
+            if (dropdown) {
+                dropdown.classList.remove('translate-dropdown--loading');
+                var t = dropdown.querySelector('.translate-dropdown__trigger');
+                if (t) t.removeAttribute('disabled');
+                var lbl = dropdown.querySelector('.translate-dropdown__label');
+                if (lbl) lbl.textContent = getCurrentDisplayLabel();
+            }
+            return;
+        }
+        var targetUrl;
+        if (!newLang || newLang === SOURCE_LANG) {
+            targetUrl = isOnGoogleTranslate() ? getOriginalPageUrl() : window.location.href;
+            if (!targetUrl) targetUrl = getSiteBaseUrl() + '/';
+            targetUrl = targetUrl.replace(/#.*$/, '');
+            setTimeout(function () { window.location.href = targetUrl; }, 50);
+        } else {
+            var pageUrl = isOnGoogleTranslate() ? getOriginalPageUrl() : window.location.href;
+            if (!pageUrl) pageUrl = getSiteBaseUrl() + window.location.pathname + window.location.search;
+            targetUrl = GOOGLE_TRANSLATE_URL + '?sl=' + SOURCE_LANG + '&tl=' + encodeURIComponent(newLang) + '&u=' + encodeURIComponent(pageUrl);
+            setTimeout(function () { window.location.href = targetUrl; }, 50);
+        }
     }
 
     function escapeHtml(s) {
         var div = document.createElement('div');
         div.textContent = s;
         return div.innerHTML;
-    }
-
-    function initGoogleTranslateElement() {
-        if (window.googleTranslateElementInit) return;
-        window.googleTranslateElementInit = function () {
-            new google.translate.TranslateElement({
-                pageLanguage: SOURCE_LANG,
-                includedLanguages: LANGUAGES.filter(function (l) { return l.code; }).map(function (l) { return l.code; }).join(','),
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-                autoDisplay: false
-            }, 'google-translate-element');
-        };
-    }
-
-    function injectGoogleScript() {
-        if (document.getElementById('google-translate-script')) return;
-        var s = document.createElement('script');
-        s.id = 'google-translate-script';
-        s.type = 'text/javascript';
-        s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-        s.async = true;
-        document.head.appendChild(s);
     }
 
     function mountDropdown() {
@@ -309,23 +380,22 @@
         var translateContainer = document.getElementById('google-translate-element');
         if (!translateContainer) return;
 
-        initGoogleTranslateElement();
-        /* Kullanıcı dil tercihi yoksa tarayıcı diline göre otomatik çeviri */
-        if (!getStoredLang()) {
+        /* Google Translate proxy'deyse (çevrilmiş sayfa), dropdown'u göster */
+        if (isOnGoogleTranslate()) {
+            mountDropdown();
+            return;
+        }
+        /* Kendi sitemizde: dil tercihi yoksa tarayıcı diline göre otomatik yönlendir (localhost hariç) */
+        if (!isLocalhost() && !getStoredLang()) {
             var browserLang = getBrowserLanguage();
             if (browserLang && browserLang !== SOURCE_LANG) {
                 setTranslateCookie(browserLang);
-                injectGoogleScript();
-                location.reload();
+                var pageUrl = window.location.href;
+                window.location.href = GOOGLE_TRANSLATE_URL + '?sl=' + SOURCE_LANG + '&tl=' + encodeURIComponent(browserLang) + '&u=' + encodeURIComponent(pageUrl);
                 return;
             }
         }
-        injectGoogleScript();
         mountDropdown();
-
-        if (getStoredLang()) {
-            document.documentElement.classList.add('translate-active');
-        }
     }
 
     if (document.readyState === 'loading') {

@@ -478,6 +478,21 @@ body {
 }
 
 /* Actions (favoriler, karşılaştır, para birimi) */
+/* Favori ve karşılaştır butonları mobilde gizli (tüm sayfalarda) */
+@media (max-width: 767px) {
+    #header-favorites-btn,
+    #header-compare-btn,
+    .product-card .product-card-actions .favorite-btn,
+    .product-card .product-card-actions .compare-btn,
+    .product-box .product-actions .favorite-btn,
+    .product-box .product-actions .compare-btn,
+    .product-box .product-image .product-actions .favorite-btn,
+    .product-box .product-image .product-actions .compare-btn,
+    .favorite-btn-detail,
+    .compare-btn-detail {
+        display: none !important;
+    }
+}
 .site-header__actions {
     display: flex;
     align-items: center;

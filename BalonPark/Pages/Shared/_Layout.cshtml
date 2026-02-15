@@ -55,8 +55,8 @@
     <meta name="geo.region" content="TR">
     <meta name="geo.country" content="Turkey">
     <meta name="geo.placename" content="Türkiye">
-    <meta name="theme-color" content="#00A8E8">
-    <meta name="msapplication-TileColor" content="#00A8E8">
+    <meta name="theme-color" content="#fbfbfb">
+    <meta name="msapplication-TileColor" content="#fbfbfb">
     <meta name="msapplication-TileImage" content="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" />
     
     @if (!string.IsNullOrEmpty(siteSettings?.GoogleSiteVerification))
@@ -122,8 +122,6 @@
     <meta name="twitter:creator" content="@@balonpark">
 
     <!-- Additional SEO -->
-    <meta name="theme-color" content="#FFFFFF">
-    <meta name="msapplication-TileColor" content="#fdfdfe">
     <link rel="canonical"
         href="@(((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"{Context.Request.Path}{Context.Request.QueryString}") ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}")">
     @if (ViewData["PrevUrl"] != null)
@@ -195,6 +193,8 @@
     }
     </script>
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="~/manifest.json">
     <!-- Favicon -->
     <link rel="icon" href="@logoUrl" type="image/png">
     <link rel="shortcut icon" href="@logoUrl" type="image/png">
@@ -239,7 +239,8 @@
 
 </head>
 
-<body class="font-sans text-[15px] sm:text-base bg-white text-ink antialiased min-h-screen flex flex-col">
+@{ var canonicalUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}"; }
+<body class="font-sans text-[15px] sm:text-base bg-white text-ink antialiased min-h-screen flex flex-col" data-site-url="@canonicalUrl">
 @if (!string.IsNullOrEmpty(siteSettings?.GoogleTagManager))
 {
 <!-- Google Tag Manager (noscript) - Admin Ayarlardan güncellenir -->
@@ -405,11 +406,11 @@
                 <div class="site-header__actions">
                     <!-- Google Translate dil seçici (sadece public sayfalarda) -->
                     <div id="google-translate-element" class="sr-only" aria-hidden="true"></div>
-                    <a href="#" id="header-favorites-btn" class="site-header__action" aria-label="Favorilerim" title="Favoriler">
+                    <a href="#" id="header-favorites-btn" class="site-header__action hidden md:inline-flex" aria-label="Favorilerim" title="Favoriler">
                         <i data-lucide="heart" class="site-header__action-icon lucide-fav-header" aria-hidden="true"></i>
                         <span class="site-header__action-badge favorites-count-text" aria-hidden="true">0</span>
                     </a>
-                    <a href="#" id="header-compare-btn" class="site-header__action" aria-label="Ürün karşılaştır" title="Karşılaştır">
+                    <a href="#" id="header-compare-btn" class="site-header__action hidden md:inline-flex" aria-label="Ürün karşılaştır" title="Karşılaştır">
                         <i data-lucide="shuffle" class="site-header__action-icon" aria-hidden="true"></i>
                         <span class="site-header__action-badge compare-count-text" aria-hidden="true">0</span>
                     </a>
