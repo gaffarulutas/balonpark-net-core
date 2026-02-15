@@ -676,6 +676,151 @@ body {
     visibility: hidden;
 }
 
+/* ========== Google Translate Dropdown - Custom CSS ========== */
+.translate-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.translate-dropdown__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: inherit;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.translate-dropdown__trigger:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.translate-dropdown__trigger:focus-visible {
+    outline: 2px solid #00A8E8;
+    outline-offset: 2px;
+}
+
+.translate-dropdown__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
+.translate-dropdown__label {
+    max-width: 6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.translate-dropdown__chevron {
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.7;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.translate-dropdown.translate-dropdown--open .translate-dropdown__chevron {
+    transform: rotate(180deg);
+}
+
+/* Panel - varsayılan gizli (HTML5 hidden attribute + CSS fallback) */
+.translate-dropdown__panel[hidden] {
+    display: none !important;
+}
+.translate-dropdown__panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.25rem;
+    min-width: 200px;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+}
+
+.translate-dropdown.translate-dropdown--open .translate-dropdown__panel {
+    display: block;
+}
+
+.translate-dropdown__list {
+    margin: 0;
+    padding: 0.5rem;
+    list-style: none;
+}
+
+.translate-dropdown__item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 0.875rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: background 0.15s;
+}
+
+.translate-dropdown__item:hover {
+    background: #f1f5f9;
+}
+
+.translate-dropdown__item--active {
+    background: rgba(0, 168, 232, 0.1);
+    color: #00A8E8;
+    font-weight: 500;
+}
+
+.translate-dropdown__item--active:hover {
+    background: rgba(0, 168, 232, 0.15);
+}
+
+@media (max-width: 639px) {
+    .translate-dropdown__label {
+        display: none;
+    }
+    .translate-dropdown__trigger {
+        padding: 0.5rem;
+    }
+    .translate-dropdown__panel {
+        min-width: 200px;
+        right: 0;
+        left: auto;
+    }
+}
+
+/* Google Translate Element gizle (biz kendi dropdown kullanıyoruz) */
+#google-translate-element,
+.goog-te-banner-frame,
+.skiptranslate {
+    display: none !important;
+}
+
+body {
+    top: 0 !important;
+}
+
+/* notranslate: fiyat, SKU vb. çevirilmesin */
+.notranslate {
+    /* Google bu class'ı otomatik atlayar */
+}
+
 /* Ürün resimleri: lazy loading spinner */
 .product-image-wrap {
     position: relative;

@@ -403,6 +403,8 @@
                 }
 
                 <div class="site-header__actions">
+                    <!-- Google Translate dil seçici (sadece public sayfalarda) -->
+                    <div id="google-translate-element" class="sr-only" aria-hidden="true"></div>
                     <a href="#" id="header-favorites-btn" class="site-header__action" aria-label="Favorilerim" title="Favoriler">
                         <i data-lucide="heart" class="site-header__action-icon lucide-fav-header" aria-hidden="true"></i>
                         <span class="site-header__action-badge favorites-count-text" aria-hidden="true">0</span>
@@ -503,6 +505,7 @@
 
     <!-- Favorites & Compare: load first so showFavorites/showCompare are defined -->
     <script src="~/js/favorites-compare.js"></script>
+    <script src="~/js/google-translate.js" asp-append-version="true" defer></script>
     <script src="~/js/site.js" defer></script>
     <script src="~/js/header-search-autocomplete.js" defer></script>
     @await RenderSectionAsync("Scripts", required: false)
