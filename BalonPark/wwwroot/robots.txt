@@ -4,6 +4,10 @@ Allow: /
 # Sitemap
 Sitemap: https://balonpark.com/sitemap.xml
 
+# Yandex Market / Yandex Direct product feed (YML)
+# Feed URL: https://balonpark.com/feed/yandex-market.xml
+Allow: /feed/
+
 # Disallow admin areas
 Disallow: /Admin/
 Disallow: /admin/

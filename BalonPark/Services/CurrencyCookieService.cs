@@ -53,6 +53,6 @@ public class CurrencyCookieService(IHttpContextAccessor httpContextAccessor) : I
 
     private static bool IsValidCurrency(string currency)
     {
-        return currency == "TL" || currency == "USD" || currency == "EUR";
+        return currency == "TL" || currency == "USD" || currency == "EUR" || currency == "RUB";
     }
 }

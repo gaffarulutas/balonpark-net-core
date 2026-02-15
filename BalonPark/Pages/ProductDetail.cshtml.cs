@@ -11,6 +11,7 @@ public class ProductDetailModel : BasePage
     private readonly ProductRepository _productRepository;
     private readonly ProductImageRepository _productImageRepository;
     private readonly CurrencyService _currencyService;
+    private readonly IYandexExchangeRateService _yandexExchangeRateService;
     private readonly PdfService _pdfService;
 
     public Product? Product { get; set; }
@@ -28,6 +29,7 @@ public class ProductDetailModel : BasePage
         ProductRepository productRepository,
         ProductImageRepository productImageRepository,
         CurrencyService currencyService,
+        IYandexExchangeRateService yandexExchangeRateService,
         PdfService pdfService,
         IUrlService urlService,
         ICurrencyCookieService currencyCookieService) : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
@@ -35,6 +37,7 @@ public class ProductDetailModel : BasePage
         _productRepository = productRepository;
         _productImageRepository = productImageRepository;
         _currencyService = currencyService;
+        _yandexExchangeRateService = yandexExchangeRateService;
         _pdfService = pdfService;
     }
 
@@ -79,12 +82,12 @@ public class ProductDetailModel : BasePage
         // Ana resmi bul
         MainImage = ProductImages.FirstOrDefault(i => i.IsMainImage) ?? ProductImages.FirstOrDefault();
 
-        // USD ve Euro fiyatlarını hesapla
+        // USD, Euro ve RUB fiyatlarını hesapla
         var (usdPrice, euroPrice) = await _currencyService.CalculatePricesAsync(Product.Price);
-        
-        // Ürünün fiyat bilgilerini güncelle
+        var tryToRub = await _yandexExchangeRateService.GetTryToRubRateAsync();
         Product.UsdPrice = Math.Round(usdPrice, 2);
         Product.EuroPrice = Math.Round(euroPrice, 2);
+        Product.RubPrice = Math.Round(Product.Price * tryToRub, 2);
 
         // İlgili ürünler (aynı alt kategoriden)
         var related = await _productRepository.GetRelatedBySubCategoryAsync(Product.SubCategorySlug ?? "", Product.Id, 6);
@@ -93,6 +96,7 @@ public class ProductDetailModel : BasePage
             var (pu, pe) = await _currencyService.CalculatePricesAsync(p.Price);
             p.UsdPrice = Math.Round(pu, 2);
             p.EuroPrice = Math.Round(pe, 2);
+            p.RubPrice = Math.Round(p.Price * tryToRub, 2);
             var mainImg = await _productImageRepository.GetMainImageAsync(p.Id);
             RelatedProducts.Add(new ProductWithImage { Product = p, MainImage = mainImg });
         }
@@ -107,6 +111,7 @@ public class ProductDetailModel : BasePage
             var (pu, pe) = await _currencyService.CalculatePricesAsync(p.Price);
             p.UsdPrice = Math.Round(pu, 2);
             p.EuroPrice = Math.Round(pe, 2);
+            p.RubPrice = Math.Round(p.Price * tryToRub, 2);
             var mainImg = await _productImageRepository.GetMainImageAsync(p.Id);
             PopularProducts.Add(new ProductWithImage { Product = p, MainImage = mainImg });
         }

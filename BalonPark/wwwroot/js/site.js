@@ -150,7 +150,7 @@
                 var currency = btn.getAttribute('data-currency');
                 if (!currency || typeof window.setCurrency !== 'function') return;
                 if (btn.getAttribute('aria-pressed') === 'true') return;
-                var labels = { TL: 'Türk Lirası (₺)', USD: 'Amerikan Doları ($)', EUR: 'Euro (€)' };
+                var labels = { TL: 'Türk Lirası (₺)', USD: 'Amerikan Doları ($)', EUR: 'Euro (€)', RUB: 'Rus Rublesi (₽)' };
                 var label = labels[currency] || currency;
                 var mainMsg = 'Tüm fiyatlar <strong>' + label + '</strong> cinsinden gösterilecektir. Onaylarsanız sayfa yenilenecektir.';
                 var disclaimer = '<p class="swal-currency-disclaimer">USD ve EUR tutarları, TCMB günlük kurlarına göre hesaplanır. Kesin fiyat için lütfen bizimle iletişime geçiniz.</p>';

@@ -35,6 +35,8 @@ public class Product
     public decimal Price { get; set; }
     public decimal UsdPrice { get; set; }
     public decimal EuroPrice { get; set; }
+    /// <summary>TCMB + CBR kurlarından hesaplanır (sunucu tarafında).</summary>
+    public decimal RubPrice { get; set; }
     public int Stock { get; set; }
     public int DisplayOrder { get; set; } = 0;
     public bool IsActive { get; set; } = true;

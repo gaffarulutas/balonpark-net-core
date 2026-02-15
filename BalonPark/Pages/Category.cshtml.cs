@@ -13,6 +13,7 @@ public class CategoryModel : BasePage
     private readonly ProductRepository _productRepository;
     private readonly ProductImageRepository _productImageRepository;
     private readonly CurrencyService _currencyService;
+    private readonly IYandexExchangeRateService _yandexExchangeRateService;
 
     public Category? Category { get; set; }
     public List<SubCategory> SubCategories { get; set; } = new();
@@ -29,6 +30,7 @@ public class CategoryModel : BasePage
         ProductRepository productRepository,
         ProductImageRepository productImageRepository,
         CurrencyService currencyService,
+        IYandexExchangeRateService yandexExchangeRateService,
         IUrlService urlService,
         ICurrencyCookieService currencyCookieService) : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
     {
@@ -37,6 +39,7 @@ public class CategoryModel : BasePage
         _productRepository = productRepository;
         _productImageRepository = productImageRepository;
         _currencyService = currencyService;
+        _yandexExchangeRateService = yandexExchangeRateService;
     }
 
     public async Task<IActionResult> OnGetAsync(string slug)
@@ -62,7 +65,7 @@ public class CategoryModel : BasePage
         
         // Group products by subcategory and limit each group to MaxProductsPerSubCategory
         ProductsBySubCategory = new Dictionary<string, List<ProductWithImage>>();
-        
+        var tryToRub = await _yandexExchangeRateService.GetTryToRubRateAsync();
         var groupedProducts = allProducts.GroupBy(p => p.SubCategorySlug ?? "");
         
         foreach (var group in groupedProducts)
@@ -76,12 +79,11 @@ public class CategoryModel : BasePage
             {
                 var mainImage = await _productImageRepository.GetMainImageAsync(product.Id);
                 
-                // USD ve Euro fiyatlarını hesapla
+                // USD, Euro ve RUB fiyatlarını hesapla
                 var (usdPrice, euroPrice) = await _currencyService.CalculatePricesAsync(product.Price);
-                
-                // Ürünün fiyat bilgilerini güncelle
                 product.UsdPrice = Math.Round(usdPrice, 2);
                 product.EuroPrice = Math.Round(euroPrice, 2);
+                product.RubPrice = Math.Round(product.Price * tryToRub, 2);
                 
                 productsWithImages.Add(new ProductWithImage
                 {

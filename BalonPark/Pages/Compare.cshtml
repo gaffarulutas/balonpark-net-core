@@ -23,6 +23,7 @@
             @if (Model.SelectedCurrency == "TL") { <span>(₺)</span> }
             else if (Model.SelectedCurrency == "USD") { <span>($)</span> }
             else if (Model.SelectedCurrency == "EUR") { <span>(€)</span> }
+            else if (Model.SelectedCurrency == "RUB") { <span>(₽)</span> }
         </p>
     </div>
 
@@ -100,6 +101,7 @@
                                 @if (Model.SelectedCurrency == "TL") { <text>Fiyat (₺)</text> }
                                 else if (Model.SelectedCurrency == "USD") { <text>Fiyat ($)</text> }
                                 else if (Model.SelectedCurrency == "EUR") { <text>Fiyat (€)</text> }
+                                else if (Model.SelectedCurrency == "RUB") { <text>Fiyat (₽)</text> }
                             </th>
                             @foreach (var item in Model.Products)
                             {
@@ -119,6 +121,10 @@
                                     else if (Model.SelectedCurrency == "EUR")
                                     {
                                         <span class="font-semibold text-ink">€@item.Product.EuroPrice.ToString("N0")</span>
+                                    }
+                                    else if (Model.SelectedCurrency == "RUB")
+                                    {
+                                        <span class="font-semibold text-ink">₽@item.Product.RubPrice.ToString("N0")</span>
                                     }
                                 </td>
                             }

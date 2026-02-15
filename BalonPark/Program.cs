@@ -108,6 +108,10 @@ try
     // Google Shopping Service
     builder.Services.AddScoped<IGoogleShoppingService, GoogleShoppingService>();
 
+    // Yandex Shopping (YML feed): TCMB + CBR kurlarından TRY→RUB
+    builder.Services.AddScoped<IYandexExchangeRateService, YandexExchangeRateService>();
+    builder.Services.AddScoped<IYandexShoppingService, YandexShoppingService>();
+
     // Google Analytics Service (anlık raporlar, veritabanına kaydetmez, memory cache)
     builder.Services.AddScoped<IGoogleAnalyticsService, BalonPark.Services.GoogleAnalytics.GoogleAnalyticsService>();
 

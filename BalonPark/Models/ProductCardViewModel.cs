@@ -11,6 +11,6 @@ public class ProductCardViewModel
     /// <summary>Ürün detay sayfası URL'i. Null ise /category/{CategorySlug}/{SubCategorySlug}/{Slug} kullanılır.</summary>
     public string? ProductUrl { get; set; }
 
-    /// <summary>Gösterilecek para birimi (TL, USD, EUR).</summary>
+    /// <summary>Gösterilecek para birimi (TL, USD, EUR, RUB).</summary>
     public string SelectedCurrency { get; set; } = "TL";
 }

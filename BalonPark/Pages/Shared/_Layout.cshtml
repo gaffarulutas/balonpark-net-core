@@ -64,6 +64,11 @@
         <!-- Google Site Verification (Admin Ayarlardan güncellenir) -->
         <meta name="google-site-verification" content="@siteSettings.GoogleSiteVerification">
     }
+    @if (!string.IsNullOrEmpty(siteSettings?.YandexSiteVerification))
+    {
+        <!-- Yandex Webmaster Verification (Admin Ayarlardan güncellenir) -->
+        <meta name="yandex-verification" content="@siteSettings.YandexSiteVerification">
+    }
     @if (!string.IsNullOrEmpty(siteSettings?.GoogleTag))
     {
         <!-- Google tag (gtag.js) - Admin Ayarlardan güncellenir -->
@@ -419,9 +424,9 @@
                         <i data-lucide="shuffle" class="site-header__action-icon" aria-hidden="true"></i>
                         <span class="site-header__action-badge compare-count-text" aria-hidden="true">0</span>
                     </a>
-                    <button type="button" class="currency-btn site-header__action @(ViewData["SelectedCurrency"]?.ToString() == "TL" ? "site-header__action--active" : "")" data-currency="TL" aria-label="Türk Lirası" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "TL")" title="TL"><i data-lucide="badge-turkish-lira" class="site-header__action-icon" aria-hidden="true"></i></button>
-                    <button type="button" class="currency-btn site-header__action @(ViewData["SelectedCurrency"]?.ToString() == "USD" ? "site-header__action--active" : "")" data-currency="USD" aria-label="Amerikan Doları" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "USD")" title="USD"><i data-lucide="dollar-sign" class="site-header__action-icon" aria-hidden="true"></i></button>
-                    <button type="button" class="currency-btn site-header__action @(ViewData["SelectedCurrency"]?.ToString() == "EUR" ? "site-header__action--active" : "")" data-currency="EUR" aria-label="Euro" aria-pressed="@(ViewData["SelectedCurrency"]?.ToString() == "EUR")" title="Euro"><i data-lucide="euro" class="site-header__action-icon" aria-hidden="true"></i></button>
+                    <!-- Para birimi dropdown (dil seçici gibi; TL, USD, EUR, RUB) -->
+                    <div id="currency-dropdown-placeholder"></div>
+                    <span class="currency-btn sr-only" aria-hidden="true"></span>
                 </div>
                 </div>
             </div>
@@ -512,6 +517,7 @@
     <!-- Favorites & Compare: load first so showFavorites/showCompare are defined -->
     <script src="~/js/favorites-compare.js"></script>
     <script src="~/js/google-translate.js" asp-append-version="true" defer></script>
+    <script src="~/js/currency-dropdown.js" asp-append-version="true" defer></script>
     <script src="~/js/site.js" defer></script>
     <script src="~/js/header-search-autocomplete.js" defer></script>
     @await RenderSectionAsync("Scripts", required: false)

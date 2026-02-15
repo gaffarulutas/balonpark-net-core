@@ -12,6 +12,7 @@ public class ProductsModel : BasePage
     private readonly ProductRepository _productRepository;
     private readonly ProductImageRepository _productImageRepository;
     private readonly CurrencyService _currencyService;
+    private readonly IYandexExchangeRateService _yandexExchangeRateService;
 
     public SubCategory? SubCategory { get; set; }
     public string CategorySlug { get; set; } = string.Empty;
@@ -32,6 +33,7 @@ public class ProductsModel : BasePage
         ProductRepository productRepository,
         ProductImageRepository productImageRepository,
         CurrencyService currencyService,
+        IYandexExchangeRateService yandexExchangeRateService,
         IUrlService urlService,
         ICurrencyCookieService currencyCookieService) : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
     {
@@ -39,6 +41,7 @@ public class ProductsModel : BasePage
         _productRepository = productRepository;
         _productImageRepository = productImageRepository;
         _currencyService = currencyService;
+        _yandexExchangeRateService = yandexExchangeRateService;
     }
 
     public async Task<IActionResult> OnGetAsync(string categorySlug, string subCategorySlug)
@@ -69,18 +72,14 @@ public class ProductsModel : BasePage
             .Take(PageSize)
             .ToList();
 
-        // Her ürün için ana resmi çek ve fiyat dönüşümü yap
+        var tryToRub = await _yandexExchangeRateService.GetTryToRubRateAsync();
         foreach (var product in pagedProducts)
         {
             var mainImage = await _productImageRepository.GetMainImageAsync(product.Id);
-            
-            // USD ve Euro fiyatlarını hesapla
             var (usdPrice, euroPrice) = await _currencyService.CalculatePricesAsync(product.Price);
-            
-            // Ürünün fiyat bilgilerini güncelle
             product.UsdPrice = Math.Round(usdPrice, 2);
             product.EuroPrice = Math.Round(euroPrice, 2);
-            
+            product.RubPrice = Math.Round(product.Price * tryToRub, 2);
             Products.Add(new ProductWithImage
             {
                 Product = product,

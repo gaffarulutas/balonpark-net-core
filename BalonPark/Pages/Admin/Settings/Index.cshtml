@@ -313,7 +313,7 @@
             <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
             </svg>
-            Google Tag & Site Doğrulama
+            Google & Yandex Site Doğrulama
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -336,6 +336,13 @@
                 </label>
                 <input type="text" asp-for="Settings.GoogleSiteVerification" maxlength="@Settings.GoogleSiteVerificationMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Meta content değeri" />
                 <p class="text-xs text-gray-500 mt-1">Google Search Console doğrulama meta etiketindeki content değeri.</p>
+            </div>
+            <div>
+                <label asp-for="Settings.YandexSiteVerification" class="block text-sm font-medium text-gray-700 mb-2">
+                    Yandex Site Verification <span class="text-gray-500 font-normal">(max @Settings.YandexSiteVerificationMaxLength)</span>
+                </label>
+                <input type="text" asp-for="Settings.YandexSiteVerification" maxlength="@Settings.YandexSiteVerificationMaxLength" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent" placeholder="Meta content değeri" />
+                <p class="text-xs text-gray-500 mt-1">Yandex Webmaster doğrulama meta etiketindeki content değeri (&lt;meta name=&quot;yandex-verification&quot; content=&quot;...&quot;&gt;).</p>
             </div>
             <div>
                 <label asp-for="Settings.GoogleAnalyticsPropertyId" class="block text-sm font-medium text-gray-700 mb-2">

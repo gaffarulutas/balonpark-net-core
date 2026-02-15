@@ -87,7 +87,8 @@ public class SitemapController(
             new { Url = "/terms-of-use", Priority = "0.5", ChangeFreq = "yearly", LastMod = DateTime.Now },
             new { Url = "/search", Priority = "0.6", ChangeFreq = "weekly", LastMod = DateTime.Now },
             new { Url = "/sitemap", Priority = "0.6", ChangeFreq = "monthly", LastMod = DateTime.Now },
-            new { Url = "/compare", Priority = "0.7", ChangeFreq = "weekly", LastMod = DateTime.Now }
+            new { Url = "/compare", Priority = "0.7", ChangeFreq = "weekly", LastMod = DateTime.Now },
+            new { Url = "/feed/yandex-market.xml", Priority = "0.5", ChangeFreq = "daily", LastMod = DateTime.Now }
         };
 
         foreach (var page in staticPages)

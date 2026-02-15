@@ -27,6 +27,8 @@ public class Settings
     public const int GoogleTagMaxLength = 100;
     public const int GoogleTagManagerMaxLength = 50;
     public const int GoogleSiteVerificationMaxLength = 255;
+    /// <summary>Yandex Webmaster doğrulama meta content değeri (Admin ayarlardan güncellenir).</summary>
+    public const int YandexSiteVerificationMaxLength = 255;
     public const int GoogleShoppingMerchantIdMaxLength = 50;
     public const int GoogleShoppingServiceAccountEmailMaxLength = 255;
     /// <summary>GA4 Property ID (numeric, e.g. 432109876). Admin → Property Settings.</summary>
@@ -94,6 +96,8 @@ public class Settings
     public string? GoogleTagManager { get; set; }
     [StringLength(GoogleSiteVerificationMaxLength)]
     public string? GoogleSiteVerification { get; set; }
+    [StringLength(YandexSiteVerificationMaxLength)]
+    public string? YandexSiteVerification { get; set; }
 
     [StringLength(GoogleShoppingMerchantIdMaxLength)]
     public string? GoogleShoppingMerchantId { get; set; }

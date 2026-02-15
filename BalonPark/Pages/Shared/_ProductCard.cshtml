@@ -49,6 +49,7 @@
                 <p class="price-tl text-sm font-medium text-primary @(Model.SelectedCurrency == "TL" ? "block" : "hidden")">₺@product.Price.ToString("N0")</p>
                 <p class="price-usd text-sm font-medium text-primary @(Model.SelectedCurrency == "USD" ? "block" : "hidden")">$@product.UsdPrice.ToString("N0")</p>
                 <p class="price-eur text-sm font-medium text-primary @(Model.SelectedCurrency == "EUR" ? "block" : "hidden")">€@product.EuroPrice.ToString("N0")</p>
+                <p class="price-rub text-sm font-medium text-primary @(Model.SelectedCurrency == "RUB" ? "block" : "hidden")">₽@product.RubPrice.ToString("N0")</p>
             }
         </div>
     </div>

@@ -5,7 +5,10 @@ namespace BalonPark.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CurrencyController(CurrencyService currencyService, ICurrencyCookieService currencyCookieService) : ControllerBase
+public class CurrencyController(
+    CurrencyService currencyService,
+    ICurrencyCookieService currencyCookieService,
+    IYandexExchangeRateService yandexExchangeRateService) : ControllerBase
 {
 
     [HttpGet]
@@ -14,16 +17,29 @@ public class CurrencyController(CurrencyService currencyService, ICurrencyCookie
         try
         {
             var currencies = await currencyService.GetCurrenciesAsync();
-            
+            var list = currencies.Currencies.Select(c => new
+            {
+                code = c.Code,
+                name = c.Name,
+                rate = c.Rate,
+                lastUpdated = c.LastUpdated
+            }).ToList();
+
+            var tryToRub = await yandexExchangeRateService.GetTryToRubRateAsync();
+            if (tryToRub > 0)
+            {
+                list.Add(new
+                {
+                    code = "RUB",
+                    name = "Rus Rublesi",
+                    rate = 1m / tryToRub,
+                    lastUpdated = DateTime.Now
+                });
+            }
+
             var response = new
             {
-                currencies = currencies.Currencies.Select(c => new
-                {
-                    code = c.Code,
-                    name = c.Name,
-                    rate = c.Rate,
-                    lastUpdated = c.LastUpdated
-                }),
+                currencies = list,
                 lastUpdated = currencies.LastUpdated,
                 success = true
             };

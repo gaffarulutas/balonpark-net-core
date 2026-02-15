@@ -10,11 +10,15 @@ namespace BalonPark.Pages
     {
         private readonly ProductRepository _productRepository;
         private readonly ProductImageRepository _productImageRepository;
+        private readonly CurrencyService _currencyService;
+        private readonly IYandexExchangeRateService _yandexExchangeRateService;
 
-    public SearchModel(ProductRepository productRepository, ProductImageRepository productImageRepository, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, SettingsRepository settingsRepository, IUrlService urlService, ICurrencyCookieService currencyCookieService) : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
+        public SearchModel(ProductRepository productRepository, ProductImageRepository productImageRepository, CurrencyService currencyService, IYandexExchangeRateService yandexExchangeRateService, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, SettingsRepository settingsRepository, IUrlService urlService, ICurrencyCookieService currencyCookieService) : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
     {
         _productRepository = productRepository;
         _productImageRepository = productImageRepository;
+        _currencyService = currencyService;
+        _yandexExchangeRateService = yandexExchangeRateService;
     }
 
         [BindProperty(SupportsGet = true)]
@@ -33,12 +37,15 @@ namespace BalonPark.Pages
 
             if (!string.IsNullOrEmpty(Query) && Query.Length >= 2)
             {
-                var searchResults = await _productRepository.SearchAsync(Query, 10);
-                
+                var searchResults = (await _productRepository.SearchAsync(Query, 10)).ToList();
+                var tryToRub = await _yandexExchangeRateService.GetTryToRubRateAsync();
                 Products = new List<ProductWithImage>();
-                
                 foreach (var product in searchResults)
                 {
+                    var (usdPrice, euroPrice) = await _currencyService.CalculatePricesAsync(product.Price);
+                    product.UsdPrice = Math.Round(usdPrice, 2);
+                    product.EuroPrice = Math.Round(euroPrice, 2);
+                    product.RubPrice = Math.Round(product.Price * tryToRub, 2);
                     var mainImage = await _productImageRepository.GetMainImageAsync(product.Id);
                     Products = Products.Append(new ProductWithImage
                     {

@@ -14,6 +14,7 @@ public class ProductListModel : BasePage
     private readonly CategoryRepository _categoryRepository;
     private readonly SubCategoryRepository _subCategoryRepository;
     private readonly CurrencyService _currencyService;
+    private readonly IYandexExchangeRateService _yandexExchangeRateService;
 
     public List<ProductWithImage> Products { get; set; } = [];
     public List<Category> FilterCategories { get; set; } = [];
@@ -45,6 +46,7 @@ public class ProductListModel : BasePage
         ProductRepository productRepository,
         ProductImageRepository productImageRepository,
         CurrencyService currencyService,
+        IYandexExchangeRateService yandexExchangeRateService,
         IUrlService urlService,
         ICurrencyCookieService currencyCookieService)
         : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
@@ -54,6 +56,7 @@ public class ProductListModel : BasePage
         _categoryRepository = categoryRepository;
         _subCategoryRepository = subCategoryRepository;
         _currencyService = currencyService;
+        _yandexExchangeRateService = yandexExchangeRateService;
     }
 
     public string GetFilterQueryString(int? pageNumber = null)
@@ -118,12 +121,14 @@ public class ProductListModel : BasePage
             .Take(PageSize)
             .ToList();
 
+        var tryToRub = await _yandexExchangeRateService.GetTryToRubRateAsync();
         foreach (var product in paged)
         {
             var mainImage = await _productImageRepository.GetMainImageAsync(product.Id);
             var (usdPrice, euroPrice) = await _currencyService.CalculatePricesAsync(product.Price);
             product.UsdPrice = Math.Round(usdPrice, 2);
             product.EuroPrice = Math.Round(euroPrice, 2);
+            product.RubPrice = Math.Round(product.Price * tryToRub, 2);
             Products.Add(new ProductWithImage
             {
                 Product = product,

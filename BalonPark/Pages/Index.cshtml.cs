@@ -12,6 +12,7 @@ public class IndexModel(
     ProductRepository productRepository,
     ProductImageRepository productImageRepository,
     CurrencyService currencyService,
+    IYandexExchangeRateService yandexExchangeRateService,
     IUrlService urlService,
     ICurrencyCookieService currencyCookieService)
     : BasePage(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
@@ -47,17 +48,17 @@ public class IndexModel(
             .Take(PageSize)
             .ToList();
 
-        // Her ürün için ana resmi çek ve fiyatları hesapla
+        var tryToRub = await yandexExchangeRateService.GetTryToRubRateAsync();
         foreach (var product in pagedProducts)
         {
             var mainImage = await productImageRepository.GetMainImageAsync(product.Id);
             var (usdPrice, euroPrice) = await currencyService.CalculatePricesAsync(product.Price);
             product.UsdPrice = Math.Round(usdPrice, 2);
             product.EuroPrice = Math.Round(euroPrice, 2);
+            product.RubPrice = Math.Round(product.Price * tryToRub, 2);
             Products.Add(new ProductWithImage { Product = product, MainImage = mainImage });
         }
 
-        // En çok bakılan ürünler (ViewCount'a göre, max 16)
         var mostViewed = activeProducts
             .OrderByDescending(p => p.ViewCount)
             .Take(16)
@@ -68,6 +69,7 @@ public class IndexModel(
             var (usdPrice, euroPrice) = await currencyService.CalculatePricesAsync(product.Price);
             product.UsdPrice = Math.Round(usdPrice, 2);
             product.EuroPrice = Math.Round(euroPrice, 2);
+            product.RubPrice = Math.Round(product.Price * tryToRub, 2);
             MostViewedProducts.Add(new ProductWithImage { Product = product, MainImage = mainImage });
         }
     }

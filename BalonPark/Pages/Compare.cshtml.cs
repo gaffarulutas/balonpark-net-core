@@ -9,6 +9,7 @@ public class CompareModel : BasePage
     private readonly ProductRepository _productRepository;
     private readonly ProductImageRepository _productImageRepository;
     private readonly CurrencyService _currencyService;
+    private readonly IYandexExchangeRateService _yandexExchangeRateService;
 
     public CompareModel(
         CategoryRepository categoryRepository,
@@ -18,12 +19,14 @@ public class CompareModel : BasePage
         ICurrencyCookieService currencyCookieService,
         ProductRepository productRepository,
         ProductImageRepository productImageRepository,
-        CurrencyService currencyService)
+        CurrencyService currencyService,
+        IYandexExchangeRateService yandexExchangeRateService)
         : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
     {
         _productRepository = productRepository;
         _productImageRepository = productImageRepository;
         _currencyService = currencyService;
+        _yandexExchangeRateService = yandexExchangeRateService;
     }
 
     public List<ProductWithImage> Products { get; set; } = new();
@@ -46,12 +49,14 @@ public class CompareModel : BasePage
 
         var productIds = productsBySlug.Select(p => p.Id).ToList();
         var mainImages = await _productImageRepository.GetMainImagesByProductIdsAsync(productIds);
+        var tryToRub = await _yandexExchangeRateService.GetTryToRubRateAsync();
 
         foreach (var product in productsBySlug)
         {
             var (usdPrice, euroPrice) = await _currencyService.CalculatePricesAsync(product.Price);
             product.UsdPrice = Math.Round(usdPrice, 2);
             product.EuroPrice = Math.Round(euroPrice, 2);
+            product.RubPrice = Math.Round(product.Price * tryToRub, 2);
             mainImages.TryGetValue(product.Id, out var mainImage);
             Products.Add(new ProductWithImage { Product = product, MainImage = mainImage });
         }

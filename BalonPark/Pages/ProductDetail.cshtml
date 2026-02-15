@@ -185,6 +185,7 @@
                         <span class="price-main price-tl text-primary text-2xl font-semibold @(selectedCurrency == "TL" ? "block" : "hidden")">₺@Model.Product?.Price.ToString("N0")</span>
                         <span class="price-main price-usd text-primary text-2xl font-semibold @(selectedCurrency == "USD" ? "block" : "hidden")">$@Model.Product?.UsdPrice.ToString("N0")</span>
                         <span class="price-main price-eur text-primary text-2xl font-semibold @(selectedCurrency == "EUR" ? "block" : "hidden")">€@Model.Product?.EuroPrice.ToString("N0")</span>
+                        <span class="price-main price-rub text-primary text-2xl font-semibold @(selectedCurrency == "RUB" ? "block" : "hidden")">₽@Model.Product?.RubPrice.ToString("N0")</span>
                         @if (Model.Product?.IsDiscounted == true)
                         {
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">İndirimli</span>
@@ -457,6 +458,7 @@
                                 <p class="mt-1 price-tl text-sm font-semibold text-primary @(selectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N0")</p>
                                 <p class="mt-1 price-usd text-sm font-semibold text-primary @(selectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N0")</p>
                                 <p class="mt-1 price-eur text-sm font-semibold text-primary @(selectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N0")</p>
+                                <p class="mt-1 price-rub text-sm font-semibold text-primary @(selectedCurrency == "RUB" ? "block" : "hidden")">₽@item.Product.RubPrice.ToString("N0")</p>
                             </div>
                         </article>
                     }

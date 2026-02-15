@@ -105,6 +105,7 @@ public class SettingsRepository(DapperContext context, ICacheService cacheServic
                 GoogleTag = @GoogleTag,
                 GoogleTagManager = @GoogleTagManager,
                 GoogleSiteVerification = @GoogleSiteVerification,
+                YandexSiteVerification = @YandexSiteVerification,
                 GoogleShoppingMerchantId = @GoogleShoppingMerchantId,
                 GoogleShoppingServiceAccountEmail = @GoogleShoppingServiceAccountEmail,
                 GoogleShoppingServiceAccountKeyJson = @GoogleShoppingServiceAccountKeyJson,
@@ -131,13 +132,13 @@ public class SettingsRepository(DapperContext context, ICacheService cacheServic
             (UserName, Password, CompanyName, About, Logo, Email, PhoneNumber, PhoneNumber2, 
              Fax, WhatsApp, Address, City, District, PostalCode, Country, 
              Facebook, Instagram, Twitter, LinkedIn, YouTube, WorkingHours, 
-             MetaTitle, MetaDescription, MetaKeywords, GoogleTag, GoogleTagManager, GoogleSiteVerification, 
+             MetaTitle, MetaDescription, MetaKeywords, GoogleTag, GoogleTagManager, GoogleSiteVerification, YandexSiteVerification, 
              GoogleShoppingMerchantId, GoogleShoppingServiceAccountEmail, GoogleShoppingServiceAccountKeyJson, GoogleAnalyticsPropertyId, CreatedAt)
             VALUES 
             (@UserName, @Password, @CompanyName, @About, @Logo, @Email, @PhoneNumber, @PhoneNumber2, 
              @Fax, @WhatsApp, @Address, @City, @District, @PostalCode, @Country, 
              @Facebook, @Instagram, @Twitter, @LinkedIn, @YouTube, @WorkingHours, 
-             @MetaTitle, @MetaDescription, @MetaKeywords, @GoogleTag, @GoogleTagManager, @GoogleSiteVerification, 
+             @MetaTitle, @MetaDescription, @MetaKeywords, @GoogleTag, @GoogleTagManager, @GoogleSiteVerification, @YandexSiteVerification, 
              @GoogleShoppingMerchantId, @GoogleShoppingServiceAccountEmail, @GoogleShoppingServiceAccountKeyJson, @GoogleAnalyticsPropertyId, @CreatedAt);
             SELECT CAST(SCOPE_IDENTITY() as int)";
         
