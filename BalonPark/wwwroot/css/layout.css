@@ -686,8 +686,11 @@ body {
 .translate-dropdown__trigger {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.375rem;
-    padding: 0.5rem 0.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 0.75rem;
     background: transparent;
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
@@ -697,6 +700,12 @@ body {
     color: inherit;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
+}
+
+.translate-dropdown__trigger-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
 }
 
 .translate-dropdown__trigger:hover {
@@ -732,6 +741,40 @@ body {
 
 .translate-dropdown.translate-dropdown--open .translate-dropdown__chevron {
     transform: rotate(180deg);
+}
+
+/* Loading state */
+.translate-dropdown__loading {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.translate-dropdown--loading .translate-dropdown__trigger-content {
+    display: none;
+}
+
+.translate-dropdown--loading .translate-dropdown__loading {
+    display: inline-flex;
+}
+
+.translate-dropdown--loading .translate-dropdown__trigger {
+    cursor: wait;
+}
+
+.translate-dropdown__spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #e2e8f0;
+    border-top-color: #00A8E8;
+    border-radius: 50%;
+    animation: translate-dropdown-spin 0.8s linear infinite;
+}
+
+@keyframes translate-dropdown-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Panel - varsayılan gizli (HTML5 hidden attribute + CSS fallback) */
@@ -796,7 +839,9 @@ body {
         display: none;
     }
     .translate-dropdown__trigger {
-        padding: 0.5rem;
+        min-width: 40px;
+        min-height: 40px;
+        padding: 0 0.5rem;
     }
     .translate-dropdown__panel {
         min-width: 200px;

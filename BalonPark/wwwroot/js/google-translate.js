@@ -98,6 +98,30 @@
         { code: 'zu', name: 'isiZulu' }
     ];
 
+    /** Tarayıcı dil kodunu desteklenen dile eşle (en-US -> en, zh-CN -> zh-CN vb.) */
+    function mapBrowserLangToSupported(browserLang) {
+        if (!browserLang || typeof browserLang !== 'string') return null;
+        var code = browserLang.split('-')[0].toLowerCase();
+        var full = browserLang.split('-').map(function (p, i) { return i === 0 ? p.toLowerCase() : p; }).join('-');
+        for (var i = 0; i < LANGUAGES.length; i++) {
+            var lang = LANGUAGES[i];
+            if (!lang.code) continue;
+            if (lang.code.toLowerCase() === full) return lang.code;
+            if (lang.code.toLowerCase() === code) return lang.code;
+        }
+        return null;
+    }
+
+    function getBrowserLanguage() {
+        if (typeof navigator === 'undefined') return null;
+        var langs = navigator.languages && navigator.languages.length ? navigator.languages : (navigator.language ? [navigator.language] : []);
+        for (var i = 0; i < langs.length; i++) {
+            var mapped = mapBrowserLangToSupported(langs[i]);
+            if (mapped) return mapped;
+        }
+        return null;
+    }
+
     function getStoredLang() {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
@@ -145,9 +169,12 @@
         btn.type = 'button';
         btn.className = 'translate-dropdown__trigger';
         btn.setAttribute('aria-label', 'Dil seçin');
-        btn.innerHTML = '<i data-lucide="languages" class="translate-dropdown__icon" aria-hidden="true"></i>' +
+        btn.innerHTML = '<span class="translate-dropdown__trigger-content">' +
+            '<i data-lucide="languages" class="translate-dropdown__icon" aria-hidden="true"></i>' +
             '<span class="translate-dropdown__label">' + escapeHtml(getCurrentDisplayLabel()) + '</span>' +
-            '<i data-lucide="chevron-down" class="translate-dropdown__chevron" aria-hidden="true"></i>';
+            '<i data-lucide="chevron-down" class="translate-dropdown__chevron" aria-hidden="true"></i>' +
+            '</span><span class="translate-dropdown__loading" aria-hidden="true">' +
+            '<span class="translate-dropdown__spinner"></span>Çeviriliyor...</span>';
 
         var panel = document.createElement('div');
         panel.className = 'translate-dropdown__panel';
@@ -169,7 +196,7 @@
             a.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                selectLanguage(lang.code);
+                selectLanguage(lang.code, wrapper);
                 closeDropdown();
             });
             li.appendChild(a);
@@ -215,21 +242,24 @@
         return wrapper;
     }
 
-    function selectLanguage(targetLang) {
-        setTranslateCookie(targetLang || '');
-
-        if (window.google && window.google.translate) {
-            var select = document.querySelector('.goog-te-combo');
-            if (select) {
-                var code = targetLang || SOURCE_LANG;
-                select.value = code;
-                select.dispatchEvent(new Event('change'));
-            } else {
-                location.reload();
-            }
-        } else {
-            location.reload();
+    function selectLanguage(targetLang, wrapper) {
+        var currentLang = getStoredLang();
+        var newLang = targetLang || '';
+        /* Aynı dil seçildiyse sadece kapat */
+        if ((!newLang && !currentLang) || (newLang && newLang === currentLang)) {
+            return;
         }
+        /* Loading state */
+        var dropdown = wrapper || document.querySelector('.translate-dropdown');
+        if (dropdown) {
+            dropdown.classList.add('translate-dropdown--loading');
+            dropdown.querySelector('.translate-dropdown__trigger').setAttribute('disabled', '');
+            var panel = dropdown.querySelector('.translate-dropdown__panel');
+            if (panel) panel.setAttribute('hidden', '');
+        }
+        setTranslateCookie(newLang);
+        /* Dil değiştiğinde her zaman sayfa yenile - Google Translate cookie ile çevirir */
+        location.reload();
     }
 
     function escapeHtml(s) {
@@ -280,6 +310,16 @@
         if (!translateContainer) return;
 
         initGoogleTranslateElement();
+        /* Kullanıcı dil tercihi yoksa tarayıcı diline göre otomatik çeviri */
+        if (!getStoredLang()) {
+            var browserLang = getBrowserLanguage();
+            if (browserLang && browserLang !== SOURCE_LANG) {
+                setTranslateCookie(browserLang);
+                injectGoogleScript();
+                location.reload();
+                return;
+            }
+        }
         injectGoogleScript();
         mountDropdown();
 
