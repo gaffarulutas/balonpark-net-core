@@ -250,21 +250,26 @@
 
 <div class="main-wrapper layout-app">
 
-    <!-- Sidebar sol, sabit; header sağda sabit; orta alan scroll -->
+    <!-- Sidebar: desktop sol sabit, mobil bottom sheet modal -->
     <aside id="layout-sidebar" class="layout-sidebar" aria-label="Kategori menüsü">
         <div class="layout-sidebar-inner">
+            <div class="layout-sidebar-handle" aria-hidden="true"></div>
             <a asp-page="/Index" class="layout-sidebar-logo" aria-label="@Html.Raw(companyName) - Ana Sayfa">
                 <img src="@logoUrl" alt="@Html.Raw(companyName)" width="160" height="48" loading="eager" class="layout-sidebar-logo__img">
             </a>
+            <nav class="layout-sidebar-pages" aria-label="Sayfa menüsü">
+                <a asp-page="/Index" class="layout-sidebar-page-link">Ana Sayfa</a>
+                <a asp-page="/ProductList" class="layout-sidebar-page-link">Ürünler</a>
+                <a asp-page="/Hakkimizda" class="layout-sidebar-page-link">Hakkımızda</a>
+                <a asp-page="/Blog" class="layout-sidebar-page-link">Blog</a>
+                <a asp-page="/Iletisim" class="layout-sidebar-page-link">İletişim</a>
+            </nav>
             <div class="layout-sidebar-header">
                 <h2 class="layout-sidebar-title">
                     <span class="layout-sidebar-title-accent" aria-hidden="true"></span>
                     <span class="layout-sidebar-title-icon" aria-hidden="true"><i data-lucide="layers" class="w-5 h-5"></i></span>
                     <span class="layout-sidebar-title-text">Kategoriler</span>
                 </h2>
-                <button type="button" id="layout-sidebar-close" class="layout-sidebar-close" aria-label="Menüyü kapat">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
             </div>
             <div class="layout-sidebar-scroll">
                 <nav class="category-tree" role="navigation" aria-label="Ürün kategorileri">
