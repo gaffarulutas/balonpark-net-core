@@ -55,7 +55,7 @@
     <meta name="geo.region" content="TR">
     <meta name="geo.country" content="Turkey">
     <meta name="geo.placename" content="Türkiye">
-    <meta name="theme-color" content="#fbfbfb">
+    <meta name="theme-color" content="#fbfbfb" id="theme-color-meta">
     <meta name="msapplication-TileColor" content="#fbfbfb">
     <meta name="msapplication-TileImage" content="@(siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png"))" />
     
@@ -213,8 +213,23 @@
     }
     <title>@Html.Raw(titleForTag)</title>
 
+    <!-- FOUC önleme: tema ilk paint öncesi uygulanır (admin hariç) -->
+    <script>
+        (function(){
+            var k='balonpark-theme',v;
+            try{v=localStorage.getItem(k);}catch(e){v=null;}
+            var dark=(v==='dark')||(v!=='light'&&typeof matchMedia!=='undefined'&&matchMedia('(prefers-color-scheme: dark)').matches);
+            if(dark){
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme','dark');
+                var m=document.querySelector('meta[name="theme-color"]');
+                if(m)m.setAttribute('content','#0f172a');
+            }
+        })();
+    </script>
     <!-- Tailwind CSS (built; run "npm run build:css" in BalonPark to rebuild) -->
     <link href="~/css/tailwind.css" rel="stylesheet">
+    <link href="~/css/dark-mode.css" rel="stylesheet">
     <link href="~/css/favorites-compare.css" rel="stylesheet">
     <link href="~/css/layout.css" rel="stylesheet">
     <!-- Swiper (carousel) - required for ProductDetail gallery and category slider -->
@@ -414,6 +429,11 @@
                 }
 
                 <div class="site-header__actions">
+                    <!-- Dark mode toggle (admin hariç, sadece public layout) -->
+                    <button type="button" id="dark-mode-toggle" class="site-header__action dark-mode-toggle" aria-label="Karanlık moda geç" title="Karanlık mod">
+                        <span class="dark-mode-icon-sun hidden" aria-hidden="true"><i data-lucide="sun" class="site-header__action-icon w-5 h-5"></i></span>
+                        <span class="dark-mode-icon-moon" aria-hidden="true"><i data-lucide="moon" class="site-header__action-icon w-5 h-5"></i></span>
+                    </button>
                     <!-- Google Translate dil seçici (sadece public sayfalarda) -->
                     <div id="google-translate-element" class="sr-only" aria-hidden="true"></div>
                     <a href="#" id="header-favorites-btn" class="site-header__action hidden md:inline-flex" aria-label="Favorilerim" title="Favoriler">
@@ -450,7 +470,7 @@
         }
     }
 
-            <footer class="bg-white border-t border-gray-200 mt-auto">
+            <footer class="layout-footer bg-white border-t border-gray-200 mt-auto">
                 <div class="w-full px-3 sm:px-4 lg:px-6 py-6">
                     <div class="flex flex-wrap items-center justify-between gap-4">
                 <p class="text-sm text-gray-600">© @DateTime.Now.Year @Html.Raw(companyName). Tüm hakları saklıdır.</p>
@@ -516,6 +536,7 @@
 
     <!-- Favorites & Compare: load first so showFavorites/showCompare are defined -->
     <script src="~/js/favorites-compare.js"></script>
+    <script src="~/js/dark-mode.js" asp-append-version="true"></script>
     <script src="~/js/google-translate.js" asp-append-version="true" defer></script>
     <script src="~/js/currency-dropdown.js" asp-append-version="true" defer></script>
     <script src="~/js/site.js" defer></script>

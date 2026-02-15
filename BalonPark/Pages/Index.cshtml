@@ -52,7 +52,7 @@
                 <img src="~/assets/images/left_image.jpg" alt="Balon Park - İç Mekan Şişme Oyun Parkı" class="absolute inset-0 w-full h-full object-cover" loading="eager" width="280" height="400">
                 <div class="hero-left-overlay">
                     <span class="text-primary font-medium text-sm sm:text-base">İç Mekan Oyun Parkı</span>
-                    <h2 class="text-white text-xl sm:text-2xl font-bold mt-1 leading-tight">Hareket, Oyun, Güven</h2>
+                    <p class="hero-overlay-headline text-white text-xl sm:text-2xl font-bold mt-1 leading-tight">Hareket, Oyun, Güven</p>
                     <p class="text-white/90 text-sm mt-2 line-clamp-1 hidden sm:block">Doğum günü ve etkinlikler için ideal.</p>
                     <a href="/category/siseme-parklar/sisme-oyun-parki" class="hero-left-overlay-link inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
                         Keşfet <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -73,7 +73,7 @@
                                 <div class="hero-slide-inner hero-slide-video-inner">
                                     <video class="hero-slide-video-el"
                                         poster="@heroSlider1Url"
-                                        preload="auto"
+                                        preload="metadata"
                                         muted
                                         autoplay
                                         playsinline
@@ -88,7 +88,7 @@
                                     <img src="@heroSlider1Url" class="hero-slide-img" alt="Şişme Oyun Parkları - Balon Park" loading="eager" fetchpriority="high" width="800" height="400">
                                     <div class="hero-slide-overlay">
                                         <span class="text-primary font-medium text-sm sm:text-base">Şişme Oyun Parkları</span>
-                                        <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">Eğlence ve Güven Bir Arada</h2>
+                                        <p class="hero-overlay-headline text-white text-2xl sm:text-3xl font-bold mt-1">Eğlence ve Güven Bir Arada</p>
                                         <p class="text-white/90 text-sm mt-2 max-w-md hidden sm:block">Çocuklarınız için özenle üretilmiş şişme kaydıraklar, havuzlar ve oyun grupları. Evinize veya işletmenize renk katın.</p>
                                         <a href="/category/siseme-parklar/sisme-kaydirak" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
                                             Ürünleri Keşfet <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -101,7 +101,7 @@
                                     <img src="~/assets/images/slider/2.jpeg" class="hero-slide-img" alt="Kaliteli Güvenli - Balon Park" loading="lazy" width="800" height="400">
                                     <div class="hero-slide-overlay">
                                         <span class="text-primary font-medium text-sm sm:text-base">Kaliteli Üretim</span>
-                                        <h2 class="text-white text-2xl sm:text-3xl font-bold mt-1">Dayanıklı, Güvenli, Eğlenceli</h2>
+                                        <p class="hero-overlay-headline text-white text-2xl sm:text-3xl font-bold mt-1">Dayanıklı, Güvenli, Eğlenceli</p>
                                         <p class="text-white/90 text-sm mt-2 max-w-md hidden sm:block">CE belgeli malzemeler ve canlı renklerle uzun ömürlü ürünler. Doğru şişme parkı için kategorilerimize göz atın.</p>
                                         <a href="/category/siseme-parklar/sisme-oyun-parki" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition w-fit">
                                             Kategorilere Göz At <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -114,6 +114,7 @@
                             <button type="button" class="swiper-button-prev hero-swiper-prev" aria-label="Önceki slide"></button>
                             <button type="button" class="swiper-button-next hero-swiper-next" aria-label="Sonraki slide"></button>
                         </div>
+                        <div class="hero-swiper-pagination swiper-pagination" aria-label="Banner sayfa numarası"></div>
                     </div>
                     </div>
                 </div>
@@ -392,12 +393,35 @@
         margin: 0;
         font-size: 1.25rem;
         font-weight: 600;
-        color: #111827;
+        color: var(--section-title-color, #111827);
     }
     .section-subtitle {
         margin: 0.25rem 0 0 0;
         font-size: 0.8125rem;
-        color: #9ca3af;
+        color: var(--section-subtitle-color, #9ca3af);
+    }
+    .hero-overlay-headline { margin: 0; }
+    /* Hero pagination: bullet style, alt köşe */
+    .hero-swiper-pagination {
+        position: absolute !important;
+        bottom: 1rem !important;
+        left: 1.5rem !important;
+        right: auto !important;
+        width: auto !important;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 10;
+    }
+    .hero-swiper-pagination .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        background: rgba(255,255,255,0.6);
+        opacity: 1;
+        margin: 0 !important;
+    }
+    .hero-swiper-pagination .swiper-pagination-bullet-active {
+        background: #fff;
+        transform: scale(1.2);
     }
     .section-link {
         font-size: 0.875rem;
@@ -474,15 +498,19 @@
             if (!heroEl || heroEl.swiper) return;
             var nextEl = heroEl.querySelector('.hero-swiper-next');
             var prevEl = heroEl.querySelector('.hero-swiper-prev');
+            var wrap = heroEl.parentElement;
+            var paginationEl = wrap ? wrap.querySelector('.hero-swiper-pagination') : null;
+            var prefersReducedMotion = typeof window.matchMedia !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             var opts = {
                 loop: false,
                 initialSlide: 0,
-                speed: 500,
-                autoplay: { delay: 5000, disableOnInteraction: false },
+                speed: prefersReducedMotion ? 0 : 500,
+                autoplay: prefersReducedMotion ? false : { delay: 5000, disableOnInteraction: false },
                 grabCursor: true,
                 keyboard: { enabled: true },
                 observer: true,
                 observeParents: true,
+                pagination: paginationEl ? { el: paginationEl, clickable: true } : false,
                 a11y: { prevSlideMessage: 'Önceki', nextSlideMessage: 'Sonraki' },
                 on: {
                     init: function(swiper) {
@@ -547,13 +575,14 @@
             var nextEl = section ? section.querySelector('.most-viewed-next') : document.querySelector('.most-viewed-next');
             var prevEl = section ? section.querySelector('.most-viewed-prev') : document.querySelector('.most-viewed-prev');
             var slideCount = el.querySelectorAll('.swiper-slide').length;
+            var prefersReducedMotion = typeof window.matchMedia !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             var opts = {
                 slidesPerView: 2,
                 spaceBetween: 16,
-                speed: 400,
+                speed: prefersReducedMotion ? 0 : 400,
                 grabCursor: true,
                 watchSlidesProgress: true,
-                autoplay: slideCount > 1 ? { delay: 4500, disableOnInteraction: false } : false,
+                autoplay: (!prefersReducedMotion && slideCount > 1) ? { delay: 4500, disableOnInteraction: false } : false,
                 navigation: (nextEl && prevEl) ? { nextEl: nextEl, prevEl: prevEl } : false,
                 observer: true,
                 observeParents: true,

@@ -1,0 +1,626 @@
+/**
+ * Dark Mode – Public site only (admin hariç)
+ * Best practices: CSS variables, prefers-color-scheme fallback, localStorage persistence
+ * FOUC önleme: head'de inline script ile .dark class erken uygulanır
+ */
+
+/* ========== Root theme variables (light default) ========== */
+:root {
+  --dm-bg: #ffffff;
+  --dm-bg-secondary: #fbfbfb;
+  --dm-bg-tertiary: #f8fafc;
+  --dm-text: #222222;
+  --dm-text-muted: #6b7280;
+  --dm-text-secondary: #64748b;
+  --dm-border: #e2e8f0;
+  --dm-border-soft: #f1f5f9;
+  --dm-surface: #ffffff;
+  --dm-surface-hover: #f1f5f9;
+  --dm-input-bg: #ffffff;
+  --dm-input-border: #e2e8f0;
+  --dm-input-text: #111827;
+  --dm-placeholder: #9ca3af;
+  --dm-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --dm-shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  --dm-card-bg: #ffffff;
+  --dm-overlay: rgba(0, 0, 0, 0.4);
+}
+
+/* ========== Dark theme variables ========== */
+html.dark {
+  --dm-bg: #0f172a;
+  --dm-bg-secondary: #1e293b;
+  --dm-bg-tertiary: #334155;
+  --dm-text: #f1f5f9;
+  --dm-text-muted: #94a3b8;
+  --dm-text-secondary: #cbd5e1;
+  --dm-border: #334155;
+  --dm-border-soft: #475569;
+  --dm-surface: #1e293b;
+  --dm-surface-hover: #334155;
+  --dm-input-bg: #1e293b;
+  --dm-input-border: #475569;
+  --dm-input-text: #f1f5f9;
+  --dm-placeholder: #64748b;
+  --dm-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --dm-shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  --dm-card-bg: #1e293b;
+  --dm-overlay: rgba(0, 0, 0, 0.6);
+}
+
+/* ========== Base & body ========== */
+html.dark body {
+  background-color: var(--dm-bg);
+  color: var(--dm-text);
+}
+
+/* Tailwind text-ink override in dark */
+html.dark .text-ink,
+html.dark [class*="text-ink"] {
+  color: var(--dm-text) !important;
+}
+
+/* ========== Layout main content area ========== */
+html.dark .layout-main {
+  background-color: var(--dm-bg);
+}
+
+/* ========== Footer ========== */
+html.dark .layout-footer,
+html.dark footer.border-t {
+  background-color: var(--dm-bg-secondary) !important;
+  border-color: var(--dm-border) !important;
+}
+
+html.dark footer .text-gray-600,
+html.dark footer .text-sm.text-gray-600 {
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark footer a.text-gray-600 {
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark footer a:hover {
+  color: #00a8e8 !important;
+}
+
+html.dark footer .text-gray-500 {
+  color: var(--dm-text-secondary) !important;
+}
+
+/* ========== Product card ========== */
+html.dark .product-card {
+  background-color: var(--dm-card-bg) !important;
+  border-color: var(--dm-border);
+}
+
+html.dark .product-card .border-t,
+html.dark .product-card .border-gray-100 {
+  border-color: var(--dm-border) !important;
+}
+
+html.dark .product-card .bg-gray-50 {
+  background-color: var(--dm-bg-tertiary) !important;
+}
+
+html.dark .product-card .text-gray-400,
+html.dark .product-card .text-gray-500 {
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .product-card .favorite-btn,
+html.dark .product-card .compare-btn {
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  color: var(--dm-text-secondary) !important;
+}
+
+html.dark .product-card .favorite-btn:hover,
+html.dark .product-card .compare-btn:hover {
+  color: #00a8e8 !important;
+}
+
+/* ========== Hero / Index panels ========== */
+html.dark .hero-left-panel,
+html.dark .hero-panel,
+html.dark .bg-gray-100.border-gray-200 {
+  background-color: var(--dm-bg-secondary) !important;
+  border-color: var(--dm-border) !important;
+}
+
+/* ========== Category intro, section header ========== */
+html.dark .category-intro,
+html.dark .category-section-header {
+  background: rgba(0, 168, 232, 0.08);
+  border-color: rgba(0, 168, 232, 0.2);
+}
+
+html.dark .category-intro__title,
+html.dark .category-section-header__title {
+  color: var(--dm-text);
+}
+
+html.dark .category-intro__desc,
+html.dark .category-section-header__desc,
+html.dark .category-intro__meta,
+html.dark .category-section-header__meta {
+  color: var(--dm-text-muted);
+}
+
+/* ========== Breadcrumb ========== */
+html.dark .breadcrumb-list {
+  background: var(--dm-bg-secondary);
+  border-color: rgba(0, 168, 232, 0.2);
+  color: var(--dm-text-muted);
+}
+
+html.dark .breadcrumb-current {
+  color: var(--dm-text);
+}
+
+html.dark .breadcrumb-link:hover {
+  color: #00a8e8;
+}
+
+/* ========== Pagination ========== */
+html.dark .pagination .page-link,
+html.dark .pagination-container .page-link {
+  background-color: var(--dm-surface);
+  border-color: var(--dm-border);
+  color: var(--dm-text-muted);
+}
+
+html.dark .pagination .page-link:hover:not(.active),
+html.dark .pagination-container .page-link:hover:not(.active) {
+  background-color: var(--dm-surface-hover);
+  border-color: var(--dm-border-soft);
+  color: var(--dm-text);
+}
+
+html.dark .pagination .page-link.active,
+html.dark .pagination-container .page-item.active .page-link {
+  background-color: #00a8e8 !important;
+  border-color: #00a8e8 !important;
+  color: #fff !important;
+}
+
+/* ========== Common Tailwind overrides for dark ========== */
+html.dark .bg-white {
+  background-color: var(--dm-surface) !important;
+}
+
+html.dark .bg-gray-50 {
+  background-color: var(--dm-bg-secondary) !important;
+}
+
+html.dark .bg-gray-100 {
+  background-color: var(--dm-bg-tertiary) !important;
+}
+
+html.dark .text-gray-600 {
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .text-gray-700,
+html.dark .text-gray-800,
+html.dark .text-gray-900 {
+  color: var(--dm-text) !important;
+}
+
+html.dark .text-gray-500 {
+  color: var(--dm-text-secondary) !important;
+}
+
+html.dark .border-gray-200,
+html.dark .border-gray-100 {
+  border-color: var(--dm-border) !important;
+}
+
+/* ========== Header dark overrides ========== */
+html.dark .site-header {
+  --header-bg: #1e293b;
+  --header-border: #334155;
+  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --header-shadow-scrolled: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --header-nav-hover: rgba(51, 65, 85, 0.8);
+}
+
+html.dark .site-header__menu-btn {
+  background: var(--dm-bg-tertiary);
+  color: var(--dm-text);
+}
+
+html.dark .site-header__menu-btn:hover {
+  background: var(--dm-surface-hover);
+}
+
+html.dark .site-header__nav-link {
+  color: var(--dm-text-muted);
+}
+
+html.dark .site-header__nav-link:hover {
+  color: #00a8e8;
+  background-color: var(--dm-surface-hover);
+}
+
+html.dark .site-header__search-input {
+  background: var(--dm-input-bg);
+  border-color: var(--dm-border);
+  color: var(--dm-input-text);
+}
+
+html.dark .site-header__search-input::placeholder {
+  color: var(--dm-placeholder);
+}
+
+html.dark .site-header__search-input:focus {
+  border-color: #00a8e8;
+}
+
+html.dark .site-header__search-btn {
+  color: var(--dm-text-muted);
+}
+
+html.dark .site-header__search-btn:hover {
+  color: #00a8e8;
+}
+
+html.dark .site-header__action {
+  border-color: var(--dm-border);
+  color: var(--dm-text-muted);
+}
+
+html.dark .site-header__action:hover {
+  border-color: var(--dm-border-soft);
+  color: #00a8e8;
+}
+
+html.dark .site-header__actions .currency-btn {
+  background: var(--dm-surface);
+  color: var(--dm-text-muted);
+}
+
+html.dark .site-header__actions .currency-btn.site-header__action--active,
+html.dark .site-header__action--active {
+  background: #00a8e8;
+  border-color: #00a8e8;
+  color: #fff;
+}
+
+html.dark .site-header__search-dropdown {
+  background: var(--dm-surface);
+  border-color: var(--dm-border);
+}
+
+html.dark .site-header__search-dropdown-title {
+  color: var(--dm-text-muted);
+}
+
+html.dark .site-header__search-dropdown-loading,
+html.dark .site-header__search-dropdown-empty {
+  color: var(--dm-text-muted);
+}
+
+html.dark #header-search-dropdown a,
+html.dark #header-search-dropdown .site-header__search-dropdown-list li {
+  color: var(--dm-text);
+}
+
+html.dark #header-search-dropdown a:hover {
+  background: var(--dm-surface-hover);
+  color: #00a8e8;
+}
+
+/* ========== Sidebar dark overrides ========== */
+html.dark .layout-sidebar {
+  background: var(--dm-bg-secondary);
+  border-color: var(--dm-border);
+}
+
+html.dark .layout-sidebar-logo {
+  background: var(--dm-bg-secondary);
+  border-color: var(--dm-border);
+}
+
+html.dark .layout-sidebar-header {
+  --sidebar-head-bg: rgba(0, 168, 232, 0.12);
+  border-color: var(--dm-border);
+}
+
+html.dark .layout-sidebar-title {
+  color: var(--dm-text);
+}
+
+html.dark .layout-sidebar-page-link {
+  color: var(--dm-text-muted);
+  border-color: var(--dm-border);
+}
+
+html.dark .layout-sidebar-page-link:hover {
+  color: #00a8e8;
+}
+
+html.dark .layout-sidebar-pages {
+  border-color: var(--dm-border);
+}
+
+html.dark .category-tree {
+  --cat-text: #f1f5f9;
+  --cat-text-secondary: #94a3b8;
+  --cat-border: #334155;
+  --cat-bg-hover: #334155;
+  --cat-icon-bg: #334155;
+}
+
+html.dark .layout-sidebar-handle::before {
+  background: var(--dm-text-muted);
+}
+
+html.dark .sidebar-certificates-box {
+  --cert-text: #f1f5f9;
+  --cert-text-muted: #94a3b8;
+  background: rgba(0, 168, 232, 0.12);
+  border-color: rgba(0, 168, 232, 0.25);
+}
+
+html.dark .layout-sidebar-overlay {
+  background: var(--dm-overlay);
+}
+
+/* ========== Translate & Currency dropdowns ========== */
+html.dark .translate-dropdown__trigger,
+html.dark .currency-dropdown__trigger {
+  border-color: var(--dm-border);
+  color: var(--dm-text);
+}
+
+html.dark .translate-dropdown__trigger:hover,
+html.dark .currency-dropdown__trigger:hover {
+  background: var(--dm-surface-hover);
+  border-color: var(--dm-border-soft);
+}
+
+html.dark .translate-dropdown__panel,
+html.dark .currency-dropdown__panel {
+  background: var(--dm-surface);
+  border-color: var(--dm-border);
+}
+
+html.dark .translate-dropdown__item:hover,
+html.dark .currency-dropdown__item:hover {
+  background: var(--dm-surface-hover);
+}
+
+html.dark .translate-dropdown__item--active,
+html.dark .currency-dropdown__item--active {
+  background: rgba(0, 168, 232, 0.2);
+  color: #00a8e8;
+}
+
+/* ========== Modal (favorites, compare, generic) ========== */
+html.dark .modal-panel,
+html.dark .modal-panel-enter,
+html.dark .favorites-modal-panel,
+html.dark .compare-modal-content,
+html.dark .favorites-modal-content {
+  background-color: var(--dm-surface) !important;
+}
+
+html.dark .modal-header h3,
+html.dark .modal-header {
+  color: var(--dm-text);
+}
+
+html.dark .modal-close-btn {
+  color: var(--dm-text-muted);
+}
+
+html.dark .modal-close-btn:hover {
+  background: var(--dm-surface-hover);
+  color: var(--dm-text);
+}
+
+html.dark .modal-content-body {
+  color: var(--dm-text);
+}
+
+html.dark .favorites-modal-content .product-card,
+html.dark .compare-modal-content .product-card {
+  background-color: var(--dm-card-bg) !important;
+}
+
+/* ========== Product detail swiper (galeri + thumbnails) ========== */
+html.dark .product-detail-gallery {
+  background: var(--dm-bg-secondary);
+  border-color: var(--dm-border);
+}
+
+html.dark .product-detail-gallery .product-gallery-main-wrap {
+  background: var(--dm-surface);
+}
+
+html.dark .product-detail-gallery .product-gallery-link {
+  background: var(--dm-surface);
+}
+
+html.dark .product-detail-gallery .product-gallery-next,
+html.dark .product-detail-gallery .product-gallery-prev {
+  background: rgba(30, 41, 59, 0.95);
+  color: var(--dm-text);
+}
+
+html.dark .product-detail-gallery .product-gallery-next:hover,
+html.dark .product-detail-gallery .product-gallery-prev:hover {
+  background: var(--dm-surface);
+  color: #00a8e8;
+}
+
+html.dark .product-detail-gallery .product-gallery-pagination {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+
+html.dark .product-detail-gallery .productThumbsSwiper .thumbnail-item {
+  background: var(--dm-surface);
+  border-color: transparent;
+}
+
+html.dark .product-detail-gallery .productThumbsSwiper .thumbnail-item:hover {
+  border-color: var(--dm-border-soft);
+}
+
+html.dark .product-detail-gallery .productThumbsSwiper .swiper-slide-thumb-active .thumbnail-item {
+  border-color: #00a8e8;
+  box-shadow: 0 0 0 1px #00a8e8;
+}
+
+html.dark .product-detail-gallery .product-gallery-thumbs-prev,
+html.dark .product-detail-gallery .product-gallery-thumbs-next {
+  background: rgba(30, 41, 59, 0.95);
+  color: var(--dm-text);
+}
+
+html.dark .product-detail-gallery .product-gallery-thumbs-prev:hover,
+html.dark .product-detail-gallery .product-gallery-thumbs-next:hover {
+  background: var(--dm-surface);
+  color: #00a8e8;
+}
+
+/* Product detail: paylaş/favori butonları (galeri üstünde) */
+html.dark .product-detail-gallery .bg-white\/95 {
+  background: rgba(30, 41, 59, 0.95) !important;
+}
+
+html.dark .product-detail-gallery .text-gray-600 {
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .product-detail-gallery .hover\:text-primary:hover {
+  color: #00a8e8 !important;
+}
+
+/* ========== Product image wrap loading spinner ========== */
+html.dark .product-image-wrap {
+  background: var(--dm-bg-tertiary);
+}
+
+html.dark .product-image-wrap .img-loading-spinner {
+  background: var(--dm-bg-secondary);
+}
+
+html.dark .product-image-wrap .img-loading-spinner::after {
+  border-color: var(--dm-border);
+  border-top-color: #00a8e8;
+}
+
+/* ========== Ana sayfa: section, hero swiper, mostViewed swiper ========== */
+html.dark .section-header {
+  border-color: var(--dm-border);
+}
+
+html.dark .section-title {
+  --section-title-color: var(--dm-text);
+  color: var(--dm-text);
+}
+
+html.dark .section-subtitle {
+  --section-subtitle-color: var(--dm-text-muted);
+  color: var(--dm-text-muted);
+}
+
+html.dark .section-link {
+  color: #00a8e8;
+}
+
+html.dark .section-link:hover {
+  color: #38bdf8;
+}
+
+/* Hero swiper nav (üst sağ butonlar) */
+html.dark .hero-swiper-nav-group .swiper-button-prev,
+html.dark .hero-swiper-nav-group .swiper-button-next {
+  background: rgba(30, 41, 59, 0.7);
+  color: var(--dm-text);
+}
+
+html.dark .hero-swiper-nav-group .swiper-button-prev:hover,
+html.dark .hero-swiper-nav-group .swiper-button-next:hover {
+  background: rgba(30, 41, 59, 0.9);
+  color: #fff;
+}
+
+/* Hero pagination bulletlar */
+html.dark .hero-swiper-pagination .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+html.dark .hero-swiper-pagination .swiper-pagination-bullet-active {
+  background: #fff;
+}
+
+/* En Çok Bakılan swiper nav */
+html.dark .most-viewed-swiper-nav .swiper-button-prev,
+html.dark .most-viewed-swiper-nav .swiper-button-next {
+  background: var(--dm-surface);
+  border-color: var(--dm-border);
+  color: var(--dm-text-muted);
+}
+
+html.dark .most-viewed-swiper-nav .swiper-button-prev:hover,
+html.dark .most-viewed-swiper-nav .swiper-button-next:hover {
+  background: var(--dm-surface-hover);
+  color: #00a8e8;
+}
+
+/* ========== İletişim sayfası (form, kartlar, uyarılar) ========== */
+html.dark .contact-info-card,
+html.dark .grid .bg-white.rounded.border.border-gray-100 {
+  background-color: var(--dm-card-bg) !important;
+  border-color: var(--dm-border) !important;
+}
+
+html.dark .grid .bg-white.rounded.border.border-gray-100:hover {
+  background-color: var(--dm-surface-hover) !important;
+  border-color: var(--dm-border-soft) !important;
+}
+
+/* Form input, textarea */
+html.dark #contact-form input,
+html.dark #contact-form textarea {
+  background-color: var(--dm-input-bg) !important;
+  border-color: var(--dm-input-border) !important;
+  color: var(--dm-input-text) !important;
+}
+
+html.dark #contact-form input::placeholder,
+html.dark #contact-form textarea::placeholder {
+  color: var(--dm-placeholder) !important;
+}
+
+html.dark #contact-form input:hover,
+html.dark #contact-form textarea:hover {
+  border-color: var(--dm-border-soft) !important;
+}
+
+/* Success alert (yeşil) */
+html.dark .border-green-200.bg-green-50.text-green-800 {
+  background-color: rgba(5, 46, 22, 0.6) !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
+  color: #86efac !important;
+}
+
+/* Error alert (kırmızı) */
+html.dark .border-red-200.bg-red-50.text-red-800 {
+  background-color: rgba(69, 10, 10, 0.6) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+/* ========== Reduce motion (accessibility) ========== */
+@media (prefers-reduced-motion: reduce) {
+  html.dark *,
+  html.dark *::before,
+  html.dark *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

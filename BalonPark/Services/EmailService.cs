@@ -66,6 +66,11 @@ public class EmailService(IConfiguration configuration, ILogger<EmailService> lo
     private string GenerateContactEmailHtml(ContactFormModel contactForm)
     {
         var siteUrl = configuration["siteUrl"];
+        var nameEnc = WebUtility.HtmlEncode(contactForm.Name);
+        var emailEnc = WebUtility.HtmlEncode(contactForm.Email);
+        var phoneEnc = WebUtility.HtmlEncode(contactForm.Phone);
+        var subjectEnc = WebUtility.HtmlEncode(contactForm.Subject);
+        var messageEnc = WebUtility.HtmlEncode(contactForm.Message).Replace("\n", "<br>");
         
         return $@"
 <!DOCTYPE html>
@@ -235,19 +240,19 @@ public class EmailService(IConfiguration configuration, ILogger<EmailService> lo
             <h2>Gönderen Bilgileri</h2>
             <div class=""detail-row"">
                 <span class=""label"">Ad Soyad:</span>
-                <span class=""value"">{contactForm.Name}</span>
+                <span class=""value"">{nameEnc}</span>
             </div>
             <div class=""detail-row"">
                 <span class=""label"">E-posta:</span>
-                <span class=""value"">{contactForm.Email}</span>
+                <span class=""value"">{emailEnc}</span>
             </div>
             <div class=""detail-row"">
                 <span class=""label"">Telefon:</span>
-                <span class=""value"">{contactForm.Phone}</span>
+                <span class=""value"">{phoneEnc}</span>
             </div>
             <div class=""detail-row"">
                 <span class=""label"">Konu:</span>
-                <span class=""value"">{contactForm.Subject}</span>
+                <span class=""value"">{subjectEnc}</span>
             </div>
             <div class=""detail-row"">
                 <span class=""label"">Gönderim Tarihi:</span>
@@ -257,12 +262,12 @@ public class EmailService(IConfiguration configuration, ILogger<EmailService> lo
 
         <div class=""message-content"">
             <h3>Mesaj İçeriği</h3>
-            <p>{contactForm.Message.Replace("\n", "<br>")}</p>
+            <p>{messageEnc}</p>
         </div>
 
         <div class=""footer"">
             <p>Bu e-posta <a href=""{siteUrl}"">Balon Park</a> web sitesindeki iletişim formu aracılığıyla gönderilmiştir.</p>
-            <p>Yanıtlamak için bu e-postayı yanıtlayabilir veya {contactForm.Email} adresine doğrudan e-posta gönderebilirsiniz.</p>
+            <p>Yanıtlamak için bu e-postayı yanıtlayabilir veya {emailEnc} adresine doğrudan e-posta gönderebilirsiniz.</p>
         </div>
     </div>
 </body>
