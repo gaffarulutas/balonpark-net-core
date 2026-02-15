@@ -549,15 +549,6 @@ html.dark .hero-swiper-nav-group .swiper-button-next:hover {
   color: #fff;
 }
 
-/* Hero pagination bulletlar */
-html.dark .hero-swiper-pagination .swiper-pagination-bullet {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-html.dark .hero-swiper-pagination .swiper-pagination-bullet-active {
-  background: #fff;
-}
-
 /* En Çok Bakılan swiper nav */
 html.dark .most-viewed-swiper-nav .swiper-button-prev,
 html.dark .most-viewed-swiper-nav .swiper-button-next {
@@ -614,6 +605,153 @@ html.dark .border-red-200.bg-red-50.text-red-800 {
   background-color: rgba(69, 10, 10, 0.6) !important;
   border-color: rgba(239, 68, 68, 0.4) !important;
   color: #fca5a5 !important;
+}
+
+/* ========== Blog sayfası (liste, detay, form, kartlar) ========== */
+html.dark .blog-search-form input[type="text"] {
+  background-color: var(--dm-input-bg) !important;
+  border-color: var(--dm-input-border) !important;
+  color: var(--dm-input-text) !important;
+}
+
+html.dark .blog-search-form input::placeholder {
+  color: var(--dm-placeholder) !important;
+}
+
+html.dark .blog-categories .bg-gray-100 {
+  background-color: var(--dm-bg-tertiary) !important;
+}
+
+html.dark .blog-categories .bg-gray-100:hover {
+  background-color: var(--dm-surface-hover) !important;
+}
+
+html.dark .blog-categories .text-gray-600 {
+  color: var(--dm-text-muted) !important;
+}
+
+/* Blog article card (liste) */
+html.dark article.group.bg-white {
+  background-color: var(--dm-card-bg) !important;
+}
+
+/* Blog detail: excerpt kutusu */
+html.dark .bg-gray-50.border-l-4.border-primary {
+  background-color: rgba(0, 168, 232, 0.12) !important;
+}
+
+/* Blog tag pill (detay sayfası) */
+html.dark .rounded-full.bg-gray-100.text-gray-600 {
+  background-color: var(--dm-bg-tertiary) !important;
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .rounded-full.bg-gray-100.text-gray-600:hover {
+  color: #fff !important;
+}
+
+/* ========== Hakkımızda: Neden Balon Park? kartları (Ürün Teknik Bilgileri ile aynı: #1e293b) ========== */
+html.dark #about-page-content li.rounded-lg.border.border-gray-100.bg-gray-50\/50 {
+  background-color: #1e293b !important;
+  border-color: var(--dm-border) !important;
+}
+
+html.dark #about-page-content li.rounded-lg.border.border-gray-100.bg-gray-50\/50:hover {
+  background-color: var(--dm-surface-hover) !important;
+}
+
+html.dark #about-page-content li.rounded-lg .text-gray-600 {
+  color: var(--dm-text-secondary) !important;
+}
+
+/* Hakkımızda: İletişim Formu butonu (bg-gray-100) */
+html.dark #about-page-content a.bg-gray-100 {
+  background-color: var(--dm-bg-tertiary) !important;
+  color: var(--dm-text) !important;
+}
+
+html.dark #about-page-content a.bg-gray-100:hover {
+  background-color: var(--dm-surface-hover) !important;
+}
+
+/* ========== Ürün detay: Sipariş Ver butonu (bg-gray-900) ========== */
+html.dark .product-detail-info a.bg-gray-900 {
+  background-color: #1e293b !important;
+  color: #fff !important;
+  border: 1px solid var(--dm-border-soft) !important;
+}
+
+html.dark .product-detail-info a.bg-gray-900:hover {
+  background-color: var(--dm-surface-hover) !important;
+  border-color: #00a8e8 !important;
+  color: #fff !important;
+}
+
+/* Ürün detay: Stokta Yok disabled butonu */
+html.dark .product-detail-info button.border-gray-200.text-gray-400 {
+  border-color: var(--dm-border) !important;
+  color: var(--dm-text-muted) !important;
+}
+
+/* ========== Ürün detay: Ürün Teknik Bilgileri kutuları (Sipariş Ver ile aynı: #1e293b) ========== */
+html.dark .rounded-lg.border.border-gray-200.bg-gray-50\/50 {
+  background-color: #1e293b !important;
+  border-color: var(--dm-border) !important;
+}
+
+html.dark .rounded-lg.border.border-gray-200.bg-gray-50\/50 dt,
+html.dark .rounded-lg.border.border-gray-200.bg-gray-50\/50 .text-gray-600 {
+  color: var(--dm-text-secondary) !important;
+}
+
+html.dark .rounded-lg.border.border-gray-200.bg-gray-50\/50 dd,
+html.dark .rounded-lg.border.border-gray-200.bg-gray-50\/50 .text-ink {
+  color: var(--dm-text) !important;
+}
+
+/* ========== Ürünler sayfası (ProductList): filtre, select, input, pagination ========== */
+html.dark .product-list-filter {
+  background-color: var(--dm-surface) !important;
+  border-color: var(--dm-border) !important;
+}
+
+html.dark .product-list-select-btn {
+  background-color: var(--dm-input-bg) !important;
+  border-color: var(--dm-input-border) !important;
+  color: var(--dm-input-text) !important;
+}
+
+html.dark .product-list-select-btn:hover {
+  border-color: var(--dm-border-soft) !important;
+}
+
+html.dark .product-list-select-dropdown-menu {
+  background-color: var(--dm-surface) !important;
+  border: 1px solid var(--dm-border);
+}
+
+html.dark .product-list-select-option {
+  color: var(--dm-text) !important;
+}
+
+html.dark .product-list-select-option:hover,
+html.dark .product-list-select-option:focus,
+html.dark .product-list-select-option.product-list-select-option-active {
+  background-color: var(--dm-surface-hover) !important;
+}
+
+html.dark .product-list-search-input {
+  background-color: var(--dm-input-bg) !important;
+  border-color: var(--dm-input-border) !important;
+  color: var(--dm-input-text) !important;
+}
+
+html.dark .product-list-search-input::placeholder {
+  color: var(--dm-placeholder) !important;
+}
+
+html.dark .product-list-search-input:hover {
+  border-color: var(--dm-border-soft) !important;
 }
 
 /* ========== Reduce motion (accessibility) ========== */

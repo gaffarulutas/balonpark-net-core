@@ -15,6 +15,21 @@
     var descriptionSnippet = !string.IsNullOrEmpty(product.Description) && product.Description.Length > 60
         ? product.Description.Substring(0, 60) + "..."
         : product.Description ?? "";
+    var dimParts = new List<string>();
+    var inflatedParts = new[] { product.InflatedLength, product.InflatedWidth, product.InflatedHeight }
+        .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+    if (inflatedParts.Count > 0)
+        dimParts.Add(string.Join("×", inflatedParts) + " m");
+    if (product.UserCount.HasValue && product.UserCount > 0)
+        dimParts.Add($"{product.UserCount} kişi");
+    if (dimParts.Count == 0)
+    {
+        var packagedParts = new[] { product.PackagedLength, product.PackagedDepth }
+            .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+        if (packagedParts.Count > 0)
+            dimParts.Add(string.Join("×", packagedParts) + " cm");
+    }
+    var dimensionText = dimParts.Count > 0 ? string.Join(" • ", dimParts) : null;
 }
 
 <article class="product-card group bg-white rounded-xl overflow-hidden flex flex-col h-full">
@@ -25,15 +40,22 @@
         </div>
         <a href="@productUrl" class="block w-full h-full product-image-wrap overflow-hidden">
             <span class="img-loading-spinner" aria-hidden="true"></span>
-            <img src="@imageUrl" class="lazy-image w-full h-full object-cover" alt="@Html.Raw(product.Name)" loading="lazy" onload="this.classList.add('loaded'); var s=this.previousElementSibling; if(s) s.classList.add('hidden');">
+            <img src="@imageUrl" class="lazy-image w-full h-full object-cover" alt="@product.Name" loading="lazy" onload="this.classList.add('loaded'); var s=this.previousElementSibling; if(s) s.classList.add('hidden');">
         </a>
     </div>
     <div class="p-3 flex flex-col flex-1 min-h-0 border-t border-gray-100">
-        <a href="@productUrl" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 transition">@Html.Raw(product.Name)</a>
-        <p class="text-xs text-gray-400 mt-0.5 flex-shrink-0">@Html.Raw(product.CategoryName)</p>
+        <a href="@productUrl" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 transition">@product.Name</a>
+        <p class="text-xs text-gray-400 mt-0.5 flex-shrink-0">@product.CategoryName</p>
+        @if (!string.IsNullOrEmpty(dimensionText))
+        {
+            <p class="flex items-center gap-1.5 text-xs text-gray-500 mt-1 flex-shrink-0" title="Ölçü bilgisi">
+                <i data-lucide="ruler" class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" aria-hidden="true"></i>
+                <span>@dimensionText</span>
+            </p>
+        }
         @if (!string.IsNullOrEmpty(product.Description))
         {
-            <p class="text-xs text-gray-500 mt-1 line-clamp-2 flex-1 min-h-0">@Html.Raw(descriptionSnippet)</p>
+            <p class="text-xs text-gray-500 mt-1 line-clamp-2 flex-1 min-h-0">@descriptionSnippet</p>
         }
         else
         {

@@ -785,10 +785,7 @@ body {
     }
 }
 
-/* Panel - varsayılan gizli (HTML5 hidden attribute + CSS fallback) */
-.translate-dropdown__panel[hidden] {
-    display: none !important;
-}
+/* Panel - 2026 best practice: opacity + scale animasyonu, hidden attribute kullanılmaz */
 .translate-dropdown__panel {
     position: absolute;
     top: 100%;
@@ -802,10 +799,26 @@ body {
     border-radius: 0.5rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
     z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.96);
+    transform-origin: top right;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.2s;
 }
 
 .translate-dropdown.translate-dropdown--open .translate-dropdown__panel {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .translate-dropdown__panel {
+        transition-duration: 0.01ms;
+    }
 }
 
 .translate-dropdown__list {
@@ -923,9 +936,8 @@ body {
 .currency-dropdown.currency-dropdown--open .currency-dropdown__chevron {
     transform: rotate(180deg);
 }
-.currency-dropdown__panel[hidden] {
-    display: none !important;
-}
+
+/* Panel - 2026 best practice: opacity + scale animasyonu */
 .currency-dropdown__panel {
     position: absolute;
     top: 100%;
@@ -939,9 +951,25 @@ body {
     border-radius: 0.5rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
     z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.96);
+    transform-origin: top right;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.2s;
 }
 .currency-dropdown.currency-dropdown--open .currency-dropdown__panel {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .currency-dropdown__panel {
+        transition-duration: 0.01ms;
+    }
 }
 .currency-dropdown__list {
     margin: 0;
@@ -1371,33 +1399,44 @@ body {
     }
 }
 
+/* Overlay: 2026 best practice – visibility/opacity ile animasyonlu geçiş (display kullanılmaz) */
 .layout-sidebar-overlay {
-    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
     z-index: 35;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s;
 }
 
 .layout-sidebar-overlay.layout-sidebar-overlay-visible {
-    display: block;
     opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s;
 }
 
 /* Mobilde overlay ve bottom sheet header'ın üstünde açılır (z-index: header 50 < overlay 55 < sidebar 60) */
 @media (max-width: 1023px) {
     .layout-sidebar-overlay {
         z-index: 55;
-        transition: opacity 0.3s ease;
         touch-action: none;
     }
 }
 
 @media (min-width: 1024px) {
     .layout-sidebar-overlay {
-        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .layout-sidebar-overlay {
+        transition-duration: 0.01ms;
     }
 }
 
@@ -1645,7 +1684,7 @@ body {
     white-space: nowrap;
 }
 
-/* ----- Alt kategoriler: header gibi tam genişlik, sağ/sol sıfır ----- */
+/* ----- Alt kategoriler: 2026 best practice – max-height ile animasyonlu açılma ----- */
 .category-tree-children {
     list-style: none;
     padding: 0;
@@ -1656,11 +1695,15 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0;
-    transition: opacity 0.2s ease;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
 }
 
-.category-tree-children.hidden {
-    display: none;
+.category-tree-children.category-tree-children-open {
+    max-height: 600px;
+    opacity: 1;
 }
 
 .category-tree-child {
@@ -1753,7 +1796,7 @@ body {
     .category-tree-toggle,
     .category-tree-children,
     .category-tree-child-link {
-        transition-duration: 0.01ms;
+        transition-duration: 0.01ms !important;
     }
     .category-tree-toggle[aria-expanded="true"] .category-tree-chevron {
         transition: none;

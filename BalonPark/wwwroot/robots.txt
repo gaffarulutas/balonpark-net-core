@@ -20,12 +20,12 @@ Disallow: /Properties/
 # Allow important pages
 Allow: /
 Allow: /Index
-Allow: /Products
+Allow: /products
 Allow: /Blog
 Allow: /Category/
 Allow: /ProductDetail/
 Allow: /BlogDetail/
-Allow: /Hakkimizda
+Allow: /about
 Allow: /Iletisim
 Allow: /Privacy
 Allow: /KullanimKosullari

@@ -45,7 +45,10 @@
             sidebar.classList.toggle('layout-sidebar-open', open);
             overlay.classList.toggle('layout-sidebar-overlay-visible', open);
             overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
-            if (toggleBtn) toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (toggleBtn) {
+                toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                toggleBtn.setAttribute('aria-label', open ? 'Kategori menüsünü kapat' : 'Kategori menüsünü aç');
+            }
             document.body.classList.toggle('overflow-hidden', open && isMobile);
             if (isMobile) {
                 if (open) {
@@ -105,7 +108,7 @@
             var children = id ? document.getElementById(id) : null;
             if (!children) return;
             var open = chevron.getAttribute('aria-expanded') !== 'true';
-            children.classList.toggle('hidden', !open);
+            children.classList.toggle('category-tree-children-open', open);
             chevron.setAttribute('aria-expanded', open);
         });
         nav.addEventListener('keydown', function (e) {

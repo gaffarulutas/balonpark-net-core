@@ -58,7 +58,7 @@
             '<i data-lucide="chevron-down" class="' + CSS.chevron + '" aria-hidden="true"></i>' +
             '</span>';
 
-        var panel = el('div', CSS.panel, { role: 'listbox', 'aria-label': 'Para birimleri', hidden: '' });
+        var panel = el('div', CSS.panel, { role: 'listbox', 'aria-label': 'Para birimleri', 'aria-hidden': 'true' });
         var list = el('ul', CSS.list);
         CURRENCIES.forEach(function (cur) {
             var isActive = (window.__currencyCurrent || 'TL') === cur.code;
@@ -72,7 +72,7 @@
                 e.stopPropagation();
                 if (cur.code === (window.__currencyCurrent || 'TL')) {
                     wrapper.classList.remove(CSS.dropdownOpen);
-                    panel.setAttribute('hidden', '');
+                    panel.setAttribute('aria-hidden', 'true');
                     return;
                 }
                 if (typeof window.setCurrency === 'function') {
@@ -82,7 +82,7 @@
                     window.location.reload();
                 }
                 wrapper.classList.remove(CSS.dropdownOpen);
-                panel.setAttribute('hidden', '');
+                panel.setAttribute('aria-hidden', 'true');
             });
             li.appendChild(btn);
             list.appendChild(li);
@@ -94,21 +94,20 @@
             e.stopPropagation();
             var open = wrapper.classList.toggle(CSS.dropdownOpen);
             wrapper.setAttribute('aria-expanded', open ? 'true' : 'false');
-            if (open) panel.removeAttribute('hidden');
-            else panel.setAttribute('hidden', '');
+            panel.setAttribute('aria-hidden', open ? 'false' : 'true');
         });
 
         document.addEventListener('click', function (e) {
             if (!wrapper.contains(e.target)) {
                 wrapper.classList.remove(CSS.dropdownOpen);
                 wrapper.setAttribute('aria-expanded', 'false');
-                panel.setAttribute('hidden', '');
+                panel.setAttribute('aria-hidden', 'true');
             }
         });
         panel.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 wrapper.classList.remove(CSS.dropdownOpen);
-                panel.setAttribute('hidden', '');
+                panel.setAttribute('aria-hidden', 'true');
             }
         });
 

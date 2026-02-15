@@ -21,7 +21,9 @@
     var productSlug = Model.Product?.Slug ?? string.Empty;
     var productShareUrl = ((IUrlService?)ViewData["UrlService"])?.GetProductUrl(productCategorySlug, productSubCategorySlug, productSlug)
         ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/category/{productCategorySlug}/{productSubCategorySlug}/{productSlug}";
+    var productShareUrlEncoded = Uri.EscapeDataString(productShareUrl);
     var productShareTitle = Uri.EscapeDataString(Model.Product?.Name ?? string.Empty);
+    var productNameEncoded = System.Net.WebUtility.HtmlEncode(Model.Product?.Name ?? "");
     var whatsAppDigits = string.IsNullOrEmpty(settings?.WhatsApp) ? "" : new string(settings.WhatsApp.Where(c => char.IsDigit(c)).ToArray());
 }
 
@@ -41,8 +43,8 @@
         <div class="product-gallery product-detail-gallery w-full max-w-full relative">
             <!-- Paylaş ve Favori: galeri üzerinde sağ üst (referans görseldeki gibi) -->
             <div class="absolute top-3 right-3 z-20 flex items-center gap-1.5" role="group" aria-label="Paylaş ve favoriler">
-                <a href="https://www.facebook.com/sharer/sharer.php?u=@productShareUrl" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/95 shadow flex items-center justify-center text-gray-600 hover:text-[#1877f2] transition" title="Facebook'ta paylaş" aria-label="Facebook'ta paylaş"><i data-lucide="facebook" class="w-4 h-4"></i></a>
-                <a href="https://twitter.com/intent/tweet?url=@productShareUrl&text=@productShareTitle" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/95 shadow flex items-center justify-center text-gray-600 hover:text-[#1da1f2] transition" title="Twitter'da paylaş" aria-label="Twitter'da paylaş"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=@productShareUrlEncoded" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/95 shadow flex items-center justify-center text-gray-600 hover:text-[#1877f2] transition" title="Facebook'ta paylaş" aria-label="Facebook'ta paylaş"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                <a href="https://twitter.com/intent/tweet?url=@productShareUrlEncoded&text=@productShareTitle" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/95 shadow flex items-center justify-center text-gray-600 hover:text-[#1da1f2] transition" title="Twitter'da paylaş" aria-label="Twitter'da paylaş"><i data-lucide="twitter" class="w-4 h-4"></i></a>
                 <button type="button" class="favorite-btn-detail w-9 h-9 rounded-full bg-white/95 shadow flex items-center justify-center text-gray-600 hover:text-primary transition" data-product-id="@Model.Product?.Id" title="Favorilere Ekle" aria-label="Favorilere Ekle"><i data-lucide="heart" class="w-4 h-4"></i></button>
             </div>
             <div class="product-gallery-main-wrap">
@@ -58,11 +60,11 @@
                                     <a href="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")"
                                        data-lg-size="1600-1600"
                                        data-src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")"
-                                       data-sub-html="<h4>@Html.Raw(Model.Product?.Name)</h4>"
+                                       data-sub-html="<h4>@productNameEncoded</h4>"
                                        class="product-gallery-link">
                                         <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.LargePath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.LargePath}")"
                                              class="lazy-image main-image product-gallery-img"
-                                             alt="@Html.Raw(Model.Product?.Name)"
+                                             alt="@Model.Product?.Name"
                                              loading="lazy"
                                              onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');"
                                              onerror="this.src='@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")'; this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
@@ -79,11 +81,11 @@
                                 <a href="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")"
                                    data-lg-size="800-800"
                                    data-src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")"
-                                   data-sub-html="<h4>@Html.Raw(Model.Product?.Name)</h4>"
+                                   data-sub-html="<h4>@productNameEncoded</h4>"
                                    class="product-gallery-link">
                                     <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")"
                                          class="lazy-image main-image product-gallery-img"
-                                         alt="@Html.Raw(Model.Product?.Name)"
+                                         alt="@Model.Product?.Name"
                                          loading="lazy"
                                          onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
                                 </a>
@@ -109,7 +111,7 @@
                                         <span class="img-loading-spinner" aria-hidden="true"></span>
                                         <img src="@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(image.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{image.ThumbnailPath}")"
                                              class="lazy-image product-gallery-thumb-img"
-                                             alt="@Html.Raw(Model.Product?.Name)"
+                                             alt="@Model.Product?.Name"
                                              loading="lazy"
                                              onload="this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');"
                                              onerror="this.src='@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")'; this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
@@ -165,7 +167,7 @@
             </div>
             <!-- Ürün adı ve ürün kodu aynı satırda: başlık sol, kod sağ, düz metin -->
             <div class="flex flex-wrap items-baseline justify-between gap-2">
-                <h1 class="text-ink text-xl md:text-2xl font-semibold leading-tight min-w-0">@Html.Raw(Model.Product?.Name)</h1>
+                <h1 class="text-ink text-xl md:text-2xl font-semibold leading-tight min-w-0">@Model.Product?.Name</h1>
                 <p class="text-sm text-gray-600 shrink-0 flex items-center gap-1">
                     Ürün Kodu: <span id="product-code-display">U-@Model.Product?.Id</span>
                     <button type="button" class="product-code-copy p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition focus:outline-none focus:ring-2 focus:ring-primary/20" data-code="U-@Model.Product?.Id" title="Kodu kopyala" aria-label="Ürün kodunu kopyala">
@@ -450,11 +452,11 @@
                         var imgUrl = item.MainImage != null ? ((IUrlService?)ViewData["UrlService"])?.GetImageUrl(item.MainImage.ThumbnailPath) ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{item.MainImage.ThumbnailPath}" : ((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png";
                         <article class="product-detail-card w-[180px] flex-shrink-0 bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                             <a href="@purl" class="block aspect-square bg-gray-50">
-                                <img src="@imgUrl" alt="@Html.Raw(item.Product.Name)" class="w-full h-full object-cover" loading="lazy" />
+                                <img src="@imgUrl" alt="@item.Product.Name" class="w-full h-full object-cover" loading="lazy" />
                             </a>
                             <div class="p-3">
-                                <p class="text-xs text-gray-500 truncate">@Html.Raw(item.Product.CategoryName)</p>
-                                <a href="@purl" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 mt-0.5">@Html.Raw(item.Product.Name)</a>
+                                <p class="text-xs text-gray-500 truncate">@item.Product.CategoryName</p>
+                                <a href="@purl" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 mt-0.5">@item.Product.Name</a>
                                 <p class="mt-1 price-tl text-sm font-semibold text-primary @(selectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N0")</p>
                                 <p class="mt-1 price-usd text-sm font-semibold text-primary @(selectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N0")</p>
                                 <p class="mt-1 price-eur text-sm font-semibold text-primary @(selectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N0")</p>
@@ -751,7 +753,7 @@
                 
                 // Accessibility
                 ariaLabelledby: 'Product Gallery',
-                ariaDescribedby: '@Html.Raw(Model.Product?.Name ?? "")',
+                ariaDescribedby: '@productNameEncoded',
             });
             
             console.log('lightGallery initialized with all features');

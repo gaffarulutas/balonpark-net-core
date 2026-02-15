@@ -524,7 +524,7 @@
             this.panel = this._el('div', css.panel, {
                 role:         'listbox',
                 'aria-label': 'Desteklenen diller',
-                hidden:       ''
+                'aria-hidden': 'true'
             });
             this.panel.appendChild(this._createList());
 
@@ -610,18 +610,14 @@
 
         toggle: function () {
             var isOpen = this.wrapper.classList.toggle(CONFIG.css.dropdownOpen);
-            if (isOpen) {
-                this.panel.removeAttribute('hidden');
-            } else {
-                this.panel.setAttribute('hidden', '');
-            }
+            this.panel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
             this.wrapper.setAttribute('aria-expanded', String(isOpen));
             if (isOpen) refreshLucideIcons();
         },
 
         close: function () {
             this.wrapper.classList.remove(CONFIG.css.dropdownOpen);
-            this.panel.setAttribute('hidden', '');
+            this.panel.setAttribute('aria-hidden', 'true');
             this.wrapper.setAttribute('aria-expanded', 'false');
         },
 
@@ -662,7 +658,7 @@
             var trigger = wrapperEl.querySelector('.' + css.trigger);
             if (trigger) trigger.setAttribute('disabled', '');
             var panel = wrapperEl.querySelector('.' + css.panel);
-            if (panel) panel.setAttribute('hidden', '');
+            if (panel) panel.setAttribute('aria-hidden', 'true');
             wrapperEl.classList.remove(css.dropdownOpen);
             wrapperEl.setAttribute('aria-expanded', 'false');
         }

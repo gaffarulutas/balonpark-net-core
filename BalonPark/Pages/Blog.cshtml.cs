@@ -8,6 +8,7 @@ namespace BalonPark.Pages;
 public class BlogModel : BasePage
 {
     private readonly IBlogService _blogService;
+    private readonly ILogger<BlogModel> _logger;
 
     public BlogModel(
         CategoryRepository categoryRepository,
@@ -15,10 +16,12 @@ public class BlogModel : BasePage
         SettingsRepository settingsRepository,
         IBlogService blogService,
         IUrlService urlService,
-        ICurrencyCookieService currencyCookieService)
+        ICurrencyCookieService currencyCookieService,
+        ILogger<BlogModel> logger)
         : base(categoryRepository, subCategoryRepository, settingsRepository, urlService, currencyCookieService)
     {
         _blogService = blogService;
+        _logger = logger;
     }
 
     public List<Blog> Blogs { get; set; } = new();
@@ -27,11 +30,22 @@ public class BlogModel : BasePage
     public List<string> BlogCategories { get; set; } = new();
     public string? SearchQuery { get; set; }
     public string? SelectedCategory { get; set; }
+    public string? SelectedTag { get; set; }
     public int CurrentPage { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public int TotalBlogs { get; set; }
     public int TotalPages { get; set; }
     public IUrlService? UrlService => _urlService;
+
+    /// <summary>Pagination ve linkler için query string fragment (q, category, tag).</summary>
+    public string GetQueryStringFragment()
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrEmpty(SearchQuery)) parts.Add($"q={Uri.EscapeDataString(SearchQuery)}");
+        if (!string.IsNullOrEmpty(SelectedCategory)) parts.Add($"category={Uri.EscapeDataString(SelectedCategory)}");
+        if (!string.IsNullOrEmpty(SelectedTag)) parts.Add($"tag={Uri.EscapeDataString(SelectedTag)}");
+        return parts.Count == 0 ? "" : "&" + string.Join("&", parts);
+    }
 
     public async Task OnGetAsync()
     {
@@ -54,6 +68,9 @@ public class BlogModel : BasePage
         SelectedCategory = HttpContext.Request.Query["category"].ToString();
         if (string.IsNullOrEmpty(SelectedCategory)) SelectedCategory = null;
 
+        SelectedTag = HttpContext.Request.Query["tag"].ToString();
+        if (string.IsNullOrEmpty(SelectedTag)) SelectedTag = null;
+
         // Initialize with empty data
         Blogs = new List<Blog>();
         FeaturedBlogs = new List<Blog>();
@@ -72,15 +89,20 @@ public class BlogModel : BasePage
             
             if (!string.IsNullOrWhiteSpace(SearchQuery))
             {
-                // Arama yapılıyorsa
                 blogs = await _blogService.SearchBlogsAsync(SearchQuery, 100);
                 ViewData["Title"] = $"'{SearchQuery}' için arama sonuçları - Blog";
                 ViewData["Description"] = $"'{SearchQuery}' ile ilgili blog yazıları. Şişme oyun parkları hakkında detaylı bilgiler.";
                 ViewData["Keywords"] = $"blog arama, {SearchQuery}, şişme oyun parkı, çocuk oyun alanı";
             }
+            else if (!string.IsNullOrWhiteSpace(SelectedTag))
+            {
+                blogs = await _blogService.GetBlogsByTagAsync(SelectedTag, 100);
+                ViewData["Title"] = $"#{SelectedTag} Etiketi - Blog";
+                ViewData["Description"] = $"{SelectedTag} etiketli blog yazılarımız. Şişme oyun parkları hakkında güncel bilgiler.";
+                ViewData["Keywords"] = $"blog, {SelectedTag}, şişme oyun parkı, çocuk oyun alanı";
+            }
             else if (!string.IsNullOrWhiteSpace(SelectedCategory))
             {
-                // Kategori filtresi varsa
                 blogs = await _blogService.GetBlogsByCategoryAsync(SelectedCategory, 100);
                 ViewData["Title"] = $"{SelectedCategory} Kategorisi - Blog";
                 ViewData["Description"] = $"{SelectedCategory} kategorisindeki blog yazılarımızı keşfedin. Şişme oyun parkları hakkında güncel bilgiler.";
@@ -88,13 +110,14 @@ public class BlogModel : BasePage
             }
             else
             {
-                // Tüm blogları getir
                 blogs = await _blogService.GetAllBlogsAsync();
             }
 
-            // Kategorileri getir (filtreleme için)
-            var allBlogs = await _blogService.GetAllBlogsAsync();
-            BlogCategories = allBlogs
+            // Kategorileri getir (filtre yoksa mevcut listeden, yoksa tüm bloglardan)
+            var blogsForCategories = !string.IsNullOrWhiteSpace(SearchQuery) || !string.IsNullOrWhiteSpace(SelectedCategory) || !string.IsNullOrWhiteSpace(SelectedTag)
+                ? await _blogService.GetAllBlogsAsync()
+                : blogs;
+            BlogCategories = blogsForCategories
                 .Where(b => !string.IsNullOrEmpty(b.Category))
                 .Select(b => b.Category!)
                 .Distinct()
@@ -116,9 +139,7 @@ public class BlogModel : BasePage
         }
         catch (Exception ex)
         {
-            // Log the error for debugging
-            System.Diagnostics.Debug.WriteLine($"Blog error: {ex.Message}");
-            // Keep the default empty data that was set above
+            _logger.LogError(ex, "Blog listesi yüklenirken hata oluştu");
         }
     }
 

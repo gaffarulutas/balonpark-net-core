@@ -232,8 +232,8 @@ public class BlogRepository(DapperContext context, ICacheService cacheService)
 
     public async Task<int> UpdateAsync(Blog blog)
     {
-        // Önce eski veriyi çek (eski slug için)
-        var oldBlog = await GetByIdAsync(blog.Id);
+        // Önce eski veriyi çek (eski slug için) - admin güncellemesi için GetByIdForAdminAsync
+        var oldBlog = await GetByIdForAdminAsync(blog.Id);
         var oldSlug = oldBlog?.Slug;
         
         var query = @"

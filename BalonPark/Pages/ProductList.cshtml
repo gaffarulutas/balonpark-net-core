@@ -22,7 +22,7 @@
     </header>
 
     <!-- Filtreler: Tailwind custom select menü + input (WAI-ARIA listbox pattern) -->
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-6 product-list-filter">
         <form method="get" id="filterForm" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Kategori: custom menü -->
@@ -32,18 +32,18 @@
                         @foreach (var cat in Model.FilterCategories)
                         {
                             @if (Model.CategoryId == cat.Id)
-                            {<option value="@cat.Id" selected>@Html.Raw(cat.Name)</option>}
+                            {<option value="@cat.Id" selected>@cat.Name</option>}
                             else
-                            {<option value="@cat.Id">@Html.Raw(cat.Name)</option>}
+                            {<option value="@cat.Id">@cat.Name</option>}
                         }
                     </select>
-                    <button type="button" class="product-list-select-trigger relative w-full h-12 pl-4 pr-10 text-left text-base bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors flex items-center justify-between" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="CategoryId-label" id="CategoryId-trigger">
+                    <button type="button" class="product-list-select-trigger relative w-full h-12 pl-4 pr-10 text-left text-base bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors flex items-center justify-between product-list-select-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="CategoryId-label" id="CategoryId-trigger">
                         <span class="block truncate product-list-select-value">Tüm kategoriler</span>
                         <span class="pointer-events-none absolute right-3 flex items-center text-gray-400">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
                         </span>
                     </button>
-                    <ul class="product-list-select-dropdown absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white py-1.5 text-sm shadow-xl ring-1 ring-black/5 focus:outline-none transition-all duration-200 ease-out origin-top opacity-0 scale-95 pointer-events-none invisible" role="listbox" aria-labelledby="CategoryId-trigger" id="CategoryId-listbox"></ul>
+                    <ul class="product-list-select-dropdown absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white py-1.5 text-sm shadow-xl ring-1 ring-black/5 focus:outline-none transition-all duration-200 ease-out origin-top opacity-0 scale-95 pointer-events-none invisible product-list-select-dropdown-menu" role="listbox" aria-labelledby="CategoryId-trigger" id="CategoryId-listbox"></ul>
                 </div>
                 <!-- Alt Kategori: custom menü -->
                 <div class="relative product-list-select-menu" data-select-id="SubCategoryId">
@@ -52,25 +52,25 @@
                         @foreach (var sub in Model.FilterSubCategories)
                         {
                             @if (Model.SubCategoryId == sub.Id)
-                            {<option value="@sub.Id" selected>@Html.Raw(sub.Name)</option>}
+                            {<option value="@sub.Id" selected>@sub.Name</option>}
                             else
-                            {<option value="@sub.Id">@Html.Raw(sub.Name)</option>}
+                            {<option value="@sub.Id">@sub.Name</option>}
                         }
                     </select>
-                    <button type="button" class="product-list-select-trigger relative w-full h-12 pl-4 pr-10 text-left text-base bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors flex items-center justify-between" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="SubCategoryId-label" id="SubCategoryId-trigger">
+                    <button type="button" class="product-list-select-trigger relative w-full h-12 pl-4 pr-10 text-left text-base bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors flex items-center justify-between product-list-select-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="SubCategoryId-label" id="SubCategoryId-trigger">
                         <span class="block truncate product-list-select-value">Tüm alt kategoriler</span>
                         <span class="pointer-events-none absolute right-3 flex items-center text-gray-400">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
                         </span>
                     </button>
-                    <ul class="product-list-select-dropdown absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white py-1.5 text-sm shadow-xl ring-1 ring-black/5 focus:outline-none transition-all duration-200 ease-out origin-top opacity-0 scale-95 pointer-events-none invisible" role="listbox" aria-labelledby="SubCategoryId-trigger" id="SubCategoryId-listbox"></ul>
+                    <ul class="product-list-select-dropdown absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white py-1.5 text-sm shadow-xl ring-1 ring-black/5 focus:outline-none transition-all duration-200 ease-out origin-top opacity-0 scale-95 pointer-events-none invisible product-list-select-dropdown-menu" role="listbox" aria-labelledby="SubCategoryId-trigger" id="SubCategoryId-listbox"></ul>
                 </div>
                 <!-- Ürün adı: menü stil input (leading icon) -->
                 <div class="relative">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400" aria-hidden="true">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </span>
-                    <input type="text" name="ProductNameFilter" id="ProductNameFilter" value="@Model.ProductNameFilter" placeholder="Ürün adı ara..." class="w-full h-12 pl-11 pr-4 text-base border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors" aria-label="Ürün adı">
+                    <input type="search" name="ProductNameFilter" id="ProductNameFilter" value="@Model.ProductNameFilter" placeholder="Ürün adı ara..." autocomplete="off" class="w-full h-12 pl-11 pr-4 text-base border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors product-list-search-input" aria-label="Ürün adı">
                 </div>
                 <!-- Sırala: custom menü -->
                 <div class="relative product-list-select-menu" data-select-id="SortBy">
@@ -83,13 +83,13 @@
                         @if (Model.SortBy == "price") {<option value="price" selected>Fiyat (düşük → yüksek)</option>} else {<option value="price">Fiyat (düşük → yüksek)</option>}
                         @if (Model.SortBy == "priceDesc") {<option value="priceDesc" selected>Fiyat (yüksek → düşük)</option>} else {<option value="priceDesc">Fiyat (yüksek → düşük)</option>}
                     </select>
-                    <button type="button" class="product-list-select-trigger relative w-full h-12 pl-4 pr-10 text-left text-base bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors flex items-center justify-between" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="SortBy-label" id="SortBy-trigger">
+                    <button type="button" class="product-list-select-trigger relative w-full h-12 pl-4 pr-10 text-left text-base bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors flex items-center justify-between product-list-select-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="SortBy-label" id="SortBy-trigger">
                         <span class="block truncate product-list-select-value">En yeni</span>
                         <span class="pointer-events-none absolute right-3 flex items-center text-gray-400">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
                         </span>
                     </button>
-                    <ul class="product-list-select-dropdown absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white py-1.5 text-sm shadow-xl ring-1 ring-black/5 focus:outline-none transition-all duration-200 ease-out origin-top opacity-0 scale-95 pointer-events-none invisible" role="listbox" aria-labelledby="SortBy-trigger" id="SortBy-listbox"></ul>
+                    <ul class="product-list-select-dropdown absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white py-1.5 text-sm shadow-xl ring-1 ring-black/5 focus:outline-none transition-all duration-200 ease-out origin-top opacity-0 scale-95 pointer-events-none invisible product-list-select-dropdown-menu" role="listbox" aria-labelledby="SortBy-trigger" id="SortBy-listbox"></ul>
                 </div>
             </div>
         </form>

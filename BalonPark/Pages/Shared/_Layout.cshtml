@@ -325,7 +325,7 @@
                                     </a>
                                     @if (hasSubs)
                                     {
-                                        <ul id="category-children-@cat.Id" class="category-tree-children @(childrenExpanded ? "" : "hidden")" role="group" aria-label="@cat.Name alt kategorileri">
+                                        <ul id="category-children-@cat.Id" class="category-tree-children @(childrenExpanded ? "category-tree-children-open" : "")" role="group" aria-label="@cat.Name alt kategorileri">
                                             @foreach (var sub in cat.SubCategories!)
                                             {
                                                 var isSubActive = string.Equals(sub.Slug, activeSubSlug, StringComparison.OrdinalIgnoreCase);

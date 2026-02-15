@@ -114,7 +114,6 @@
                             <button type="button" class="swiper-button-prev hero-swiper-prev" aria-label="Önceki slide"></button>
                             <button type="button" class="swiper-button-next hero-swiper-next" aria-label="Sonraki slide"></button>
                         </div>
-                        <div class="hero-swiper-pagination swiper-pagination" aria-label="Banner sayfa numarası"></div>
                     </div>
                     </div>
                 </div>
@@ -401,28 +400,6 @@
         color: var(--section-subtitle-color, #9ca3af);
     }
     .hero-overlay-headline { margin: 0; }
-    /* Hero pagination: bullet style, alt köşe */
-    .hero-swiper-pagination {
-        position: absolute !important;
-        bottom: 1rem !important;
-        left: 1.5rem !important;
-        right: auto !important;
-        width: auto !important;
-        display: flex;
-        gap: 0.5rem;
-        z-index: 10;
-    }
-    .hero-swiper-pagination .swiper-pagination-bullet {
-        width: 8px;
-        height: 8px;
-        background: rgba(255,255,255,0.6);
-        opacity: 1;
-        margin: 0 !important;
-    }
-    .hero-swiper-pagination .swiper-pagination-bullet-active {
-        background: #fff;
-        transform: scale(1.2);
-    }
     .section-link {
         font-size: 0.875rem;
         font-weight: 500;
@@ -498,8 +475,6 @@
             if (!heroEl || heroEl.swiper) return;
             var nextEl = heroEl.querySelector('.hero-swiper-next');
             var prevEl = heroEl.querySelector('.hero-swiper-prev');
-            var wrap = heroEl.parentElement;
-            var paginationEl = wrap ? wrap.querySelector('.hero-swiper-pagination') : null;
             var prefersReducedMotion = typeof window.matchMedia !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             var opts = {
                 loop: false,
@@ -510,7 +485,7 @@
                 keyboard: { enabled: true },
                 observer: true,
                 observeParents: true,
-                pagination: paginationEl ? { el: paginationEl, clickable: true } : false,
+                pagination: false,
                 a11y: { prevSlideMessage: 'Önceki', nextSlideMessage: 'Sonraki' },
                 on: {
                     init: function(swiper) {

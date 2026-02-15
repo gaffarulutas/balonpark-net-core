@@ -9,6 +9,17 @@ module.exports = {
   ],
   theme: {
     extend: {
+      transitionProperty: {
+        'max-height': 'max-height',
+      },
+      transitionDuration: {
+        '250': '250ms',
+        '300': '300ms',
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'in-out-smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      },
       colors: {
         primary: '#00A8E8',
         'primary-dark': '#0087c4',
