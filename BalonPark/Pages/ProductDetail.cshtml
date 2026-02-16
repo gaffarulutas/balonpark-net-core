@@ -30,7 +30,7 @@
 
 
 <!-- Product Section Start -->
-<div class="space-y-6">
+<div class="space-y-6" id="product-detail-root" @Html.Raw(isAdminLoggedIn ? "data-edit-mode=\"false\"" : "")>
     @await Html.PartialAsync("Shared/_Breadcrumb", new List<BreadcrumbItem>
     {
         BreadcrumbItem.Link("Ana Sayfa", "/"),
@@ -149,10 +149,20 @@
                     }
                 }
             }
-            <!-- Üst satır: Marka/Kategori sol, WhatsApp + PDF sağ üst -->
+            <!-- Üst satır: Marka/Kategori sol, Düzenleme modu (admin) + PDF + WhatsApp sağ üst -->
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">@(Model.Product?.CategoryName)@(!string.IsNullOrEmpty(Model.Product?.SubCategoryName) ? " / " + Model.Product.SubCategoryName : "")</p>
-                <div class="flex items-center gap-2 flex-shrink-0">
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    @if (isAdminLoggedIn)
+                    {
+                        <label class="product-detail-edit-mode-switch cursor-pointer select-none" for="product-detail-edit-mode-switch">
+                            <input type="checkbox" id="product-detail-edit-mode-switch" class="sr-only" autocomplete="off" aria-label="Düzenleme modu">
+                            <span class="switch-track">
+                                <span class="switch-knob"></span>
+                            </span>
+                            <span class="text-sm font-medium text-gray-600">Düzenleme modu</span>
+                        </label>
+                    }
                     <a href="@(Url.Page("/ProductDetail", "ExportRelatedProductsPdf", new { categorySlug = Model.Product?.CategorySlug, subCategorySlug = Model.Product?.SubCategorySlug, productSlug = Model.Product?.Slug }))" id="productPdfBtn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm disabled:opacity-70 disabled:pointer-events-none" title="Bu ürünü PDF olarak indir" aria-label="Ürünü PDF indir">
                         <i data-lucide="file-down" class="w-5 h-5 text-red-600 pdf-btn-icon flex-shrink-0" aria-hidden="true"></i>
                         <span class="pdf-btn-text">PDF indir</span>
@@ -166,13 +176,13 @@
                     }
                 </div>
             </div>
-            <!-- Ürün adı ve ürün kodu aynı satırda: başlık sol, kod sağ, düz metin -->
+            <!-- Ürün adı ve ürün kodu aynı satırda: başlık sol (metin sonunda düzenle ikonu), kod sağ -->
             <div class="flex flex-wrap items-baseline justify-between gap-2">
                 <div class="admin-editable-field product-detail-editable min-w-0 flex-1 flex items-baseline gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Name" data-product-id="@Model.Product?.Id" data-type="text" data-value="@Model.Product?.Name">
-                    <h1 class="text-ink text-xl md:text-2xl font-semibold leading-tight admin-editable-value">@Model.Product?.Name</h1>
+                    <h1 class="text-ink text-xl md:text-2xl font-semibold leading-tight admin-editable-value min-w-0">@Model.Product?.Name</h1>
                     @if (isAdminLoggedIn)
                     {
-                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0" aria-label="Ürün adını düzenle" title="Düzenle">
+                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0 ml-0.5" aria-label="Ürün adını düzenle" title="Düzenle">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
                     }
@@ -184,6 +194,37 @@
                     </button>
                 </p>
             </div>
+            <!-- Stok durumu: ürün kodunun altında -->
+            <div class="admin-editable-field product-detail-editable flex items-center gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Stock" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.Stock">
+                @if (Model.Product?.Stock > 0)
+                {
+                    <p class="flex items-center gap-2 text-sm text-green-700 flex-wrap">
+                        <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
+                        <span>Stokta mevcut</span>
+                        <span class="text-gray-500 admin-editable-value">(@(Model.Product?.Stock) adet)</span>
+                        @if (isAdminLoggedIn)
+                        {
+                            <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0 ml-0.5" aria-label="Stok düzenle" title="Düzenle">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                        }
+                    </p>
+                }
+                else
+                {
+                    <p class="flex items-center gap-2 text-sm text-red-600 flex-wrap">
+                        <i data-lucide="x-circle" class="w-5 h-5 flex-shrink-0"></i>
+                        <span>Stokta yok</span>
+                        <span class="admin-editable-value hidden">(0 adet)</span>
+                        @if (isAdminLoggedIn)
+                        {
+                            <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0 ml-0.5" aria-label="Stok düzenle" title="Düzenle">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                        }
+                    </p>
+                }
+            </div>
             <!-- Fiyat + indirim badge + görüntülenme (referans: £40 üstü çizili, £28 vurgulu, yanında rating) -->
             <div class="flex flex-wrap items-center gap-3 pb-4 border-b border-gray-100">
                 @if (Model.Product?.Price <= 0)
@@ -192,7 +233,7 @@
                         <p class="text-gray-500 admin-editable-value">Fiyat için iletişime geçin</p>
                         @if (isAdminLoggedIn)
                         {
-                            <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Fiyat düzenle" title="Düzenle">
+                            <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0" aria-label="Fiyat düzenle" title="Düzenle">
                                 <i data-lucide="pencil" class="w-4 h-4"></i>
                             </button>
                         }
@@ -205,7 +246,7 @@
                             <span class="price-main price-tl text-primary text-2xl font-semibold admin-editable-value @(selectedCurrency == "TL" ? "block" : "hidden")">₺@Model.Product?.Price.ToString("N0")</span>
                             @if (isAdminLoggedIn)
                             {
-                                <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Fiyat düzenle" title="Düzenle">
+                                <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0" aria-label="Fiyat düzenle" title="Düzenle">
                                     <i data-lucide="pencil" class="w-4 h-4"></i>
                                 </button>
                             }
@@ -227,28 +268,18 @@
                     </span>
                 }
             </div>
-            <!-- Açıklama (tüm metin her zaman görünür) -->
-            @if (!string.IsNullOrEmpty(Model.Product?.Description) || !string.IsNullOrEmpty(Model.Product?.Summary))
+            <!-- Açıklama / özet tek blok (özet varsa özet, yoksa açıklama; başlık yok) -->
+            @if (!string.IsNullOrEmpty(Model.Product?.Summary) || !string.IsNullOrEmpty(Model.Product?.Description))
             {
-                var fullDesc = !string.IsNullOrEmpty(Model.Product?.Description) ? Model.Product.Description : Model.Product?.Summary ?? "";
-                <div class="product-description-block border-b border-gray-100 pb-4 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Description" data-product-id="@Model.Product?.Id" data-type="textarea">
-                    <div class="text-sm text-gray-700 leading-relaxed admin-editable-value">@Html.Raw(fullDesc)</div>
+                var showSummary = !string.IsNullOrEmpty(Model.Product?.Summary);
+                var content = showSummary ? Model.Product!.Summary! : (Model.Product?.Description ?? "");
+                var dataField = showSummary ? "Summary" : "Description";
+                var ariaLabel = showSummary ? "Özeti düzenle" : "Açıklamayı düzenle";
+                <div class="product-description-block border-b border-gray-100 pb-4 admin-editable-field product-detail-editable flex flex-row items-start gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="@dataField" data-product-id="@Model.Product?.Id" data-type="textarea">
+                    <div class="text-sm text-gray-700 leading-relaxed admin-editable-value flex-1 min-w-0">@Html.Raw(content)</div>
                     @if (isAdminLoggedIn)
                     {
-                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition mt-1" aria-label="Açıklamayı düzenle" title="Düzenle">
-                            <i data-lucide="pencil" class="w-4 h-4"></i>
-                        </button>
-                    }
-                </div>
-            }
-            @if (!string.IsNullOrEmpty(Model.Product?.Summary) && !string.IsNullOrEmpty(Model.Product?.Description))
-            {
-                <div class="border-b border-gray-100 pb-4 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Summary" data-product-id="@Model.Product?.Id" data-type="textarea">
-                    <p class="text-sm font-medium text-gray-600 mb-1">Özet</p>
-                    <div class="text-sm text-gray-700 leading-relaxed admin-editable-value">@(Model.Product?.Summary)</div>
-                    @if (isAdminLoggedIn)
-                    {
-                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition mt-1" aria-label="Özeti düzenle" title="Düzenle">
+                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0" aria-label="@ariaLabel" title="Düzenle">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
                     }
@@ -288,53 +319,27 @@
                         { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium @(Model.Product?.IsPopular == true ? "text-gray-700" : "text-gray-400") admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="IsPopular" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.IsPopular == true ? "true" : "false")"><i data-lucide="trending-up" class="w-5 h-5 text-green-600 flex-shrink-0"></i><span class="admin-editable-value">@(Model.Product?.IsPopular == true ? "Popüler" : "Popüler (kapalı)")</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Popüler düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
                         @if (Model.Product?.IsProjectSpecial == true || isAdminLoggedIn)
                         { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium @(Model.Product?.IsProjectSpecial == true ? "text-gray-700" : "text-gray-400") admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="IsProjectSpecial" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.IsProjectSpecial == true ? "true" : "false")"><i data-lucide="star" class="w-5 h-5 text-amber-500 flex-shrink-0"></i><span class="admin-editable-value">@(Model.Product?.IsProjectSpecial == true ? "Projeye özel" : "Projeye özel (kapalı)")</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Projeye özel düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
-                        @if (Model.Product?.IsDiscounted == true || isAdminLoggedIn)
-                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium @(Model.Product?.IsDiscounted == true ? "text-gray-700" : "text-gray-400") admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="IsDiscounted" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.IsDiscounted == true ? "true" : "false")"><i data-lucide="percent" class="w-5 h-5 text-red-600 flex-shrink-0"></i><span class="admin-editable-value">@(Model.Product?.IsDiscounted == true ? "İndirimli" : "İndirimli (kapalı)")</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="İndirimli düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
                     </div>
                 </div>
             }
-            <!-- Renk paleti (sadece görüntüleme, düzenleme yok) -->
-            @if (colorItems.Any())
-            {
-                <div class="product-color-section border-b border-gray-100 pb-4">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Renkler</p>
-                    <div class="flex flex-wrap items-center gap-2" role="img" aria-label="Ürün renk seçenekleri">
-                        @foreach (var item in colorItems)
-                        {
-                            <span class="inline-block w-9 h-9 rounded-full border-2 border-gray-200 flex-shrink-0 cursor-default bg-gray-100"
-                                  style="@(item.Hex != null ? $"background-color:{item.Hex} !important" : "background: linear-gradient(135deg,#e5e7eb 50%,#d1d5db 50%) !important")"
-                                  title="@item.Name"
-                                  aria-hidden="true"></span>
-                        }
+            <!-- Renk Seçenekleri + Stok/Teslimat: aynı div, sola dayalı, dikey hizada -->
+            <div class="product-detail-options-block border-b border-gray-100 pb-4">
+                @if (colorItems.Any())
+                {
+                    <div class="product-color-section mb-3">
+                        <p class="text-sm font-medium text-gray-700 mb-2">Renk Seçenekleri</p>
+                        <div class="flex flex-wrap items-center gap-1.5" role="img" aria-label="Renk seçenekleri">
+                            @foreach (var item in colorItems)
+                            {
+                                <span class="product-color-swatch inline-block w-5 h-5 rounded border border-gray-200 flex-shrink-0 cursor-default bg-gray-100"
+                                      style="@(item.Hex != null ? $"background-color:{item.Hex} !important" : "background: linear-gradient(135deg,#e5e7eb 50%,#d1d5db 50%) !important")"
+                                      title="@item.Name"
+                                      aria-hidden="true"></span>
+                            }
+                        </div>
                     </div>
-                </div>
-            }
-            <!-- Stok + Teslimat + CTA -->
-            <div class="space-y-3">
-                <div class="admin-editable-field product-detail-editable flex items-center gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Stock" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.Stock">
-                    @if (Model.Product?.Stock > 0)
-                    {
-                        <p class="flex items-center gap-2 text-sm text-green-700">
-                            <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
-                            <span>Stokta mevcut</span>
-                            <span class="text-gray-500 admin-editable-value">(@(Model.Product?.Stock) adet)</span>
-                        </p>
-                    }
-                    else
-                    {
-                        <p class="flex items-center gap-2 text-sm text-red-600">
-                            <i data-lucide="x-circle" class="w-5 h-5 flex-shrink-0"></i>
-                            <span>Stokta yok</span>
-                            <span class="admin-editable-value hidden">(0 adet)</span>
-                        </p>
-                    }
-                    @if (isAdminLoggedIn)
-                    {
-                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Stok düzenle" title="Düzenle">
-                            <i data-lucide="pencil" class="w-4 h-4"></i>
-                        </button>
-                    }
-                </div>
+                }
+                <div class="product-detail-stock-delivery flex flex-wrap items-center gap-x-6 gap-y-2">
                 @if (!string.IsNullOrEmpty(deliveryLabel))
                 {
                     <p class="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
@@ -359,6 +364,7 @@
                         </span>
                     </p>
                 }
+                </div>
             </div>
             <!-- CTA butonları (referans: Add To Cart + Checkout Now) -->
             <div class="flex flex-wrap gap-3 pt-2">
@@ -484,15 +490,17 @@
     <!-- Teknik Özellikler -->
     @if (!string.IsNullOrEmpty(Model.Product?.TechnicalDescription))
     {
-        <div class="pt-4 border-t border-gray-100 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="TechnicalDescription" data-product-id="@Model.Product?.Id" data-type="textarea">
-            <h3 class="flex items-center gap-2 text-ink text-base font-semibold pb-2 border-b border-gray-100 mb-3">
-                <i data-lucide="list-checks" class="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true"></i>
-                Teknik Özellikler
-            </h3>
-            <div class="technical-description-html text-ink max-w-none admin-editable-value">@Html.Raw(Model.Product?.TechnicalDescription)</div>
+        <div class="pt-4 border-t border-gray-100 admin-editable-field product-detail-editable flex flex-row items-start gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="TechnicalDescription" data-product-id="@Model.Product?.Id" data-type="textarea">
+            <div class="flex-1 min-w-0">
+                <h3 class="flex items-center gap-2 text-ink text-base font-semibold pb-2 border-b border-gray-100 mb-3">
+                    <i data-lucide="list-checks" class="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true"></i>
+                    Teknik Özellikler
+                </h3>
+                <div class="technical-description-html text-ink max-w-none admin-editable-value">@Html.Raw(Model.Product?.TechnicalDescription)</div>
+            </div>
             @if (isAdminLoggedIn)
             {
-                <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition mt-1" aria-label="Teknik özellikleri düzenle" title="Düzenle">
+                <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0" aria-label="Teknik özellikleri düzenle" title="Düzenle">
                     <i data-lucide="pencil" class="w-4 h-4"></i>
                 </button>
             }

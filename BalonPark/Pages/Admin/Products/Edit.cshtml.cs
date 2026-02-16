@@ -134,7 +134,7 @@ public class EditModel : BaseAdminPage
         // Yeni resimleri yükle
         if (NewImages != null && NewImages.Any())
         {
-            // Watermark için logo.png'yi kullan
+            // Watermark için logo.png kullan
             var watermarkLogoPath = "/assets/images/logo/logo.png";
             
             var uploadPath = Path.Combine(_environment.WebRootPath, "uploads", "products", Product.Id.ToString());

@@ -754,6 +754,126 @@ html.dark .product-list-search-input:hover {
   border-color: var(--dm-border-soft) !important;
 }
 
+/* ========== Ürün detay: admin inline edit (input, textarea, butonlar) ========== */
+html.dark .admin-edit-inline .admin-edit-input,
+html.dark .product-detail-info .admin-edit-input {
+  background-color: var(--dm-input-bg) !important;
+  border-color: var(--dm-input-border) !important;
+  color: var(--dm-input-text) !important;
+}
+
+html.dark .admin-edit-inline .admin-edit-input::placeholder,
+html.dark .product-detail-info .admin-edit-input::placeholder {
+  color: var(--dm-placeholder) !important;
+}
+
+html.dark .admin-edit-inline .admin-edit-input:focus,
+html.dark .product-detail-info .admin-edit-input:focus {
+  border-color: #00a8e8 !important;
+  outline: none;
+}
+
+/* İptal butonu (border-gray-300 bg-white text-gray-700 hover:bg-gray-50) */
+html.dark .admin-edit-inline button.border-gray-300.bg-white,
+html.dark .admin-edit-inline .border-gray-300.bg-white {
+  background-color: var(--dm-surface) !important;
+  border-color: var(--dm-border) !important;
+  color: var(--dm-text) !important;
+}
+
+html.dark .admin-edit-inline button.border-gray-300.bg-white:hover,
+html.dark .admin-edit-inline .border-gray-300.bg-white:hover {
+  background-color: var(--dm-surface-hover) !important;
+  border-color: var(--dm-border-soft) !important;
+}
+
+/* Bool edit: checkbox ve "Aktif" label */
+html.dark .admin-edit-inline .admin-edit-input.border-gray-300,
+html.dark .admin-edit-inline input[type="checkbox"].border-gray-300 {
+  border-color: var(--dm-border) !important;
+  accent-color: #00a8e8;
+}
+
+html.dark .admin-edit-inline .admin-edit-input .text-gray-700,
+html.dark .admin-edit-inline .text-sm.font-medium.text-gray-700 {
+  color: var(--dm-text) !important;
+}
+
+/* Ürün detay: PDF butonu, ürün kodu alanı */
+html.dark .product-detail-info #productPdfBtn,
+html.dark .product-detail-info a.border-gray-200.bg-white {
+  background-color: var(--dm-surface) !important;
+  border-color: var(--dm-border) !important;
+  color: var(--dm-text) !important;
+}
+
+html.dark .product-detail-info #productPdfBtn:hover,
+html.dark .product-detail-info a.border-gray-200.bg-white:hover {
+  background-color: var(--dm-surface-hover) !important;
+  border-color: var(--dm-border-soft) !important;
+}
+
+html.dark .product-detail-info .product-code-copy:hover {
+  background-color: var(--dm-surface-hover) !important;
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .product-detail-info .product-code-copy {
+  color: var(--dm-text-muted) !important;
+}
+
+/* Ürün detay: Düzenleme modu switch dark */
+html.dark .product-detail-edit-mode-switch .switch-track {
+  background-color: var(--dm-bg-tertiary);
+}
+html.dark .product-detail-edit-mode-switch .switch-knob {
+  background-color: var(--dm-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+html.dark .product-detail-edit-mode-switch .text-sm.font-medium.text-gray-600 {
+  color: var(--dm-text-muted) !important;
+}
+
+/* Ürün detay: açıklama / özet metin rengi */
+html.dark .product-description-block .text-gray-700,
+html.dark .product-detail-info .text-sm.text-gray-700 {
+  color: var(--dm-text-secondary) !important;
+}
+
+/* Ürün detay: özellik etiketleri (border-gray-200 bg-white) – generic override yeterli; ekstra text-gray-400 */
+html.dark .product-detail-info .product-feature-tags .text-gray-400 {
+  color: var(--dm-text-muted) !important;
+}
+
+/* Ürün detay: Renkler bölümü */
+html.dark .product-color-section .text-gray-700 {
+  color: var(--dm-text) !important;
+}
+
+html.dark .product-color-section .border-gray-200.bg-gray-100 {
+  background-color: var(--dm-bg-tertiary) !important;
+  border-color: var(--dm-border) !important;
+}
+
+/* Ürün detay: stok / teslimat metinleri */
+html.dark .product-detail-info .text-green-700 {
+  color: #86efac !important;
+}
+
+html.dark .product-detail-info .text-red-600 {
+  color: #fca5a5 !important;
+}
+
+/* Admin edit icon (kalem) dark modda okunaklı */
+html.dark .product-detail-editable .admin-edit-icon {
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .product-detail-editable .admin-edit-icon:hover {
+  color: #00a8e8 !important;
+  background-color: rgba(0, 168, 232, 0.15) !important;
+}
+
 /* ========== Reduce motion (accessibility) ========== */
 @media (prefers-reduced-motion: reduce) {
   html.dark *,

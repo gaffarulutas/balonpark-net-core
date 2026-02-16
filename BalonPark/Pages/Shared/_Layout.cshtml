@@ -26,6 +26,8 @@
         sameAsLinks.Add(siteSettings.YouTube);
 
     var logoUrl = siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? "~/assets/images/logo/logo.png");
+    // Sidebar'da sadece SVG logo kullan (keskin görünüm)
+    var sidebarLogoUrl = siteSettings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(siteSettings.Logo) ?? siteSettings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.svg") ?? "~/assets/images/logo/logo.svg");
 }
 <!DOCTYPE html>
 <html lang="tr">
@@ -275,7 +277,7 @@
         <div class="layout-sidebar-inner">
             <div class="layout-sidebar-handle" aria-hidden="true"></div>
             <a asp-page="/Index" class="layout-sidebar-logo" aria-label="@Html.Raw(companyName) - Ana Sayfa">
-                <img src="@logoUrl" alt="@Html.Raw(companyName)" width="160" height="48" loading="eager" class="layout-sidebar-logo__img">
+                <img src="@sidebarLogoUrl" alt="@Html.Raw(companyName)" width="160" height="48" loading="eager" class="layout-sidebar-logo__img">
             </a>
             <nav class="layout-sidebar-pages" aria-label="Sayfa menüsü">
                 <a asp-page="/Index" class="layout-sidebar-page-link">Ana Sayfa</a>

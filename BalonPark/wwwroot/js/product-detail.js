@@ -154,6 +154,26 @@
         });
     }
 
+    var EDIT_MODE_STORAGE_KEY = 'productDetailEditMode';
+
+    function initEditModeSwitch() {
+        var root = document.getElementById('product-detail-root');
+        var switchEl = document.getElementById('product-detail-edit-mode-switch');
+        if (!root || !switchEl) return;
+
+        var saved = sessionStorage.getItem(EDIT_MODE_STORAGE_KEY);
+        if (saved === 'true') {
+            switchEl.checked = true;
+            root.setAttribute('data-edit-mode', 'true');
+        }
+
+        switchEl.addEventListener('change', function () {
+            var on = switchEl.checked;
+            root.setAttribute('data-edit-mode', on ? 'true' : 'false');
+            sessionStorage.setItem(EDIT_MODE_STORAGE_KEY, on ? 'true' : 'false');
+        });
+    }
+
     function initAdminInlineEdit() {
         var container = document.querySelector('.admin-editable-field');
         if (!container) return;
@@ -163,6 +183,8 @@
             if (!editBtn) return;
 
             editBtn.addEventListener('click', function (e) {
+                var root = document.getElementById('product-detail-root');
+                if (root && root.getAttribute('data-edit-mode') !== 'true') return;
                 e.preventDefault();
                 e.stopPropagation();
                 var productId = parseInt(wrap.getAttribute('data-product-id'), 10);
@@ -196,13 +218,13 @@
                     input.appendChild(lbl);
                 } else {
                     input = isTextarea ? document.createElement('textarea') : document.createElement('input');
-                    input.type = isNumber ? 'number' : (isTextarea ? null : 'text');
-                    input.min = isNumber ? '0' : null;
                     if (isTextarea) {
                         input.rows = 6;
                         input.className = 'admin-edit-input w-full text-sm border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary';
                         input.value = (valueEl && valueEl.innerText) ? valueEl.innerText : currentVal;
                     } else {
+                        input.type = isNumber ? 'number' : 'text';
+                        input.min = isNumber ? '0' : undefined;
                         input.className = 'admin-edit-input text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-primary focus:border-primary';
                         input.value = currentVal;
                     }
@@ -374,6 +396,7 @@
         initSwipers();
         initPdfButton();
         initProductCodeCopy();
+        initEditModeSwitch();
         initAdminInlineEdit();
     });
 

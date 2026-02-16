@@ -113,7 +113,7 @@ public class CreateModel : BaseAdminPage
         // Resimleri yükle
         if (Images != null && Images.Any())
         {
-            // Watermark için logo.png'yi kullan
+            // Watermark için logo.png kullan
             var watermarkLogoPath = "/assets/images/logo/logo.png";
             
             var uploadPath = Path.Combine(_environment.WebRootPath, "uploads", "products", productId.ToString());

@@ -1,6 +1,59 @@
 /**
- * Product detail page: admin inline edit, loading state, gallery styles.
+ * Product detail page: admin inline edit, loading state, gallery styles, edit mode switch.
  */
+
+/* Düzenleme modu kapalıyken edit butonları gizle, client modu */
+#product-detail-root[data-edit-mode="false"] .admin-edit-icon {
+    display: none !important;
+}
+#product-detail-root[data-edit-mode="false"] .admin-editable-field {
+    cursor: default !important;
+}
+
+/* Düzenleme modu switch: hizalama ve tasarım */
+.product-detail-edit-mode-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0 0;
+    margin: 0;
+    vertical-align: middle;
+}
+.product-detail-edit-mode-switch .switch-track {
+    position: relative;
+    width: 2.5rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background-color: #e5e7eb;
+    transition: background-color 0.2s ease;
+    box-sizing: border-box;
+}
+.product-detail-edit-mode-switch .switch-knob {
+    position: absolute;
+    top: 50%;
+    left: 0.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    transform: translateY(-50%);
+    pointer-events: none;
+    box-sizing: border-box;
+}
+#product-detail-edit-mode-switch:checked ~ .switch-track {
+    background-color: #00a8e8;
+}
+#product-detail-edit-mode-switch:checked ~ .switch-track .switch-knob {
+    transform: translate(1.125rem, -50%);
+}
+.product-detail-edit-mode-switch .text-sm {
+    line-height: 1.25rem;
+    white-space: nowrap;
+}
 
 /* Admin inline edit: alan hover'da edit icon görünsün */
 .product-detail-editable.admin-editable-field .admin-edit-icon {
@@ -16,11 +69,25 @@
 .product-detail-editable.admin-editable-field.admin-edit-active .admin-edit-icon {
     pointer-events: none;
 }
+
+/* Açıklama / Özet edit: container ve textarea %100 genişlik */
+.admin-editable-field.admin-edit-active {
+    flex-wrap: wrap;
+}
+.admin-editable-field .admin-edit-inline {
+    width: 100%;
+    min-width: 0;
+    flex-basis: 100%;
+    box-sizing: border-box;
+}
 .admin-edit-inline .admin-edit-input {
     max-width: 100%;
+    box-sizing: border-box;
 }
 .admin-edit-inline textarea.admin-edit-input {
+    width: 100%;
     min-height: 120px;
+    box-sizing: border-box;
 }
 
 /* Admin inline edit: loading state */
@@ -37,6 +104,12 @@
 }
 @keyframes admin-edit-spin {
     to { transform: rotate(360deg); }
+}
+
+/* Renk Seçenekleri: Stok/Teslimat metni ile aynı sol hiza (stok satırı ikon+gap ile 1.75rem’de başlıyor) */
+/* Renk Seçenekleri + Stok/Teslimat: aynı blok, sola dayalı, dikey hizada (ikon + gap = 1.75rem) */
+.product-detail-info .product-detail-options-block {
+    box-sizing: border-box;
 }
 
 /* ========== Product detail gallery: büyük swiper ========== */

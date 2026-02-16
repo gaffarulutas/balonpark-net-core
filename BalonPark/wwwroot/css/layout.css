@@ -1545,6 +1545,7 @@ body {
     justify-content: center;
     flex-shrink: 0;
     color: var(--breadcrumb-separator);
+    padding: 0 0.3rem;
 }
 
 .breadcrumb-chevron {
