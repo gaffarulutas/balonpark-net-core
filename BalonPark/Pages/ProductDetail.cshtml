@@ -25,6 +25,7 @@
     var productShareTitle = Uri.EscapeDataString(Model.Product?.Name ?? string.Empty);
     var productNameEncoded = System.Net.WebUtility.HtmlEncode(Model.Product?.Name ?? "");
     var whatsAppDigits = string.IsNullOrEmpty(settings?.WhatsApp) ? "" : new string(settings.WhatsApp.Where(c => char.IsDigit(c)).ToArray());
+    var isAdminLoggedIn = ViewData["IsAdminLoggedIn"] as bool? ?? false;
 }
 
 
@@ -48,7 +49,7 @@
                 <button type="button" class="favorite-btn-detail w-9 h-9 rounded-full bg-white/95 shadow flex items-center justify-center text-gray-600 hover:text-primary transition" data-product-id="@Model.Product?.Id" title="Favorilere Ekle" aria-label="Favorilere Ekle"><i data-lucide="heart" class="w-4 h-4"></i></button>
             </div>
             <div class="product-gallery-main-wrap">
-            <div class="swiper productMainSwiper product-gallery-main" data-swiper-autoplay="false" id="lightgallery">
+            <div class="swiper productMainSwiper product-gallery-main" data-swiper-autoplay="false" id="lightgallery" data-aria-describedby="@(productNameEncoded)">
                 <div class="swiper-wrapper">
                     @if (Model.ProductImages.Any())
                     {
@@ -167,7 +168,15 @@
             </div>
             <!-- Ürün adı ve ürün kodu aynı satırda: başlık sol, kod sağ, düz metin -->
             <div class="flex flex-wrap items-baseline justify-between gap-2">
-                <h1 class="text-ink text-xl md:text-2xl font-semibold leading-tight min-w-0">@Model.Product?.Name</h1>
+                <div class="admin-editable-field product-detail-editable min-w-0 flex-1 flex items-baseline gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Name" data-product-id="@Model.Product?.Id" data-type="text" data-value="@Model.Product?.Name">
+                    <h1 class="text-ink text-xl md:text-2xl font-semibold leading-tight admin-editable-value">@Model.Product?.Name</h1>
+                    @if (isAdminLoggedIn)
+                    {
+                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0" aria-label="Ürün adını düzenle" title="Düzenle">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                    }
+                </div>
                 <p class="text-sm text-gray-600 shrink-0 flex items-center gap-1">
                     Ürün Kodu: <span id="product-code-display">U-@Model.Product?.Id</span>
                     <button type="button" class="product-code-copy p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition focus:outline-none focus:ring-2 focus:ring-primary/20" data-code="U-@Model.Product?.Id" title="Kodu kopyala" aria-label="Ürün kodunu kopyala">
@@ -179,12 +188,28 @@
             <div class="flex flex-wrap items-center gap-3 pb-4 border-b border-gray-100">
                 @if (Model.Product?.Price <= 0)
                 {
-                    <p class="text-gray-500">Fiyat için iletişime geçin</p>
+                    <div class="admin-editable-field product-detail-editable flex items-center gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Price" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.Price">
+                        <p class="text-gray-500 admin-editable-value">Fiyat için iletişime geçin</p>
+                        @if (isAdminLoggedIn)
+                        {
+                            <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Fiyat düzenle" title="Düzenle">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                        }
+                    </div>
                 }
                 else
                 {
                     <div class="flex items-center gap-2 flex-wrap">
-                        <span class="price-main price-tl text-primary text-2xl font-semibold @(selectedCurrency == "TL" ? "block" : "hidden")">₺@Model.Product?.Price.ToString("N0")</span>
+                        <div class="admin-editable-field product-detail-editable flex items-center gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Price" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                            <span class="price-main price-tl text-primary text-2xl font-semibold admin-editable-value @(selectedCurrency == "TL" ? "block" : "hidden")">₺@Model.Product?.Price.ToString("N0")</span>
+                            @if (isAdminLoggedIn)
+                            {
+                                <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Fiyat düzenle" title="Düzenle">
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                </button>
+                            }
+                        </div>
                         <span class="price-main price-usd text-primary text-2xl font-semibold @(selectedCurrency == "USD" ? "block" : "hidden")">$@Model.Product?.UsdPrice.ToString("N0")</span>
                         <span class="price-main price-eur text-primary text-2xl font-semibold @(selectedCurrency == "EUR" ? "block" : "hidden")">€@Model.Product?.EuroPrice.ToString("N0")</span>
                         <span class="price-main price-rub text-primary text-2xl font-semibold @(selectedCurrency == "RUB" ? "block" : "hidden")">₽@Model.Product?.RubPrice.ToString("N0")</span>
@@ -206,8 +231,27 @@
             @if (!string.IsNullOrEmpty(Model.Product?.Description) || !string.IsNullOrEmpty(Model.Product?.Summary))
             {
                 var fullDesc = !string.IsNullOrEmpty(Model.Product?.Description) ? Model.Product.Description : Model.Product?.Summary ?? "";
-                <div class="product-description-block border-b border-gray-100 pb-4">
-                    <div class="text-sm text-gray-700 leading-relaxed">@Html.Raw(fullDesc)</div>
+                <div class="product-description-block border-b border-gray-100 pb-4 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Description" data-product-id="@Model.Product?.Id" data-type="textarea">
+                    <div class="text-sm text-gray-700 leading-relaxed admin-editable-value">@Html.Raw(fullDesc)</div>
+                    @if (isAdminLoggedIn)
+                    {
+                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition mt-1" aria-label="Açıklamayı düzenle" title="Düzenle">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                    }
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Product?.Summary) && !string.IsNullOrEmpty(Model.Product?.Description))
+            {
+                <div class="border-b border-gray-100 pb-4 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Summary" data-product-id="@Model.Product?.Id" data-type="textarea">
+                    <p class="text-sm font-medium text-gray-600 mb-1">Özet</p>
+                    <div class="text-sm text-gray-700 leading-relaxed admin-editable-value">@(Model.Product?.Summary)</div>
+                    @if (isAdminLoggedIn)
+                    {
+                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition mt-1" aria-label="Özeti düzenle" title="Düzenle">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                    }
                 </div>
             }
             <!-- Özellik etiketleri: Paket, Ateşe dayanıklı, Kumaş, Teslimat, Popüler, Projeye özel (indirim fiyatın yanında) -->
@@ -217,7 +261,7 @@
                 var deliveryLabel = (deliveryMin != null && deliveryMax != null)
                     ? (deliveryMin == deliveryMax ? $"{deliveryMin} iş günü" : $"{deliveryMin}-{deliveryMax} iş günü")
                     : (deliveryMin != null ? $"{deliveryMin} iş günü" : (deliveryMax != null ? $"{deliveryMax} iş günü" : null));
-                if (string.IsNullOrEmpty(deliveryLabel) && !string.IsNullOrEmpty(Model.Product?.DeliveryDays)) { deliveryLabel = Model.Product.DeliveryDays; }
+                if (string.IsNullOrEmpty(deliveryLabel) && !string.IsNullOrEmpty(Model.Product?.DeliveryDays)) { deliveryLabel = Model.Product?.DeliveryDays; }
                 var packL = Model.Product?.PackagedLength?.Trim();
                 var packD = Model.Product?.PackagedDepth?.Trim();
                 var packW = Model.Product?.PackagedWeightKg;
@@ -226,28 +270,30 @@
                     : null;
                 var hasFeatureTags = !string.IsNullOrEmpty(packagedTag) || Model.Product?.IsFireResistant == true || Model.Product?.MaterialWeightGrm2 != null || !string.IsNullOrEmpty(Model.Product?.MaterialWeight) || !string.IsNullOrEmpty(deliveryLabel) || Model.Product?.IsPopular == true || Model.Product?.IsProjectSpecial == true;
             }
-            @if (hasFeatureTags)
+            @if (hasFeatureTags || isAdminLoggedIn)
             {
                 <div class="product-feature-tags border-b border-gray-100 pb-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         @if (!string.IsNullOrEmpty(packagedTag))
                         { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700" title="Paket: Uzunluk×Derinlik×Ağırlık (cm×cm×kg)"><i data-lucide="package" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>Paket: @packagedTag</span> }
-                        @if (Model.Product?.IsFireResistant == true)
-                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700"><i data-lucide="flame" class="w-5 h-5 text-orange-600 flex-shrink-0"></i>Ateşe dayanıklı</span> }
+                        @if (Model.Product?.IsFireResistant == true || isAdminLoggedIn)
+                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium @(Model.Product?.IsFireResistant == true ? "text-gray-700" : "text-gray-400") admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="IsFireResistant" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.IsFireResistant == true ? "true" : "false")"><i data-lucide="flame" class="w-5 h-5 text-orange-600 flex-shrink-0"></i><span class="admin-editable-value">@(Model.Product?.IsFireResistant == true ? "Ateşe dayanıklı" : "Ateşe dayanıklı (kapalı)")</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Ateşe dayanıklı düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
                         @if (Model.Product?.MaterialWeightGrm2 != null)
-                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700"><i data-lucide="layers" class="w-5 h-5 text-slate-600 flex-shrink-0"></i>Kumaş: @(Model.Product.MaterialWeightGrm2) gr/m²</span> }
+                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="MaterialWeightGrm2" data-product-id="@Model.Product?.Id" data-type="number" data-value="@(Model.Product?.MaterialWeightGrm2?.ToString(System.Globalization.CultureInfo.InvariantCulture))"><i data-lucide="layers" class="w-5 h-5 text-slate-600 flex-shrink-0"></i><span class="admin-editable-value">Kumaş: @(Model.Product?.MaterialWeightGrm2) gr/m²</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Kumaş gr/m² düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
                         @if (Model.Product?.MaterialWeightGrm2 == null && !string.IsNullOrEmpty(Model.Product?.MaterialWeight))
-                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700"><i data-lucide="layers" class="w-5 h-5 text-slate-600 flex-shrink-0"></i>Kumaş: @Model.Product.MaterialWeight</span> }
+                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="MaterialWeight" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.MaterialWeight)"><i data-lucide="layers" class="w-5 h-5 text-slate-600 flex-shrink-0"></i><span class="admin-editable-value">Kumaş: @(Model.Product?.MaterialWeight)</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Kumaş düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
                         @if (!string.IsNullOrEmpty(deliveryLabel))
                         { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700"><i data-lucide="truck" class="w-5 h-5 text-blue-600 flex-shrink-0"></i>Teslimat: @deliveryLabel</span> }
-                        @if (Model.Product?.IsPopular == true)
-                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700"><i data-lucide="trending-up" class="w-5 h-5 text-green-600 flex-shrink-0"></i>Popüler</span> }
-                        @if (Model.Product?.IsProjectSpecial == true)
-                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700"><i data-lucide="star" class="w-5 h-5 text-amber-500 flex-shrink-0"></i>Projeye özel</span> }
+                        @if (Model.Product?.IsPopular == true || isAdminLoggedIn)
+                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium @(Model.Product?.IsPopular == true ? "text-gray-700" : "text-gray-400") admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="IsPopular" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.IsPopular == true ? "true" : "false")"><i data-lucide="trending-up" class="w-5 h-5 text-green-600 flex-shrink-0"></i><span class="admin-editable-value">@(Model.Product?.IsPopular == true ? "Popüler" : "Popüler (kapalı)")</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Popüler düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
+                        @if (Model.Product?.IsProjectSpecial == true || isAdminLoggedIn)
+                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium @(Model.Product?.IsProjectSpecial == true ? "text-gray-700" : "text-gray-400") admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="IsProjectSpecial" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.IsProjectSpecial == true ? "true" : "false")"><i data-lucide="star" class="w-5 h-5 text-amber-500 flex-shrink-0"></i><span class="admin-editable-value">@(Model.Product?.IsProjectSpecial == true ? "Projeye özel" : "Projeye özel (kapalı)")</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Projeye özel düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
+                        @if (Model.Product?.IsDiscounted == true || isAdminLoggedIn)
+                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium @(Model.Product?.IsDiscounted == true ? "text-gray-700" : "text-gray-400") admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="IsDiscounted" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.IsDiscounted == true ? "true" : "false")"><i data-lucide="percent" class="w-5 h-5 text-red-600 flex-shrink-0"></i><span class="admin-editable-value">@(Model.Product?.IsDiscounted == true ? "İndirimli" : "İndirimli (kapalı)")</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="İndirimli düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
                     </div>
                 </div>
             }
-            <!-- Renk paleti (sadece görüntüleme, seçim yok) -->
+            <!-- Renk paleti (sadece görüntüleme, düzenleme yok) -->
             @if (colorItems.Any())
             {
                 <div class="product-color-section border-b border-gray-100 pb-4">
@@ -265,33 +311,52 @@
             }
             <!-- Stok + Teslimat + CTA -->
             <div class="space-y-3">
-                @if (Model.Product?.Stock > 0)
-                {
-                    <p class="flex items-center gap-2 text-sm text-green-700">
-                        <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
-                        <span>Stokta mevcut</span>
-                        <span class="text-gray-500">(@Model.Product.Stock adet)</span>
-                    </p>
-                }
-                else
-                {
-                    <p class="flex items-center gap-2 text-sm text-red-600">
-                        <i data-lucide="x-circle" class="w-5 h-5 flex-shrink-0"></i>
-                        <span>Stokta yok</span>
-                    </p>
-                }
+                <div class="admin-editable-field product-detail-editable flex items-center gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Stock" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.Stock">
+                    @if (Model.Product?.Stock > 0)
+                    {
+                        <p class="flex items-center gap-2 text-sm text-green-700">
+                            <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
+                            <span>Stokta mevcut</span>
+                            <span class="text-gray-500 admin-editable-value">(@(Model.Product?.Stock) adet)</span>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="flex items-center gap-2 text-sm text-red-600">
+                            <i data-lucide="x-circle" class="w-5 h-5 flex-shrink-0"></i>
+                            <span>Stokta yok</span>
+                            <span class="admin-editable-value hidden">(0 adet)</span>
+                        </p>
+                    }
+                    @if (isAdminLoggedIn)
+                    {
+                        <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Stok düzenle" title="Düzenle">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                    }
+                </div>
                 @if (!string.IsNullOrEmpty(deliveryLabel))
                 {
                     <p class="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-                        <span class="flex items-center gap-2"><i data-lucide="truck" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>Teslimat: @deliveryLabel</span>
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="truck" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
+                            <span>Teslimat: </span>
+                            <span class="admin-editable-field product-detail-editable inline-flex items-center gap-1 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DeliveryDaysMin" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.DeliveryDaysMin"><span class="admin-editable-value">@Model.Product?.DeliveryDaysMin</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Teslimat min düzenle" title="Min iş günü"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span>
+                            <span>-</span>
+                            <span class="admin-editable-field product-detail-editable inline-flex items-center gap-1 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DeliveryDaysMax" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.DeliveryDaysMax"><span class="admin-editable-value">@Model.Product?.DeliveryDaysMax</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Teslimat max düzenle" title="Max iş günü"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span>
+                            <span>iş günü</span>
+                        </span>
                         <span class="text-gray-500">• Kargo ücreti alıcıya aittir</span>
                     </p>
                 }
                 else
                 {
                     <p class="flex items-center gap-2 text-sm text-gray-500">
-                        <i data-lucide="truck" class="w-5 h-5 flex-shrink-0"></i>
-                        <span>Kargo ücreti alıcıya aittir</span>
+                        <span class="flex items-center gap-2 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DeliveryDaysMin" data-product-id="@Model.Product?.Id" data-type="number" data-value="">
+                            <i data-lucide="truck" class="w-5 h-5 flex-shrink-0"></i>
+                            <span class="admin-editable-value">Kargo ücreti alıcıya aittir</span>
+                            @if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Teslimat ekle" title="Teslimat (Min-Max iş günü) ekle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}
+                        </span>
                     </p>
                 }
             </div>
@@ -360,11 +425,11 @@
                             Şişmiş ürün
                         </h4>
                         <dl class="space-y-2.5 text-sm">
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedLength)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-horizontal" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold">@Model.Product.InflatedLength m</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedWidth)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move" class="w-4 h-4 text-primary flex-shrink-0"></i>Genişlik</dt><dd class="text-ink font-semibold">@Model.Product.InflatedWidth m</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedHeight)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-vertical" class="w-4 h-4 text-primary flex-shrink-0"></i>Yükseklik</dt><dd class="text-ink font-semibold">@Model.Product.InflatedHeight m</dd></div> }
-                            @if (Model.Product?.UserCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="users" class="w-4 h-4 text-primary flex-shrink-0"></i>Kullanıcı Sayısı</dt><dd class="text-ink font-semibold">@Model.Product.UserCount</dd></div> }
-                            @if (Model.Product?.InflatedWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Şişmiş ağırlık</dt><dd class="text-ink font-semibold">@(Model.Product.InflatedWeightKg) kg</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedLength)) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="InflatedLength" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.InflatedLength)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-horizontal" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.InflatedLength) m</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Uzunluk düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedWidth)) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="InflatedWidth" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.InflatedWidth)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move" class="w-4 h-4 text-primary flex-shrink-0"></i>Genişlik</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.InflatedWidth) m</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Genişlik düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.InflatedHeight)) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="InflatedHeight" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.InflatedHeight)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="move-vertical" class="w-4 h-4 text-primary flex-shrink-0"></i>Yükseklik</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.InflatedHeight) m</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Yükseklik düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (Model.Product?.UserCount != null) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="UserCount" data-product-id="@Model.Product?.Id" data-type="number" data-value="@(Model.Product?.UserCount)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="users" class="w-4 h-4 text-primary flex-shrink-0"></i>Kullanıcı Sayısı</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.UserCount)</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Kullanıcı sayısı düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (Model.Product?.InflatedWeightKg != null) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="InflatedWeightKg" data-product-id="@Model.Product?.Id" data-type="number" data-value="@(Model.Product?.InflatedWeightKg?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Şişmiş ağırlık</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.InflatedWeightKg) kg</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Şişmiş ağırlık düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
                         </dl>
                     </div>
                 }
@@ -376,10 +441,10 @@
                             Montaj / demontaj
                         </h4>
                         <dl class="space-y-2.5 text-sm">
-                            @if (Model.Product?.AssemblyTime != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="clock" class="w-4 h-4 text-primary flex-shrink-0"></i>Montaj ve demontaj süresi</dt><dd class="text-ink font-semibold">@(Model.Product.AssemblyTime) saat</dd></div> }
-                            @if (Model.Product?.RequiredPersonCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="users" class="w-4 h-4 text-primary flex-shrink-0"></i>Gerekli kişi sayısı</dt><dd class="text-ink font-semibold">@(Model.Product.RequiredPersonCount) kişi</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.FanDescription)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="wind" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan</dt><dd class="text-ink font-semibold">@Model.Product.FanDescription</dd></div> }
-                            @if (Model.Product?.FanWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan ağırlığı</dt><dd class="text-ink font-semibold">@(Model.Product.FanWeightKg) kg</dd></div> }
+                            @if (Model.Product?.AssemblyTime != null) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="AssemblyTime" data-product-id="@Model.Product?.Id" data-type="number" data-value="@(Model.Product?.AssemblyTime?.ToString(System.Globalization.CultureInfo.InvariantCulture))"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="clock" class="w-4 h-4 text-primary flex-shrink-0"></i>Montaj ve demontaj süresi</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.AssemblyTime) saat</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Montaj süresi düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (Model.Product?.RequiredPersonCount != null) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="RequiredPersonCount" data-product-id="@Model.Product?.Id" data-type="number" data-value="@(Model.Product?.RequiredPersonCount)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="users" class="w-4 h-4 text-primary flex-shrink-0"></i>Gerekli kişi sayısı</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.RequiredPersonCount) kişi</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Kişi sayısı düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.FanDescription)) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="FanDescription" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.FanDescription)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="wind" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.FanDescription)</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Fan düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (Model.Product?.FanWeightKg != null) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="FanWeightKg" data-product-id="@Model.Product?.Id" data-type="number" data-value="@(Model.Product?.FanWeightKg?.ToString(System.Globalization.CultureInfo.InvariantCulture))"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Fan ağırlığı</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.FanWeightKg) kg</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Fan ağırlığı düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
                         </dl>
                     </div>
                 }
@@ -391,10 +456,10 @@
                             Paketlenmiş ürünün özellikleri
                         </h4>
                         <dl class="space-y-2.5 text-sm">
-                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedLength)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="ruler" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold">@Model.Product.PackagedLength cm</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedDepth)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="box" class="w-4 h-4 text-primary flex-shrink-0"></i>Derinlik</dt><dd class="text-ink font-semibold">@Model.Product.PackagedDepth cm</dd></div> }
-                            @if (Model.Product?.PackagedWeightKg != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Ağırlık</dt><dd class="text-ink font-semibold">@(Model.Product.PackagedWeightKg) kg</dd></div> }
-                            @if (Model.Product?.PackagePalletCount != null) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="layers" class="w-4 h-4 text-primary flex-shrink-0"></i>Paket / palet sayısı</dt><dd class="text-ink font-semibold">@Model.Product.PackagePalletCount</dd></div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedLength)) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="PackagedLength" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.PackagedLength)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="ruler" class="w-4 h-4 text-primary flex-shrink-0"></i>Uzunluk</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.PackagedLength) cm</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Paket uzunluk düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.PackagedDepth)) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="PackagedDepth" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.PackagedDepth)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="box" class="w-4 h-4 text-primary flex-shrink-0"></i>Derinlik</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.PackagedDepth) cm</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Paket derinlik düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (Model.Product?.PackagedWeightKg != null) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="PackagedWeightKg" data-product-id="@Model.Product?.Id" data-type="number" data-value="@(Model.Product?.PackagedWeightKg?.ToString(System.Globalization.CultureInfo.InvariantCulture))"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="weight" class="w-4 h-4 text-primary flex-shrink-0"></i>Ağırlık</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.PackagedWeightKg) kg</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Paket ağırlık düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (Model.Product?.PackagePalletCount != null) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="PackagePalletCount" data-product-id="@Model.Product?.Id" data-type="number" data-value="@(Model.Product?.PackagePalletCount)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="layers" class="w-4 h-4 text-primary flex-shrink-0"></i>Paket / palet sayısı</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.PackagePalletCount)</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Palet sayısı düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
                         </dl>
                     </div>
                 }
@@ -406,9 +471,9 @@
                             Genel
                         </h4>
                         <dl class="space-y-2.5 text-sm">
-                            @if (Model.Product?.HasCertificate == true) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="award" class="w-4 h-4 text-primary flex-shrink-0"></i>Sertifika</dt><dd class="text-ink font-semibold">Sertifika var</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.WarrantyDescription)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="shield-check" class="w-4 h-4 text-primary flex-shrink-0"></i>Garanti</dt><dd class="text-ink font-semibold">@Model.Product.WarrantyDescription</dd></div> }
-                            @if (!string.IsNullOrEmpty(Model.Product?.AfterSalesService)) { <div class="flex justify-between gap-2 items-center"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="headset" class="w-4 h-4 text-primary flex-shrink-0"></i>Garanti Sonrası Hizmet</dt><dd class="text-ink font-semibold">@Model.Product.AfterSalesService</dd></div> }
+                            <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="HasCertificate" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.HasCertificate == true ? "true" : "false")"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="award" class="w-4 h-4 text-primary flex-shrink-0"></i>Sertifika</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.HasCertificate == true ? "Sertifika var" : "Yok")</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Sertifika düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div>
+                            @if (!string.IsNullOrEmpty(Model.Product?.WarrantyDescription)) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="WarrantyDescription" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.WarrantyDescription)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="shield-check" class="w-4 h-4 text-primary flex-shrink-0"></i>Garanti</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.WarrantyDescription)</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Garanti düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
+                            @if (!string.IsNullOrEmpty(Model.Product?.AfterSalesService)) { <div class="flex justify-between gap-2 items-center admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="AfterSalesService" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.AfterSalesService)"><dt class="flex items-center gap-2 text-gray-600 font-medium"><i data-lucide="headset" class="w-4 h-4 text-primary flex-shrink-0"></i>Garanti Sonrası Hizmet</dt><dd class="text-ink font-semibold admin-editable-value">@(Model.Product?.AfterSalesService)</dd>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Garanti sonrası düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}</div> }
                         </dl>
                     </div>
                 }
@@ -419,18 +484,27 @@
     <!-- Teknik Özellikler -->
     @if (!string.IsNullOrEmpty(Model.Product?.TechnicalDescription))
     {
-        <div class="pt-4 border-t border-gray-100">
+        <div class="pt-4 border-t border-gray-100 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="TechnicalDescription" data-product-id="@Model.Product?.Id" data-type="textarea">
             <h3 class="flex items-center gap-2 text-ink text-base font-semibold pb-2 border-b border-gray-100 mb-3">
                 <i data-lucide="list-checks" class="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true"></i>
                 Teknik Özellikler
             </h3>
-            <div class="technical-description-html text-ink max-w-none">@Html.Raw(Model.Product.TechnicalDescription)</div>
+            <div class="technical-description-html text-ink max-w-none admin-editable-value">@Html.Raw(Model.Product?.TechnicalDescription)</div>
+            @if (isAdminLoggedIn)
+            {
+                <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition mt-1" aria-label="Teknik özellikleri düzenle" title="Düzenle">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                </button>
+            }
         </div>
     }
 
     <!-- Ürün meta: tüm alanlara bağlantı (DisplayOrder, CreatedAt, UpdatedAt) -->
     <div class="pt-4 mt-4 border-t border-gray-100 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
-        @if (Model.Product?.DisplayOrder > 0) { <span>Liste sırası: @Model.Product.DisplayOrder</span> }
+        @if (Model.Product != null && (Model.Product.DisplayOrder > 0 || isAdminLoggedIn))
+        {
+            <span class="admin-editable-field product-detail-editable inline-flex items-center gap-1 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DisplayOrder" data-product-id="@Model.Product.Id" data-type="number" data-value="@Model.Product.DisplayOrder">Liste sırası: <span class="admin-editable-value">@Model.Product.DisplayOrder</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Liste sırası düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span>
+        }
         <span>Eklenme: @Model.Product?.CreatedAt.ToString("dd.MM.yyyy")</span>
         @if (Model.Product?.UpdatedAt != null) { <span>Güncelleme: @Model.Product.UpdatedAt.Value.ToString("dd.MM.yyyy")</span> }
         <span>Görüntülenme: @(Model.Product?.ViewCount ?? 0)</span>
@@ -473,177 +547,6 @@
 <!-- Product Section End -->
 
 @section Scripts {
-<script>
-    // Swiper instances
-    let productMainSwiper;
-    let productThumbsSwiper;
-
-    // Initialize Swipers when DOM is loaded (Swiper 11: no loopedSlides)
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof window.Swiper === 'undefined') {
-            console.warn('Swiper not loaded; product gallery will not be interactive.');
-            return;
-        }
-        const mainSwiperElement = document.querySelector('.productMainSwiper');
-        const thumbsSwiperElement = document.querySelector('.productThumbsSwiper');
-        if (!mainSwiperElement) return;
-
-        // Thumbnail swiper: navigasyon + main ile senkron, ana galeri değişince thumb scroll
-        var thumbsNavNext = document.querySelector('.product-gallery-thumbs-next');
-        var thumbsNavPrev = document.querySelector('.product-gallery-thumbs-prev');
-        if (thumbsSwiperElement) {
-            productThumbsSwiper = new window.Swiper('.productThumbsSwiper', {
-                spaceBetween: 6,
-                slidesPerView: 'auto',
-                freeMode: false,
-                watchSlidesProgress: true,
-                breakpoints: {
-                    320: { slidesPerView: 3, spaceBetween: 6 },
-                    640: { slidesPerView: 4, spaceBetween: 6 },
-                    768: { slidesPerView: 5, spaceBetween: 6 },
-                    1024: { slidesPerView: 6, spaceBetween: 6 },
-                },
-                navigation: thumbsNavNext && thumbsNavPrev ? {
-                    nextEl: thumbsNavNext,
-                    prevEl: thumbsNavPrev,
-                } : undefined,
-                allowTouchMove: true,
-            });
-        }
-
-        const slideCount = mainSwiperElement.querySelectorAll('.swiper-slide').length;
-        const swiperConfig = {
-            spaceBetween: 0,
-            speed: 300,
-            autoHeight: false,
-            navigation: {
-                nextEl: mainSwiperElement.querySelector('.product-gallery-next'),
-                prevEl: mainSwiperElement.querySelector('.product-gallery-prev'),
-            },
-            pagination: {
-                el: mainSwiperElement.querySelector('.product-gallery-pagination'),
-                type: 'fraction',
-                formatFractionCurrent: function (n) { return n; },
-                formatFractionTotal: function (n) { return n; },
-            },
-            loop: slideCount > 1,
-            on: {
-                slideChange: function () {
-                    if (productThumbsSwiper && !productThumbsSwiper.destroyed) {
-                        var realIndex = this.realIndex;
-                        productThumbsSwiper.slideTo(realIndex, 300);
-                    }
-                },
-            },
-        };
-        if (productThumbsSwiper) {
-            swiperConfig.thumbs = {
-                swiper: productThumbsSwiper,
-                autoScrollOffset: 2,
-            };
-        }
-
-        productMainSwiper = new window.Swiper('.productMainSwiper', swiperConfig);
-
-        // Thumb tıklanınca ana galeriyi o slayda götür
-        if (productThumbsSwiper && productMainSwiper) {
-            productThumbsSwiper.on('click', function () {
-                var clickedIndex = productThumbsSwiper.clickedIndex;
-                if (typeof clickedIndex === 'number' && clickedIndex >= 0) {
-                    if (productMainSwiper.params.loop) {
-                        productMainSwiper.slideToLoop(clickedIndex, 300);
-                    } else {
-                        productMainSwiper.slideTo(clickedIndex, 300);
-                    }
-                }
-            });
-        }
-
-        // PDF indir butonu: loading state + fetch ile indir
-        var pdfBtn = document.getElementById('productPdfBtn');
-        if (pdfBtn) {
-            pdfBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                var href = this.getAttribute('href');
-                if (!href) return;
-                var icon = this.querySelector('.pdf-btn-icon');
-                var text = this.querySelector('.pdf-btn-text');
-                var originalHtml = this.innerHTML;
-                this.setAttribute('disabled', 'disabled');
-                this.classList.add('opacity-70', 'pointer-events-none');
-                if (text) text.textContent = 'Hazırlanıyor...';
-                if (icon) icon.style.display = 'none';
-                var spinner = document.createElement('span');
-                spinner.className = 'inline-block w-[18px] h-[18px] rounded-full flex-shrink-0 animate-spin';
-                spinner.style.borderWidth = '2px';
-                spinner.style.borderStyle = 'solid';
-                spinner.style.borderColor = '#e5e7eb transparent #e5e7eb #e5e7eb';
-                spinner.style.borderTopColor = '#dc2626';
-                spinner.setAttribute('aria-hidden', 'true');
-                this.insertBefore(spinner, this.firstChild);
-                fetch(href)
-                    .then(function(res) { return res.ok ? res.blob() : Promise.reject(new Error('PDF oluşturulamadı')); })
-                    .then(function(blob) {
-                        var url = window.URL.createObjectURL(blob);
-                        var a = document.createElement('a');
-                        a.href = url;
-                        var pathSegments = (typeof window !== 'undefined' && window.location.pathname) ? window.location.pathname.split('/').filter(Boolean) : [];
-                        var slug = pathSegments.length >= 3 ? pathSegments[pathSegments.length - 1] : 'urun';
-                        a.download = 'Urun-' + slug + '.pdf';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                    })
-                    .catch(function(err) {
-                        if (text) text.textContent = 'Hata';
-                    })
-                    .finally(function() {
-                        if (text && text.textContent === 'Hazırlanıyor...') text.textContent = 'PDF indir';
-                        if (text && text.textContent === 'Hata') setTimeout(function() { if (text) text.textContent = 'PDF indir'; }, 2000);
-                        if (icon) icon.style.display = '';
-                        var s = pdfBtn.querySelector('.animate-spin');
-                        if (s) s.remove();
-                        pdfBtn.removeAttribute('disabled');
-                        pdfBtn.classList.remove('opacity-70', 'pointer-events-none');
-                    });
-            });
-        }
-
-        // Ürün kodu kopyala butonu
-        document.querySelectorAll('.product-code-copy').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var code = this.getAttribute('data-code');
-                if (!code) return;
-                navigator.clipboard.writeText(code).then(function() {
-                    var origTitle = btn.getAttribute('title');
-                    btn.setAttribute('title', 'Kopyalandı!');
-                    if (typeof btn.setAttribute === 'function') btn.setAttribute('aria-label', 'Kopyalandı!');
-                    setTimeout(function() {
-                        btn.setAttribute('title', origTitle || 'Kodu kopyala');
-                        btn.setAttribute('aria-label', 'Ürün kodunu kopyala');
-                    }, 1500);
-                });
-            });
-        });
-    });
-
-    // Error handling for Swiper
-    window.addEventListener('error', function(e) {
-        if (e.message && e.message.includes('Swiper')) {
-            // Fallback: show first image only
-            const slides = document.querySelectorAll('.swiper-slide');
-            slides.forEach((slide, index) => {
-                if (index === 0) {
-                    slide.style.display = 'block';
-                } else {
-                    slide.style.display = 'none';
-                }
-            });
-        }
-    });
-</script>
-
 <!-- lightGallery JS -->
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.2/lightgallery.min.js"></script>
 
@@ -657,343 +560,13 @@
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.2/plugins/hash/lg-hash.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.2/plugins/pager/lg-pager.min.js"></script>
 
-<!-- lightGallery Initialization -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const lightGalleryElement = document.getElementById('lightgallery');
-        
-        if (lightGalleryElement) {
-            lightGallery(lightGalleryElement, {
-                // Core settings
-                speed: 500,
-                licenseKey: '0000-0000-000-0000', // Demo license
-                
-                // Plugins
-                plugins: [
-                    lgThumbnail,
-                    lgZoom,
-                    lgAutoplay,
-                    lgFullscreen,
-                    lgRotate,
-                    lgShare,
-                    lgHash,
-                    lgPager
-                ],
-                
-                // Thumbnail settings
-                thumbnail: true,
-                animateThumb: true,
-                showThumbByDefault: true,
-                thumbWidth: 100,
-                thumbHeight: '80px',
-                thumbMargin: 5,
-                
-                // Zoom settings
-                zoom: true,
-                scale: 1,
-                actualSize: true,
-                actualSizeIcons: {
-                    zoomIn: 'lg-zoom-in',
-                    zoomOut: 'lg-zoom-out',
-                },
-                
-                // Autoplay settings
-                autoplay: false,
-                autoplayControls: true,
-                progressBar: true,
-                pause: 3000,
-                
-                // Fullscreen
-                fullScreen: true,
-                
-                // Rotate & Flip
-                rotate: true,
-                flipHorizontal: true,
-                flipVertical: true,
-                rotateLeft: true,
-                rotateRight: true,
-                
-                // Share settings
-                share: true,
-                facebook: true,
-                twitter: true,
-                pinterest: true,
-                
-                // Hash (URL)
-                hash: true,
-                galleryId: 'product-gallery',
-                
-                // Pager
-                pager: true,
-                
-                // Additional settings
-                download: true,
-                counter: true,
-                loop: true,
-                escKey: true,
-                keyPress: true,
-                controls: true,
-                slideEndAnimation: true,
-                hideControlOnEnd: false,
-                mousewheel: true,
-                
-                // Mobile
-                mobileSettings: {
-                    controls: true,
-                    showCloseIcon: true,
-                    download: true,
-                    rotate: true
-                },
-                
-                // Animation
-                mode: 'lg-fade',
-                
-                // Selector (work with swiper)
-                selector: 'a',
-                
-                // Accessibility
-                ariaLabelledby: 'Product Gallery',
-                ariaDescribedby: '@productNameEncoded',
-            });
-            
-            console.log('lightGallery initialized with all features');
-        }
-    });
-</script>
+<script src="~/js/product-detail.js" asp-append-version="true"></script>
 }
 
 @section Styles {
 <!-- lightGallery CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.2/css/lightgallery-bundle.min.css">
-<style>
-    /* ========== Product detail gallery: büyük swiper ========== */
-    .product-detail-gallery {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        padding: 0;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        overflow: hidden;
-        background: #fafafa;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        max-width: 540px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    @@media (min-width: 1024px) {
-        .product-detail-gallery {
-            margin-left: 0;
-            margin-right: 0;
-            max-width: 100%;
-        }
-    }
-
-    /* Ana galeri: yükseklik genişliğin %85’i */
-    .product-detail-gallery .product-gallery-main-wrap {
-        position: relative;
-        width: 100%;
-        height: 0;
-        padding-bottom: 92%;
-        border-radius: 12px 12px 0 0;
-        overflow: hidden;
-        background: #fff;
-        aspect-ratio: 1 / 0.92;
-    }
-    .product-detail-gallery .product-gallery-main {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100% !important;
-        height: 100% !important;
-        max-height: 100% !important;
-        border-radius: 12px 12px 0 0;
-        overflow: hidden;
-    }
-    .product-detail-gallery .product-gallery-main .swiper-wrapper,
-    .product-detail-gallery .product-gallery-main .swiper-slide {
-        height: 100% !important;
-        min-height: 0;
-    }
-    .product-detail-gallery .product-gallery-slide-inner {
-        height: 100% !important;
-        min-height: 0;
-        overflow: hidden;
-    }
-    /* layout.css .product-image-wrap min-height'ı galeri içinde devre dışı */
-    .product-detail-gallery .product-image-wrap {
-        min-height: 0 !important;
-        height: 100% !important;
-    }
-    .product-detail-gallery .product-gallery-link {
-        display: block;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background: #fff;
-    }
-    .product-detail-gallery .product-gallery-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        vertical-align: middle;
-    }
-
-    /* Nav butonları: yuvarlak, gölgeli */
-    .product-detail-gallery .product-gallery-next,
-    .product-detail-gallery .product-gallery-prev {
-        width: 40px;
-        height: 40px;
-        margin-top: 0;
-        transform: translateY(-50%);
-        background: rgba(255,255,255,0.95);
-        color: #374151;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-    }
-    .product-detail-gallery .product-gallery-next::after,
-    .product-detail-gallery .product-gallery-prev::after {
-        font-size: 1rem;
-        font-weight: 700;
-    }
-    .product-detail-gallery .product-gallery-next:hover,
-    .product-detail-gallery .product-gallery-prev:hover {
-        background: #fff;
-        color: #00A8E8;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .product-detail-gallery .product-gallery-next.swiper-button-disabled,
-    .product-detail-gallery .product-gallery-prev.swiper-button-disabled {
-        opacity: 0.35;
-    }
-
-    /* Pagination: köşede, okunaklı */
-    .product-detail-gallery .product-gallery-pagination {
-        bottom: 12px !important;
-        left: auto !important;
-        right: 12px;
-        width: auto;
-        padding: 4px 10px;
-        background: rgba(0,0,0,0.5);
-        color: #fff;
-        border-radius: 20px;
-        font-size: 0.8125rem;
-        font-weight: 500;
-    }
-    .product-detail-gallery .product-gallery-pagination .swiper-pagination-current { font-weight: 600; }
-
-    /* Thumbnail strip: wrapper – absolute nav için relative */
-    .product-detail-gallery .product-gallery-thumbs-wrap {
-        position: relative;
-        margin-top: 0;
-        padding: 0 0 12px;
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-    .product-detail-gallery .product-gallery-thumbs-wrap .product-gallery-thumbs,
-    .product-detail-gallery .product-gallery-thumbs-wrap .productThumbsSwiper {
-        width: 100% !important;
-        max-width: 100%;
-        margin-top: 0;
-        margin-left: 0;
-        margin-right: 0;
-        padding: 0;
-        overflow: hidden;
-        box-sizing: border-box;
-    }
-    .product-detail-gallery .productThumbsSwiper .swiper-wrapper {
-        align-items: center;
-    }
-    .product-detail-gallery .productThumbsSwiper .swiper-slide {
-        width: auto !important;
-        flex-shrink: 0;
-        box-sizing: border-box;
-    }
-    .product-detail-gallery .productThumbsSwiper .thumbnail-item {
-        width: 62px;
-        height: 62px;
-        aspect-ratio: 1;
-        border: 2px solid transparent;
-        border-radius: 8px;
-        overflow: hidden;
-        cursor: pointer;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        background: #fff;
-        flex-shrink: 0;
-    }
-    .product-detail-gallery .productThumbsSwiper .thumbnail-item:hover {
-        border-color: #d1d5db;
-    }
-    .product-detail-gallery .product-gallery-thumb-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        display: block;
-        vertical-align: middle;
-    }
-    @@media (min-width: 640px) {
-        .product-detail-gallery .productThumbsSwiper .thumbnail-item {
-            width: 72px;
-            height: 72px;
-        }
-    }
-    @@media (min-width: 1024px) {
-        .product-detail-gallery .productThumbsSwiper .thumbnail-item {
-            width: 82px;
-            height: 82px;
-        }
-    }
-    .product-detail-gallery .productThumbsSwiper .swiper-slide-thumb-active .thumbnail-item {
-        border-color: #00A8E8;
-        box-shadow: 0 0 0 1px #00A8E8;
-    }
-    /* Thumb strip nav: absolute, strip'in dışında sol/sağ – ilk/son thumb kenarları tam görünür */
-    .product-detail-gallery .product-gallery-thumbs-prev,
-    .product-detail-gallery .product-gallery-thumbs-next {
-        position: absolute;
-        top: 50%;
-        margin-top: 0;
-        transform: translateY(-50%);
-        width: 28px;
-        height: 28px;
-        left: auto;
-        right: auto;
-        background: rgba(255,255,255,0.95);
-        color: #374151;
-        border-radius: 50%;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-        z-index: 10;
-        transition: background 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s;
-    }
-    .product-detail-gallery .product-gallery-thumbs-prev {
-        left: 4px;
-    }
-    .product-detail-gallery .product-gallery-thumbs-next {
-        right: 4px;
-    }
-    .product-detail-gallery .product-gallery-thumbs-next::after,
-    .product-detail-gallery .product-gallery-thumbs-prev::after {
-        font-size: 0.75rem;
-        font-weight: 700;
-    }
-    .product-detail-gallery .product-gallery-thumbs-next:hover,
-    .product-detail-gallery .product-gallery-thumbs-prev:hover {
-        background: #fff;
-        color: #00A8E8;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    .product-detail-gallery .product-gallery-thumbs-next.swiper-button-disabled,
-    .product-detail-gallery .product-gallery-thumbs-prev.swiper-button-disabled {
-        opacity: 0.35;
-        pointer-events: none;
-    }
-    .product-detail-gallery .image-wrapper { overflow: hidden; }
-</style>
+<link href="~/css/product-detail.css" rel="stylesheet" asp-append-version="true" />
 }
 
 <!-- Product Structured Data -->

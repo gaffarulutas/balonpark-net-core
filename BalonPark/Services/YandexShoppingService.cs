@@ -26,6 +26,10 @@ public class YandexShoppingService(
     /// <summary>Yandex doğrulayıcı RUR, RUB, USD, BYR, BYN, KZT, EUR, UAH kabul ediyor. TCMB + CBR kurlarından TRY→RUB.</summary>
     private const string CurrencyId = "RUB";
     private const int YandexSubCategoryIdOffset = 10000;
+    /// <summary>Yandex Merchant Center RSS feed: Google Product namespace.</summary>
+    private const string GNamespace = "http://base.google.com/ns/1.0";
+    private const int MerchantCenterTitleMaxLength = 150;
+    private const int MerchantCenterDescriptionMaxLength = 5000;
 
     public async Task<string> GetYmlFeedAsync(CancellationToken cancellationToken = default)
     {
@@ -111,6 +115,169 @@ public class YandexShoppingService(
         }
 
         return Encoding.UTF8.GetString(ms.ToArray());
+    }
+
+    /// <summary>
+    /// Yandex Merchant Center / Alışveriş ücretsiz listeleme: RSS 2.0 + g: namespace, TL fiyat, g:shipping.
+    /// Format: https://yandex.com/support/merchant-center/feed-format.html
+    /// </summary>
+    public async Task<string> GetMerchantCenterRssFeedAsync(CancellationToken cancellationToken = default)
+    {
+        var settings = await settingsRepository.GetFirstAsync();
+        var shopName = settings?.CompanyName ?? VendorName;
+        var baseUrl = urlService.GetBaseUrl();
+        if (string.IsNullOrEmpty(baseUrl))
+            baseUrl = "https://www.balonpark.com";
+
+        var products = (await productRepository.GetAllForGoogleShoppingAsync()).ToList();
+        var tr = CultureInfo.GetCultureInfo("tr-TR");
+
+        using var ms = new MemoryStream();
+        var settingsXml = new XmlWriterSettings
+        {
+            Encoding = new UTF8Encoding(false),
+            Indent = true,
+            OmitXmlDeclaration = false,
+            ConformanceLevel = ConformanceLevel.Document,
+            Async = true
+        };
+
+        await using (var writer = XmlWriter.Create(ms, settingsXml))
+        {
+            await writer.WriteStartDocumentAsync(false);
+            await writer.WriteStartElementAsync(null, "rss", null);
+            await writer.WriteAttributeStringAsync("xmlns", "g", null, GNamespace);
+            await writer.WriteAttributeStringAsync(null, "version", null, "2.0");
+
+            await writer.WriteStartElementAsync(null, "channel", null);
+            await WriteElementAsync(writer, "title", shopName + " - Yandex Alışveriş ürün beslemesi");
+            await WriteElementAsync(writer, "link", baseUrl.TrimEnd('/'));
+            await WriteElementAsync(writer, "description", "Ürünler Yandex Merchant Center ücretsiz listeleme formatında.");
+
+            foreach (var product in products)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await WriteRssItemAsync(writer, product, baseUrl, tr);
+            }
+
+            logger.LogDebug("Yandex Merchant Center RSS feed generated: {ProductCount} items", products.Count);
+
+            await writer.WriteEndElementAsync(); // channel
+            await writer.WriteEndElementAsync(); // rss
+            await writer.WriteEndDocumentAsync();
+        }
+
+        return Encoding.UTF8.GetString(ms.ToArray());
+    }
+
+    private async Task WriteRssItemAsync(XmlWriter writer, Product product, string baseUrl, CultureInfo trCulture)
+    {
+        var productUrl = urlService.GetProductUrl(
+            product.CategorySlug ?? "urunler",
+            product.SubCategorySlug ?? "tum-urunler",
+            product.Slug);
+        if (!productUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            productUrl = baseUrl.TrimEnd('/') + "/" + productUrl.TrimStart('/');
+
+        var pictures = await GetPictureUrlsAsync(product);
+        var mainImage = pictures.Count > 0 ? pictures[0] : urlService.GetImageUrl("/assets/images/no-image.png");
+        var additionalImages = pictures.Skip(1).Take(9).ToList();
+
+        await writer.WriteStartElementAsync(null, "item", null);
+
+        await WriteGElementAsync(writer, "id", product.Id.ToString(trCulture));
+        var title = (product.Name ?? "Ürün").Trim();
+        if (title.Length > MerchantCenterTitleMaxLength)
+            title = title.Substring(0, MerchantCenterTitleMaxLength);
+        await WriteGElementAsync(writer, "title", title);
+
+        var description = SanitizeDescriptionForMerchantCenter(
+            product.Description ?? product.TechnicalDescription ?? product.Summary ?? product.Name ?? "Balon Park ürünü");
+        await WriteGElementAsync(writer, "description", description);
+
+        await WriteGElementAsync(writer, "link", productUrl);
+        await WriteGElementAsync(writer, "image_link", mainImage);
+        if (additionalImages.Count > 0)
+            await WriteGElementAsync(writer, "additional_image_link", string.Join(",", additionalImages));
+
+        await WriteGElementAsync(writer, "condition", "new");
+        await WriteGElementAsync(writer, "availability", product.Stock > 0 ? "in_stock" : "out_of_stock");
+
+        decimal displayPrice = product.Price;
+        decimal? salePrice = null;
+        if (product.IsDiscounted && product.Price > 0)
+        {
+            var oldPriceTry = Math.Round(product.Price / 0.85m, 2);
+            if (oldPriceTry > product.Price && (oldPriceTry - product.Price) / oldPriceTry >= 0.05m)
+            {
+                displayPrice = oldPriceTry;
+                salePrice = product.Price;
+            }
+        }
+        await WriteGElementAsync(writer, "price", FormatPriceTl(displayPrice, trCulture));
+        if (salePrice.HasValue)
+            await WriteGElementAsync(writer, "sale_price", FormatPriceTl(salePrice.Value, trCulture));
+
+        await WriteGElementAsync(writer, "gtin", GenerateValidGtin(product.Id));
+        await WriteGElementAsync(writer, "brand", VendorName);
+
+        await writer.WriteStartElementAsync("g", "shipping", GNamespace);
+        await WriteElementAsync(writer, "price", "0 TL");
+        await WriteElementAsync(writer, "max_transit_time", (product.DeliveryDaysMax ?? 15).ToString(trCulture));
+        await WriteElementAsync(writer, "min_transit_time", (product.DeliveryDaysMin ?? 5).ToString(trCulture));
+        await WriteElementAsync(writer, "service", "Standart");
+        await WriteElementAsync(writer, "min_handling_time", "1");
+        await WriteElementAsync(writer, "max_handling_time", "3");
+        await WriteElementAsync(writer, "country", "TR");
+        await WriteElementAsync(writer, "region", "All");
+        await writer.WriteEndElementAsync(); // g:shipping
+
+        await writer.WriteEndElementAsync(); // item
+    }
+
+    private static string FormatPriceTl(decimal price, CultureInfo trCulture)
+    {
+        var formatted = price.ToString("N0", trCulture);
+        return formatted + " TL";
+    }
+
+    private static string SanitizeDescriptionForMerchantCenter(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        var t = text.Trim();
+        if (t.Length > MerchantCenterDescriptionMaxLength)
+            t = t.Substring(0, MerchantCenterDescriptionMaxLength);
+        return t;
+    }
+
+    private static string GenerateValidGtin(int productId)
+    {
+        const string prefix = "869";
+        var productCode = productId.ToString("D6", CultureInfo.InvariantCulture);
+        var baseGtin = prefix + productCode;
+        var gtin12 = baseGtin.PadRight(12, '0');
+        var checkDigit = CalculateGtinCheckDigit(gtin12);
+        return gtin12 + checkDigit;
+    }
+
+    private static int CalculateGtinCheckDigit(string gtin12)
+    {
+        int sum = 0;
+        for (var i = 0; i < 12; i++)
+        {
+            int digit = int.Parse(gtin12[i].ToString(), CultureInfo.InvariantCulture);
+            int multiplier = (i % 2 == 0) ? 1 : 3;
+            sum += digit * multiplier;
+        }
+        return (10 - (sum % 10)) % 10;
+    }
+
+    private static async Task WriteGElementAsync(XmlWriter writer, string localName, string? value)
+    {
+        if (value == null) return;
+        await writer.WriteStartElementAsync("g", localName, GNamespace);
+        await writer.WriteStringAsync(value);
+        await writer.WriteEndElementAsync();
     }
 
     private async Task WriteOfferAsync(XmlWriter writer, Product product, string baseUrl, decimal tryToRubRate)

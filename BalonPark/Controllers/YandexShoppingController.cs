@@ -13,8 +13,7 @@ namespace BalonPark.Controllers;
 public class YandexShoppingController(IYandexShoppingService yandexShoppingService, ILogger<YandexShoppingController> logger) : ControllerBase
 {
     /// <summary>
-    /// Yandex Market YML feed. Yandex Merchant / Yandex Direct'te bu URL'yi feed adresi olarak ekleyin.
-    /// Content-Type: application/xml (Yandex gereksinimleri).
+    /// Yandex Market YML feed. Yandex Market (ücretli) için bu URL kullanılır.
     /// </summary>
     [HttpGet("yandex-market.xml")]
     [Produces("application/xml", "text/xml")]
@@ -32,6 +31,30 @@ public class YandexShoppingController(IYandexShoppingService yandexShoppingServi
         catch (Exception ex)
         {
             logger.LogError(ex, "Yandex YML feed oluşturulurken hata");
+            return StatusCode(500, "Feed oluşturulamadı.");
+        }
+    }
+
+    /// <summary>
+    /// Yandex Merchant Center / Alışveriş ücretsiz listeleme feed'i (RSS 2.0 + g: namespace, TL).
+    /// Bu URL'yi Merchant Center'da "Besleme dosyası" olarak ekleyin; XML/CSV kılavuzuna uygundur.
+    /// </summary>
+    [HttpGet("yandex-merchant-center.xml")]
+    [Produces("application/xml", "text/xml")]
+    public async Task<IActionResult> GetMerchantCenterRssFeed(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var xml = await yandexShoppingService.GetMerchantCenterRssFeedAsync(cancellationToken);
+            return Content(xml, "application/xml; charset=utf-8");
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(499);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Yandex Merchant Center RSS feed oluşturulurken hata");
             return StatusCode(500, "Feed oluşturulamadı.");
         }
     }

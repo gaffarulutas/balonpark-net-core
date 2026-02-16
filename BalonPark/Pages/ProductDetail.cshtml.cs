@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using BalonPark.Data;
+using BalonPark.Helpers;
 using BalonPark.Models;
 using BalonPark.Services;
 
@@ -103,6 +104,7 @@ public class ProductDetailModel : BasePage
 
         ViewData["ActiveCategorySlug"] = Product.CategorySlug;
         ViewData["ActiveSubCategorySlug"] = Product.SubCategorySlug;
+        ViewData["IsAdminLoggedIn"] = HttpContext.Session.IsAdminLoggedIn();
 
         // Popüler ürünler (görüntülenme / IsPopular)
         var popular = await _productRepository.GetPopularProductsAsync(Product.Id, 6);
