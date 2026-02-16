@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using BalonPark.Data;
 using BalonPark.Helpers;
 using BalonPark.Models;
@@ -14,7 +13,6 @@ public class ProductDetailModel : BasePage
     private readonly CurrencyService _currencyService;
     private readonly IYandexExchangeRateService _yandexExchangeRateService;
     private readonly PdfService _pdfService;
-
     public Product? Product { get; set; }
     public ProductImage? MainImage { get; set; }
     public List<ProductImage> ProductImages { get; set; } = new();
