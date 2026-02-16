@@ -346,9 +346,8 @@ body {
 /* Search (sadece masaüstü – mobilde gizli) */
 .site-header__search {
     display: none;
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
-    max-width: 42rem;
     margin: 0 0.5rem 0 0.75rem;
     position: relative;
 }

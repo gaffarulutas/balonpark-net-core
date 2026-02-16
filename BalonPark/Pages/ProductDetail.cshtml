@@ -293,6 +293,9 @@
                     ? (deliveryMin == deliveryMax ? $"{deliveryMin} iş günü" : $"{deliveryMin}-{deliveryMax} iş günü")
                     : (deliveryMin != null ? $"{deliveryMin} iş günü" : (deliveryMax != null ? $"{deliveryMax} iş günü" : null));
                 if (string.IsNullOrEmpty(deliveryLabel) && !string.IsNullOrEmpty(Model.Product?.DeliveryDays)) { deliveryLabel = Model.Product?.DeliveryDays; }
+                var deliveryDaysBadge = (deliveryMin != null && deliveryMax != null)
+                    ? (deliveryMin == deliveryMax ? deliveryMin.ToString() : $"{deliveryMin}-{deliveryMax}")
+                    : (deliveryMin != null ? deliveryMin.ToString() : deliveryMax?.ToString());
                 var packL = Model.Product?.PackagedLength?.Trim();
                 var packD = Model.Product?.PackagedDepth?.Trim();
                 var packW = Model.Product?.PackagedWeightKg;
@@ -314,7 +317,7 @@
                         @if (Model.Product?.MaterialWeightGrm2 == null && !string.IsNullOrEmpty(Model.Product?.MaterialWeight))
                         { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="MaterialWeight" data-product-id="@Model.Product?.Id" data-type="text" data-value="@(Model.Product?.MaterialWeight)"><i data-lucide="layers" class="w-5 h-5 text-slate-600 flex-shrink-0"></i><span class="admin-editable-value">Kumaş: @(Model.Product?.MaterialWeight)</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Kumaş düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
                         @if (!string.IsNullOrEmpty(deliveryLabel))
-                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700"><i data-lucide="truck" class="w-5 h-5 text-blue-600 flex-shrink-0"></i>Teslimat: @deliveryLabel</span> }
+                        { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium text-gray-700"><i data-lucide="truck" class="w-5 h-5 text-blue-600 flex-shrink-0"></i>Teslimat: @if (deliveryDaysBadge != null){<span class="delivery-days-badge inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 border border-gray-200 text-sm font-medium text-gray-800" title="Teslimat süresi (iş günü)">@deliveryDaysBadge</span><span> iş günü</span>}else{@deliveryLabel}</span> }
                         @if (Model.Product?.IsPopular == true || isAdminLoggedIn)
                         { <span class="inline-flex items-center gap-2.5 px-4 py-3 rounded border border-gray-200 bg-white text-base font-medium @(Model.Product?.IsPopular == true ? "text-gray-700" : "text-gray-400") admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="IsPopular" data-product-id="@Model.Product?.Id" data-type="bool" data-value="@(Model.Product?.IsPopular == true ? "true" : "false")"><i data-lucide="trending-up" class="w-5 h-5 text-green-600 flex-shrink-0"></i><span class="admin-editable-value">@(Model.Product?.IsPopular == true ? "Popüler" : "Popüler (kapalı)")</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition ml-1" aria-label="Popüler düzenle" title="Düzenle"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span> }
                         @if (Model.Product?.IsProjectSpecial == true || isAdminLoggedIn)
@@ -322,11 +325,11 @@
                     </div>
                 </div>
             }
-            <!-- Renk Seçenekleri + Stok/Teslimat: aynı div, sola dayalı, dikey hizada -->
-            <div class="product-detail-options-block border-b border-gray-100 pb-4">
+            <!-- Renk Seçenekleri + Teslimat yan yana (Teslimat en solda değil, renklerin yanında) -->
+            <div class="product-detail-options-block border-b border-gray-100 pb-4 flex flex-wrap items-center gap-6">
                 @if (colorItems.Any())
                 {
-                    <div class="product-color-section mb-3">
+                    <div class="product-color-section min-w-0">
                         <p class="text-sm font-medium text-gray-700 mb-2">Renk Seçenekleri</p>
                         <div class="flex flex-wrap items-center gap-1.5" role="img" aria-label="Renk seçenekleri">
                             @foreach (var item in colorItems)
@@ -339,31 +342,31 @@
                         </div>
                     </div>
                 }
-                <div class="product-detail-stock-delivery flex flex-wrap items-center gap-x-6 gap-y-2">
+                <div class="product-detail-delivery min-w-0">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Teslimat</p>
+                    <div class="text-sm text-gray-600">
                 @if (!string.IsNullOrEmpty(deliveryLabel))
                 {
-                    <p class="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-                        <span class="flex items-center gap-2">
-                            <i data-lucide="truck" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
-                            <span>Teslimat: </span>
-                            <span class="admin-editable-field product-detail-editable inline-flex items-center gap-1 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DeliveryDaysMin" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.DeliveryDaysMin"><span class="admin-editable-value">@Model.Product?.DeliveryDaysMin</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Teslimat min düzenle" title="Min iş günü"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span>
-                            <span>-</span>
-                            <span class="admin-editable-field product-detail-editable inline-flex items-center gap-1 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DeliveryDaysMax" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.DeliveryDaysMax"><span class="admin-editable-value">@Model.Product?.DeliveryDaysMax</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Teslimat max düzenle" title="Max iş günü"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span>
-                            <span>iş günü</span>
+                        <span class="inline-flex flex-wrap items-center gap-1">
+                            <span class="inline-flex items-baseline gap-0.5 whitespace-nowrap">
+                                <span class="delivery-days-badge inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-gray-100 border border-gray-200 text-sm font-medium text-gray-800" title="Teslimat süresi (iş günü)">
+                                    <span class="admin-editable-field product-detail-editable inline-flex items-center gap-0.5 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DeliveryDaysMin" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.DeliveryDaysMin"><span class="admin-editable-value">@Model.Product?.DeliveryDaysMin</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Teslimat min düzenle" title="Min iş günü"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span>
+                                    <span aria-hidden="true">-</span>
+                                    <span class="admin-editable-field product-detail-editable inline-flex items-center gap-0.5 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DeliveryDaysMax" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.DeliveryDaysMax"><span class="admin-editable-value">@Model.Product?.DeliveryDaysMax</span>@if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Teslimat max düzenle" title="Max iş günü"><i data-lucide="pencil" class="w-3 h-3"></i></button>}</span>
+                                </span>
+                                <span>iş günü</span>
+                            </span>
+                            <span class="text-gray-500">• Kargo ücreti alıcıya aittir</span>
                         </span>
-                        <span class="text-gray-500">• Kargo ücreti alıcıya aittir</span>
-                    </p>
                 }
                 else
                 {
-                    <p class="flex items-center gap-2 text-sm text-gray-500">
-                        <span class="flex items-center gap-2 admin-editable-field product-detail-editable group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="DeliveryDaysMin" data-product-id="@Model.Product?.Id" data-type="number" data-value="">
-                            <i data-lucide="truck" class="w-5 h-5 flex-shrink-0"></i>
+                        <span class="admin-editable-field product-detail-editable inline-flex items-center gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "") text-gray-500" data-field="DeliveryDaysMin" data-product-id="@Model.Product?.Id" data-type="number" data-value="">
                             <span class="admin-editable-value">Kargo ücreti alıcıya aittir</span>
                             @if (isAdminLoggedIn){<button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition" aria-label="Teslimat ekle" title="Teslimat (Min-Max iş günü) ekle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>}
                         </span>
-                    </p>
                 }
+                    </div>
                 </div>
             </div>
             <!-- CTA butonları (referans: Add To Cart + Checkout Now) -->

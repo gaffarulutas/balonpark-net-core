@@ -207,10 +207,12 @@ class FavoritesAndCompare {
         const favoritesCountText = document.querySelector('.favorites-count-text');
         const compareCountText = document.querySelector('.compare-count-text');
         if (favoritesCountText) {
-            favoritesCountText.textContent = `${this.favorites.length} Ürün`;
+            favoritesCountText.textContent = this.favorites.length;
+            favoritesCountText.style.display = this.favorites.length > 0 ? '' : 'none';
         }
         if (compareCountText) {
-            compareCountText.textContent = `${this.compareList.length} Ürün`;
+            compareCountText.textContent = this.compareList.length;
+            compareCountText.style.display = this.compareList.length > 0 ? '' : 'none';
         }
         // Header favori kalp ikonu: dolu/boş (Lucide SVG)
         document.querySelectorAll('.lucide-fav-header').forEach(function (el) {
