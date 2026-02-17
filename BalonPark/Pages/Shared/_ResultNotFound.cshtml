@@ -2,10 +2,10 @@
 @{
     if (Model == null) return;
 }
-<div class="flex justify-center w-full" role="status" aria-live="polite" aria-label="Sonuç bulunamadı">
+<div class="flex justify-center w-full result-not-found" role="status" aria-live="polite" aria-label="Sonuç bulunamadı">
     <div class="flex flex-col items-center gap-6 sm:gap-8 py-12 sm:py-16 px-6 sm:px-8 w-full bg-gray-50/95 rounded-xl border border-gray-100 shadow-sm">
         <!-- İkon: en üstte ortalı -->
-        <div class="flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100/80 text-gray-400" aria-hidden="true">
+        <div class="flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100/80 text-gray-400 result-not-found__icon" aria-hidden="true">
             <i data-lucide="@Model.Icon" class="w-7 h-7 sm:w-8 sm:h-8"></i>
         </div>
         <!-- Metin alanı: ortalı -->

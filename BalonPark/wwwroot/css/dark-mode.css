@@ -709,6 +709,45 @@ html.dark .rounded-lg.border.border-gray-200.bg-gray-50\/50 .text-ink {
   color: var(--dm-text) !important;
 }
 
+/* ========== ResultNotFound: Ürün bulunmamaktadır / sonuç yok (bg-gray-50/95, icon) ========== */
+html.dark .result-not-found > div {
+  background-color: var(--dm-bg-secondary) !important;
+  border-color: var(--dm-border) !important;
+  box-shadow: var(--dm-shadow);
+}
+
+html.dark .result-not-found .result-not-found__icon {
+  background-color: var(--dm-bg-tertiary) !important;
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .result-not-found .result-not-found__icon i,
+html.dark .result-not-found .result-not-found__icon svg {
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .result-not-found .text-gray-500 {
+  color: var(--dm-text-muted) !important;
+}
+
+html.dark .result-not-found a.border-gray-200 {
+  border-color: var(--dm-border) !important;
+  color: var(--dm-text) !important;
+}
+
+html.dark .result-not-found a.border-gray-200:hover {
+  background-color: var(--dm-surface-hover) !important;
+  border-color: var(--dm-border-soft) !important;
+}
+
+html.dark .result-not-found a.border-gray-200.text-gray-600:hover {
+  color: var(--dm-text) !important;
+}
+
+html.dark .result-not-found a.border-gray-200.text-gray-700:hover {
+  color: var(--dm-text) !important;
+}
+
 /* ========== Ürünler sayfası (ProductList): filtre, select, input, pagination ========== */
 html.dark .product-list-filter {
   background-color: var(--dm-surface) !important;
