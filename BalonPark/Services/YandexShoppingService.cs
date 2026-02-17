@@ -170,6 +170,20 @@ public class YandexShoppingService(
         return Encoding.UTF8.GetString(ms.ToArray());
     }
 
+    /// <summary>
+    /// Yandex Merchant Center RSS feed ogesini Google urun verileri spesifikasyonuna uygun yazar.
+    /// Referans: https://support.google.com/merchants/answer/7052112?hl=tr
+    /// RSS 2.0: https://support.google.com/merchants/answer/14987622?hl=tr
+    /// Kurallar:
+    /// - Fiyat: ISO 4217 para birimi kodu (TRY), ondalik ayirici nokta (.)
+    /// - Availability: in_stock / out_of_stock (alt cizgili - RSS/XML formati)
+    /// - Description: duz metin, HTML etiketleri temizlenmeli, maks 5000 karakter
+    /// - Title: maks 150 karakter, promosyon metni icermemeli
+    /// - additional_image_link: her resim icin ayri element (virgul ile degil)
+    /// - Shipping alt elementleri g: namespace ile yazilmali
+    /// - GTIN: yalnizca uretici tarafindan atanmis gercek GTIN gonderilmeli
+    /// - identifier_exists: gercek GTIN/MPN yoksa "no" olarak ayarlanmali
+    /// </summary>
     private async Task WriteRssItemAsync(XmlWriter writer, Product product, string baseUrl, CultureInfo trCulture)
     {
         var productUrl = urlService.GetProductUrl(
@@ -181,28 +195,43 @@ public class YandexShoppingService(
 
         var pictures = await GetPictureUrlsAsync(product);
         var mainImage = pictures.Count > 0 ? pictures[0] : urlService.GetImageUrl("/assets/images/no-image.png");
-        var additionalImages = pictures.Skip(1).Take(9).ToList();
+        var additionalImages = pictures.Skip(1).Take(10).ToList();
 
         await writer.WriteStartElementAsync(null, "item", null);
 
-        await WriteGElementAsync(writer, "id", product.Id.ToString(trCulture));
-        var title = (product.Name ?? "Ürün").Trim();
+        // Zorunlu: id - her urun icin benzersiz, guncelleme sirasinda ayni kalmali
+        await WriteGElementAsync(writer, "id", product.Id.ToString(CultureInfo.InvariantCulture));
+
+        // Zorunlu: title - maks 150 karakter, promosyon metni icermemeli
+        var title = StripHtmlTags((product.Name ?? "Ürün").Trim());
         if (title.Length > MerchantCenterTitleMaxLength)
-            title = title.Substring(0, MerchantCenterTitleMaxLength);
+            title = title[..(MerchantCenterTitleMaxLength - 3)] + "...";
         await WriteGElementAsync(writer, "title", title);
 
-        var description = SanitizeDescriptionForMerchantCenter(
-            product.Description ?? product.TechnicalDescription ?? product.Summary ?? product.Name ?? "Balon Park ürünü");
+        // Zorunlu: description - duz metin, maks 5000 karakter, HTML temizlenmeli
+        var description = BuildRssDescription(product);
         await WriteGElementAsync(writer, "description", description);
 
+        // Zorunlu: link - dogrulanmis alan adi, http veya https ile baslamali
         await WriteGElementAsync(writer, "link", productUrl);
-        await WriteGElementAsync(writer, "image_link", mainImage);
-        if (additionalImages.Count > 0)
-            await WriteGElementAsync(writer, "additional_image_link", string.Join(",", additionalImages));
 
+        // Zorunlu: image_link - ana urun resmi URL'si
+        await WriteGElementAsync(writer, "image_link", mainImage);
+
+        // Istege bagli: additional_image_link - her resim icin AYRI element (maks 10)
+        foreach (var img in additionalImages)
+        {
+            await WriteGElementAsync(writer, "additional_image_link", img);
+        }
+
+        // Zorunlu: condition - new, refurbished veya used (Ingilizce)
         await WriteGElementAsync(writer, "condition", "new");
+
+        // Zorunlu: availability - RSS/XML formati: in_stock, out_of_stock, preorder, backorder
         await WriteGElementAsync(writer, "availability", product.Stock > 0 ? "in_stock" : "out_of_stock");
 
+        // Zorunlu: price - "SAYI PARA_BIRIMI" formati, ISO 4217, ondalik nokta (.)
+        // Turkiye icin: fiyata KDV dahil olmali
         decimal displayPrice = product.Price;
         decimal? salePrice = null;
         if (product.IsDiscounted && product.Price > 0)
@@ -214,62 +243,66 @@ public class YandexShoppingService(
                 salePrice = product.Price;
             }
         }
-        await WriteGElementAsync(writer, "price", FormatPriceTl(displayPrice, trCulture));
+        await WriteGElementAsync(writer, "price", FormatPriceIso4217(displayPrice));
         if (salePrice.HasValue)
-            await WriteGElementAsync(writer, "sale_price", FormatPriceTl(salePrice.Value, trCulture));
+            await WriteGElementAsync(writer, "sale_price", FormatPriceIso4217(salePrice.Value));
 
-        await WriteGElementAsync(writer, "gtin", GenerateValidGtin(product.Id));
+        // Urun tanimlayicilari: ozel uretim urunlerde gercek GTIN yok
+        await WriteGElementAsync(writer, "identifier_exists", "no");
         await WriteGElementAsync(writer, "brand", VendorName);
+        await WriteGElementAsync(writer, "mpn", $"BP-{product.Id:D6}");
 
+        // Kargo: g: namespace ile alt elementler yazilmali
         await writer.WriteStartElementAsync("g", "shipping", GNamespace);
-        await WriteElementAsync(writer, "price", "0 TL");
-        await WriteElementAsync(writer, "max_transit_time", (product.DeliveryDaysMax ?? 15).ToString(trCulture));
-        await WriteElementAsync(writer, "min_transit_time", (product.DeliveryDaysMin ?? 5).ToString(trCulture));
-        await WriteElementAsync(writer, "service", "Standart");
-        await WriteElementAsync(writer, "min_handling_time", "1");
-        await WriteElementAsync(writer, "max_handling_time", "3");
-        await WriteElementAsync(writer, "country", "TR");
-        await WriteElementAsync(writer, "region", "All");
+        await WriteGElementAsync(writer, "country", "TR");
+        await WriteGElementAsync(writer, "service", "Standart Kargo");
+        await WriteGElementAsync(writer, "price", FormatPriceIso4217(0));
         await writer.WriteEndElementAsync(); // g:shipping
+
+        // Sevkiyata hazirlik ve nakliye sureleri
+        await WriteGElementAsync(writer, "min_handling_time", "1");
+        await WriteGElementAsync(writer, "max_handling_time", "3");
+        await WriteGElementAsync(writer, "min_transit_time", (product.DeliveryDaysMin ?? 5).ToString(CultureInfo.InvariantCulture));
+        await WriteGElementAsync(writer, "max_transit_time", (product.DeliveryDaysMax ?? 15).ToString(CultureInfo.InvariantCulture));
 
         await writer.WriteEndElementAsync(); // item
     }
 
-    private static string FormatPriceTl(decimal price, CultureInfo trCulture)
+    /// <summary>
+    /// RSS feed icin urun aciklamasi olusturur.
+    /// Google spesifikasyonu: duz metin, maks 5000 karakter, HTML temizlenmeli,
+    /// promosyon metni veya reklam icermemeli, yalnizca urunle ilgili bilgiler.
+    /// </summary>
+    private static string BuildRssDescription(Product product)
     {
-        var formatted = price.ToString("N0", trCulture);
-        return formatted + " TL";
+        var parts = new List<string>();
+
+        if (!string.IsNullOrEmpty(product.Description))
+            parts.Add(StripHtmlTags(product.Description));
+
+        if (!string.IsNullOrEmpty(product.TechnicalDescription))
+            parts.Add(StripHtmlTags(product.TechnicalDescription));
+
+        if (!string.IsNullOrEmpty(product.Summary) && parts.Count == 0)
+            parts.Add(StripHtmlTags(product.Summary));
+
+        var text = parts.Count > 0
+            ? string.Join(" ", parts)
+            : $"{product.Name ?? "Balon Park ürünü"} - Kaliteli ve güvenli şişirilebilir oyun grubu.";
+
+        if (text.Length > MerchantCenterDescriptionMaxLength)
+            text = text[..(MerchantCenterDescriptionMaxLength - 3)] + "...";
+
+        return text;
     }
 
-    private static string SanitizeDescriptionForMerchantCenter(string text)
+    /// <summary>
+    /// Fiyati Google Merchant Center ISO 4217 formatinda dondurur.
+    /// Ornek: "1500.00 TRY" - ondalik ayirici nokta (.), para birimi ISO 4217 kodu.
+    /// </summary>
+    private static string FormatPriceIso4217(decimal price)
     {
-        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
-        var t = text.Trim();
-        if (t.Length > MerchantCenterDescriptionMaxLength)
-            t = t.Substring(0, MerchantCenterDescriptionMaxLength);
-        return t;
-    }
-
-    private static string GenerateValidGtin(int productId)
-    {
-        const string prefix = "869";
-        var productCode = productId.ToString("D6", CultureInfo.InvariantCulture);
-        var baseGtin = prefix + productCode;
-        var gtin12 = baseGtin.PadRight(12, '0');
-        var checkDigit = CalculateGtinCheckDigit(gtin12);
-        return gtin12 + checkDigit;
-    }
-
-    private static int CalculateGtinCheckDigit(string gtin12)
-    {
-        int sum = 0;
-        for (var i = 0; i < 12; i++)
-        {
-            int digit = int.Parse(gtin12[i].ToString(), CultureInfo.InvariantCulture);
-            int multiplier = (i % 2 == 0) ? 1 : 3;
-            sum += digit * multiplier;
-        }
-        return (10 - (sum % 10)) % 10;
+        return price.ToString("F2", CultureInfo.InvariantCulture) + " TRY";
     }
 
     private static async Task WriteGElementAsync(XmlWriter writer, string localName, string? value)
@@ -321,9 +354,9 @@ public class YandexShoppingService(
         foreach (var pic in pictureUrls.Take(5))
             await WriteElementAsync(writer, "picture", pic);
 
-        // Açıklama (reklam metni içermemeli)
-        var description = SanitizeDescription(
-            product.Description ?? product.TechnicalDescription ?? product.Summary ?? product.Name ?? "Balon Park ürünü");
+        // Aciklama: HTML temizlenmeli, reklam metni icermemeli
+        var rawDescription = product.Description ?? product.TechnicalDescription ?? product.Summary ?? product.Name ?? "Balon Park ürünü";
+        var description = SanitizeDescription(rawDescription);
         await WriteElementAsync(writer, "description", description);
 
         // İndirim: sitede eski fiyat gösteriliyorsa oldprice (fark en az %5 olmalı). RUB'ye çeviriyoruz
@@ -375,13 +408,25 @@ public class YandexShoppingService(
         return list;
     }
 
+    /// <summary>
+    /// Yandex YML aciklamasini temizler: HTML etiketlerini kaldirir, maks 3000 karakter.
+    /// Yandex kurallari: reklam metni, link, rakip bilgisi icermemeli.
+    /// </summary>
     private static string SanitizeDescription(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return string.Empty;
-        // Reklam metni, link, rakip bilgisi kaldır (Yandex kuralları)
-        var t = text.Trim();
-        if (t.Length > 3000) t = t.Substring(0, 3000);
+        var t = StripHtmlTags(text);
+        if (t.Length > 3000) t = t[..3000];
         return t;
+    }
+
+    /// <summary>HTML etiketlerini temizler, yalnizca duz metin dondurur.</summary>
+    private static string StripHtmlTags(string html)
+    {
+        if (string.IsNullOrEmpty(html)) return string.Empty;
+        var text = System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", " ");
+        text = System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ");
+        return text.Trim();
     }
 
     private static async Task WriteElementAsync(XmlWriter writer, string localName, string? value)

@@ -106,20 +106,15 @@ namespace BalonPark.Services
             }
         }
 
-        private HttpClient CreateHttpClient()
+        private static HttpClient CreateHttpClient()
         {
-            var handler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-            };
-
-            var httpClient = new HttpClient(handler)
+            var httpClient = new HttpClient
             {
                 Timeout = TimeSpan.FromMinutes(5)
             };
-            
+
             httpClient.DefaultRequestHeaders.Add("User-Agent", "BalonPark-Shopping-API/1.0");
-            
+
             return httpClient;
         }
 
@@ -377,63 +372,12 @@ namespace BalonPark.Services
         {
             try
             {
-                // Veritabanından güncel verileri al (cache kullanmaz)
                 var products = await productRepository.GetAllForGoogleShoppingAsync();
                 var googleShoppingProducts = new List<GoogleShoppingProduct>();
 
                 foreach (var product in products)
                 {
-                    // GetAllForGoogleShoppingAsync zaten aktif ve fiyatı > 0 olan ürünleri getiriyor
-                    
-                    // Ürünün tüm resimlerini getir
-                    var productImages = await productImageRepository.GetByProductIdAsync(product.Id);
-                    var additionalImageLinks = new List<string>();
-                    
-                    foreach (var image in productImages.Where(img => !img.IsMainImage).OrderBy(img => img.DisplayOrder))
-                    {
-                        var imageUrl = GetImageUrl(image.LargePath);
-                        if (!string.IsNullOrEmpty(imageUrl))
-                        {
-                            additionalImageLinks.Add(imageUrl);
-                        }
-                    }
-
-                    var googleProduct = new GoogleShoppingProduct
-                    {
-                        Id = $"balonpark_{product.Id}",
-                        OfferId = $"balonpark_offer_{product.Id}",
-                        Title = product.Name ?? "Ürün",
-                        Description = !string.IsNullOrEmpty(product.Description) ? product.Description : 
-                                     (!string.IsNullOrEmpty(product.TechnicalDescription) ? product.TechnicalDescription : 
-                                     product.Name ?? "Balon Park ürünü"),
-                        Link = urlService.GetProductUrl(product.CategorySlug ?? "urunler", product.SubCategorySlug ?? "tum-urunler", product.Slug),
-                        ImageLink = GetMainImageUrl(product),
-                        AdditionalImageLinks = additionalImageLinks,
-                        Availability = "in stock", // GetAllForGoogleShoppingAsync zaten aktif ürünleri getiriyor
-                        Condition = "new",
-                        Brand = "Balon Park",
-                        Gtin = GenerateValidGtin(product.Id), // Doğrulanmış GTIN
-                        Mpn = $"U-{product.Id}",
-                        Price = product.Price,
-                        Currency = "TRY", // Türkiye için TRY kullanılmalı
-                        ContentLanguage = "tr",
-                        TargetCountry = "TR", // Sadece Türkiye hedef ülke
-                        GoogleProductCategory = GetGoogleProductCategory(product.CategoryId),
-                        ProductType = $"{product.CategoryName} > {product.SubCategoryName}",
-                        AgeGroup = "kids", // Şişme oyun grupları çocuklar için (Google geçerli değer: newborn, infant, toddler, kids, adult)
-                        Gender = "unisex",
-                        ItemGroupId = $"category_{product.CategoryId}",
-                        ShippingWeight = "1 kg", // Varsayılan ağırlık
-                        CustomLabel0 = product.CategoryName,
-                        CustomLabel1 = product.SubCategoryName,
-                        CustomLabel2 = $"Stok: {product.Stock}",
-                        CustomLabel3 = !string.IsNullOrEmpty(product.Summary) ? product.Summary : null,
-                        // Kargo bilgileri - Kargo para birimi Currency ile aynı olacak (TRY)
-                        ShippingCountry = "TR",
-                        ShippingService = "Standart Kargo",
-                        ShippingPrice = 0 // Ücretsiz kargo (TRY para birimi ile)
-                    };
-
+                    var googleProduct = await BuildGoogleShoppingProduct(product);
                     googleShoppingProducts.Add(googleProduct);
                 }
 
@@ -449,8 +393,8 @@ namespace BalonPark.Services
         private Google.Apis.ShoppingContent.v2_1.Data.Product ConvertToGoogleProduct(GoogleShoppingProduct product)
         {
             var formattedPrice = product.Price.ToString("F2", CultureInfo.InvariantCulture);
-            
-            return new Google.Apis.ShoppingContent.v2_1.Data.Product
+
+            var googleProduct = new Google.Apis.ShoppingContent.v2_1.Data.Product
             {
                 Id = product.Id,
                 OfferId = product.OfferId,
@@ -461,36 +405,36 @@ namespace BalonPark.Services
                 Availability = product.Availability,
                 Condition = product.Condition,
                 Brand = product.Brand,
-                Gtin = product.Gtin,
                 Mpn = product.Mpn,
+                IdentifierExists = product.IdentifierExists,
                 Price = new Google.Apis.ShoppingContent.v2_1.Data.Price
                 {
-                    Value = formattedPrice, // TRY için TL cinsinden gönder (kuruş değil!)
+                    Value = formattedPrice,
                     Currency = product.Currency
                 },
                 ContentLanguage = product.ContentLanguage,
                 TargetCountry = product.TargetCountry,
+                Channel = "online",
                 GoogleProductCategory = product.GoogleProductCategory,
-                AdditionalImageLinks = product.AdditionalImageLinks?.Any() == true ? product.AdditionalImageLinks.ToArray() : null,
+                ProductTypes = !string.IsNullOrEmpty(product.ProductType) ? new[] { product.ProductType } : null,
+                AdditionalImageLinks = product.AdditionalImageLinks?.Count > 0 ? product.AdditionalImageLinks.ToArray() : null,
                 Color = product.Color,
                 Material = product.Material,
                 AgeGroup = product.AgeGroup,
                 Gender = product.Gender,
                 ItemGroupId = product.ItemGroupId,
+                ProductHighlights = product.ProductHighlights?.Count > 0 ? product.ProductHighlights : null,
                 CustomLabel0 = product.CustomLabel0,
                 CustomLabel1 = product.CustomLabel1,
                 CustomLabel2 = product.CustomLabel2,
                 CustomLabel3 = product.CustomLabel3,
                 CustomLabel4 = product.CustomLabel4,
-                // Zorunlu kanal alanı eklendi
-                Channel = "online",
-                // Kargo bilgileri
                 Shipping = product.ShippingCountry != null && product.ShippingPrice.HasValue ? new List<Google.Apis.ShoppingContent.v2_1.Data.ProductShipping>
                 {
-                    new Google.Apis.ShoppingContent.v2_1.Data.ProductShipping
+                    new()
                     {
                         Country = product.ShippingCountry,
-                        Service = product.ShippingService ?? "Standart",
+                        Service = product.ShippingService ?? "Standart Kargo",
                         Price = new Google.Apis.ShoppingContent.v2_1.Data.Price
                         {
                             Value = product.ShippingPrice.Value.ToString("F2", CultureInfo.InvariantCulture),
@@ -499,6 +443,22 @@ namespace BalonPark.Services
                     }
                 } : null
             };
+
+            if (!string.IsNullOrEmpty(product.Gtin))
+            {
+                googleProduct.Gtin = product.Gtin;
+            }
+
+            if (product.SalePrice.HasValue && product.SalePrice.Value > 0 && product.SalePrice.Value < product.Price)
+            {
+                googleProduct.SalePrice = new Google.Apis.ShoppingContent.v2_1.Data.Price
+                {
+                    Value = product.SalePrice.Value.ToString("F2", CultureInfo.InvariantCulture),
+                    Currency = product.Currency
+                };
+            }
+
+            return googleProduct;
         }
 
         private static GoogleShoppingProduct ConvertFromGoogleProduct(Google.Apis.ShoppingContent.v2_1.Data.Product product)
@@ -514,26 +474,24 @@ namespace BalonPark.Services
                 Availability = product.Availability ?? "in stock",
                 Condition = product.Condition ?? "new",
                 Brand = product.Brand ?? string.Empty,
-                Gtin = product.Gtin ?? string.Empty,
-                Mpn = product.Mpn ?? string.Empty,
-                Price = decimal.TryParse(product.Price?.Value, out var price) ? price : 0, // TL cinsinden değer
+                Gtin = product.Gtin,
+                Mpn = product.Mpn,
+                IdentifierExists = product.IdentifierExists ?? true,
+                Price = decimal.TryParse(product.Price?.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var price) ? price : 0,
+                SalePrice = decimal.TryParse(product.SalePrice?.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var salePrice) ? salePrice : null,
                 Currency = product.Price?.Currency ?? "TRY",
                 ContentLanguage = product.ContentLanguage ?? "tr",
                 TargetCountry = product.TargetCountry ?? "TR",
                 GoogleProductCategory = product.GoogleProductCategory ?? string.Empty,
-                ProductType = string.Empty, // Google API'de bu alan bulunmuyor
+                ProductType = product.ProductTypes?.FirstOrDefault() ?? string.Empty,
                 AdditionalImageLink = product.AdditionalImageLinks?.FirstOrDefault(),
                 AdditionalImageLinks = product.AdditionalImageLinks?.ToList() ?? [],
                 Color = product.Color,
                 Material = product.Material,
-                Size = string.Empty, // Google API'de bu alan bulunmuyor
                 AgeGroup = product.AgeGroup,
                 Gender = product.Gender,
                 ItemGroupId = product.ItemGroupId,
-                ShippingWeight = string.Empty, // Google API'de bu alan farklı şekilde
-                ShippingLength = string.Empty,
-                ShippingWidth = string.Empty,
-                ShippingHeight = string.Empty,
+                ProductHighlights = product.ProductHighlights?.ToList(),
                 CustomLabel0 = product.CustomLabel0,
                 CustomLabel1 = product.CustomLabel1,
                 CustomLabel2 = product.CustomLabel2,
@@ -589,61 +547,12 @@ namespace BalonPark.Services
         {
             try
             {
-                // Veritabanından Google Shopping için hazırlanmış ürünleri getir
                 var products = await productRepository.GetAllForGoogleShoppingAsync();
                 var googleShoppingProducts = new List<GoogleShoppingProduct>();
 
                 foreach (var product in products)
                 {
-                    // Ürünün tüm resimlerini getir
-                    var productImages = await productImageRepository.GetByProductIdAsync(product.Id);
-                    var additionalImageLinks = new List<string>();
-                    
-                    foreach (var image in productImages.Where(img => !img.IsMainImage).OrderBy(img => img.DisplayOrder))
-                    {
-                        var imageUrl = GetImageUrl(image.LargePath);
-                        if (!string.IsNullOrEmpty(imageUrl))
-                        {
-                            additionalImageLinks.Add(imageUrl);
-                        }
-                    }
-
-                    var googleProduct = new GoogleShoppingProduct
-                    {
-                        Id = $"balonpark_{product.Id}",
-                        OfferId = $"balonpark_offer_{product.Id}",
-                        Title = product.Name ?? "Ürün",
-                        Description = !string.IsNullOrEmpty(product.Description) ? product.Description : 
-                                     (!string.IsNullOrEmpty(product.TechnicalDescription) ? product.TechnicalDescription : 
-                                     product.Name ?? "Balon Park ürünü"),
-                        Link = urlService.GetProductUrl(product.CategorySlug ?? "urunler", product.SubCategorySlug ?? "tum-urunler", product.Slug),
-                        ImageLink = GetMainImageUrl(product),
-                        AdditionalImageLinks = additionalImageLinks,
-                        Availability = "in stock",
-                        Condition = "new",
-                        Brand = "Balon Park",
-                        Gtin = GenerateValidGtin(product.Id),
-                        Mpn = $"U-{product.Id}",
-                        Price = product.Price,
-                        Currency = "TRY", // Türkiye için TRY kullanılmalı
-                        ContentLanguage = "tr",
-                        TargetCountry = "TR", // Sadece Türkiye hedef ülke
-                        GoogleProductCategory = GetGoogleProductCategory(product.CategoryId),
-                        ProductType = $"{product.CategoryName} > {product.SubCategoryName}",
-                        AgeGroup = "kids", // Google geçerli değer: newborn, infant, toddler, kids, adult
-                        Gender = "unisex",
-                        ItemGroupId = $"category_{product.CategoryId}",
-                        ShippingWeight = "-",
-                        CustomLabel0 = product.CategoryName,
-                        CustomLabel1 = product.SubCategoryName,
-                        CustomLabel2 = $"Stok: {product.Stock}",
-                        CustomLabel3 = !string.IsNullOrEmpty(product.Summary) ? product.Summary : null,
-                        // Kargo bilgileri - Kargo para birimi Currency ile aynı olacak (TRY)
-                        ShippingCountry = "TR",
-                        ShippingService = "Standart Kargo",
-                        ShippingPrice = 0 // Ücretsiz kargo (TRY para birimi ile)
-                    };
-
+                    var googleProduct = await BuildGoogleShoppingProduct(product);
                     googleShoppingProducts.Add(googleProduct);
                 }
 
@@ -706,61 +615,283 @@ namespace BalonPark.Services
             }
         }
 
-        private string GenerateValidGtin(int productId)
+        /// <summary>
+        /// Veritabanı ürününü Google Shopping formatına dönüştürür.
+        /// Google Merchant Center best practices uygulanır:
+        /// - Title maks 150 karakter
+        /// - Description maks 5000 karakter, HTML temizlenir
+        /// - CustomLabel alanları maks 100 karakter
+        /// - Stok durumu gerçek stoktan kontrol edilir
+        /// - Üretici GTIN yoksa IdentifierExists=false
+        /// </summary>
+        private async Task<GoogleShoppingProduct> BuildGoogleShoppingProduct(BalonPark.Models.Product product)
         {
-            // GTIN-13 formatı için 12 basamak + 1 kontrol basamağı
-            // Balon Park için prefix: 869 (Türkiye kodu)
-            var prefix = "869";
-            var productCode = productId.ToString("D6"); // 6 basamaklı ürün kodu
-            var baseGtin = prefix + productCode; // 9 basamak
-            
-            // 13 basamak için 4 sıfır ekle (12 basamak + kontrol basamağı için)
-            var gtin12 = baseGtin.PadRight(12, '0');
-            
-            // Kontrol basamağını hesapla
-            var checkDigit = CalculateCheckDigit(gtin12);
-            
-            return gtin12 + checkDigit; // 13 basamaklı GTIN
-        }
-        
-        private int CalculateCheckDigit(string gtin12)
-        {
-            // GTIN-13 kontrol basamağı hesaplama algoritması
-            int sum = 0;
-            for (int i = 0; i < 12; i++)
+            var productImages = await productImageRepository.GetByProductIdAsync(product.Id);
+            var additionalImageLinks = productImages
+                .Where(img => !img.IsMainImage)
+                .OrderBy(img => img.DisplayOrder)
+                .Select(img => GetImageUrl(img.LargePath))
+                .Where(url => !string.IsNullOrEmpty(url))
+                .Take(10) // Google maks 10 ek resim kabul eder
+                .ToList();
+
+            var title = BuildTitle(product);
+            var description = BuildDescription(product);
+            var availability = GetAvailability(product.Stock);
+            var shippingWeight = GetShippingWeight(product);
+            var productHighlights = BuildProductHighlights(product);
+
+            return new GoogleShoppingProduct
             {
-                int digit = int.Parse(gtin12[i].ToString());
-                // Çift pozisyonlarda 1, tek pozisyonlarda 3 ile çarp
-                int multiplier = (i % 2 == 0) ? 1 : 3;
-                sum += digit * multiplier;
+                Id = $"balonpark_{product.Id}",
+                OfferId = $"balonpark_offer_{product.Id}",
+                Title = title,
+                Description = description,
+                Link = urlService.GetProductUrl(
+                    product.CategorySlug ?? "urunler",
+                    product.SubCategorySlug ?? "tum-urunler",
+                    product.Slug),
+                ImageLink = GetMainImageUrl(product),
+                AdditionalImageLinks = additionalImageLinks,
+                Availability = availability,
+                Condition = "new",
+                Brand = "Balon Park",
+                Gtin = null, // Üretici tarafından atanmış gerçek GTIN bulunmuyor
+                Mpn = $"BP-{product.Id:D6}",
+                IdentifierExists = false, // Özel üretim ürünler - gerçek GTIN/UPC yok
+                Price = product.Price,
+                Currency = "TRY",
+                ContentLanguage = "tr",
+                TargetCountry = "TR",
+                GoogleProductCategory = GetGoogleProductCategory(product.CategoryId),
+                ProductType = $"{product.CategoryName} > {product.SubCategoryName}",
+                Color = GetDefaultColor(product),
+                AgeGroup = "kids",
+                Gender = "unisex",
+                ItemGroupId = $"category_{product.CategoryId}",
+                ShippingWeight = shippingWeight,
+                ProductHighlights = productHighlights,
+                // Custom Labels: kampanya segmentasyonu için kısa etiketler (maks 100 karakter)
+                CustomLabel0 = TruncateToCustomLabel(product.CategoryName),
+                CustomLabel1 = TruncateToCustomLabel(product.SubCategoryName),
+                CustomLabel2 = GetStockLabel(product.Stock),
+                CustomLabel3 = GetPriceRangeLabel(product.Price),
+                CustomLabel4 = product.IsPopular ? "Populer" : (product.IsDiscounted ? "Indirimli" : null),
+                ShippingCountry = "TR",
+                ShippingService = "Standart Kargo",
+                ShippingPrice = 0 // Ucretsiz kargo
+            };
+        }
+
+        /// <summary>
+        /// Varsayilan renk degerini dondurur.
+        /// Urunun ColorOptions alani doluysa onu kullanir, yoksa
+        /// "Kırmızı/Mavi/Yeşil/Sarı/Turuncu/Açık Mavi" dondurur.
+        /// Google spec: birden fazla renk "/" ile ayrilir, once birincil renk listelenir.
+        /// </summary>
+        private static string GetDefaultColor(BalonPark.Models.Product product)
+        {
+            if (!string.IsNullOrWhiteSpace(product.ColorOptions))
+                return product.ColorOptions;
+
+            return "Kırmızı/Mavi/Yeşil/Sarı/Turuncu/Açık Mavi";
+        }
+
+        /// <summary>
+        /// Google Merchant Center spesifikasyonuna uygun title olusturur.
+        /// Maks 150 karakter. Sadece urun adi kullanilir.
+        /// </summary>
+        private static string BuildTitle(BalonPark.Models.Product product)
+        {
+            var title = product.Name ?? "Ürün";
+
+            if (title.Length > GoogleShoppingProduct.TitleMaxLength)
+            {
+                title = title[..(GoogleShoppingProduct.TitleMaxLength - 3)] + "...";
             }
-            
-            // 10'a bölümünden kalanı 10'dan çıkar
-            return (10 - (sum % 10)) % 10;
+
+            return title;
+        }
+
+        /// <summary>
+        /// Google Merchant Center spesifikasyonuna uygun description olusturur.
+        /// Maks 5000 karakter. HTML etiketleri temizlenir.
+        /// Urun bilgileri, teknik ozellikler ve ozet birlestirilir.
+        /// </summary>
+        private static string BuildDescription(BalonPark.Models.Product product)
+        {
+            var parts = new List<string>();
+
+            if (!string.IsNullOrEmpty(product.Description))
+            {
+                parts.Add(StripHtmlTags(product.Description));
+            }
+
+            if (!string.IsNullOrEmpty(product.TechnicalDescription))
+            {
+                parts.Add(StripHtmlTags(product.TechnicalDescription));
+            }
+
+            if (!string.IsNullOrEmpty(product.Summary) && parts.Count == 0)
+            {
+                parts.Add(StripHtmlTags(product.Summary));
+            }
+
+            var description = parts.Count > 0
+                ? string.Join(" ", parts)
+                : $"Balon Park {product.Name} - Kaliteli ve guvenli sisirilebilir oyun grubu.";
+
+            if (description.Length > GoogleShoppingProduct.DescriptionMaxLength)
+            {
+                description = description[..(GoogleShoppingProduct.DescriptionMaxLength - 3)] + "...";
+            }
+
+            return description;
+        }
+
+        /// <summary>
+        /// Urunun one cikan ozelliklerini (product_highlight) olusturur.
+        /// Google maks 150 karakter/ozellik, 2-100 ozellik kabul eder.
+        /// </summary>
+        private static List<string>? BuildProductHighlights(BalonPark.Models.Product product)
+        {
+            var highlights = new List<string>();
+
+            if (product.HasCertificate)
+                highlights.Add("Uluslararasi guvenlik sertifikalari mevcut");
+
+            if (product.IsFireResistant)
+                highlights.Add("Yanmaz malzeme ile uretilmistir");
+
+            if (!string.IsNullOrEmpty(product.WarrantyDescription))
+                highlights.Add(TruncateText(product.WarrantyDescription, 150));
+
+            if (!string.IsNullOrEmpty(product.MaterialWeight))
+                highlights.Add($"Malzeme gramaji: {product.MaterialWeight}");
+
+            if (product.UserCount.HasValue && product.UserCount > 0)
+                highlights.Add($"Ayni anda {product.UserCount} cocuk kullanabilir");
+
+            if (!string.IsNullOrEmpty(product.InflatedLength) && !string.IsNullOrEmpty(product.InflatedWidth))
+                highlights.Add($"Sisik boyut: {product.InflatedLength} x {product.InflatedWidth} x {product.InflatedHeight}");
+
+            return highlights.Count >= 2 ? highlights : null;
+        }
+
+        /// <summary>
+        /// Stok durumunu Google Content API v2.1 formatina esler.
+        /// Content API bosluklu degerler kabul eder: "in stock", "out of stock", "preorder", "backorder".
+        /// Not: RSS/XML feed'lerde alt cizgili format kullanilir (in_stock, out_of_stock).
+        /// </summary>
+        private static string GetAvailability(int stock)
+        {
+            return stock > 0 ? "in stock" : "out of stock";
+        }
+
+        /// <summary>
+        /// Kargo agirligini Google formatinda dondurur (ornek: "50 kg").
+        /// Gecersiz veya eksik deger durumunda null dondurur.
+        /// </summary>
+        private static string? GetShippingWeight(BalonPark.Models.Product product)
+        {
+            if (product.PackagedWeightKg.HasValue && product.PackagedWeightKg > 0)
+            {
+                return $"{product.PackagedWeightKg.Value:F1} kg";
+            }
+
+            if (product.InflatedWeightKg.HasValue && product.InflatedWeightKg > 0)
+            {
+                return $"{product.InflatedWeightKg.Value:F1} kg";
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Stok segmentasyonu icin etiket olusturur.
+        /// Kampanya teklif stratejisi ve raporlamada kullanilir.
+        /// </summary>
+        private static string GetStockLabel(int stock)
+        {
+            return stock switch
+            {
+                0 => "Tukendi",
+                <= 5 => "Sinirli Stok",
+                <= 20 => "Stokta",
+                _ => "Yuksek Stok"
+            };
+        }
+
+        /// <summary>
+        /// Fiyat araliklarini segmentler halinde etiketler.
+        /// Google Ads kampanyalarinda fiyat bazli teklif stratejisi icin kullanilir.
+        /// </summary>
+        private static string GetPriceRangeLabel(decimal price)
+        {
+            return price switch
+            {
+                < 10_000 => "0-10K TL",
+                < 50_000 => "10K-50K TL",
+                < 100_000 => "50K-100K TL",
+                < 250_000 => "100K-250K TL",
+                _ => "250K+ TL"
+            };
+        }
+
+        /// <summary>
+        /// Metni Google custom_label limiti olan 100 karaktere kisaltir.
+        /// Merchant Center hesabindaki her custom label icin maks 1000 benzersiz deger kullanilmalidir.
+        /// </summary>
+        private static string? TruncateToCustomLabel(string? text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return null;
+
+            return text.Length <= GoogleShoppingProduct.CustomLabelMaxLength
+                ? text
+                : text[..(GoogleShoppingProduct.CustomLabelMaxLength - 3)] + "...";
+        }
+
+        /// <summary>Metni belirtilen uzunluga kisaltir.</summary>
+        private static string TruncateText(string text, int maxLength)
+        {
+            if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
+                return text ?? string.Empty;
+
+            return text[..(maxLength - 3)] + "...";
+        }
+
+        /// <summary>HTML etiketlerini temizler, yalnizca duz metin dondurur.</summary>
+        private static string StripHtmlTags(string html)
+        {
+            if (string.IsNullOrEmpty(html))
+                return string.Empty;
+
+            var text = System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", " ");
+            text = System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ");
+            return text.Trim();
         }
 
         private string GetGoogleProductCategory(int? categoryId)
         {
-            // Google Shopping kategori ID'leri - 2024 güncel kategoriler
-            // Numeric ID kullanımı daha güvenli ve tutarlı
-            // Kaynak: https://support.google.com/merchants/answer/6324436
-            // Google Taxonomy: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
+            // Google Shopping Taxonomy (numeric ID) - daha guvenli ve tutarli
+            // https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
             return categoryId switch
             {
-                1 => "1253", // Toys & Games (Şişme oyun grupları için genel kategori)
-                2 => "1253", // Toys & Games (Şişme kaydıraklar için)
-                3 => "1253", // Toys & Games (Şişme havuzlar için)
-                4 => "1253", // Toys & Games (Şişme rodeo için)
-                5 => "1253", // Toys & Games (Top havuzları için)
-                6 => "1253", // Toys & Games (İç mekan oyun parkları için)
-                7 => "1253", // Toys & Games (Trambolin için)
-                8 => "1253", // Toys & Games (Softplay oyuncaklar için)
-                9 => "96", // Party & Celebration > Party Supplies (Yer balonları)
-                10 => "96", // Party & Celebration > Party Supplies (Balon tak)
-                11 => "1253", // Toys & Games (Fly tüp)
-                12 => "5192", // Apparel & Accessories > Costumes & Accessories (Şişme kostüm)
-                13 => "96", // Party & Celebration > Party Supplies (Reklam balonları)
-                _ => "1253" // Varsayılan: Toys & Games
+                1 => "1253",  // Toys & Games (Sisme oyun gruplari)
+                2 => "1253",  // Toys & Games (Sisme kaydıraklar)
+                3 => "1253",  // Toys & Games (Sisme havuzlar)
+                4 => "1253",  // Toys & Games (Sisme rodeo)
+                5 => "1253",  // Toys & Games (Top havuzlari)
+                6 => "1253",  // Toys & Games (Ic mekan oyun parklari)
+                7 => "1253",  // Toys & Games (Trambolin)
+                8 => "1253",  // Toys & Games (Softplay oyuncaklar)
+                9 => "96",    // Party Supplies (Yer balonlari)
+                10 => "96",   // Party Supplies (Balon tak)
+                11 => "1253", // Toys & Games (Fly tup)
+                12 => "5192", // Costumes & Accessories (Sisme kostum)
+                13 => "96",   // Party Supplies (Reklam balonlari)
+                _ => "1253"   // Varsayilan: Toys & Games
             };
         }
     }
