@@ -665,7 +665,7 @@ namespace BalonPark.Services
                 TargetCountry = "TR",
                 GoogleProductCategory = GetGoogleProductCategory(product.CategoryId),
                 ProductType = $"{product.CategoryName} > {product.SubCategoryName}",
-                Color = GetDefaultColor(product),
+                Color ="Kırmızı/Mavi/Yeşil/Sarı/Turuncu/Açık Mavi",
                 AgeGroup = "kids",
                 Gender = "unisex",
                 ItemGroupId = $"category_{product.CategoryId}",
@@ -682,21 +682,7 @@ namespace BalonPark.Services
                 ShippingPrice = 0 // Ucretsiz kargo
             };
         }
-
-        /// <summary>
-        /// Varsayilan renk degerini dondurur.
-        /// Urunun ColorOptions alani doluysa onu kullanir, yoksa
-        /// "Kırmızı/Mavi/Yeşil/Sarı/Turuncu/Açık Mavi" dondurur.
-        /// Google spec: birden fazla renk "/" ile ayrilir, once birincil renk listelenir.
-        /// </summary>
-        private static string GetDefaultColor(BalonPark.Models.Product product)
-        {
-            if (!string.IsNullOrWhiteSpace(product.ColorOptions))
-                return product.ColorOptions;
-
-            return "Kırmızı/Mavi/Yeşil/Sarı/Turuncu/Açık Mavi";
-        }
-
+ 
         /// <summary>
         /// Google Merchant Center spesifikasyonuna uygun title olusturur.
         /// Maks 150 karakter. Sadece urun adi kullanilir.
