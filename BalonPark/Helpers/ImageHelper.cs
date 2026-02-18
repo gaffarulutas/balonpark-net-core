@@ -2,25 +2,46 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 
 namespace BalonPark.Helpers;
 
 public static class ImageHelper
 {
-    /// <summary>Ürün resimleri için yüksek JPEG kalitesi (net görüntü, az sıkıştırma).</summary>
+    /// <summary>WebP kalitesi: 85 = JPEG 95'e denk goruntu kalitesi, ~%30-40 daha kucuk dosya boyutu.</summary>
+    private const int WebPQuality = 85;
+
+    /// <summary>Ürün resimleri için yüksek JPEG kalitesi (orijinal yedek icin).</summary>
     private const int JpegQuality = 95;
 
-    /// <summary>Dosya uzantısına göre yüksek kaliteli encoder döndürür.</summary>
+    /// <summary>WebP encoder: lossy sikistirma, yuksek kalite.</summary>
+    private static readonly WebpEncoder WebPEncoder = new()
+    {
+        Quality = WebPQuality,
+        FileFormat = WebpFileFormatType.Lossy
+    };
+
+    /// <summary>Dosya uzantısına göre encoder döndürür (orijinal dosya kaydi icin).</summary>
     private static IImageEncoder GetEncoderForPath(string filePath)
     {
         var ext = Path.GetExtension(filePath).ToLowerInvariant();
         return ext switch
         {
+            ".webp" => WebPEncoder,
             ".png" => new PngEncoder { CompressionLevel = PngCompressionLevel.BestCompression },
             ".jpg" or ".jpeg" => new JpegEncoder { Quality = JpegQuality },
             _ => new JpegEncoder { Quality = JpegQuality }
         };
+    }
+
+    /// <summary>
+    /// Dosya adinin uzantisini .webp olarak degistirir.
+    /// Ornek: "abc123.jpg" -> "abc123.webp"
+    /// </summary>
+    public static string ToWebPFileName(string fileName)
+    {
+        return Path.ChangeExtension(fileName, ".webp");
     }
 
     public static async Task<(string originalPath, string largePath, string thumbnailPath)> SaveProductImageAsync(
@@ -28,20 +49,19 @@ public static class ImageHelper
         string productFolderPath,
         string fileName)
     {
-        var originalPath = Path.Combine(productFolderPath, $"original_{fileName}");
-        var largePath = Path.Combine(productFolderPath, $"large_{fileName}");
-        var thumbnailPath = Path.Combine(productFolderPath, $"thumb_{fileName}");
+        var webpFileName = ToWebPFileName(fileName);
 
-        // Orijinali olduğu gibi kaydet (kalite kaybı yok)
+        var originalPath = Path.Combine(productFolderPath, $"original_{fileName}");
+        var largePath = Path.Combine(productFolderPath, $"large_{webpFileName}");
+        var thumbnailPath = Path.Combine(productFolderPath, $"thumb_{webpFileName}");
+
+        // Orijinali olduğu gibi kaydet (kalite kaybı yok, yedek amacli)
         using (var stream = new FileStream(originalPath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        var encoderLarge = GetEncoderForPath(largePath);
-        var encoderThumb = GetEncoderForPath(thumbnailPath);
-
-        // Large (1000px) – Lanczos3 ile keskin resize, yüksek kalite kayıt
+        // Large (1000px) – Lanczos3 ile keskin resize, WebP formatinda kaydet
         using (var stream = file.OpenReadStream())
         using (var image = await Image.LoadAsync(stream))
         {
@@ -50,10 +70,10 @@ public static class ImageHelper
             var largeHeight = (int)(largeWidth * aspectRatio);
 
             image.Mutate(x => x.Resize(largeWidth, largeHeight, KnownResamplers.Lanczos3));
-            await image.SaveAsync(largePath, encoderLarge);
+            await image.SaveAsync(largePath, WebPEncoder);
         }
 
-        // Thumbnail (450px) – aynı kalite ayarları
+        // Thumbnail (450px) – WebP formatinda kaydet
         using (var stream = file.OpenReadStream())
         using (var image = await Image.LoadAsync(stream))
         {
@@ -62,7 +82,7 @@ public static class ImageHelper
             var thumbHeight = (int)(thumbWidth * aspectRatio);
 
             image.Mutate(x => x.Resize(thumbWidth, thumbHeight, KnownResamplers.Lanczos3));
-            await image.SaveAsync(thumbnailPath, encoderThumb);
+            await image.SaveAsync(thumbnailPath, WebPEncoder);
         }
 
         return (originalPath, largePath, thumbnailPath);
@@ -84,23 +104,20 @@ public static class ImageHelper
     {
         var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "blog");
         
-        // Klasör yoksa oluştur
         if (!Directory.Exists(uploadsFolder))
         {
             Directory.CreateDirectory(uploadsFolder);
         }
         
-        // Benzersiz dosya adı oluştur
-        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        // WebP formatinda benzersiz dosya adi olustur
+        var fileName = $"{Guid.NewGuid()}.webp";
         var filePath = Path.Combine(uploadsFolder, fileName);
         
-        // Resmi kaydet
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
+        // Resmi WebP formatinda kaydet
+        using var stream = file.OpenReadStream();
+        using var image = await Image.LoadAsync(stream);
+        await image.SaveAsync(filePath, WebPEncoder);
         
-        // Web path döndür
         return $"/uploads/blog/{fileName}";
     }
 

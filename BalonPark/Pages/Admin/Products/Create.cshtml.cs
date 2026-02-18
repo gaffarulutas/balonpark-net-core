@@ -127,25 +127,26 @@ public class CreateModel : BaseAdminPage
                 if (image.Length > 0)
                 {
                     var fileName = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
+                    var webpFileName = ImageHelper.ToWebPFileName(fileName);
                     
-                    // Watermark ile kaydet (logo varsa)
+                    // Watermark ile kaydet (logo varsa) - large ve thumb WebP formatinda
                     (string originalPath, string largePath, string thumbnailPath) = await ImageHelper.SaveProductImageWithWatermarkAsync(
                         image,
                         uploadPath,
                         fileName,
                         watermarkLogoPath,
-                        watermarkOpacity: 0.3f,     // %30 saydam (çok az görünür)
-                        watermarkScale: 0.1f       // Resmin %10'u kadar (küçük)
+                        watermarkOpacity: 0.3f,
+                        watermarkScale: 0.1f
                     );
 
                     var productImage = new ProductImage
                     {
                         ProductId = productId,
-                        FileName = fileName,
+                        FileName = webpFileName,
                         OriginalPath = $"uploads/products/{productId}/original_{fileName}",
-                        LargePath = $"uploads/products/{productId}/large_{fileName}",
-                        ThumbnailPath = $"uploads/products/{productId}/thumb_{fileName}",
-                        IsMainImage = !hasMainImage, // Sadece ilk resim ana resim olur
+                        LargePath = $"uploads/products/{productId}/large_{webpFileName}",
+                        ThumbnailPath = $"uploads/products/{productId}/thumb_{webpFileName}",
+                        IsMainImage = !hasMainImage,
                         DisplayOrder = displayOrder,
                         CreatedAt = DateTime.Now
                     };

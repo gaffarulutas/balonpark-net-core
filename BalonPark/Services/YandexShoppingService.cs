@@ -37,7 +37,7 @@ public class YandexShoppingService(
         var shopName = settings?.CompanyName ?? "Balon Park";
         var baseUrl = urlService.GetBaseUrl();
         if (string.IsNullOrEmpty(baseUrl))
-            baseUrl = "https://www.balonpark.com";
+            baseUrl = "https://balonpark.com";
 
         var categories = (await categoryRepository.GetAllAsync()).ToList();
         var subCategories = (await subCategoryRepository.GetAllAsync()).ToList();
@@ -127,7 +127,7 @@ public class YandexShoppingService(
         var shopName = settings?.CompanyName ?? VendorName;
         var baseUrl = urlService.GetBaseUrl();
         if (string.IsNullOrEmpty(baseUrl))
-            baseUrl = "https://www.balonpark.com";
+            baseUrl = "https://balonpark.com";
 
         var products = (await productRepository.GetAllForGoogleShoppingAsync()).ToList();
         var tr = CultureInfo.GetCultureInfo("tr-TR");

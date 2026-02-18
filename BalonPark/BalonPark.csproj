@@ -32,4 +32,25 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\blog\db68d36a-e6d2-4be3-9c65-e116e2f93615.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\blog\f90d5aed-9f20-4265-9b4a-b8de8e7d64b4.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\large_11f26a89-c870-42ae-919b-333daf77b952.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\large_3333f236-959b-4b25-9d75-65df95c0ecca.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\large_6dbff6aa-ff7c-4750-a65e-09259e0e2ecc.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\large_ffccb795-2482-44bc-b7c7-f6a78a6f7b8b.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\original_11f26a89-c870-42ae-919b-333daf77b952.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\original_3333f236-959b-4b25-9d75-65df95c0ecca.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\original_6dbff6aa-ff7c-4750-a65e-09259e0e2ecc.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\original_ffccb795-2482-44bc-b7c7-f6a78a6f7b8b.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\thumb_11f26a89-c870-42ae-919b-333daf77b952.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\thumb_3333f236-959b-4b25-9d75-65df95c0ecca.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\thumb_6dbff6aa-ff7c-4750-a65e-09259e0e2ecc.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\uploads\products\1\thumb_ffccb795-2482-44bc-b7c7-f6a78a6f7b8b.jpeg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\" />
+  </ItemGroup>
+
 </Project>

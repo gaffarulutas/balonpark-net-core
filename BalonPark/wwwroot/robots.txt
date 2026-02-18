@@ -12,11 +12,6 @@ Allow: /feed/
 Disallow: /Admin/
 Disallow: /admin/
 
-# Disallow private areas
-Disallow: /bin/
-Disallow: /obj/
-Disallow: /Properties/
-
 # Allow important pages
 Allow: /
 Allow: /Index
@@ -29,6 +24,7 @@ Allow: /about
 Allow: /Iletisim
 Allow: /Privacy
 Allow: /KullanimKosullari
+Allow: /iade-politikasi
 Allow: /Search
 
 # Allow static resources

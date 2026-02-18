@@ -1,0 +1,158 @@
+@page "/iade-politikasi"
+@model IadePolitikasiModel
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    ViewData["Title"] = "İade ve İptal Politikası";
+    ViewData["Description"] = $"{companyName} iade ve iptal politikası. Sipariş iptal koşulları, iade süreci ve garanti bilgileri.";
+    ViewData["Keywords"] = "iade politikası, iptal koşulları, garanti, balon park, şişme oyun grupları";
+    ViewData["Image"] = settings?.Logo != null ? (((IUrlService?)ViewData["UrlService"])?.GetImageUrl(settings.Logo) ?? settings.Logo) : (((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/logo/logo.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/logo/logo.png");
+    var lastUpdated = DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"));
+}
+
+<article class="space-y-12 md:space-y-16 pb-10" id="return-policy-page-content">
+    @await Html.PartialAsync("Shared/_Breadcrumb", new List<BreadcrumbItem>
+    {
+        BreadcrumbItem.Link("Ana Sayfa", "/"),
+        BreadcrumbItem.Current("İade ve İptal Politikası")
+    })
+
+    <header class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <span class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                <i data-lucide="rotate-ccw" class="w-7 h-7"></i>
+            </span>
+            <div class="min-w-0 flex-1">
+                <h1 class="text-3xl font-bold text-ink sm:text-4xl">İade ve İptal Politikası</h1>
+                <p class="mt-2 text-lg text-gray-600 leading-relaxed">@companyName olarak müşteri memnuniyeti bizim için en önemli önceliktir. Sipariş iptali, iade ve değişim koşullarımızı aşağıda bulabilirsiniz.</p>
+                <p class="mt-3 text-sm text-gray-500"><strong>Son Güncelleme:</strong> @lastUpdated</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section aria-labelledby="cancel-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 id="cancel-heading" class="mb-3 flex items-center gap-3 text-xl font-semibold text-ink">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                </span>
+                Sipariş İptali
+            </h2>
+            <ul class="space-y-2 text-gray-600 leading-relaxed list-disc pl-5">
+                <li>Ürünler özel üretim olduğundan, siparişiniz üretime girmeden önce ücretsiz olarak iptal edilebilir.</li>
+                <li>Üretime girmiş siparişlerde iptal kabul edilmemektedir.</li>
+                <li>İptal talebinizi telefon veya e-posta ile bize iletebilirsiniz.</li>
+            </ul>
+        </section>
+
+        <section aria-labelledby="return-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 id="return-heading" class="mb-3 flex items-center gap-3 text-xl font-semibold text-ink">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="package" class="w-5 h-5"></i>
+                </span>
+                İade Koşulları
+            </h2>
+            <ul class="space-y-2 text-gray-600 leading-relaxed list-disc pl-5">
+                <li>Teslim aldığınız ürünü <strong>14 gün</strong> içinde iade edebilirsiniz (6502 Sayılı Tüketicinin Korunması Hakkında Kanun).</li>
+                <li>İade edilecek ürünün kullanılmamış, orijinal ambalajında ve hasarsız olması gerekmektedir.</li>
+                <li>Özel üretim ve kişiselleştirilmiş ürünlerde iade kabul edilmemektedir.</li>
+                <li>İade kargo ücreti alıcıya aittir. Üretim hatası durumunda kargo ücreti firmamıza aittir.</li>
+            </ul>
+        </section>
+    </div>
+
+    <section aria-labelledby="process-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="process-heading" class="mb-4 flex items-center gap-3 text-xl font-semibold text-ink">
+            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white" aria-hidden="true">
+                <i data-lucide="list-ordered" class="w-5 h-5"></i>
+            </span>
+            İade Süreci
+        </h2>
+        <ol class="space-y-3 text-gray-600 leading-relaxed list-decimal pl-5">
+            <li><strong>Bildirim:</strong> İade talebinizi telefon, e-posta veya WhatsApp üzerinden bize bildirin.</li>
+            <li><strong>Onay:</strong> İade talebiniz incelenir ve size onay verilir.</li>
+            <li><strong>Kargo:</strong> Ürünü orijinal ambalajında, hasarsız şekilde kargo ile gönderin.</li>
+            <li><strong>İnceleme:</strong> Ürün tarafımıza ulaştığında kontrol edilir.</li>
+            <li><strong>İade Ödemesi:</strong> Onay sonrası <strong>10 iş günü</strong> içinde ödemeniz iade edilir.</li>
+        </ol>
+    </section>
+
+    <section aria-labelledby="warranty-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="warranty-heading" class="mb-6 text-center text-xl font-semibold text-ink">Garanti ve Değişim</h2>
+        <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" role="list">
+            <li class="rounded-lg border border-gray-100 bg-gray-50/50 p-4 text-center transition-colors hover:bg-gray-50">
+                <span class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </span>
+                <h3 class="font-semibold text-ink mb-1.5">Garanti</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Tüm ürünlerimiz üretim hatalarına karşı garantilidir. Garanti süresi ürüne göre değişir.</p>
+            </li>
+            <li class="rounded-lg border border-gray-100 bg-gray-50/50 p-4 text-center transition-colors hover:bg-gray-50">
+                <span class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="wrench" class="w-5 h-5"></i>
+                </span>
+                <h3 class="font-semibold text-ink mb-1.5">Tamir Hizmeti</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Garanti kapsamındaki arızalar ücretsiz onarılır. Garanti dışı tamir hizmeti de sunulmaktadır.</p>
+            </li>
+            <li class="rounded-lg border border-gray-100 bg-gray-50/50 p-4 text-center transition-colors hover:bg-gray-50">
+                <span class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                </span>
+                <h3 class="font-semibold text-ink mb-1.5">Değişim</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Üretim hatası tespit edilen ürünler yenisi ile değiştirilir.</p>
+            </li>
+            <li class="rounded-lg border border-gray-100 bg-gray-50/50 p-4 text-center transition-colors hover:bg-gray-50">
+                <span class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">
+                    <i data-lucide="truck" class="w-5 h-5"></i>
+                </span>
+                <h3 class="font-semibold text-ink mb-1.5">Teslimat Hasarı</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Kargo sırasında hasar görmüş ürünler için tutanak tutulmalı ve 3 gün içinde bildirilmelidir.</p>
+            </li>
+        </ul>
+    </section>
+
+    <section aria-labelledby="payment-heading" class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
+        <h2 id="payment-heading" class="mb-4 flex items-center gap-3 text-xl font-semibold text-ink">
+            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white" aria-hidden="true">
+                <i data-lucide="credit-card" class="w-5 h-5"></i>
+            </span>
+            Ödeme ve Sipariş Bilgileri
+        </h2>
+        <div class="text-gray-600 leading-relaxed space-y-3">
+            <p>Siparişleriniz için aşağıdaki ödeme yöntemlerini kullanabilirsiniz:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li><strong>Banka Havalesi / EFT:</strong> Sipariş onayı sonrası banka hesap bilgileri paylaşılır.</li>
+                <li><strong>Kredi Kartı:</strong> Telefon ile güvenli ödeme alınır.</li>
+                <li><strong>Nakit Ödeme:</strong> Teslimatta nakit ödeme yapılabilir.</li>
+            </ul>
+            <p>Sipariş ve ödeme detayları için <a asp-page="/Iletisim" class="text-primary hover:underline font-medium">iletişim sayfamızdan</a> bize ulaşabilirsiniz.</p>
+        </div>
+    </section>
+
+    <section aria-labelledby="return-contact-heading" class="rounded-xl border border-gray-100 bg-white p-6 text-center shadow-sm md:p-8">
+        <h2 id="return-contact-heading" class="text-xl font-semibold text-ink mb-2">İletişim</h2>
+        <p class="text-gray-600 mb-6 max-w-xl mx-auto">İade, iptal veya değişim talepleriniz için bizimle iletişime geçebilirsiniz.</p>
+        <nav class="flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row" aria-label="İletişim kanalları">
+            @if (!string.IsNullOrEmpty(settings?.WhatsApp))
+            {
+                var whatsAppDigits = new string(settings.WhatsApp.Where(c => char.IsDigit(c) || c == '+').ToArray());
+                <a href="https://wa.me/@whatsAppDigits" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-green-500 text-white font-medium hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                    <i data-lucide="message-circle" class="w-5 h-5" aria-hidden="true"></i>
+                    <span>WhatsApp</span>
+                </a>
+            }
+            @if (!string.IsNullOrEmpty(settings?.PhoneNumber))
+            {
+                var telHref = "tel:" + new string(settings.PhoneNumber.Where(c => char.IsDigit(c) || c == '+').ToArray());
+                <a href="@telHref" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                    <i data-lucide="phone" class="w-5 h-5" aria-hidden="true"></i>
+                    <span>Telefon</span>
+                </a>
+            }
+            <a asp-page="/Iletisim" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gray-100 text-ink font-medium hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                <i data-lucide="mail" class="w-5 h-5" aria-hidden="true"></i>
+                <span>İletişim Formu</span>
+            </a>
+        </nav>
+    </section>
+</article>

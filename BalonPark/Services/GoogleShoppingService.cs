@@ -665,7 +665,7 @@ namespace BalonPark.Services
                 TargetCountry = "TR",
                 GoogleProductCategory = GetGoogleProductCategory(product.CategoryId),
                 ProductType = $"{product.CategoryName} > {product.SubCategoryName}",
-                Color ="Kırmızı/Mavi/Yeşil/Sarı/Turuncu/Açık Mavi",
+                Color = GetDefaultColor(product),
                 AgeGroup = "kids",
                 Gender = "unisex",
                 ItemGroupId = $"category_{product.CategoryId}",
@@ -845,6 +845,52 @@ namespace BalonPark.Services
                 return text ?? string.Empty;
 
             return text[..(maxLength - 3)] + "...";
+        }
+
+        /// <summary>
+        /// Urun icin renk bilgisi dondurur - Google Merchant Center formatina uygun.
+        /// Google kurallari:
+        /// - Maks 100 karakter
+        /// - Maks 3 renk, '/' ile ayrilmis (ornek: "Kırmızı/Mavi/Yeşil")
+        /// - Hex kodu (#XXXXXX) yasak, sadece renk adi
+        /// - Rakam icermemeli
+        /// - Feed diliyle ayni dilde olmali (Turkce)
+        /// Veritabanindaki ham veri: "Kırmızı (#dc2626), Mavi (#2563eb), ..."
+        /// Donusen format: "Kırmızı/Mavi/Yeşil"
+        /// </summary>
+        private static string GetDefaultColor(BalonPark.Models.Product product)
+        {
+            const string defaultColors = "Kırmızı/Mavi/Yeşil";
+            const int maxColors = 3;
+            const int maxLength = 100;
+
+            if (string.IsNullOrWhiteSpace(product.ColorOptions))
+                return defaultColors;
+
+            var raw = product.ColorOptions;
+
+            // Hex kodlarini kaldir: (#XXXXXX) veya (#XXX) kaliplari
+            raw = System.Text.RegularExpressions.Regex.Replace(raw, @"\s*\(#[0-9a-fA-F]{3,8}\)", "");
+
+            // Virgul veya slash ile ayir
+            var colors = raw.Split(new[] { ',', '/' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Select(c => c.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(maxColors)
+                .ToList();
+
+            if (colors.Count == 0)
+                return defaultColors;
+
+            // Google formati: renkleri '/' ile birlestir
+            var result = string.Join("/", colors);
+
+            // Maks 100 karakter
+            if (result.Length > maxLength)
+                result = result[..maxLength];
+
+            return result;
         }
 
         /// <summary>HTML etiketlerini temizler, yalnizca duz metin dondurur.</summary>

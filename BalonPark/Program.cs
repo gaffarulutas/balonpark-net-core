@@ -179,6 +179,10 @@ try
 
     app.UseHttpsRedirection();
 
+    // Canonical domain redirect: www.balonpark.com -> balonpark.com (301)
+    // Google Merchant Center domain tutarliligi icin kritik
+    app.UseCanonicalDomain();
+
     // Static files: cache + security headers (Lighthouse cache-insight iyileştirmesi)
     var staticFileOptions = new StaticFileOptions
     {
