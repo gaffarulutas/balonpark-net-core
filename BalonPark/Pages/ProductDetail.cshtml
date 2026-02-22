@@ -162,6 +162,10 @@
                             </span>
                             <span class="text-sm font-medium text-gray-600">Düzenleme modu</span>
                         </label>
+                        <a href="@(Url.Page("/Admin/Products/Edit", null, new { id = Model.Product?.Id }))" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm" title="Ürünü panelde düzenle" aria-label="Panelde göster">
+                            <i data-lucide="external-link" class="w-5 h-5 text-gray-600 flex-shrink-0" aria-hidden="true"></i>
+                            <span>Panelde göster</span>
+                        </a>
                     }
                     <a href="@(Url.Page("/ProductDetail", "ExportRelatedProductsPdf", new { categorySlug = Model.Product?.CategorySlug, subCategorySlug = Model.Product?.SubCategorySlug, productSlug = Model.Product?.Slug }))" id="productPdfBtn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm disabled:opacity-70 disabled:pointer-events-none" title="Bu ürünü PDF olarak indir" aria-label="Ürünü PDF indir">
                         <i data-lucide="file-down" class="w-5 h-5 text-red-600 pdf-btn-icon flex-shrink-0" aria-hidden="true"></i>
