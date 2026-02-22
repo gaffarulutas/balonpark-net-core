@@ -122,6 +122,10 @@ try
     builder.Services.AddHttpClient<AiService>();
     builder.Services.AddScoped<IAiService, AiService>();
 
+    // Gemini Imagen (ürün görseli üretimi)
+    builder.Services.AddHttpClient<GeminiImageService>();
+    builder.Services.AddScoped<IGeminiImageService, GeminiImageService>();
+
     var app = builder.Build();
 
     // SQL Migrations - uygulama başlarken Migrations klasöründeki scriptleri çalıştır

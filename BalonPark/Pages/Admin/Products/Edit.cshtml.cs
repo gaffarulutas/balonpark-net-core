@@ -15,6 +15,7 @@ public class EditModel : BaseAdminPage
     private readonly ProductImageRepository _productImageRepository;
     private readonly IWebHostEnvironment _environment;
     private readonly ICacheService _cacheService;
+    private readonly IGeminiImageService _geminiImageService;
 
     public EditModel(
         ProductRepository productRepository,
@@ -22,7 +23,8 @@ public class EditModel : BaseAdminPage
         SubCategoryRepository subCategoryRepository,
         ProductImageRepository productImageRepository,
         IWebHostEnvironment environment,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        IGeminiImageService geminiImageService)
     {
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
@@ -30,6 +32,7 @@ public class EditModel : BaseAdminPage
         _productImageRepository = productImageRepository;
         _environment = environment;
         _cacheService = cacheService;
+        _geminiImageService = geminiImageService;
     }
 
     [BindProperty]
@@ -249,5 +252,30 @@ public class EditModel : BaseAdminPage
         var subCategories = await _subCategoryRepository.GetByCategoryIdAsync(categoryId);
         return new JsonResult(subCategories);
     }
+
+    /// <summary>
+    /// Ürün başlık/özet/açıklamaya göre Gemini Imagen ile en az 6 görsel üretir. JSON: { images: ["data:image/png;base64,..."] }
+    /// </summary>
+    public async Task<IActionResult> OnGetGenerateImagesAsync(int id)
+    {
+        var product = await _productRepository.GetByIdAsync(id);
+        if (product == null)
+            return new JsonResult(new { error = "Ürün bulunamadı." }) { StatusCode = 404 };
+
+        try
+        {
+            var base64List = await _geminiImageService.GenerateProductImagesAsync(product);
+            var dataUrls = base64List
+                .Where(b => !string.IsNullOrEmpty(b))
+                .Select(b => b!.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ? b : "data:image/png;base64," + b)
+                .ToList();
+            return new JsonResult(new { images = dataUrls });
+        }
+        catch (Exception ex)
+        {
+            return new JsonResult(new { error = ex.Message }) { StatusCode = 500 };
+        }
+    }
+
 }
 

@@ -95,7 +95,13 @@
                 }
             </div>
         }
-        <p class="text-sm text-gray-500 mb-2">@(Model.ProductImages.Any() ? "Yeni resim ekleyin:" : "Ürün resimleri yükleyin:")</p>
+        <div class="flex flex-wrap items-center gap-3 mb-3">
+            <p class="text-sm text-gray-500 mb-0">@(Model.ProductImages.Any() ? "Yeni resim ekleyin:" : "Ürün resimleri yükleyin:")</p>
+            <button type="button" id="btnGenerateAiImages" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm" data-product-id="@Model.Product.Id" data-loading-text="Resimler üretiliyor...">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Yapay zeka ile resim oluştur
+            </button>
+        </div>
         <form method="post" enctype="multipart/form-data" id="productEditForm">
             <input type="hidden" asp-for="Product.Id" />
             <input type="hidden" asp-for="Product.CreatedAt" />
@@ -426,6 +432,33 @@
     </div>
 </div>
 
+<!-- Modal: AI ile üretilen resimler -->
+<div id="aiImagesModal" class="fixed inset-0 z-50 hidden" aria-modal="true" aria-labelledby="aiImagesModalTitle">
+    <div class="fixed inset-0 bg-black/60 transition-opacity" id="aiImagesModalBackdrop"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="relative bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <h2 id="aiImagesModalTitle" class="text-lg font-semibold text-gray-800">Yapay zeka ile üretilen resimler</h2>
+                <button type="button" id="aiImagesModalClose" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Kapat">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="aiImagesModalBody" class="p-4 overflow-y-auto flex-1">
+                <div id="aiImagesLoading" class="hidden flex flex-col items-center justify-center py-12 text-gray-500">
+                    <svg class="w-12 h-12 animate-spin text-indigo-600 mb-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p>Resimler üretiliyor, lütfen bekleyin...</p>
+                </div>
+                <div id="aiImagesError" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-red-700"></div>
+                <div id="aiImagesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden"></div>
+            </div>
+            <div id="aiImagesModalFooter" class="hidden p-4 border-t border-gray-200 flex justify-end gap-2">
+                <button type="button" id="aiImagesModalCancel" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors">İptal</button>
+                <button type="button" id="aiImagesModalSave" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors" data-loading-text="Kaydediliyor...">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
     <script>
@@ -652,6 +685,135 @@
                 var files = e.dataTransfer && e.dataTransfer.files;
                 if (files && files.length) handleFiles(files);
             });
+        })();
+
+        // ----- Yapay zeka ile resim oluştur + modal -----
+        (function() {
+            var modal = document.getElementById('aiImagesModal');
+            var backdrop = document.getElementById('aiImagesModalBackdrop');
+            var closeBtn = document.getElementById('aiImagesModalClose');
+            var cancelBtn = document.getElementById('aiImagesModalCancel');
+            var saveBtn = document.getElementById('aiImagesModalSave');
+            var generateBtn = document.getElementById('btnGenerateAiImages');
+            var loadingEl = document.getElementById('aiImagesLoading');
+            var errorEl = document.getElementById('aiImagesError');
+            var gridEl = document.getElementById('aiImagesGrid');
+            var footerEl = document.getElementById('aiImagesModalFooter');
+            var currentProductId = 0;
+            var currentImages = [];
+
+            function openModal() {
+                if (modal) modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeModal() {
+                if (modal) modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+            function showLoading(show) {
+                if (loadingEl) loadingEl.classList.toggle('hidden', !show);
+                if (errorEl) errorEl.classList.add('hidden');
+                if (gridEl) gridEl.classList.add('hidden');
+                if (footerEl) footerEl.classList.add('hidden');
+            }
+            function showError(msg) {
+                showLoading(false);
+                if (errorEl) {
+                    errorEl.textContent = msg || 'Bir hata oluştu.';
+                    errorEl.classList.remove('hidden');
+                }
+                if (gridEl) gridEl.classList.add('hidden');
+                if (footerEl) footerEl.classList.add('hidden');
+            }
+            function showImages(images) {
+                currentImages = images || [];
+                showLoading(false);
+                if (errorEl) errorEl.classList.add('hidden');
+                if (gridEl) {
+                    gridEl.innerHTML = '';
+                    gridEl.classList.remove('hidden');
+                    currentImages.forEach(function(dataUrl, i) {
+                        var card = document.createElement('div');
+                        card.className = 'rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50 aspect-square';
+                        var img = document.createElement('img');
+                        img.src = dataUrl;
+                        img.alt = 'Üretilen resim ' + (i + 1);
+                        img.className = 'w-full h-full object-cover';
+                        card.appendChild(img);
+                        gridEl.appendChild(card);
+                    });
+                }
+                if (footerEl && currentImages.length > 0) footerEl.classList.remove('hidden');
+            }
+
+            if (generateBtn) {
+                generateBtn.addEventListener('click', function() {
+                    var productId = parseInt(generateBtn.getAttribute('data-product-id'), 10);
+                    if (!productId) return;
+                    currentProductId = productId;
+                    openModal();
+                    showLoading(true);
+                    var loadingText = generateBtn.getAttribute('data-loading-text') || 'Resimler üretiliyor...';
+                    var originalHtml = generateBtn.innerHTML;
+                    generateBtn.disabled = true;
+                    generateBtn.innerHTML = '<span class="inline-block w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>' + loadingText;
+                    fetch('/Admin/Products/Edit?handler=GenerateImages&id=' + productId, { method: 'GET', headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || '' } })
+                        .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+                        .then(function(result) {
+                            generateBtn.disabled = false;
+                            generateBtn.innerHTML = originalHtml;
+                            if (!result.ok) {
+                                showError(result.data?.error || 'Resimler oluşturulurken hata oluştu.');
+                                return;
+                            }
+                            var images = result.data?.images || [];
+                            if (images.length === 0) {
+                                showError('Hiç resim üretilemedi. Ürün başlık/özet/açıklama dolu mu kontrol edin.');
+                                return;
+                            }
+                            showImages(images);
+                        })
+                        .catch(function(err) {
+                            generateBtn.disabled = false;
+                            generateBtn.innerHTML = originalHtml;
+                            showError('İstek başarısız: ' + (err && err.message ? err.message : 'Bilinmeyen hata'));
+                        });
+                });
+            }
+            if (backdrop) backdrop.addEventListener('click', closeModal);
+            if (closeBtn) closeBtn.addEventListener('click', closeModal);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    if (currentImages.length === 0 || !currentProductId) return;
+                    var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    var originalText = saveBtn.textContent;
+                    var loadingText = saveBtn.getAttribute('data-loading-text') || 'Kaydediliyor...';
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = loadingText;
+                    fetch('/api/ProductImageAdmin/SaveGeneratedImages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId: currentProductId, images: currentImages })
+                    }).then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = originalText;
+                            if (data && data.success) {
+                                if (typeof showSnackbar === 'function') showSnackbar(data.message || 'Resimler kaydedildi.', 'success');
+                                closeModal();
+                                window.location.reload();
+                            } else {
+                                if (typeof showSnackbar === 'function') showSnackbar(data?.message || 'Kaydetme hatası.', 'error');
+                            }
+                        })
+                        .catch(function() {
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = originalText;
+                            if (typeof showSnackbar === 'function') showSnackbar('Kaydetme sırasında hata oluştu.', 'error');
+                        });
+                });
+            }
         })();
 
         $(function() {

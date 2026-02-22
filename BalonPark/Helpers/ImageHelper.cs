@@ -44,6 +44,55 @@ public static class ImageHelper
         return Path.ChangeExtension(fileName, ".webp");
     }
 
+    /// <summary>
+    /// Byte dizisinden (örn. AI üretim) ürün resmi kaydeder. Orijinal + large + thumb + isteğe bağlı watermark.
+    /// </summary>
+    public static async Task<(string originalPath, string largePath, string thumbnailPath)> SaveProductImageFromBytesAsync(
+        byte[] imageBytes,
+        string productFolderPath,
+        string fileName,
+        string? watermarkLogoPath = null,
+        float watermarkOpacity = 0.3f,
+        float watermarkScale = 0.1f)
+    {
+        var webpFileName = ToWebPFileName(fileName);
+        var originalPath = Path.Combine(productFolderPath, $"original_{fileName}");
+        var largePath = Path.Combine(productFolderPath, $"large_{webpFileName}");
+        var thumbnailPath = Path.Combine(productFolderPath, $"thumb_{webpFileName}");
+
+        await File.WriteAllBytesAsync(originalPath, imageBytes);
+
+        using (var stream = new MemoryStream(imageBytes))
+        using (var image = await Image.LoadAsync(stream))
+        {
+            var largeWidth = 1000;
+            var aspectRatio = (double)image.Height / image.Width;
+            var largeHeight = (int)(largeWidth * aspectRatio);
+            image.Mutate(x => x.Resize(largeWidth, largeHeight, KnownResamplers.Lanczos3));
+            await image.SaveAsync(largePath, WebPEncoder);
+        }
+        using (var stream = new MemoryStream(imageBytes))
+        using (var image = await Image.LoadAsync(stream))
+        {
+            var thumbWidth = 450;
+            var aspectRatio = (double)image.Height / image.Width;
+            var thumbHeight = (int)(thumbWidth * aspectRatio);
+            image.Mutate(x => x.Resize(thumbWidth, thumbHeight, KnownResamplers.Lanczos3));
+            await image.SaveAsync(thumbnailPath, WebPEncoder);
+        }
+
+        if (!string.IsNullOrEmpty(watermarkLogoPath))
+        {
+            var physicalWatermarkPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", watermarkLogoPath.TrimStart('/'));
+            if (File.Exists(physicalWatermarkPath))
+            {
+                await AddWatermarkAsync(largePath, physicalWatermarkPath, watermarkOpacity, watermarkScale);
+                await AddWatermarkAsync(thumbnailPath, physicalWatermarkPath, watermarkOpacity, watermarkScale * 1.2f);
+            }
+        }
+        return (originalPath, largePath, thumbnailPath);
+    }
+
     public static async Task<(string originalPath, string largePath, string thumbnailPath)> SaveProductImageAsync(
         IFormFile file, 
         string productFolderPath,
