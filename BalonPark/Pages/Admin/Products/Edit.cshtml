@@ -448,7 +448,10 @@
                     <svg class="w-12 h-12 animate-spin text-indigo-600 mb-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     <p>Resimler üretiliyor, lütfen bekleyin...</p>
                 </div>
-                <div id="aiImagesError" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-red-700"></div>
+                <div id="aiImagesError" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                    <p class="font-semibold mb-1">Hata</p>
+                    <p id="aiImagesErrorMessage" class="text-sm"></p>
+                </div>
                 <div id="aiImagesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden"></div>
             </div>
             <div id="aiImagesModalFooter" class="hidden p-4 border-t border-gray-200 flex justify-end gap-2">
@@ -719,7 +722,8 @@
             function showError(msg) {
                 showLoading(false);
                 if (errorEl) {
-                    errorEl.textContent = msg || 'Bir hata oluştu.';
+                    var msgEl = document.getElementById('aiImagesErrorMessage');
+                    if (msgEl) msgEl.textContent = msg || 'Bir hata oluştu.';
                     errorEl.classList.remove('hidden');
                 }
                 if (gridEl) gridEl.classList.add('hidden');
@@ -763,10 +767,11 @@
                             generateBtn.disabled = false;
                             generateBtn.innerHTML = originalHtml;
                             if (!result.ok) {
-                                showError(result.data?.error || 'Resimler oluşturulurken hata oluştu.');
+                                var errMsg = (result.data && result.data.error) ? result.data.error : (result.error || 'Resimler oluşturulurken hata oluştu.');
+                                showError(errMsg);
                                 return;
                             }
-                            var images = result.data?.images || [];
+                            var images = (result.data && result.data.images) ? result.data.images : (result.images || []);
                             if (images.length === 0) {
                                 showError('Hiç resim üretilemedi. Ürün başlık/özet/açıklama dolu mu kontrol edin.');
                                 return;

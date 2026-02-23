@@ -186,6 +186,10 @@ public class GeminiImageService : IGeminiImageService
                     return "Görsel üretimi şu an yalnızca faturalandırması açık hesaplara açıktır. Google AI Studio (aistudio.google.com) veya Google Cloud Console'da projenize fatura hesabı ekleyin: Ayarlar > Faturalandırma.";
                 if (message.Contains("quota", StringComparison.OrdinalIgnoreCase) || message.Contains("RESOURCE_EXHAUSTED", StringComparison.OrdinalIgnoreCase))
                     return "Gemini/Imagen kotası aşıldı. Daha sonra tekrar deneyin veya faturalandırma sayfasından kotayı kontrol edin.";
+                if (message.Contains("leaked", StringComparison.OrdinalIgnoreCase))
+                    return "Bu API anahtarı güvenlik nedeniyle devre dışı bırakılmış (sızdı olarak işaretlenmiş). Google AI Studio (aistudio.google.com) üzerinden yeni bir API anahtarı oluşturup Admin → Genel Ayarlar → Yapay Zeka API Anahtarları bölümünden güncelleyin.";
+                if (message.Contains("expired", StringComparison.OrdinalIgnoreCase) || message.Contains("renew", StringComparison.OrdinalIgnoreCase))
+                    return "Gemini API anahtarının süresi dolmuş. Google AI Studio (aistudio.google.com) üzerinden yeni bir anahtar oluşturup Admin → Genel Ayarlar → Yapay Zeka API Anahtarları bölümünden güncelleyin.";
                 if (message.Contains("API key", StringComparison.OrdinalIgnoreCase) || message.Contains("invalid", StringComparison.OrdinalIgnoreCase))
                     return "Geçersiz veya eksik Gemini API anahtarı. Admin → Genel Ayarlar → Yapay Zeka API Anahtarları bölümünden Google Gemini API anahtarını kontrol edin.";
                 if (message.Contains("not found", StringComparison.OrdinalIgnoreCase) || message.Contains("404", StringComparison.OrdinalIgnoreCase))
