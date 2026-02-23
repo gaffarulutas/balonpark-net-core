@@ -33,6 +33,10 @@ public class Settings
     public const int GoogleShoppingServiceAccountEmailMaxLength = 255;
     /// <summary>GA4 Property ID (numeric, e.g. 432109876). Admin → Property Settings.</summary>
     public const int GoogleAnalyticsPropertyIdMaxLength = 20;
+    /// <summary>OpenAI/ChatGPT API key (Admin ayarlardan).</summary>
+    public const int ChatGPTApiKeyMaxLength = 500;
+    /// <summary>Google Gemini API key (Admin ayarlardan, görsel üretimi için).</summary>
+    public const int GeminiApiKeyMaxLength = 500;
 
     public int Id { get; set; }
 
@@ -109,6 +113,15 @@ public class Settings
     /// <summary>Google Analytics 4 Property ID (numeric, e.g. 432109876). Dashboard raporları için.</summary>
     [StringLength(GoogleAnalyticsPropertyIdMaxLength)]
     public string? GoogleAnalyticsPropertyId { get; set; }
+
+    /// <summary>OpenAI ChatGPT API anahtarı (ürün/blog AI içerik üretimi). Admin ayarlardan güncellenir.</summary>
+    [StringLength(ChatGPTApiKeyMaxLength)]
+    public string? ChatGPTApiKey { get; set; }
+    /// <summary>Google Gemini API anahtarı (ürün görseli üretimi). Admin ayarlardan güncellenir.</summary>
+    [StringLength(GeminiApiKeyMaxLength)]
+    public string? GeminiApiKey { get; set; }
+    /// <summary>Gemini görsel üretiminde Imagen yedek kullanılsın mı (faturalandırma gerekir).</summary>
+    public bool GeminiUseImagenFallback { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

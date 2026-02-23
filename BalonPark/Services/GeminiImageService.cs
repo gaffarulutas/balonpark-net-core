@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using BalonPark.Data;
 using BalonPark.Models;
 
 namespace BalonPark.Services;
@@ -18,28 +19,25 @@ public class GeminiImageService : IGeminiImageService
     private const string ImagenModel = "imagen-4.0-generate-001";
     private readonly HttpClient _httpClient;
     private readonly ILogger<GeminiImageService> _logger;
-    private readonly string _apiKey;
-    private readonly bool _useImagenFallback;
+    private readonly SettingsRepository _settingsRepository;
 
     public GeminiImageService(
         HttpClient httpClient,
-        IConfiguration configuration,
+        SettingsRepository settingsRepository,
         ILogger<GeminiImageService> logger)
     {
         _httpClient = httpClient;
+        _settingsRepository = settingsRepository;
         _logger = logger;
-        _apiKey = configuration["Gemini:ApiKey"] ?? "";
-        _useImagenFallback = string.Equals(configuration["Gemini:UseImagenFallback"], "true", StringComparison.OrdinalIgnoreCase);
-        if (string.IsNullOrWhiteSpace(_apiKey))
-            _logger.LogWarning("Gemini:ApiKey is not set. AI image generation will fail.");
-        else
-            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-goog-api-key", _apiKey);
     }
 
     public async Task<IReadOnlyList<string>> GenerateProductImagesAsync(Product product, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(_apiKey))
-            throw new InvalidOperationException("Gemini:ApiKey yapılandırılmamış. Lütfen appsettings.json veya ortam değişkeninde Gemini:ApiKey tanımlayın.");
+        var settings = await _settingsRepository.GetFirstAsync();
+        var apiKey = settings?.GeminiApiKey?.Trim();
+        if (string.IsNullOrEmpty(apiKey))
+            throw new InvalidOperationException("Gemini API anahtarı tanımlı değil. Admin → Genel Ayarlar → Yapay Zeka API Anahtarları bölümünden Google Gemini API anahtarını girin.");
+        var useImagenFallback = settings?.GeminiUseImagenFallback ?? false;
 
         var productContext = BuildProductContext(product);
         var prompts = BuildPrompts(productContext);
@@ -50,18 +48,18 @@ public class GeminiImageService : IGeminiImageService
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                var base64 = await GenerateOneImageViaGeminiAsync(prompts[i], cancellationToken).ConfigureAwait(false);
+                var base64 = await GenerateOneImageViaGeminiAsync(prompts[i], apiKey, cancellationToken).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(base64))
                     results.Add(base64);
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Gemini image request {Index} failed: {Message}", i + 1, ex.Message);
-                if (_useImagenFallback)
+                if (useImagenFallback)
                 {
                     try
                     {
-                        var fallback = await GenerateOneImageViaImagenAsync(prompts[i], cancellationToken).ConfigureAwait(false);
+                        var fallback = await GenerateOneImageViaImagenAsync(prompts[i], apiKey, cancellationToken).ConfigureAwait(false);
                         if (!string.IsNullOrEmpty(fallback))
                             results.Add(fallback);
                     }
@@ -107,7 +105,7 @@ public class GeminiImageService : IGeminiImageService
     /// <summary>
     /// Gemini 2.5 Flash Image (2025/2026): generateContent + responseModalities IMAGE. API key ile, pay-as-you-go.
     /// </summary>
-    private async Task<string?> GenerateOneImageViaGeminiAsync(string prompt, CancellationToken cancellationToken)
+    private async Task<string?> GenerateOneImageViaGeminiAsync(string prompt, string apiKey, CancellationToken cancellationToken)
     {
         var url = $"{BaseUrl}/{GeminiImageModel}:generateContent";
 
@@ -121,12 +119,11 @@ public class GeminiImageService : IGeminiImageService
             }
         };
 
-        using var content = new StringContent(
-            JsonSerializer.Serialize(body),
-            Encoding.UTF8,
-            "application/json");
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Headers.TryAddWithoutValidation("x-goog-api-key", apiKey);
+        request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
-        using var response = await _httpClient.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
+        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         var responseText = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccessStatusCode)
@@ -140,9 +137,9 @@ public class GeminiImageService : IGeminiImageService
     }
 
     /// <summary>
-    /// Imagen predict endpoint (faturalandırma gerekir). Gemini:UseImagenFallback=true ile kullanılır.
+    /// Imagen predict endpoint (faturalandırma gerekir). Admin ayarlarda "Imagen yedek kullan" açıksa kullanılır.
     /// </summary>
-    private async Task<string?> GenerateOneImageViaImagenAsync(string prompt, CancellationToken cancellationToken)
+    private async Task<string?> GenerateOneImageViaImagenAsync(string prompt, string apiKey, CancellationToken cancellationToken)
     {
         var url = $"{BaseUrl}/{ImagenModel}:predict";
 
@@ -157,12 +154,11 @@ public class GeminiImageService : IGeminiImageService
             }
         };
 
-        using var content = new StringContent(
-            JsonSerializer.Serialize(body),
-            Encoding.UTF8,
-            "application/json");
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Headers.TryAddWithoutValidation("x-goog-api-key", apiKey);
+        request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
-        using var response = await _httpClient.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
+        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         var responseText = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccessStatusCode)
@@ -191,7 +187,7 @@ public class GeminiImageService : IGeminiImageService
                 if (message.Contains("quota", StringComparison.OrdinalIgnoreCase) || message.Contains("RESOURCE_EXHAUSTED", StringComparison.OrdinalIgnoreCase))
                     return "Gemini/Imagen kotası aşıldı. Daha sonra tekrar deneyin veya faturalandırma sayfasından kotayı kontrol edin.";
                 if (message.Contains("API key", StringComparison.OrdinalIgnoreCase) || message.Contains("invalid", StringComparison.OrdinalIgnoreCase))
-                    return "Geçersiz veya eksik Gemini API anahtarı. appsettings.json içinde Gemini:ApiKey değerini kontrol edin.";
+                    return "Geçersiz veya eksik Gemini API anahtarı. Admin → Genel Ayarlar → Yapay Zeka API Anahtarları bölümünden Google Gemini API anahtarını kontrol edin.";
                 if (message.Contains("not found", StringComparison.OrdinalIgnoreCase) || message.Contains("404", StringComparison.OrdinalIgnoreCase))
                     return "Seçilen model bu API sürümünde bulunamıyor. Gemini 2.5 Flash Image (gemini-2.5-flash-image) veya Imagen kullanıldığından emin olun; gerekirse Google AI Studio'dan güncel model listesini kontrol edin.";
                 return $"Gemini/Imagen API: {message}";

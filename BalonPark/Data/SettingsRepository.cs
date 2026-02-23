@@ -110,6 +110,9 @@ public class SettingsRepository(DapperContext context, ICacheService cacheServic
                 GoogleShoppingServiceAccountEmail = @GoogleShoppingServiceAccountEmail,
                 GoogleShoppingServiceAccountKeyJson = @GoogleShoppingServiceAccountKeyJson,
                 GoogleAnalyticsPropertyId = @GoogleAnalyticsPropertyId,
+                ChatGPTApiKey = @ChatGPTApiKey,
+                GeminiApiKey = @GeminiApiKey,
+                GeminiUseImagenFallback = @GeminiUseImagenFallback,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id";
         
@@ -133,13 +136,15 @@ public class SettingsRepository(DapperContext context, ICacheService cacheServic
              Fax, WhatsApp, Address, City, District, PostalCode, Country, 
              Facebook, Instagram, Twitter, LinkedIn, YouTube, WorkingHours, 
              MetaTitle, MetaDescription, MetaKeywords, GoogleTag, GoogleTagManager, GoogleSiteVerification, YandexSiteVerification, 
-             GoogleShoppingMerchantId, GoogleShoppingServiceAccountEmail, GoogleShoppingServiceAccountKeyJson, GoogleAnalyticsPropertyId, CreatedAt)
+             GoogleShoppingMerchantId, GoogleShoppingServiceAccountEmail, GoogleShoppingServiceAccountKeyJson, GoogleAnalyticsPropertyId, 
+             ChatGPTApiKey, GeminiApiKey, GeminiUseImagenFallback, CreatedAt)
             VALUES 
             (@UserName, @Password, @CompanyName, @About, @Logo, @Email, @PhoneNumber, @PhoneNumber2, 
              @Fax, @WhatsApp, @Address, @City, @District, @PostalCode, @Country, 
              @Facebook, @Instagram, @Twitter, @LinkedIn, @YouTube, @WorkingHours, 
              @MetaTitle, @MetaDescription, @MetaKeywords, @GoogleTag, @GoogleTagManager, @GoogleSiteVerification, @YandexSiteVerification, 
-             @GoogleShoppingMerchantId, @GoogleShoppingServiceAccountEmail, @GoogleShoppingServiceAccountKeyJson, @GoogleAnalyticsPropertyId, @CreatedAt);
+             @GoogleShoppingMerchantId, @GoogleShoppingServiceAccountEmail, @GoogleShoppingServiceAccountKeyJson, @GoogleAnalyticsPropertyId, 
+             @ChatGPTApiKey, @GeminiApiKey, @GeminiUseImagenFallback, @CreatedAt);
             SELECT CAST(SCOPE_IDENTITY() as int)";
         
         using var connection = context.CreateConnection();

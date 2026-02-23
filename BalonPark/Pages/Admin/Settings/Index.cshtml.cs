@@ -83,7 +83,13 @@ public class IndexModel : BaseAdminPage
             {
                 Settings.GoogleShoppingServiceAccountKeyJson = existingSettings.GoogleShoppingServiceAccountKeyJson;
             }
-            
+
+            // Yapay zeka API anahtarları boşsa mevcut değeri koru
+            if (string.IsNullOrWhiteSpace(Settings.ChatGPTApiKey))
+                Settings.ChatGPTApiKey = existingSettings.ChatGPTApiKey;
+            if (string.IsNullOrWhiteSpace(Settings.GeminiApiKey))
+                Settings.GeminiApiKey = existingSettings.GeminiApiKey;
+
             Settings.UpdatedAt = DateTime.Now;
             
             // Her zaman güncelleme yap (Settings tablosu tek satırlıktır)

@@ -1,28 +1,39 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using BalonPark.Data;
 using BalonPark.Models;
 
 namespace BalonPark.Services;
 
-public class AiService(HttpClient httpClient, ILogger<AiService> logger, IConfiguration configuration) : IAiService
+public class AiService : IAiService
 {
-    private readonly string _apiKey = configuration["ChatGPT:ApiKey"] ?? throw new InvalidOperationException("ChatGPT API key not configured");
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<AiService> _logger;
+    private readonly SettingsRepository _settingsRepository;
 
-    // Static constructor equivalent - execute initialization
-    private readonly HttpClient _httpClient = InitializeHttpClient(httpClient, configuration["ChatGPT:ApiKey"] ?? throw new InvalidOperationException("ChatGPT API key not configured"));
-
-    private static HttpClient InitializeHttpClient(HttpClient client, string apiKey)
+    public AiService(HttpClient httpClient, ILogger<AiService> logger, SettingsRepository settingsRepository)
     {
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-        return client;
+        _httpClient = httpClient;
+        _logger = logger;
+        _settingsRepository = settingsRepository;
+    }
+
+    private async Task<string> GetChatGPTApiKeyAsync()
+    {
+        var settings = await _settingsRepository.GetFirstAsync();
+        var key = settings?.ChatGPTApiKey?.Trim();
+        if (string.IsNullOrEmpty(key))
+            throw new InvalidOperationException("ChatGPT API anahtarı tanımlı değil. Admin → Genel Ayarlar → Yapay Zeka API Anahtarları bölümünden OpenAI (ChatGPT) API anahtarını girin.");
+        return key;
     }
 
     public async Task<ProductAiResponse> GenerateProductContentAsync(string productDescription)
     {
         try
         {
-            logger.LogInformation("AI Service: API Key length: {ApiKeyLength}", _apiKey?.Length ?? 0);
+            var apiKey = await GetChatGPTApiKeyAsync();
+            _logger.LogInformation("AI Service: API Key length: {ApiKeyLength}", apiKey.Length);
             
             if (string.IsNullOrWhiteSpace(productDescription))
             {
@@ -46,41 +57,45 @@ public class AiService(HttpClient httpClient, ILogger<AiService> logger, IConfig
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            logger.LogInformation("Sending request to ChatGPT API with prompt: {Prompt}", prompt);
+            _logger.LogInformation("Sending request to ChatGPT API with prompt: {Prompt}", prompt);
 
-            var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
+            using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
+            req.Headers.TryAddWithoutValidation("Authorization", "Bearer " + apiKey);
+            req.Content = content;
+
+            var response = await _httpClient.SendAsync(req);
             
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                logger.LogError("ChatGPT API error: {StatusCode} - {Content}", response.StatusCode, errorContent);
+                _logger.LogError("ChatGPT API error: {StatusCode} - {Content}", response.StatusCode, errorContent);
                 throw new Exception($"ChatGPT API hatası ({response.StatusCode}): {errorContent}");
             }
 
             var responseContent = await response.Content.ReadAsStringAsync();
-            logger.LogInformation("ChatGPT API response: {Response}", responseContent);
+            _logger.LogInformation("ChatGPT API response: {Response}", responseContent);
 
             var chatResponse = JsonSerializer.Deserialize<ChatGptResponse>(responseContent);
             
-            logger.LogInformation("Deserialized response - Choices count: {Count}", chatResponse?.Choices?.Count ?? 0);
+            _logger.LogInformation("Deserialized response - Choices count: {Count}", chatResponse?.Choices?.Count ?? 0);
             
             if (chatResponse?.Choices == null || !chatResponse.Choices.Any())
             {
-                logger.LogError("No choices in response");
+                _logger.LogError("No choices in response");
                 throw new Exception("ChatGPT API returned no choices");
             }
 
             var firstChoice = chatResponse.Choices.First();
-            logger.LogInformation("First choice message: {Message}", firstChoice?.Message?.Content ?? "NULL");
+            _logger.LogInformation("First choice message: {Message}", firstChoice?.Message?.Content ?? "NULL");
             
             if (firstChoice?.Message?.Content == null)
             {
-                logger.LogError("Message content is null");
+                _logger.LogError("Message content is null");
                 throw new Exception("ChatGPT API returned empty message content");
             }
 
             var aiContent = firstChoice.Message.Content;
-            logger.LogInformation("AI Content: {Content}", aiContent);
+            _logger.LogInformation("AI Content: {Content}", aiContent);
             
             if (string.IsNullOrWhiteSpace(aiContent))
             {
@@ -100,18 +115,18 @@ public class AiService(HttpClient httpClient, ILogger<AiService> logger, IConfig
                     throw new Exception("Failed to deserialize AI response");
                 }
 
-                logger.LogInformation("Successfully parsed AI response: {Response}", JsonSerializer.Serialize(productResponse));
+                _logger.LogInformation("Successfully parsed AI response: {Response}", JsonSerializer.Serialize(productResponse));
                 return productResponse;
             }
             catch (JsonException jsonEx)
             {
-                logger.LogError(jsonEx, "JSON parsing error. Content: {Content}", aiContent);
+                _logger.LogError(jsonEx, "JSON parsing error. Content: {Content}", aiContent);
                 throw new Exception($"JSON parsing hatası: {jsonEx.Message}");
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error generating product content with AI");
+            _logger.LogError(ex, "Error generating product content with AI");
             throw new Exception($"Yapay zeka ile içerik oluşturulurken hata oluştu: {ex.Message}");
         }
     }
@@ -140,15 +155,20 @@ public class AiService(HttpClient httpClient, ILogger<AiService> logger, IConfig
                 temperature = 0.8
             };
 
+            var apiKey = await GetChatGPTApiKeyAsync();
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
+            using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
+            request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + apiKey);
+            request.Content = content;
+
+            var response = await _httpClient.SendAsync(request);
             
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                logger.LogError("ChatGPT API error: {StatusCode} - {Content}", response.StatusCode, errorContent);
+                _logger.LogError("ChatGPT API error: {StatusCode} - {Content}", response.StatusCode, errorContent);
                 throw new Exception($"ChatGPT API hatası ({response.StatusCode}): {errorContent}");
             }
 
@@ -173,7 +193,6 @@ public class AiService(HttpClient httpClient, ILogger<AiService> logger, IConfig
                 throw new Exception("ChatGPT API returned empty content");
             }
             
-            // JSON'u parse et
             try
             {
                 var blogResponse = JsonSerializer.Deserialize<BlogAiResponse>(aiContent, new JsonSerializerOptions
@@ -190,13 +209,13 @@ public class AiService(HttpClient httpClient, ILogger<AiService> logger, IConfig
             }
             catch (JsonException jsonEx)
             {
-                logger.LogError(jsonEx, "JSON parsing error. Content: {Content}", aiContent);
+                _logger.LogError(jsonEx, "JSON parsing error. Content: {Content}", aiContent);
                 throw new Exception($"JSON parsing hatası: {jsonEx.Message}");
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error generating blog content with AI");
+            _logger.LogError(ex, "Error generating blog content with AI");
             throw new Exception($"Yapay zeka ile blog içeriği oluşturulurken hata oluştu: {ex.Message}");
         }
     }
