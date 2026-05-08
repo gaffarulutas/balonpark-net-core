@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using BalonPark.Data;
 using BalonPark.Services;
+using BalonPark.Services.Accounting;
 using BalonPark.Pages.Admin;
 using BalonPark.Middleware;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
 
@@ -87,6 +89,24 @@ try
     builder.Services.AddScoped<ProductImageRepository>();
     builder.Services.AddScoped<BlogRepository>();
     builder.Services.AddScoped<ErrorLogRepository>();
+    builder.Services.AddScoped<AccountingCompanyRepository>();
+    builder.Services.AddScoped<CounterpartyRepository>();
+    builder.Services.AddScoped<InvoiceRepository>();
+    builder.Services.AddScoped<InvoiceAttachmentRepository>();
+    builder.Services.AddScoped<AccountMovementRepository>();
+
+    builder.Services.Configure<AccountingStorageOptions>(builder.Configuration.GetSection(AccountingStorageOptions.SectionName));
+    builder.Services.AddScoped<FileSystemInvoiceBlobStorage>();
+    builder.Services.AddScoped<FtpInvoiceBlobStorage>();
+    builder.Services.AddScoped<IInvoiceBlobStorage>(sp =>
+    {
+        var options = sp.GetRequiredService<IOptions<AccountingStorageOptions>>().Value;
+        var provider = options.StorageProvider?.Trim();
+        if (string.Equals(provider, "Ftp", StringComparison.OrdinalIgnoreCase))
+            return sp.GetRequiredService<FtpInvoiceBlobStorage>();
+
+        return sp.GetRequiredService<FileSystemInvoiceBlobStorage>();
+    });
 
     // Services
     builder.Services.AddHttpClient<CurrencyService>();
@@ -128,6 +148,8 @@ try
 
     var app = builder.Build();
 
+    Log.Information("Ortam: {Environment}. Veritabanı migration'ları çalıştırılıyor…", app.Environment.EnvironmentName);
+
     // SQL Migrations - uygulama başlarken Migrations klasöründeki scriptleri çalıştır
     using (var migrationScope = app.Services.CreateScope())
     {
@@ -150,6 +172,8 @@ try
         BaseAdminPage.SetSettingsRepository(settingsRepository);
     }
     Log.Information("SettingsRepository yüklendi.");
+
+    Log.Information("HTTP pipeline kuruluyor; Kestrel dinlemeye geçecek.");
 
     // Global Exception Handling Middleware - Tüm hataları yakala
     app.UseGlobalExceptionHandling();
@@ -181,7 +205,9 @@ try
         app.UseDeveloperExceptionPage();
     }
 
-    app.UseHttpsRedirection();
+    // Yerelde yalnızca http:// dinleniyorsa UseHttpsRedirection "https port" uyarısı üretir; prod'da açık kalsın.
+    if (!app.Environment.IsDevelopment())
+        app.UseHttpsRedirection();
 
     // Canonical domain redirect: www.balonpark.com -> balonpark.com (301)
     // Google Merchant Center domain tutarliligi icin kritik
@@ -235,6 +261,8 @@ try
 
     // Development ortamında sunucu ayağa kalktıktan sonra tarayıcıyı otomatik aç
     // Not: dotnet run/dotnet watch CLI'da launchBrowser güvenilir çalışmıyor; bu yöntem her ortamda çalışır.
+    Log.Information("Kestrel başlatılıyor. Adres: {Url}", openUrl);
+
     if (app.Environment.IsDevelopment())
     {
         app.Lifetime.ApplicationStarted.Register(() =>

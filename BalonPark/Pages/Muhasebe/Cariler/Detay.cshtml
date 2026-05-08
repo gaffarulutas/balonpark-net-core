@@ -1,0 +1,173 @@
+@page "/muhasebe/cariler/detay/{id:int}"
+@model BalonPark.Pages.Muhasebe.Cariler.DetayModel
+@{
+    Layout = "_MuhasebeLayout";
+    ViewData["Title"] = Model.Counterparty?.Name ?? "Cari detay";
+}
+@if (Model.Counterparty != null)
+{
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <a href="/muhasebe/cariler" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mb-3">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Carilere dön
+        </a>
+        <h1 class="text-3xl font-bold text-gray-800">@Model.Counterparty.Name</h1>
+        <p class="text-gray-600 mt-2 text-sm">Cari özeti ve hareketler</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.OdemeMessage))
+    {
+        <div class="mb-6 rounded-md bg-green-50 border border-green-200 text-green-900 text-sm px-4 py-3 flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>@Model.OdemeMessage</span>
+        </div>
+    }
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-l-red-500 bg-red-50/40 ring-1 ring-red-100/80">
+            <p class="text-xs font-semibold text-red-800 uppercase tracking-wider">Borç toplamı</p>
+            <p class="mt-2 text-2xl font-bold text-red-950 tabular-nums">@Model.DebitTotal.ToString("N2")</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-l-green-600 bg-green-50/40 ring-1 ring-green-100/80">
+            <p class="text-xs font-semibold text-green-800 uppercase tracking-wider">Alacak toplamı</p>
+            <p class="mt-2 text-2xl font-bold text-green-950 tabular-nums">@Model.CreditTotal.ToString("N2")</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Net (Alacak − Borç)</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900 tabular-nums">@((Model.CreditTotal - Model.DebitTotal).ToString("N2"))</p>
+        </div>
+    </div>
+    <p class="text-xs text-gray-500 mb-8 max-w-3xl">Özet rakamlar hareketlerin borç/alacak kolonlarına göredir; cari tipi ve işletme pratiğine göre yorum değişebilir. Resmi muhasebe yerine geçmez.</p>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 class="text-lg font-bold text-gray-800">Hareketler</h2>
+            <button type="button" id="btnOpenOdemeModal" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg shadow-md transition-colors">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Tahsilat / ödeme
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tür</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Açıklama</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tutar</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach (var m in Model.Movements)
+                    {
+                        var alacak = m.IsCredit;
+                        var rowClass = alacak
+                            ? "bg-green-50/90 hover:bg-green-100 border-l-4 border-l-green-600"
+                            : "bg-red-50/90 hover:bg-red-100 border-l-4 border-l-red-600";
+                        var turClass = alacak ? "text-green-800 font-semibold" : "text-red-800 font-semibold";
+                        var tutarClass = alacak ? "text-green-900" : "text-red-900";
+                        <tr class="@rowClass transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">@m.MovementDate.ToString("dd.MM.yyyy")</td>
+                            <td class="px-6 py-4 text-sm @turClass">@(alacak ? "Alacak" : "Borç") · <span class="font-normal text-gray-600">@MuhasebeUiTurkish.HareketReferansi(m.ReferenceType)</span></td>
+                            <td class="px-6 py-4 text-sm text-gray-700">@(m.Description ?? "—")</td>
+                            <td class="px-6 py-4 text-sm font-semibold @tutarClass text-right tabular-nums">@m.Amount.ToString("N2") @m.Currency</td>
+                        </tr>
+                    }
+                    @if (Model.Movements.Count == 0)
+                    {
+                        <tr><td colspan="4" class="px-6 py-10 text-center text-gray-500 text-sm">Hareket yok.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tahsilat / ödeme modal -->
+    <div id="odemeModal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true" aria-labelledby="odemeModalTitle" aria-hidden="true">
+        <button type="button" id="odemeModalBackdrop" class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px]" aria-label="Kapat"></button>
+        <div class="relative flex min-h-full items-center justify-center p-4 pointer-events-none">
+            <div class="pointer-events-auto bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto border border-gray-200">
+                <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">
+                    <div>
+                        <h3 id="odemeModalTitle" class="text-lg font-bold text-gray-900">Tahsilat / ödeme</h3>
+                        <p class="text-sm text-gray-600 mt-1">Müşteriden tahsilat: <strong>Tahsilat</strong> (borç). Tedarikçiye ödeme: <strong>Ödeme</strong> (alacak). Varsayılan olarak şirket para birimi seçilir; aşağıdan değiştirebilirsiniz.</p>
+                    </div>
+                    <button type="button" id="odemeModalClose" class="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors shrink-0" aria-label="Kapat">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <form method="post" asp-page="/Muhasebe/Cariler/Detay" asp-route-id="@Model.Counterparty.Id" asp-page-handler="Odeme" id="formOdeme" class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
+                    <div asp-validation-summary="ModelOnly" class="sm:col-span-2 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3"></div>
+                    <div class="min-w-0">
+                        <label asp-for="Odeme.MovementDate" class="block text-sm font-medium text-gray-700 mb-2">Tarih</label>
+                        <input asp-for="Odeme.MovementDate" type="date" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <span asp-validation-for="Odeme.MovementDate" class="text-red-600 text-sm mt-1 block"></span>
+                    </div>
+                    <div class="min-w-0">
+                        <label asp-for="Odeme.Kind" class="block text-sm font-medium text-gray-700 mb-2">Tür</label>
+                        <select asp-for="Odeme.Kind" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                            <option value="tahsilat">Tahsilat</option>
+                            <option value="odeme">Ödeme</option>
+                        </select>
+                    </div>
+                    <div class="min-w-0">
+                        <label asp-for="Odeme.Amount" class="block text-sm font-medium text-gray-700 mb-2">Tutar</label>
+                        <input asp-for="Odeme.Amount" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <span asp-validation-for="Odeme.Amount" class="text-red-600 text-sm mt-1 block"></span>
+                    </div>
+                    <partial name="_MuhasebeIsoCurrencySelect" model='@(new IsoCurrencySelectViewModel { FieldName = "Odeme.Currency", Selected = Model.Odeme.Currency, Label = "Para birimi", ControlId = "odemeCurrency", ShowHint = true })' />
+                    <div class="sm:col-span-2 min-w-0">
+                        <label asp-for="Odeme.Description" class="block text-sm font-medium text-gray-700 mb-2">Açıklama (isteğe bağlı)</label>
+                        <input asp-for="Odeme.Description" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                    </div>
+                    <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-3 mt-1 border-t border-gray-200">
+                        <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Kaydediliyor...">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                            Kaydet
+                        </button>
+                        <button type="button" id="odemeModalCancel" class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200">İptal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            var modal = document.getElementById('odemeModal');
+            var btnOpen = document.getElementById('btnOpenOdemeModal');
+            var btnClose = document.getElementById('odemeModalClose');
+            var btnCancel = document.getElementById('odemeModalCancel');
+            var backdrop = document.getElementById('odemeModalBackdrop');
+            if (!modal || !btnOpen) return;
+
+            function openModal() {
+                modal.classList.remove('hidden');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('overflow-hidden');
+                var first = modal.querySelector('#formOdeme input, #formOdeme select');
+                if (first) first.focus();
+            }
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.classList.remove('overflow-hidden');
+                btnOpen.focus();
+            }
+
+            btnOpen.addEventListener('click', openModal);
+            if (btnClose) btnClose.addEventListener('click', closeModal);
+            if (btnCancel) btnCancel.addEventListener('click', closeModal);
+            if (backdrop) backdrop.addEventListener('click', closeModal);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+            });
+
+            @if (Model.OpenOdemeModal)
+            {
+                <text>openModal();</text>
+            }
+        })();
+    </script>
+}

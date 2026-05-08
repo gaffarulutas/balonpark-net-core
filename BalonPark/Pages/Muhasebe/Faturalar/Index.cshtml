@@ -1,0 +1,194 @@
+@page "/muhasebe/faturalar"
+@model BalonPark.Pages.Muhasebe.Faturalar.IndexModel
+@{
+    Layout = "_MuhasebeLayout";
+    ViewData["Title"] = "Faturalar";
+}
+
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Faturalar
+            </h1>
+            <p class="text-gray-600 mt-2">Manuel fatura kayıtları; detaydan ek yükleyebilir veya iptal edebilirsiniz.</p>
+        </div>
+        <div>
+            <button type="button" id="btnFaturaCreateOpen" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Yeni fatura
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    @if (Model.Invoices.Count == 0)
+    {
+        <div class="text-center py-12 px-4">
+            <svg class="mx-auto w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Henüz fatura yok</h3>
+            <p class="text-gray-500 mb-6">İlk kaydı oluşturmak için butonu kullanın.</p>
+            <button type="button" id="btnFaturaCreateOpenEmpty" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">Fatura ekle</button>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fatura no</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yön</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cari</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Brüt tutar</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var i in Model.Invoices)
+                    {
+                        var yon = i.Direction == InvoiceDirection.Outgoing ? "Kesilen" : "Alınan";
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 text-sm font-semibold text-gray-900">@i.InvoiceNo</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">@yon</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">@(i.CounterpartyName ?? "—")</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">@i.IssueDate.ToString("dd.MM.yyyy")</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900 text-right tabular-nums">@i.AmountGross.ToString("N2") @i.Currency</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (i.IsCancelled)
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-900">İptal</span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="/muhasebe/faturalar/detay/@i.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded-md transition-colors duration-200">Detay</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div id="faturaCreateModal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true" aria-labelledby="faturaCreateTitle" aria-hidden="true">
+    <button type="button" id="faturaCreateBackdrop" class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px]" aria-label="Kapat"></button>
+    <div class="relative flex min-h-full items-center justify-center p-4 pointer-events-none">
+        <div class="pointer-events-auto bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto border border-gray-200">
+            <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">
+                <div>
+                    <h3 id="faturaCreateTitle" class="text-lg font-bold text-gray-900">Yeni fatura</h3>
+                    <p class="text-sm text-gray-600 mt-1">Cari, tutarlar ve yön bilgisini girin.</p>
+                </div>
+                <button type="button" id="faturaCreateClose" class="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors shrink-0" aria-label="Kapat">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <form method="post" asp-page-handler="CreateInvoice" id="formFaturaCreate" class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
+                <div asp-validation-summary="All" class="sm:col-span-2 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3"></div>
+                <div class="sm:col-span-2 min-w-0">
+                    <label asp-for="CreateInvoiceInput.CounterpartyId" class="block text-sm font-medium text-gray-700 mb-2">Cari</label>
+                    <select asp-for="CreateInvoiceInput.CounterpartyId" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                        @foreach (var c in Model.Counterparties.Where(x => x.IsActive))
+                        {
+                            <option value="@c.Id">@c.Name</option>
+                        }
+                    </select>
+                </div>
+                @if (!Model.Counterparties.Any(x => x.IsActive))
+                {
+                    <div class="sm:col-span-2 rounded-md bg-amber-50 border border-amber-200 text-amber-900 text-sm px-4 py-3">
+                        Önce <a href="/muhasebe/cariler?yeni=true" class="font-semibold underline">cari ekleyin</a>.
+                    </div>
+                }
+                <div class="min-w-0">
+                    <label asp-for="CreateInvoiceInput.Direction" class="block text-sm font-medium text-gray-700 mb-2">Yön</label>
+                    <select asp-for="CreateInvoiceInput.Direction" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                        <option value="@((int)InvoiceDirection.Outgoing)">Kesilen (satış)</option>
+                        <option value="@((int)InvoiceDirection.Incoming)">Alınan (alış)</option>
+                    </select>
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="CreateInvoiceInput.InvoiceNo" class="block text-sm font-medium text-gray-700 mb-2">Fatura no</label>
+                    <input asp-for="CreateInvoiceInput.InvoiceNo" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="CreateInvoiceInput.IssueDate" class="block text-sm font-medium text-gray-700 mb-2">Tarih</label>
+                    <input asp-for="CreateInvoiceInput.IssueDate" type="date" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="CreateInvoiceInput.DueDate" class="block text-sm font-medium text-gray-700 mb-2">Vade (opsiyonel)</label>
+                    <input asp-for="CreateInvoiceInput.DueDate" type="date" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="sm:col-span-2 min-w-0">
+                    <partial name="_MuhasebeIsoCurrencySelect" model='@(new IsoCurrencySelectViewModel { FieldName = "CreateInvoiceInput.Currency", Selected = Model.CreateInvoiceInput.Currency, Label = "Para birimi", ControlId = "faturaCreateCurrency" })' />
+                </div>
+                <p class="sm:col-span-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">Matrah + KDV, brüt ile aynı olmalıdır (yuvarlama toleransı ±@AccountingValidation.InvoiceAmountTolerance.ToString("N2") TL).</p>
+                <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4 min-w-0">
+                    <div class="min-w-0">
+                        <label asp-for="CreateInvoiceInput.AmountNet" class="block text-sm font-medium text-gray-700 mb-2">Matrah</label>
+                        <input asp-for="CreateInvoiceInput.AmountNet" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                    </div>
+                    <div class="min-w-0">
+                        <label asp-for="CreateInvoiceInput.AmountVat" class="block text-sm font-medium text-gray-700 mb-2">KDV</label>
+                        <input asp-for="CreateInvoiceInput.AmountVat" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                    </div>
+                    <div class="min-w-0">
+                        <label asp-for="CreateInvoiceInput.AmountGross" class="block text-sm font-medium text-gray-700 mb-2">Brüt tutar</label>
+                        <input asp-for="CreateInvoiceInput.AmountGross" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                    </div>
+                </div>
+                <div class="sm:col-span-2 min-w-0">
+                    <label asp-for="CreateInvoiceInput.Notes" class="block text-sm font-medium text-gray-700 mb-2">Notlar</label>
+                    <textarea asp-for="CreateInvoiceInput.Notes" rows="2" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200"></textarea>
+                </div>
+                <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-3 mt-1 border-t border-gray-200">
+                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Kaydediliyor...">Kaydet</button>
+                    <button type="button" id="faturaCreateCancel" class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var modal = document.getElementById('faturaCreateModal');
+            if (!modal) return;
+            function openModal() {
+                modal.classList.remove('hidden');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('overflow-hidden');
+                var first = modal.querySelector('#formFaturaCreate input:not([type=hidden]), #formFaturaCreate select, #formFaturaCreate textarea');
+                if (first) first.focus();
+            }
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.classList.remove('overflow-hidden');
+            }
+            document.getElementById('btnFaturaCreateOpen')?.addEventListener('click', openModal);
+            document.getElementById('btnFaturaCreateOpenEmpty')?.addEventListener('click', openModal);
+            document.getElementById('faturaCreateClose')?.addEventListener('click', closeModal);
+            document.getElementById('faturaCreateCancel')?.addEventListener('click', closeModal);
+            document.getElementById('faturaCreateBackdrop')?.addEventListener('click', closeModal);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+            });
+            @if (Model.OpenCreateModal)
+            {
+                <text>openModal();</text>
+            }
+        })();
+    </script>
+}

@@ -1,0 +1,446 @@
+@page "/muhasebe/faturalar/detay/{id:int}"
+@model BalonPark.Pages.Muhasebe.Faturalar.DetayModel
+@{
+    Layout = "_MuhasebeLayout";
+    ViewData["Title"] = Model.Invoice != null ? $"Fatura · {Model.Invoice.InvoiceNo}" : "Fatura detayı";
+
+    string DosyaBoyutuMetni(long bayt)
+    {
+        if (bayt < 1024) return $"{bayt} bayt";
+        if (bayt < 1024 * 1024) return $"{(bayt / 1024.0):N1} KB";
+        return $"{(bayt / (1024.0 * 1024.0)):N2} MB";
+    }
+}
+@if (Model.Invoice == null)
+{
+    <div class="bg-white rounded-lg shadow-md p-10 text-center max-w-lg mx-auto">
+        <svg class="mx-auto w-14 h-14 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <h1 class="text-xl font-bold text-gray-900">Fatura bulunamadı</h1>
+        <p class="text-gray-600 mt-2 text-sm">Bu fatura silinmiş olabilir veya seçili şirkete ait değildir.</p>
+        <a href="/muhasebe/faturalar" class="mt-6 inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors">Fatura listesine dön</a>
+    </div>
+}
+else
+{
+    var i = Model.Invoice;
+    var yonUzun = i.Direction == InvoiceDirection.Outgoing ? "Kesilen (satış)" : "Alınan (alış)";
+    var durumAktif = !i.IsCancelled;
+    var islemMesajiBasarili = !string.IsNullOrEmpty(Model.ActionMessage) && Model.ActionMessage.Contains("iptal edildi", StringComparison.OrdinalIgnoreCase);
+    var islemMesajiUyari = !string.IsNullOrEmpty(Model.ActionMessage) && (Model.ActionMessage.Contains("zaten", StringComparison.OrdinalIgnoreCase) || Model.ActionMessage.Contains("yapılamadı", StringComparison.OrdinalIgnoreCase));
+    var yuklemeBasarili = !string.IsNullOrEmpty(Model.UploadMessage) && Model.UploadMessage.Contains("yüklendi", StringComparison.OrdinalIgnoreCase);
+    var yuklemeUyari = !string.IsNullOrEmpty(Model.UploadMessage) && !yuklemeBasarili;
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <a href="/muhasebe/faturalar" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mb-4">
+            <svg class="w-4 h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Fatura listesine dön
+        </a>
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">@i.InvoiceNo</h1>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">@yonUzun</span>
+                    @if (durumAktif)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Aktif</span>
+                    }
+                    else
+                    {
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900">İptal edildi</span>
+                    }
+                </div>
+                <p class="text-gray-600 text-sm sm:text-base">
+                    <span class="font-medium text-gray-800">Cari:</span>
+                    @if (!string.IsNullOrEmpty(i.CounterpartyName))
+                    {
+                        <a href="/muhasebe/cariler/detay/@i.CounterpartyId" class="text-gray-900 underline decoration-gray-300 hover:decoration-gray-900 underline-offset-2 font-semibold">@i.CounterpartyName</a>
+                    }
+                    else
+                    {
+                        <span class="text-gray-500">—</span>
+                    }
+                </p>
+                <p class="text-xs text-gray-500 mt-3">Kayıt oluşturulma: @i.CreatedAt.ToString("dd.MM.yyyy HH:mm")@(i.UpdatedAt.HasValue ? " · Son güncelleme: " + i.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm") : "")</p>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ActionMessage))
+    {
+        var panelClass = islemMesajiBasarili
+            ? "bg-green-50 border-green-200 text-green-900"
+            : islemMesajiUyari
+                ? "bg-amber-50 border-amber-200 text-amber-950"
+                : "bg-gray-50 border-gray-200 text-gray-800";
+        <div class="mb-6 rounded-lg border px-4 py-3 text-sm flex items-start gap-3 @panelClass" role="status">
+            @if (islemMesajiBasarili)
+            {
+                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            }
+            else if (islemMesajiUyari)
+            {
+                <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            }
+            else
+            {
+                <svg class="w-5 h-5 text-gray-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            }
+            <span>@Model.ActionMessage</span>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.UploadMessage))
+    {
+        var upClass = yuklemeBasarili ? "bg-green-50 border-green-200 text-green-900" : yuklemeUyari ? "bg-amber-50 border-amber-200 text-amber-950" : "bg-blue-50 border-blue-200 text-blue-900";
+        <div class="mb-6 rounded-lg border px-4 py-3 text-sm flex items-start gap-3 @upClass" role="status">
+            @if (yuklemeBasarili)
+            {
+                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            }
+            else
+            {
+                <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            }
+            <span>@Model.UploadMessage</span>
+        </div>
+    }
+
+    <!-- Tutar özeti -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Matrah (KDV hariç)</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900 tabular-nums">@i.AmountNet.ToString("N2") <span class="text-base font-semibold text-gray-600">@i.Currency</span></p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">KDV tutarı</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900 tabular-nums">@i.AmountVat.ToString("N2") <span class="text-base font-semibold text-gray-600">@i.Currency</span></p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 ring-1 ring-gray-900/5">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Genel toplam (KDV dahil)</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900 tabular-nums">@i.AmountGross.ToString("N2") <span class="text-base font-semibold text-gray-600">@i.Currency</span></p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-10">
+        <!-- Sol: fatura bilgileri -->
+        <div class="xl:col-span-2 space-y-8">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/80">
+                    <h2 class="text-lg font-bold text-gray-900">Fatura bilgileri</h2>
+                    <p class="text-sm text-gray-600 mt-1">Liste ve muhasebe hareketi bu kayda göre üretilir.</p>
+                </div>
+                <dl class="divide-y divide-gray-100">
+                    <div class="px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Fatura numarası</dt>
+                        <dd class="sm:col-span-2 text-sm text-gray-900 font-semibold">@i.InvoiceNo</dd>
+                    </div>
+                    <div class="px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Fatura yönü</dt>
+                        <dd class="sm:col-span-2 text-sm text-gray-900">@yonUzun</dd>
+                    </div>
+                    <div class="px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Kayıt durumu</dt>
+                        <dd class="sm:col-span-2 text-sm">
+                            @if (durumAktif)
+                            {
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif — tahsilat / ödeme hareketleri geçerlidir</span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-900">İptal — ters hareket yazılmıştır</span>
+                            }
+                        </dd>
+                    </div>
+                    <div class="px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Fatura tarihi</dt>
+                        <dd class="sm:col-span-2 text-sm text-gray-900">@i.IssueDate.ToString("dd.MM.yyyy")</dd>
+                    </div>
+                    <div class="px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Vade tarihi</dt>
+                        <dd class="sm:col-span-2 text-sm text-gray-900">@(i.DueDate.HasValue ? i.DueDate.Value.ToString("dd.MM.yyyy") : "Belirtilmedi")</dd>
+                    </div>
+                    <div class="px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Para birimi</dt>
+                        <dd class="sm:col-span-2 text-sm text-gray-900 font-mono">@i.Currency</dd>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(i.Notes))
+                    {
+                        <div class="px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                            <dt class="text-sm font-medium text-gray-500 shrink-0">Notlar</dt>
+                            <dd class="sm:col-span-2 text-sm text-gray-900 whitespace-pre-wrap">@i.Notes</dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Fatura ekleri</h2>
+                        <p class="text-sm text-gray-600 mt-1">PDF, görsel veya XML dosyalarını buradan indirebilirsiniz.</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dosya adı</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Boyut</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yükleme tarihi</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach (var a in Model.Attachments)
+                            {
+                                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 max-w-xs truncate" title="@a.OriginalFileName">@a.OriginalFileName</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600 tabular-nums">@DosyaBoyutuMetni(a.FileSizeBytes)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">@a.UploadedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        <div class="inline-flex items-center gap-2">
+                                            <a href="/muhasebe/ek-goruntule/@a.Id" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 text-sm font-medium rounded-md transition-colors duration-200">Görüntüle</a>
+                                            <a href="/muhasebe/ek/@a.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-md transition-colors duration-200">İndir</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            @if (Model.Attachments.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center">
+                                        <svg class="mx-auto w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                        <p class="text-gray-600 text-sm font-medium">Henüz ek dosya yok</p>
+                                        <p class="text-gray-500 text-xs mt-1 max-w-sm mx-auto">Sağdaki formdan PDF, görsel veya XML yükleyebilirsiniz (aktif faturalar için).</p>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ: işlemler -->
+        <div class="space-y-6">
+            @if (durumAktif)
+            {
+                <div class="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900">Ek dosya yükle</h2>
+                        <p class="text-sm text-gray-600 mt-1">Dosya seçtikten sonra yükleme için onay penceresi açılır.</p>
+                    </div>
+                    <div class="p-6">
+                        <form id="attachmentUploadForm" method="post" asp-page="/Muhasebe/Faturalar/Detay" asp-route-id="@i.Id" asp-page-handler="Upload" enctype="multipart/form-data" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Dosya seçin</label>
+                                <input id="attachmentFileInput" type="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.xml" required
+                                       class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-900 file:text-white hover:file:bg-gray-800 cursor-pointer" />
+                                <p class="text-xs text-gray-500 mt-2">İzin verilen türler: PDF, PNG, JPG, JPEG, WebP, XML. Boyut sunucu ayarındaki üst sınırı aşmamalıdır.</p>
+                                <p id="selectedAttachmentText" class="text-xs text-gray-600 mt-2 hidden"></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="uploadConfirmModal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+                    <div id="uploadConfirmBackdrop" class="absolute inset-0 bg-gray-900/50 opacity-0 transition-opacity duration-200 ease-out motion-reduce:transition-none"></div>
+                    <div class="relative z-10 min-h-full flex items-center justify-center p-4">
+                        <div id="uploadConfirmPanel" role="dialog" aria-modal="true" aria-labelledby="uploadConfirmTitle" aria-describedby="uploadConfirmDescription" tabindex="-1" class="w-full max-w-md rounded-xl bg-white shadow-xl border border-gray-100 p-6 opacity-0 scale-95 translate-y-2 sm:translate-y-0 transition-all duration-200 ease-out motion-reduce:transition-none motion-reduce:transform-none">
+                            <h3 id="uploadConfirmTitle" class="text-lg font-bold text-gray-900">Dosya yükleme onayı</h3>
+                            <p id="uploadConfirmDescription" class="mt-2 text-sm text-gray-700">Seçtiğiniz dosyayı yüklemek istediğinize emin misiniz?</p>
+                            <p id="modalSelectedFileName" class="mt-3 text-sm font-medium text-gray-900 break-all"></p>
+                            <div class="mt-6 flex items-center justify-end gap-2">
+                                <button id="cancelUploadButton" type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400">Vazgeç</button>
+                                <button id="confirmUploadButton" type="button" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-md hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900">Evet, yükle</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="rounded-lg border border-amber-200 bg-amber-50/80 px-5 py-4 text-sm text-amber-950">
+                    <p class="font-semibold">İptal edilmiş fatura</p>
+                    <p class="mt-1 text-amber-900/90">Bu kayda yeni ek yüklenemez. Mevcut ekleri yukarıdaki tablodan indirebilirsiniz.</p>
+                </div>
+            }
+
+            @if (durumAktif)
+            {
+                <div class="bg-white rounded-lg shadow-md border border-red-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-red-100 bg-red-50/50">
+                        <h2 class="text-lg font-bold text-gray-900">Tehlikeli işlem</h2>
+                        <p class="text-sm text-gray-700 mt-1">Faturayı iptal ederseniz cari hesaba ters yönlü muhasebe hareketi yazılır. Bu işlem geri alınamaz.</p>
+                    </div>
+                    <div class="p-6">
+                        <form method="post" asp-page="/Muhasebe/Faturalar/Detay" asp-route-id="@i.Id" asp-page-handler="Iptal" onsubmit="return confirm('Bu faturayı iptal etmek istediğinize emin misiniz? Cariye ters hareket kaydedilecek ve işlem geri alınamaz.');">
+                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-md" data-loading-text="İptal ediliyor…">
+                                <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                Faturayı iptal et
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <p class="text-xs text-gray-500 max-w-3xl">Bu ekran operasyonel takip içindir; resmi muhasebe veya vergi beyanı yerine geçmez. Şüphe halinde mali müşavirinize danışın.</p>
+}
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.getElementById('attachmentUploadForm');
+            const fileInput = document.getElementById('attachmentFileInput');
+            const modal = document.getElementById('uploadConfirmModal');
+            const backdrop = document.getElementById('uploadConfirmBackdrop');
+            const panel = document.getElementById('uploadConfirmPanel');
+            const confirmButton = document.getElementById('confirmUploadButton');
+            const cancelButton = document.getElementById('cancelUploadButton');
+            const selectedText = document.getElementById('selectedAttachmentText');
+            const modalFileName = document.getElementById('modalSelectedFileName');
+            const focusableSelector = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const transitionDurationMs = 200;
+
+            let isModalOpen = false;
+            let lastFocusedElement = null;
+            let closeTimer = null;
+
+            if (!form || !fileInput || !modal || !backdrop || !panel || !confirmButton || !cancelButton || !selectedText || !modalFileName) {
+                return;
+            }
+
+            const setOpenStateClasses = () => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+
+                panel.classList.remove('opacity-0', 'scale-95', 'translate-y-2');
+                panel.classList.add('opacity-100', 'scale-100', 'translate-y-0');
+            };
+
+            const setClosedStateClasses = () => {
+                backdrop.classList.remove('opacity-100');
+                backdrop.classList.add('opacity-0');
+
+                panel.classList.remove('opacity-100', 'scale-100', 'translate-y-0');
+                panel.classList.add('opacity-0', 'scale-95', 'translate-y-2');
+            };
+
+            const finalizeClose = (clearSelection) => {
+                modal.classList.add('hidden');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.classList.remove('overflow-hidden');
+
+                if (clearSelection) {
+                    fileInput.value = '';
+                    selectedText.textContent = '';
+                    selectedText.classList.add('hidden');
+                    modalFileName.textContent = '';
+                }
+
+                if (lastFocusedElement instanceof HTMLElement) {
+                    lastFocusedElement.focus();
+                }
+
+                lastFocusedElement = null;
+                isModalOpen = false;
+            };
+
+            const closeModal = (clearSelection) => {
+                if (!isModalOpen) {
+                    finalizeClose(clearSelection);
+                    return;
+                }
+
+                setClosedStateClasses();
+                if (closeTimer) {
+                    window.clearTimeout(closeTimer);
+                }
+
+                closeTimer = window.setTimeout(() => {
+                    finalizeClose(clearSelection);
+                }, transitionDurationMs);
+            };
+
+            const openModal = (fileName) => {
+                if (closeTimer) {
+                    window.clearTimeout(closeTimer);
+                    closeTimer = null;
+                }
+
+                lastFocusedElement = document.activeElement;
+                modalFileName.textContent = fileName;
+                modal.classList.remove('hidden');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('overflow-hidden');
+                isModalOpen = true;
+
+                setClosedStateClasses();
+                window.requestAnimationFrame(() => {
+                    setOpenStateClasses();
+                    confirmButton.focus();
+                });
+            };
+
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files && fileInput.files[0];
+                if (!file) {
+                    selectedText.textContent = '';
+                    selectedText.classList.add('hidden');
+                    return;
+                }
+
+                selectedText.textContent = `Seçilen dosya: ${file.name}`;
+                selectedText.classList.remove('hidden');
+
+                openModal(file.name);
+            });
+
+            confirmButton.addEventListener('click', () => {
+                closeModal(false);
+                confirmButton.disabled = true;
+                confirmButton.textContent = 'Yükleniyor...';
+                form.submit();
+            });
+
+            cancelButton.addEventListener('click', () => closeModal(true));
+            backdrop.addEventListener('click', () => closeModal(true));
+
+            document.addEventListener('keydown', (event) => {
+                if (!isModalOpen) {
+                    return;
+                }
+
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeModal(true);
+                    return;
+                }
+
+                if (event.key !== 'Tab') {
+                    return;
+                }
+
+                const focusableElements = panel.querySelectorAll(focusableSelector);
+                if (focusableElements.length === 0) {
+                    event.preventDefault();
+                    return;
+                }
+
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+
+                if (event.shiftKey && document.activeElement === firstElement) {
+                    event.preventDefault();
+                    lastElement.focus();
+                }
+                else if (!event.shiftKey && document.activeElement === lastElement) {
+                    event.preventDefault();
+                    firstElement.focus();
+                }
+            });
+        })();
+    </script>
+}

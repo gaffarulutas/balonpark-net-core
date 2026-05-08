@@ -1,0 +1,31 @@
+@model BalonPark.Pages.Muhasebe.Shared.IsoCurrencySelectViewModel
+@using BalonPark.Helpers
+@{
+    var sel = PopularIso4217Currencies.NormalizeSelected(Model.Selected);
+    var unknownCode = !PopularIso4217Currencies.IsInList(sel);
+}
+<div class="min-w-0">
+    <label for="@Model.EffectiveId" class="block text-sm font-medium text-gray-700 mb-2">@Model.Label</label>
+    <select name="@Model.FieldName" id="@Model.EffectiveId" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200 bg-white">
+        @if (unknownCode)
+        {
+            <option value="@sel" selected="selected">@sel — kayıttaki değer (listeden seçin veya kaydedin)</option>
+        }
+        @foreach (var (code, label) in PopularIso4217Currencies.Options)
+        {
+            var isSelected = !unknownCode && string.Equals(sel, code, StringComparison.OrdinalIgnoreCase);
+            if (isSelected)
+            {
+                <option value="@code" selected="selected">@label</option>
+            }
+            else
+            {
+                <option value="@code">@label</option>
+            }
+        }
+    </select>
+    @if (Model.ShowHint)
+    {
+        <p class="text-xs text-gray-500 mt-1.5">Lira, dolar, euro ve diğer yaygın para birimleri; kayıt üç harfli kodla saklanır (örn. TRY, USD).</p>
+    }
+</div>

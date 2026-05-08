@@ -1,0 +1,262 @@
+@page "/muhasebe/cariler"
+@model BalonPark.Pages.Muhasebe.Cariler.IndexModel
+@{
+    Layout = "_MuhasebeLayout";
+    ViewData["Title"] = "Cariler";
+}
+
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <svg class="w-8 h-8 text-gray-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                Cariler
+            </h1>
+            <p class="text-gray-600 mt-2">Müşteri ve tedarikçi carilerini görüntüleyin; bakiye özeti hareketlere göredir.</p>
+        </div>
+        <div>
+            <button type="button" id="btnOpenCariModal" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Yeni cari
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    @if (Model.Rows.Count == 0)
+    {
+        <div class="text-center py-12 px-4">
+            <svg class="mx-auto w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Henüz cari yok</h3>
+            <p class="text-gray-500 mb-6">İlk cariyi eklemek için butonu kullanın.</p>
+            <button type="button" id="btnOpenCariModalEmpty" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">Cari ekle</button>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unvan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tip</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Borç</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Alacak</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var row in Model.Rows)
+                    {
+                        var tip = row.C.CounterpartyType switch
+                        {
+                            CounterpartyType.Customer => "Müşteri",
+                            CounterpartyType.Supplier => "Tedarikçi",
+                            _ => "Her ikisi"
+                        };
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 text-sm font-semibold text-gray-900">@row.C.Name</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">@tip</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 text-right tabular-nums">@row.Debit.ToString("N2")</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 text-right tabular-nums">@row.Credit.ToString("N2")</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex flex-wrap items-center justify-end gap-2">
+                                    <a href="/muhasebe/cariler/detay/@row.C.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-md transition-colors duration-200">Detay</a>
+                                    <a href="/muhasebe/cariler?duzenle=@row.C.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded-md transition-colors duration-200">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        Düzenle
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Yeni cari modal -->
+<div id="cariCreateModal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true" aria-labelledby="cariCreateModalTitle" aria-hidden="true">
+    <button type="button" id="cariCreateModalBackdrop" class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px]" aria-label="Kapat"></button>
+    <div class="relative flex min-h-full items-center justify-center p-4 pointer-events-none">
+        <div class="pointer-events-auto bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto border border-gray-200">
+            <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">
+                <div>
+                    <h3 id="cariCreateModalTitle" class="text-lg font-bold text-gray-900">Yeni cari</h3>
+                    <p class="text-sm text-gray-600 mt-1">Unvan ve tip zorunludur.</p>
+                </div>
+                <button type="button" id="cariCreateModalClose" class="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors shrink-0" aria-label="Kapat">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <form method="post" asp-page-handler="Create" id="formCariCreate" class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
+                <div asp-validation-summary="ModelOnly" class="sm:col-span-2 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3"></div>
+                <div class="min-w-0">
+                    <label asp-for="CreateInput.Name" class="block text-sm font-medium text-gray-700 mb-2">Unvan <span class="text-red-500">*</span></label>
+                    <input asp-for="CreateInput.Name" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                    <span asp-validation-for="CreateInput.Name" class="text-red-600 text-sm mt-1 block"></span>
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="CreateInput.CounterpartyType" class="block text-sm font-medium text-gray-700 mb-2">Tip</label>
+                    <select asp-for="CreateInput.CounterpartyType" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                        <option value="@((int)CounterpartyType.Customer)">Müşteri</option>
+                        <option value="@((int)CounterpartyType.Supplier)">Tedarikçi</option>
+                        <option value="@((int)CounterpartyType.Both)">Her ikisi</option>
+                    </select>
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="CreateInput.TaxId" class="block text-sm font-medium text-gray-700 mb-2">VKN</label>
+                    <input asp-for="CreateInput.TaxId" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="CreateInput.Phone" class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                    <input asp-for="CreateInput.Phone" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="sm:col-span-2 min-w-0">
+                    <label asp-for="CreateInput.Email" class="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
+                    <input asp-for="CreateInput.Email" type="email" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="sm:col-span-2 min-w-0">
+                    <label asp-for="CreateInput.Notes" class="block text-sm font-medium text-gray-700 mb-2">Notlar</label>
+                    <textarea asp-for="CreateInput.Notes" rows="3" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200"></textarea>
+                </div>
+                <div class="sm:col-span-2 flex items-center">
+                    <input asp-for="CreateInput.IsActive" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800" />
+                    <label asp-for="CreateInput.IsActive" class="ml-2 block text-sm text-gray-900">Aktif</label>
+                </div>
+                <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-3 mt-1 border-t border-gray-200">
+                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Kaydediliyor...">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                        Kaydet
+                    </button>
+                    <button type="button" id="cariCreateModalCancel" class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Cari düzenle -->
+<div id="cariEditModal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true" aria-labelledby="cariEditModalTitle" aria-hidden="true">
+    <button type="button" id="cariEditModalBackdrop" class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px]" aria-label="Kapat"></button>
+    <div class="relative flex min-h-full items-center justify-center p-4 pointer-events-none">
+        <div class="pointer-events-auto bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto border border-gray-200">
+            <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">
+                <div>
+                    <h3 id="cariEditModalTitle" class="text-lg font-bold text-gray-900">Cari düzenle</h3>
+                    <p class="text-sm text-gray-600 mt-1">Unvan ve tip zorunludur.</p>
+                </div>
+                <button type="button" id="cariEditModalClose" class="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors shrink-0" aria-label="Kapat">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <form method="post" asp-page-handler="Edit" id="formCariEdit" class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
+                <div class="sm:col-span-2"><input type="hidden" asp-for="EditId" /></div>
+                <div asp-validation-summary="ModelOnly" class="sm:col-span-2 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3"></div>
+                <div class="min-w-0">
+                    <label asp-for="EditInput.Name" class="block text-sm font-medium text-gray-700 mb-2">Unvan <span class="text-red-500">*</span></label>
+                    <input asp-for="EditInput.Name" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                    <span asp-validation-for="EditInput.Name" class="text-red-600 text-sm mt-1 block"></span>
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="EditInput.CounterpartyType" class="block text-sm font-medium text-gray-700 mb-2">Tip</label>
+                    <select asp-for="EditInput.CounterpartyType" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                        <option value="@((int)CounterpartyType.Customer)">Müşteri</option>
+                        <option value="@((int)CounterpartyType.Supplier)">Tedarikçi</option>
+                        <option value="@((int)CounterpartyType.Both)">Her ikisi</option>
+                    </select>
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="EditInput.TaxId" class="block text-sm font-medium text-gray-700 mb-2">VKN</label>
+                    <input asp-for="EditInput.TaxId" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="min-w-0">
+                    <label asp-for="EditInput.Phone" class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                    <input asp-for="EditInput.Phone" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="sm:col-span-2 min-w-0">
+                    <label asp-for="EditInput.Email" class="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
+                    <input asp-for="EditInput.Email" type="email" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="sm:col-span-2 min-w-0">
+                    <label asp-for="EditInput.Notes" class="block text-sm font-medium text-gray-700 mb-2">Notlar</label>
+                    <textarea asp-for="EditInput.Notes" rows="3" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200"></textarea>
+                </div>
+                <div class="sm:col-span-2 flex items-center">
+                    <input asp-for="EditInput.IsActive" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-800" />
+                    <label asp-for="EditInput.IsActive" class="ml-2 block text-sm text-gray-900">Aktif</label>
+                </div>
+                <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-3 mt-1 border-t border-gray-200">
+                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Kaydediliyor...">Kaydet</button>
+                    <button type="button" id="cariEditModalCancel" class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var createModal = document.getElementById('cariCreateModal');
+            var editModal = document.getElementById('cariEditModal');
+            var btnOpen = document.getElementById('btnOpenCariModal');
+            var btnOpenEmpty = document.getElementById('btnOpenCariModalEmpty');
+            function bodyScroll(on) { document.body.classList.toggle('overflow-hidden', on); }
+            function openCreate() {
+                if (editModal) { editModal.classList.add('hidden'); editModal.setAttribute('aria-hidden', 'true'); }
+                if (!createModal) return;
+                createModal.classList.remove('hidden');
+                createModal.setAttribute('aria-hidden', 'false');
+                bodyScroll(true);
+                var first = createModal.querySelector('#formCariCreate input:not([type=hidden]), #formCariCreate select, #formCariCreate textarea');
+                if (first) first.focus();
+            }
+            function closeCreate() {
+                if (!createModal) return;
+                createModal.classList.add('hidden');
+                createModal.setAttribute('aria-hidden', 'true');
+                bodyScroll(!!(editModal && !editModal.classList.contains('hidden')));
+            }
+            function openEdit() {
+                if (createModal) { createModal.classList.add('hidden'); createModal.setAttribute('aria-hidden', 'true'); }
+                if (!editModal) return;
+                editModal.classList.remove('hidden');
+                editModal.setAttribute('aria-hidden', 'false');
+                bodyScroll(true);
+                var first = editModal.querySelector('#formCariEdit input:not([type=hidden]):not([type=checkbox]), #formCariEdit select, #formCariEdit textarea');
+                if (first) first.focus();
+            }
+            function closeEdit() {
+                if (!editModal) return;
+                editModal.classList.add('hidden');
+                editModal.setAttribute('aria-hidden', 'true');
+                bodyScroll(!!(createModal && !createModal.classList.contains('hidden')));
+            }
+            if (btnOpen) btnOpen.addEventListener('click', openCreate);
+            if (btnOpenEmpty) btnOpenEmpty.addEventListener('click', openCreate);
+            document.getElementById('cariCreateModalClose')?.addEventListener('click', closeCreate);
+            document.getElementById('cariCreateModalCancel')?.addEventListener('click', closeCreate);
+            document.getElementById('cariCreateModalBackdrop')?.addEventListener('click', closeCreate);
+            document.getElementById('cariEditModalClose')?.addEventListener('click', closeEdit);
+            document.getElementById('cariEditModalCancel')?.addEventListener('click', closeEdit);
+            document.getElementById('cariEditModalBackdrop')?.addEventListener('click', closeEdit);
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape') return;
+                if (editModal && !editModal.classList.contains('hidden')) { closeEdit(); return; }
+                if (createModal && !createModal.classList.contains('hidden')) closeCreate();
+            });
+            @if (Model.OpenEditModal)
+            {
+                <text>openEdit();</text>
+            }
+            else if (Model.OpenCreateModal)
+            {
+                <text>openCreate();</text>
+            }
+        })();
+    </script>
+}

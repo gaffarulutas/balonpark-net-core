@@ -591,24 +591,28 @@ public class MailService(IConfiguration configuration, ILogger<MailService> logg
 
                 message.Body = builder.ToMessageBody();
 
+                var smtpHost = emailSettings["SmtpServer"]
+                    ?? throw new InvalidOperationException("EmailSettings:SmtpServer yapılandırılmamış.");
+                var smtpUser = emailSettings["SmtpUsername"]
+                    ?? throw new InvalidOperationException("EmailSettings:SmtpUsername yapılandırılmamış.");
+                var smtpPassword = emailSettings["SmtpPassword"]
+                    ?? throw new InvalidOperationException("EmailSettings:SmtpPassword yapılandırılmamış.");
+
                 using var smtp = new SmtpClient
                 {
                     Timeout = 30000,
                     ServerCertificateValidationCallback = (s, c, h, e) => true
                 };
 
-                logger.LogInformation($"SMTP connection attempt {attempt} to {emailSettings["SmtpServer"]}");
+                logger.LogInformation("SMTP connection attempt {Attempt} to {Host}", attempt, smtpHost);
 
                 await smtp.ConnectAsync(
-                    emailSettings["SmtpServer"],
-                    int.Parse(emailSettings["SmtpPort"] ?? "587"),
+                    smtpHost,
+                    int.Parse(emailSettings["SmtpPort"] ?? "587", System.Globalization.CultureInfo.InvariantCulture),
                     SecureSocketOptions.StartTls
                 );
 
-                await smtp.AuthenticateAsync(
-                    emailSettings["SmtpUsername"],
-                    emailSettings["SmtpPassword"]
-                );
+                await smtp.AuthenticateAsync(smtpUser, smtpPassword);
 
                 await smtp.SendAsync(message);
                 await smtp.DisconnectAsync(true);
@@ -758,10 +762,13 @@ public class MailService(IConfiguration configuration, ILogger<MailService> logg
     private async Task<ImapClient> CreateImapClientWithRetryAsync(int maxRetries = 3)
     {
         var emailSettings = configuration.GetSection("EmailSettings");
-        var server = emailSettings["ImapServer"];
-        var port = int.Parse(emailSettings["ImapPort"] ?? "993");
-        var username = emailSettings["ImapUsername"] ?? emailSettings["SmtpUsername"];
-        var password = emailSettings["ImapPassword"] ?? emailSettings["SmtpPassword"];
+        var server = emailSettings["ImapServer"]
+            ?? throw new InvalidOperationException("EmailSettings:ImapServer yapılandırılmamış.");
+        var port = int.Parse(emailSettings["ImapPort"] ?? "993", System.Globalization.CultureInfo.InvariantCulture);
+        var username = emailSettings["ImapUsername"] ?? emailSettings["SmtpUsername"]
+            ?? throw new InvalidOperationException("EmailSettings:ImapUsername veya SmtpUsername gerekli.");
+        var password = emailSettings["ImapPassword"] ?? emailSettings["SmtpPassword"]
+            ?? throw new InvalidOperationException("EmailSettings:ImapPassword veya SmtpPassword gerekli.");
 
         Exception? lastException = null;
 
@@ -847,7 +854,7 @@ public class MailService(IConfiguration configuration, ILogger<MailService> logg
         var emailMessage = new EmailMessage
         {
             Uid = summary.UniqueId.Id,
-            MessageId = message.MessageId,
+            MessageId = message.MessageId ?? string.Empty,
             Subject = message.Subject ?? "(Konu yok)",
             Date = message.Date.DateTime,
             IsSeen = summary.Flags.HasValue && summary.Flags.Value.HasFlag(MessageFlags.Seen),
@@ -888,9 +895,12 @@ public class MailService(IConfiguration configuration, ILogger<MailService> logg
         {
             if (attachment is MimePart mimePart)
             {
+                if (mimePart.Content is null)
+                    continue;
+
                 using var memory = new MemoryStream();
                 mimePart.Content.DecodeTo(memory);
-                
+
                 emailMessage.Attachments.Add(new EmailAttachment
                 {
                     FileName = mimePart.FileName ?? "unknown",

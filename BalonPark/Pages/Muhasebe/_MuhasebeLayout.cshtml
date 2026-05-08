@@ -1,0 +1,345 @@
+@using BalonPark.Models.Accounting
+@{
+    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    var accCompanies = ViewData["AccountingCompanies"] as IReadOnlyList<AccountingCompany> ?? Array.Empty<AccountingCompany>();
+    var selectedAccId = ViewData["SelectedAccountingCompanyId"] as int?;
+    var pagePath = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    var userName = ViewData["AdminUserName"]?.ToString() ?? "Yönetici";
+    var userEmail = ViewData["AdminEmail"]?.ToString() ?? "";
+    var returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+    if (string.IsNullOrEmpty(returnUrl) || returnUrl == "/")
+        returnUrl = "/muhasebe";
+
+    bool NavActive(string fragment) =>
+        fragment.Equals("/Muhasebe/Index", StringComparison.OrdinalIgnoreCase)
+            ? pagePath.Equals("/Muhasebe/Index", StringComparison.OrdinalIgnoreCase)
+            : pagePath.Contains(fragment, StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Muhasebe | @companyName</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
+
+    <style>
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @@keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; }
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        html { scroll-behavior: smooth; font-size: 100%; }
+    </style>
+    <script>
+        (function() {
+            var key = 'adminFontSize';
+            var val = parseInt(localStorage.getItem(key) || '100', 10);
+            val = Math.min(120, Math.max(80, isNaN(val) ? 100 : val));
+            document.documentElement.style.setProperty('font-size', val + '%', 'important');
+        })();
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link rel="stylesheet" href="~/css/swal-theme.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.526.0/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
+</head>
+<body class="h-screen overflow-hidden bg-gray-50">
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 h-16">
+        <div class="h-16 flex items-center">
+            <div class="flex items-center gap-3 w-64 flex-shrink-0 px-6 border-r border-gray-200">
+                <button id="mobileMenuBtn" type="button" class="md:hidden -ml-2 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md" aria-label="Menüyü aç">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="bg-gray-900 p-2 rounded-lg shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2zM15 7V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2h8z" />
+                        </svg>
+                    </div>
+                    <div class="hidden md:block min-w-0">
+                        <h1 class="text-base font-semibold text-gray-900 leading-tight truncate">Muhasebe</h1>
+                        <p class="text-[10px] text-gray-500 truncate">@companyName</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 flex items-center px-3 sm:px-6 min-w-0">
+                @if (accCompanies.Count > 0)
+                {
+                    <form method="post" asp-page="/Muhasebe/SirketSec" asp-page-handler="Sec" id="frmHdrCompany" class="flex items-center gap-2 sm:gap-3 min-w-0 w-full max-w-2xl">
+                        <label for="hdrCompanySelect" class="text-xs sm:text-sm font-medium text-gray-500 shrink-0 hidden sm:block">Şirket</label>
+                        <select name="companyId" id="hdrCompanySelect"
+                                class="min-w-0 flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                                onchange="if (this.value) { document.getElementById('frmHdrCompany').submit(); }"
+                                aria-label="Aktif muhasebe şirketi">
+                            @if (!selectedAccId.HasValue)
+                            {
+                                <option value="" selected disabled>Şirket seçin…</option>
+                            }
+                            @foreach (var c in accCompanies)
+                            {
+                                if (!c.IsActive)
+                                {
+                                    <option value="@c.Id" disabled>@c.LegalName (pasif)</option>
+                                }
+                                else if (selectedAccId == c.Id)
+                                {
+                                    <option value="@c.Id" selected="selected">@c.LegalName</option>
+                                }
+                                else
+                                {
+                                    <option value="@c.Id">@c.LegalName</option>
+                                }
+                            }
+                        </select>
+                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                    </form>
+                }
+                else
+                {
+                    <p class="text-sm text-gray-600 truncate">
+                        <span class="text-gray-500">Şirket:</span>
+                        <a href="/muhasebe/sirketler?yeni=true" class="font-medium text-gray-900 underline">Şirket ekleyin</a>
+                    </p>
+                }
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 shrink-0">
+                <div class="hidden sm:flex items-center gap-0.5 border-r border-gray-200 pr-3" role="group" aria-label="Yazı boyutu">
+                    <button type="button" id="adminFontDecrease" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Yazıyı küçült" aria-label="Yazıyı küçült">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
+                    </button>
+                    <span id="adminFontLabel" class="min-w-[2.5rem] text-center text-xs text-gray-500 tabular-nums">100%</span>
+                    <button type="button" id="adminFontIncrease" class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Yazıyı büyüt" aria-label="Yazıyı büyüt">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
+                    </button>
+                </div>
+
+                <a href="/admin" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" title="Genel site yönetimi">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Site yönetimi
+                </a>
+
+                <div class="hidden lg:flex items-center gap-2 pl-2 border-l border-gray-200">
+                    <div class="h-8 w-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-medium shrink-0">
+                        @(userName.Length > 0 ? userName.Substring(0, 1).ToUpper() : "?")
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium text-gray-900 leading-tight truncate max-w-[10rem]">@userName</p>
+                        @if (!string.IsNullOrEmpty(userEmail))
+                        {
+                            <p class="text-xs text-gray-500 truncate max-w-[10rem]">@userEmail</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-screen pt-16">
+        <aside class="hidden md:flex md:flex-shrink-0 fixed left-0 top-16 bottom-0 w-64 z-40">
+            <div class="flex w-64 flex-col border-r border-gray-200 bg-white h-full" id="sidebar">
+                <nav class="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+                    <a href="/muhasebe" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(NavActive("/Muhasebe/Index") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        <span>Özet</span>
+                    </a>
+                    <a href="/muhasebe/sirketler" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(NavActive("/Muhasebe/Sirketler") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                        <span>Şirketler</span>
+                    </a>
+                    <a href="/muhasebe/cariler" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(NavActive("/Muhasebe/Cariler") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <span>Cariler</span>
+                    </a>
+                    <a href="/muhasebe/faturalar" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(NavActive("/Muhasebe/Faturalar") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <span>Faturalar</span>
+                    </a>
+                    <a href="/muhasebe/hareketler" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 @(NavActive("/Muhasebe/Hareketler") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+                        <span>Hareketler</span>
+                    </a>
+                </nav>
+                <div class="border-t border-gray-200 p-3 space-y-2">
+                    <a href="/admin" class="flex items-center justify-center gap-x-2 px-3 py-2 border border-gray-300 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" /></svg>
+                        <span>Site yönetimi</span>
+                    </a>
+                    <form method="post" asp-page="/Admin/Index" asp-page-handler="Logout">
+                        <button type="submit" class="w-full flex items-center justify-center gap-x-2 px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-md transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                            <span>Çıkış yap</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <div class="md:hidden fixed inset-0 z-[60] hidden" id="mobileMenuOverlay">
+            <div class="fixed inset-0 bg-gray-600/75" id="mobileMenuBackdrop"></div>
+            <div class="fixed inset-y-0 left-0 flex w-64 flex-col bg-white border-r border-gray-200 transform transition-transform duration-300 -translate-x-full" id="mobileSidebar">
+                <nav class="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+                    <a href="/muhasebe" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md @(NavActive("/Muhasebe/Index") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")"><span>Özet</span></a>
+                    <a href="/muhasebe/sirketler" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md @(NavActive("/Muhasebe/Sirketler") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")"><span>Şirketler</span></a>
+                    <a href="/muhasebe/cariler" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md @(NavActive("/Muhasebe/Cariler") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")"><span>Cariler</span></a>
+                    <a href="/muhasebe/faturalar" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md @(NavActive("/Muhasebe/Faturalar") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")"><span>Faturalar</span></a>
+                    <a href="/muhasebe/hareketler" class="flex items-center space-x-3 px-4 py-2 text-sm font-medium rounded-md @(NavActive("/Muhasebe/Hareketler") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50")"><span>Hareketler</span></a>
+                </nav>
+                <div class="border-t border-gray-200 p-3 space-y-2">
+                    <a href="/admin" class="flex items-center justify-center gap-x-2 px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-800 hover:bg-gray-50">Site yönetimi</a>
+                    <form method="post" asp-page="/Admin/Index" asp-page-handler="Logout">
+                        <button type="submit" class="w-full flex items-center justify-center gap-x-2 px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded-md">Çıkış yap</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <main class="flex-1 md:ml-64 overflow-y-auto bg-gray-50 h-full">
+            <div class="py-6 px-4 sm:px-6 lg:px-8">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden items-center justify-center z-[9999]">
+        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+            <div class="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full mx-auto mb-4 animate-spin"></div>
+            <p class="text-gray-900 font-medium" id="loadingText">İşlem yapılıyor...</p>
+        </div>
+    </div>
+
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/node-snackbar@0.1.16/dist/snackbar.min.js"></script>
+    <script src="~/js/snackbar-helper.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function showLoading(message = 'İşlem yapılıyor...') {
+            $('#loadingText').text(message);
+            $('#loadingOverlay').removeClass('hidden').addClass('flex');
+        }
+        function hideLoading() {
+            $('#loadingOverlay').removeClass('flex').addClass('hidden');
+        }
+        function showDeleteConfirm(message, callback) {
+            var opts = { icon: 'warning', showCancelButton: true, confirmButtonText: 'Evet', cancelButtonText: 'İptal', focusCancel: true };
+            if (typeof message === 'string') {
+                opts.title = 'İşlemi onayla';
+                opts.html = message.indexOf('<') !== -1 ? message : null;
+                opts.text = message.indexOf('<') === -1 ? message : null;
+            } else {
+                opts.title = 'İşlemi onayla';
+                opts.text = message || 'Bu işlem geri alınamaz. Devam etmek istiyor musunuz?';
+            }
+            if (typeof window.Swal !== 'undefined') {
+                window.Swal.fire(opts).then(function (r) { if (r.isConfirmed && typeof callback === 'function') callback(); });
+            } else {
+                if (confirm(opts.text || opts.title)) { if (typeof callback === 'function') callback(); }
+            }
+        }
+        function showSuccessAlert(message) { if (typeof showSnackbar === 'function') showSnackbar(message, 'success'); }
+        function showErrorAlert(message) { if (typeof showSnackbar === 'function') showSnackbar(message, 'error'); }
+        function showConfirm(options) {
+            var opts = options || {};
+            var title = opts.title || 'Onay';
+            var text = opts.text || null;
+            var html = opts.html || null;
+            var swalOpts = { icon: opts.icon || 'question', showCancelButton: true, confirmButtonText: 'Evet', cancelButtonText: 'İptal', focusCancel: true, title: title };
+            if (html) swalOpts.html = html;
+            else if (text) swalOpts.text = text;
+            if (typeof window.Swal !== 'undefined') return window.Swal.fire(swalOpts);
+            return Promise.resolve({ isConfirmed: confirm(title + (text ? ': ' + text.replace(/<[^>]*>/g, '') : '')) });
+        }
+
+        $(document).ready(function () {
+            $('#mobileMenuBtn').on('click', function () {
+                $('#mobileSidebar').toggleClass('-translate-x-full');
+                $('#mobileMenuOverlay').toggleClass('hidden');
+            });
+            $('#mobileMenuBackdrop').on('click', function () {
+                $('#mobileSidebar').addClass('-translate-x-full');
+                $('#mobileMenuOverlay').addClass('hidden');
+            });
+            $('form').on('submit', function () {
+                var $form = $(this);
+                var $submitBtn = $form.find('button[type="submit"]').first();
+                var loadingText = $submitBtn.data('loading-text') || 'Kaydediliyor...';
+                showLoading(loadingText);
+                $submitBtn.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+                if ($submitBtn.data('loading-text')) {
+                    var $originalHtml = $submitBtn.html();
+                    $submitBtn.data('original-html', $originalHtml);
+                    $submitBtn.html('<span class="inline-block w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>' + loadingText);
+                }
+                return true;
+            });
+            hideLoading();
+            $('button[type="submit"]').prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+        });
+        $(window).on('beforeunload', function () { hideLoading(); });
+        $(window).on('load', function () {
+            hideLoading();
+            $('button[type="submit"]').prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+        });
+
+        (function() {
+            var KEY = 'adminFontSize';
+            var MIN = 80, MAX = 120, STEP = 5;
+            var styleId = 'admin-font-size-style';
+            function getVal() {
+                var v = parseInt(localStorage.getItem(KEY) || '100', 10);
+                return isNaN(v) ? 100 : Math.min(MAX, Math.max(MIN, v));
+            }
+            function applyFontSize(val) {
+                val = Math.min(MAX, Math.max(MIN, val));
+                document.documentElement.style.setProperty('font-size', val + '%', 'important');
+                var el = document.getElementById(styleId);
+                if (el) el.textContent = 'html { font-size: ' + val + '% !important; }';
+                else {
+                    el = document.createElement('style');
+                    el.id = styleId;
+                    el.textContent = 'html { font-size: ' + val + '% !important; }';
+                    document.head.appendChild(el);
+                }
+                return val;
+            }
+            function setVal(val) {
+                val = applyFontSize(val);
+                localStorage.setItem(KEY, String(val));
+                var label = document.getElementById('adminFontLabel');
+                if (label) label.textContent = val + '%';
+            }
+            function initFontSize() {
+                setVal(getVal());
+                var btnDec = document.getElementById('adminFontDecrease');
+                var btnInc = document.getElementById('adminFontIncrease');
+                if (btnDec) btnDec.addEventListener('click', function() { setVal(getVal() - STEP); });
+                if (btnInc) btnInc.addEventListener('click', function() { setVal(getVal() + STEP); });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initFontSize);
+            else initFontSize();
+        })();
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) { lucide.createIcons(); }
+        });
+    </script>
+    @await RenderSectionAsync("Styles", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

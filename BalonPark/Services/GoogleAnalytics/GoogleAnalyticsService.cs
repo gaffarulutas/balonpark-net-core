@@ -5,6 +5,7 @@ using BalonPark.Data;
 using BalonPark.Models;
 using Google.Analytics.Data.V1Beta;
 using Google.Apis.Auth.OAuth2;
+using Grpc.Core;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BalonPark.Services.GoogleAnalytics;
@@ -90,6 +91,11 @@ public class GoogleAnalyticsService(
             }
             catch (Exception ex)
             {
+                if (IsClientCancellation(ex))
+                {
+                    logger.LogDebug("GA anlık rapor isteği iptal edildi (istemci bağlantısı veya navigasyon).");
+                    return result;
+                }
                 logger.LogWarning(ex, "GA anlık rapor alınamadı");
                 if (IsApiDisabledOrPermissionDenied(ex))
                 {
@@ -132,6 +138,11 @@ public class GoogleAnalyticsService(
             }
             catch (Exception ex)
             {
+                if (IsClientCancellation(ex))
+                {
+                    logger.LogDebug("GA özet rapor isteği iptal edildi (istemci bağlantısı veya navigasyon).");
+                    return result;
+                }
                 logger.LogWarning(ex, "GA özet rapor alınamadı");
                 if (IsApiDisabledOrPermissionDenied(ex))
                 {
@@ -168,6 +179,11 @@ public class GoogleAnalyticsService(
             }
             catch (Exception ex)
             {
+                if (IsClientCancellation(ex))
+                {
+                    logger.LogDebug("GA en çok görüntülenen sayfalar raporu iptal edildi (istemci).");
+                    return result;
+                }
                 logger.LogWarning(ex, "GA en çok görüntülenen sayfalar raporu alınamadı");
                 if (IsApiDisabledOrPermissionDenied(ex))
                 {
@@ -207,6 +223,11 @@ public class GoogleAnalyticsService(
             }
             catch (Exception ex)
             {
+                if (IsClientCancellation(ex))
+                {
+                    logger.LogDebug("GA trafik kaynakları raporu iptal edildi (istemci).");
+                    return result;
+                }
                 logger.LogWarning(ex, "GA trafik kaynakları raporu alınamadı");
                 if (IsApiDisabledOrPermissionDenied(ex))
                 {
@@ -220,6 +241,11 @@ public class GoogleAnalyticsService(
         }
         catch (Exception ex)
         {
+            if (IsClientCancellation(ex))
+            {
+                logger.LogDebug("Google Analytics dashboard isteği iptal edildi (istemci).");
+                throw;
+            }
             logger.LogError(ex, "Google Analytics dashboard yüklenemedi");
             var friendlyMessage = GetFriendlyApiErrorMessage(ex);
             return new GoogleAnalyticsDashboardDto
@@ -229,6 +255,19 @@ public class GoogleAnalyticsService(
                 FetchedAt = DateTime.UtcNow
             };
         }
+    }
+
+    /// <summary>Tarayıcı sayfayı terk ettiğinde veya bağlantı koptuğunda gRPC Cancelled / TaskCanceledException oluşur; bunlar hata değildir.</summary>
+    private static bool IsClientCancellation(Exception ex)
+    {
+        for (var e = ex; e != null; e = e.InnerException!)
+        {
+            if (e is OperationCanceledException or TaskCanceledException)
+                return true;
+            if (e is RpcException rpc && rpc.StatusCode == StatusCode.Cancelled)
+                return true;
+        }
+        return false;
     }
 
     private static bool IsApiDisabledOrPermissionDenied(Exception ex)
