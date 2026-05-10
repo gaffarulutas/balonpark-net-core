@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using BalonPark.Data;
 using BalonPark.Models.Accounting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace BalonPark.Pages.Muhasebe.Cariler;
 
@@ -22,10 +23,14 @@ public class IndexModel : BaseMuhasebePage
 
     public List<(Counterparty C, decimal Debit, decimal Credit)> Rows { get; } = new();
 
+    // [ValidateNever]: iki form aynı anda doğrulanırsa diğerinin boş [Required] alanı
+    // ModelState'i kirletir. Her handler kendi modeli için ModelState.Clear() + TryValidateModel yapar.
     [BindProperty]
+    [ValidateNever]
     public CariFormInput CreateInput { get; set; } = new();
 
     [BindProperty]
+    [ValidateNever]
     public CariFormInput EditInput { get; set; } = new();
 
     [BindProperty]
@@ -89,7 +94,8 @@ public class IndexModel : BaseMuhasebePage
     public async Task<IActionResult> OnPostCreateAsync(CancellationToken cancellationToken = default)
     {
         await LoadRowsAsync(cancellationToken).ConfigureAwait(false);
-        if (!ModelState.IsValid)
+        ModelState.Clear();
+        if (!TryValidateModel(CreateInput, nameof(CreateInput)))
         {
             OpenCreateModal = true;
             return Page();
@@ -115,7 +121,8 @@ public class IndexModel : BaseMuhasebePage
     public async Task<IActionResult> OnPostEditAsync(CancellationToken cancellationToken = default)
     {
         await LoadRowsAsync(cancellationToken).ConfigureAwait(false);
-        if (!ModelState.IsValid)
+        ModelState.Clear();
+        if (!TryValidateModel(EditInput, nameof(EditInput)))
         {
             OpenEditModal = true;
             return Page();

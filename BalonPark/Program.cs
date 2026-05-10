@@ -57,6 +57,17 @@ try
         }
     });
 
+    // Türkçe kültür: model binder ondalık/tarih ayırıcılarını tr-TR ile yorumlar (ör. 23.333,33 → decimal)
+    var trCulture = new System.Globalization.CultureInfo("tr-TR");
+    builder.Services.Configure<Microsoft.AspNetCore.Builder.RequestLocalizationOptions>(opts =>
+    {
+        opts.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(trCulture);
+        opts.SupportedCultures = [trCulture];
+        opts.SupportedUICultures = [trCulture];
+        // Tarayıcı/cookie/query-string ile kültür değiştirilmesin; uygulama hep tr-TR kullanır.
+        opts.RequestCultureProviders = [];
+    });
+
     // Add services to the container.
     builder.Services.AddRazorPages();
     builder.Services.AddControllers();
@@ -121,6 +132,9 @@ try
 
     // PDF Generation Service
     builder.Services.AddScoped<PdfService>();
+
+    // Invoice PDF Parser (e-fatura / e-arşiv PDF'inden veri çıkarma)
+    builder.Services.AddScoped<InvoicePdfParserService>();
 
     // Excel Generation Service
     builder.Services.AddScoped<ExcelService>();
@@ -237,6 +251,7 @@ try
     };
     app.UseStaticFiles(staticFileOptions);
 
+    app.UseRequestLocalization();
     app.UseRouting();
     app.UseSecurityHeaders();
 

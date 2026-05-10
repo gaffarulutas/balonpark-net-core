@@ -3,27 +3,27 @@ using BalonPark.Data;
 using BalonPark.Helpers;
 using BalonPark.Models.Accounting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace BalonPark.Pages.Muhasebe.Sirketler;
 
-public class IndexModel : BaseMuhasebePage
+public class IndexModel(AccountingCompanyRepository accountingCompanyRepository)
+    : BaseMuhasebePage(accountingCompanyRepository)
 {
-    private readonly AccountingCompanyRepository _repository;
-
-    public IndexModel(AccountingCompanyRepository accountingCompanyRepository)
-        : base(accountingCompanyRepository)
-    {
-        _repository = accountingCompanyRepository;
-    }
+    private readonly AccountingCompanyRepository _repository = accountingCompanyRepository;
 
     protected override bool RequiresSelectedCompany => false;
 
     public IReadOnlyList<AccountingCompany> Companies { get; private set; } = Array.Empty<AccountingCompany>();
 
+    /// <summary>POST doğrulaması yalnızca ilgili handler içinde <see cref="PageModel.TryValidateModel"/> ile yapılır;
+    /// aksi halde diğer formdaki boş <see cref="SirketFormInput.LegalName"/> için [Required] tetiklenir.</summary>
     [BindProperty]
+    [ValidateNever]
     public SirketFormInput CreateCompanyInput { get; set; } = new();
 
     [BindProperty]
+    [ValidateNever]
     public SirketFormInput EditCompanyInput { get; set; } = new();
 
     [BindProperty]
@@ -69,7 +69,7 @@ public class IndexModel : BaseMuhasebePage
     public async Task OnGetAsync(CancellationToken cancellationToken = default)
     {
         Companies = await _repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        if (Duzenle is int eid)
+        if (Duzenle is { } eid)
         {
             var entity = await _repository.GetByIdAsync(eid, cancellationToken).ConfigureAwait(false);
             if (entity != null)
@@ -88,7 +88,10 @@ public class IndexModel : BaseMuhasebePage
     public async Task<IActionResult> OnPostCreateCompanyAsync(CancellationToken cancellationToken = default)
     {
         Companies = await _repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        if (!ModelState.IsValid)
+
+        // Sadece bu forma ait alanları doğrula; diğer formdaki boş alanlar ModelState'i kirletmesin.
+        ModelState.Clear();
+        if (!TryValidateModel(CreateCompanyInput, nameof(CreateCompanyInput)))
         {
             OpenCreateModal = true;
             return Page();
@@ -118,7 +121,10 @@ public class IndexModel : BaseMuhasebePage
     public async Task<IActionResult> OnPostEditCompanyAsync(CancellationToken cancellationToken = default)
     {
         Companies = await _repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        if (!ModelState.IsValid)
+
+        // Sadece bu forma ait alanları doğrula; diğer formdaki boş alanlar ModelState'i kirletmesin.
+        ModelState.Clear();
+        if (!TryValidateModel(EditCompanyInput, nameof(EditCompanyInput)))
         {
             OpenEditModal = true;
             return Page();

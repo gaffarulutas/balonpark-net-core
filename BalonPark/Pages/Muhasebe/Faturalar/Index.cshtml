@@ -15,7 +15,8 @@
             <p class="text-gray-600 mt-2">Manuel fatura kayıtları; detaydan ek yükleyebilir veya iptal edebilirsiniz.</p>
         </div>
         <div>
-            <button type="button" id="btnFaturaCreateOpen" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+            <button type="button" id="btnFaturaCreateOpen"
+                    class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                 Yeni fatura
             </button>
@@ -30,7 +31,8 @@
             <svg class="mx-auto w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Henüz fatura yok</h3>
             <p class="text-gray-500 mb-6">İlk kaydı oluşturmak için butonu kullanın.</p>
-            <button type="button" id="btnFaturaCreateOpenEmpty" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">Fatura ekle</button>
+            <button type="button" id="btnFaturaCreateOpenEmpty"
+                    class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">Fatura ekle</button>
         </div>
     }
     else
@@ -69,7 +71,8 @@
                                 }
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="/muhasebe/faturalar/detay/@i.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded-md transition-colors duration-200">Detay</a>
+                                <a href="/muhasebe/faturalar/detay/@i.Id"
+                                   class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded-md transition-colors duration-200">Detay</a>
                             </td>
                         </tr>
                     }
@@ -79,82 +82,266 @@
     }
 </div>
 
-<div id="faturaCreateModal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true" aria-labelledby="faturaCreateTitle" aria-hidden="true">
-    <button type="button" id="faturaCreateBackdrop" class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px]" aria-label="Kapat"></button>
-    <div class="relative flex min-h-full items-center justify-center p-4 pointer-events-none">
-        <div class="pointer-events-auto bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto border border-gray-200">
-            <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">
+@* ═══════════════════ MODAL ═══════════════════ *@
+<div id="faturaCreateModal"
+     class="fixed inset-0 z-[70] pointer-events-none opacity-0 invisible transition-[opacity,visibility] duration-300 ease-out"
+     role="dialog" aria-modal="true" aria-labelledby="faturaCreateTitle" aria-hidden="true">
+    <button type="button" id="faturaCreateBackdrop"
+            class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px] pointer-events-auto opacity-0 transition-opacity duration-300" aria-label="Kapat"></button>
+
+    <div class="relative flex min-h-full items-center justify-center p-4">
+        <div id="faturaModalContent"
+             class="pointer-events-auto bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto border border-gray-200 transform scale-95 opacity-0 translate-y-4 transition-all duration-300 ease-out">
+
+            @* Başlık *@
+            <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl z-10">
                 <div>
                     <h3 id="faturaCreateTitle" class="text-lg font-bold text-gray-900">Yeni fatura</h3>
-                    <p class="text-sm text-gray-600 mt-1">Cari, tutarlar ve yön bilgisini girin.</p>
+                    <p id="faturaModalSubtitle" class="text-sm text-gray-600 mt-1">PDF faturayı yükleyin; bilgiler otomatik doldurulur.</p>
                 </div>
-                <button type="button" id="faturaCreateClose" class="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors shrink-0" aria-label="Kapat">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                <button type="button" id="faturaCreateClose"
+                        class="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors shrink-0" aria-label="Kapat">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
-            <form method="post" asp-page-handler="CreateInvoice" id="formFaturaCreate" class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
-                <div asp-validation-summary="All" class="sm:col-span-2 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3"></div>
-                <div class="sm:col-span-2 min-w-0">
-                    <label asp-for="CreateInvoiceInput.CounterpartyId" class="block text-sm font-medium text-gray-700 mb-2">Cari</label>
-                    <select asp-for="CreateInvoiceInput.CounterpartyId" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
-                        @foreach (var c in Model.Counterparties.Where(x => x.IsActive))
+
+            @* ── ADIM 1: PDF Yükleme ── *@
+            <div id="panelUpload" class="px-6 py-5 space-y-5">
+
+                @* Drop zone *@
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        PDF Fatura <span class="text-red-500">*</span>
+                    </label>
+                    <div id="pdfDropZone"
+                         class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-gray-500 hover:bg-gray-50 transition-all duration-200 group">
+                        <input type="file" id="pdfFileInput" accept=".pdf,application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+                        <div id="pdfDropContent">
+                            <svg class="mx-auto w-12 h-12 text-gray-400 mb-3 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p class="text-sm text-gray-600">PDF dosyayı buraya sürükleyin veya <span class="font-semibold text-gray-900 underline">gözatın</span></p>
+                            <p class="text-xs text-gray-400 mt-1">e-Fatura / e-Arşiv PDF · Maks. 10 MB</p>
+                        </div>
+                        <div id="pdfFileSelected" class="hidden">
+                            <svg class="mx-auto w-10 h-10 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p id="pdfFileNameDisplay" class="text-sm font-semibold text-gray-800"></p>
+                            <p id="pdfFileSizeDisplay" class="text-xs text-gray-500 mt-0.5"></p>
+                        </div>
+                    </div>
+                </div>
+
+                @* Yön + Para birimi *@
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="pdfDirectionSelect" class="block text-sm font-medium text-gray-700 mb-2">
+                            Yön <span class="text-red-500">*</span>
+                        </label>
+                        <select id="pdfDirectionSelect"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                            <option value="Outgoing">Kesilen (satış)</option>
+                            <option value="Incoming">Alınan (alış)</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Alınan = siz alıcısınız, Kesilen = siz satıcısınız.</p>
+                    </div>
+                    <div>
+                        <label for="pdfCurrencySelect" class="block text-sm font-medium text-gray-700 mb-2">
+                            Para birimi <span class="text-red-500">*</span>
+                        </label>
+                        <select id="pdfCurrencySelect"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                            <option value="TRY" selected>₺ TRY – Türk lirası</option>
+                            <option value="USD">$ USD – ABD doları</option>
+                            <option value="EUR">€ EUR – Euro</option>
+                            <option value="GBP">£ GBP – İngiliz sterlini</option>
+                            <option value="CHF">CHF – İsviçre frankı</option>
+                        </select>
+                    </div>
+                </div>
+
+                @* Hata *@
+                <div id="pdfExtractError" class="hidden rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3"></div>
+
+                @* Butonlar *@
+                <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-100">
+                    <button type="button" id="btnExtractPdf"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
+                        <svg id="btnExtractIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <svg id="btnExtractSpinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"/>
+                        </svg>
+                        <span id="btnExtractText">PDF'den Oku</span>
+                    </button>
+                    <button type="button" id="btnManualMode"
+                            class="inline-flex items-center px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                        Manuel Giriş
+                    </button>
+                    <button type="button" id="faturaUploadCancel"
+                            class="ml-auto inline-flex items-center px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                        İptal
+                    </button>
+                </div>
+            </div>
+
+            @* ── ADIM 2: Fatura Formu ── *@
+            <div id="panelForm" class="hidden">
+
+                @* Cari bilgi kartı (PDF modunda) *@
+                <div id="cariInfoCard" class="hidden mx-6 mt-5 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Karşı Taraf (Cari)</p>
+                            <p id="cariCardName" class="font-semibold text-gray-900 text-sm truncate"></p>
+                            <p id="cariCardTaxId" class="text-xs text-gray-600 mt-0.5"></p>
+                            <p id="cariCardTaxOffice" class="text-xs text-gray-500"></p>
+                        </div>
+                        <span id="cariCardNewBadge"
+                              class="hidden shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Yeni oluşturuldu
+                        </span>
+                        <span id="cariCardFoundBadge"
+                              class="hidden shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Mevcut cari
+                        </span>
+                    </div>
+                </div>
+
+                @* Ana form *@
+                <form method="post" asp-page-handler="CreateInvoice" id="formFaturaCreate"
+                      class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
+                    <div asp-validation-summary="All" id="faturaValidationSummary"
+                         class="sm:col-span-2 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3 hidden"></div>
+
+                    @* CounterpartyId: hidden (PDF mode) veya select (manual mode) *@
+                    <input type="hidden" asp-for="CreateInvoiceInput.CounterpartyId" id="fCounterpartyId" />
+
+                    <div id="fManualCariGroup" class="sm:col-span-2 min-w-0 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Cari <span class="text-red-500">*</span>
+                        </label>
+                        <select id="fManualCariSelect"
+                                class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                            <option value="0">— Seçin —</option>
+                            @foreach (var c in Model.Counterparties.Where(x => x.IsActive))
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </select>
+                        @if (!Model.Counterparties.Any(x => x.IsActive))
                         {
-                            <option value="@c.Id">@c.Name</option>
+                            <p class="text-xs text-amber-700 mt-1">
+                                Önce <a href="/muhasebe/cariler?yeni=true" class="font-semibold underline">cari ekleyin</a>.
+                            </p>
                         }
-                    </select>
-                </div>
-                @if (!Model.Counterparties.Any(x => x.IsActive))
-                {
-                    <div class="sm:col-span-2 rounded-md bg-amber-50 border border-amber-200 text-amber-900 text-sm px-4 py-3">
-                        Önce <a href="/muhasebe/cariler?yeni=true" class="font-semibold underline">cari ekleyin</a>.
+                        <span asp-validation-for="CreateInvoiceInput.CounterpartyId" class="text-red-600 text-sm mt-1 block"></span>
                     </div>
-                }
-                <div class="min-w-0">
-                    <label asp-for="CreateInvoiceInput.Direction" class="block text-sm font-medium text-gray-700 mb-2">Yön</label>
-                    <select asp-for="CreateInvoiceInput.Direction" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
-                        <option value="@((int)InvoiceDirection.Outgoing)">Kesilen (satış)</option>
-                        <option value="@((int)InvoiceDirection.Incoming)">Alınan (alış)</option>
-                    </select>
-                </div>
-                <div class="min-w-0">
-                    <label asp-for="CreateInvoiceInput.InvoiceNo" class="block text-sm font-medium text-gray-700 mb-2">Fatura no</label>
-                    <input asp-for="CreateInvoiceInput.InvoiceNo" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
-                </div>
-                <div class="min-w-0">
-                    <label asp-for="CreateInvoiceInput.IssueDate" class="block text-sm font-medium text-gray-700 mb-2">Tarih</label>
-                    <input asp-for="CreateInvoiceInput.IssueDate" type="date" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
-                </div>
-                <div class="min-w-0">
-                    <label asp-for="CreateInvoiceInput.DueDate" class="block text-sm font-medium text-gray-700 mb-2">Vade (opsiyonel)</label>
-                    <input asp-for="CreateInvoiceInput.DueDate" type="date" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
-                </div>
-                <div class="sm:col-span-2 min-w-0">
-                    <partial name="_MuhasebeIsoCurrencySelect" model='@(new IsoCurrencySelectViewModel { FieldName = "CreateInvoiceInput.Currency", Selected = Model.CreateInvoiceInput.Currency, Label = "Para birimi", ControlId = "faturaCreateCurrency" })' />
-                </div>
-                <p class="sm:col-span-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">Matrah + KDV, brüt ile aynı olmalıdır (yuvarlama toleransı ±@AccountingValidation.InvoiceAmountTolerance.ToString("N2") TL).</p>
-                <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4 min-w-0">
+
+                    @* Yön *@
                     <div class="min-w-0">
-                        <label asp-for="CreateInvoiceInput.AmountNet" class="block text-sm font-medium text-gray-700 mb-2">Matrah</label>
-                        <input asp-for="CreateInvoiceInput.AmountNet" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <label asp-for="CreateInvoiceInput.Direction" class="block text-sm font-medium text-gray-700 mb-2">
+                            Yön <span class="text-red-500">*</span>
+                        </label>
+                        <select asp-for="CreateInvoiceInput.Direction" id="fDirection"
+                                class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200">
+                            <option value="@((int)InvoiceDirection.Outgoing)">Kesilen (satış)</option>
+                            <option value="@((int)InvoiceDirection.Incoming)">Alınan (alış)</option>
+                        </select>
+                        <span asp-validation-for="CreateInvoiceInput.Direction" class="text-red-600 text-sm mt-1 block"></span>
                     </div>
+
+                    @* Fatura no *@
                     <div class="min-w-0">
-                        <label asp-for="CreateInvoiceInput.AmountVat" class="block text-sm font-medium text-gray-700 mb-2">KDV</label>
-                        <input asp-for="CreateInvoiceInput.AmountVat" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <label asp-for="CreateInvoiceInput.InvoiceNo" class="block text-sm font-medium text-gray-700 mb-2">
+                            Fatura no <span class="text-red-500">*</span>
+                        </label>
+                        <input asp-for="CreateInvoiceInput.InvoiceNo" id="fInvoiceNo" autocomplete="off"
+                               class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <span asp-validation-for="CreateInvoiceInput.InvoiceNo" class="text-red-600 text-sm mt-1 block"></span>
                     </div>
+
+                    @* Tarih *@
                     <div class="min-w-0">
-                        <label asp-for="CreateInvoiceInput.AmountGross" class="block text-sm font-medium text-gray-700 mb-2">Brüt tutar</label>
-                        <input asp-for="CreateInvoiceInput.AmountGross" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <label asp-for="CreateInvoiceInput.IssueDate" class="block text-sm font-medium text-gray-700 mb-2">
+                            Tarih <span class="text-red-500">*</span>
+                        </label>
+                        <input asp-for="CreateInvoiceInput.IssueDate" type="date" id="fIssueDate"
+                               class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <span asp-validation-for="CreateInvoiceInput.IssueDate" class="text-red-600 text-sm mt-1 block"></span>
                     </div>
-                </div>
-                <div class="sm:col-span-2 min-w-0">
-                    <label asp-for="CreateInvoiceInput.Notes" class="block text-sm font-medium text-gray-700 mb-2">Notlar</label>
-                    <textarea asp-for="CreateInvoiceInput.Notes" rows="2" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200"></textarea>
-                </div>
-                <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-3 mt-1 border-t border-gray-200">
-                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Kaydediliyor...">Kaydet</button>
-                    <button type="button" id="faturaCreateCancel" class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200">İptal</button>
-                </div>
-            </form>
+
+                    @* Vade *@
+                    <div class="min-w-0">
+                        <label asp-for="CreateInvoiceInput.DueDate" class="block text-sm font-medium text-gray-700 mb-2">Vade (opsiyonel)</label>
+                        <input asp-for="CreateInvoiceInput.DueDate" type="date" id="fDueDate"
+                               class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                    </div>
+
+                    @* Para birimi *@
+                    <div class="sm:col-span-2 min-w-0">
+                        <partial name="_MuhasebeIsoCurrencySelect"
+                                 model='@(new IsoCurrencySelectViewModel { FieldName = "CreateInvoiceInput.Currency", Selected = Model.CreateInvoiceInput.Currency, Label = "Para birimi", ControlId = "faturaCreateCurrency" })' />
+                    </div>
+
+                    @* Tutarlar *@
+                    <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4 min-w-0">
+                        <div class="min-w-0">
+                            <label asp-for="CreateInvoiceInput.AmountNet" class="block text-sm font-medium text-gray-700 mb-2">
+                                Matrah (KDV hariç) <span class="text-red-500">*</span>
+                            </label>
+                            <input asp-for="CreateInvoiceInput.AmountNet" id="fAmountNet" placeholder="0,00" autocomplete="off"
+                                   class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                            <span asp-validation-for="CreateInvoiceInput.AmountNet" class="text-red-600 text-sm mt-1 block"></span>
+                        </div>
+                        <div class="min-w-0">
+                            <label asp-for="CreateInvoiceInput.AmountVat" class="block text-sm font-medium text-gray-700 mb-2">KDV tutarı</label>
+                            <input asp-for="CreateInvoiceInput.AmountVat" id="fAmountVat" placeholder="0,00" autocomplete="off"
+                                   class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                            <div class="flex gap-1 mt-1.5 flex-wrap">
+                                <button type="button" class="kdv-rate-btn text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" data-rate="0">%0</button>
+                                <button type="button" class="kdv-rate-btn text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" data-rate="1">%1</button>
+                                <button type="button" class="kdv-rate-btn text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" data-rate="10">%10</button>
+                                <button type="button" class="kdv-rate-btn text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" data-rate="20">%20</button>
+                            </div>
+                            <span asp-validation-for="CreateInvoiceInput.AmountVat" class="text-red-600 text-sm mt-1 block"></span>
+                        </div>
+                        <div class="min-w-0">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Brüt tutar</label>
+                            <input type="text" id="fAmountGross" placeholder="0,00" autocomplete="off" readonly tabindex="-1"
+                                   class="w-full min-w-0 px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 font-semibold cursor-default" />
+                            <p class="text-xs text-gray-500 mt-1">Otomatik: Matrah + KDV</p>
+                        </div>
+                    </div>
+
+                    @* Notlar *@
+                    <div class="sm:col-span-2 min-w-0">
+                        <label asp-for="CreateInvoiceInput.Notes" class="block text-sm font-medium text-gray-700 mb-2">Notlar</label>
+                        <textarea asp-for="CreateInvoiceInput.Notes" id="fNotes" rows="2"
+                                  class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200"></textarea>
+                    </div>
+
+                    @* Form butonları *@
+                    <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-3 mt-1 border-t border-gray-200">
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md"
+                                data-loading-text="Kaydediliyor...">Kaydet</button>
+                        <button type="button" id="btnBackToPdf"
+                                class="inline-flex items-center gap-1.5 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                            Geri
+                        </button>
+                        <button type="button" id="faturaCreateCancel"
+                                class="inline-flex items-center px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200">İptal</button>
+                    </div>
+                </form>
+            </div>
+
         </div>
     </div>
 </div>
@@ -162,33 +349,309 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        (function () {
-            var modal = document.getElementById('faturaCreateModal');
-            if (!modal) return;
-            function openModal() {
-                modal.classList.remove('hidden');
-                modal.setAttribute('aria-hidden', 'false');
-                document.body.classList.add('overflow-hidden');
-                var first = modal.querySelector('#formFaturaCreate input:not([type=hidden]), #formFaturaCreate select, #formFaturaCreate textarea');
-                if (first) first.focus();
+    (function () {
+        'use strict';
+
+        /* ════════════════════════════════════════════════════════════
+           Validation summary: hata yoksa gizle
+        ════════════════════════════════════════════════════════════ */
+        var valSummary = document.getElementById('faturaValidationSummary');
+        if (valSummary) {
+            var ul = valSummary.querySelector('ul');
+            var hasErrors = ul && ul.children.length > 0 && ul.textContent.trim().length > 0;
+            valSummary.classList.toggle('hidden', !hasErrors);
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           Modal aç / kapat (animated)
+        ════════════════════════════════════════════════════════════ */
+        var modal        = document.getElementById('faturaCreateModal');
+        var backdrop     = document.getElementById('faturaCreateBackdrop');
+        var modalContent = document.getElementById('faturaModalContent');
+        var panelUpload  = document.getElementById('panelUpload');
+        var panelForm    = document.getElementById('panelForm');
+        var subtitle     = document.getElementById('faturaModalSubtitle');
+        if (!modal) return;
+
+        var isPdfMode = false;
+
+        function openModal(startAtForm) {
+            modal.classList.remove('invisible');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('overflow-hidden');
+            requestAnimationFrame(function () {
+                modal.classList.remove('opacity-0');
+                modal.classList.add('opacity-100');
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                modalContent.classList.remove('scale-95', 'opacity-0', 'translate-y-4');
+                modalContent.classList.add('scale-100', 'opacity-100', 'translate-y-0');
+            });
+            if (startAtForm) {
+                showForm(false);
+            } else {
+                showUpload();
             }
-            function closeModal() {
-                modal.classList.add('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100', 'opacity-100', 'translate-y-0');
+            modalContent.classList.add('scale-95', 'opacity-0', 'translate-y-4');
+            setTimeout(function () {
+                modal.classList.add('invisible');
                 modal.setAttribute('aria-hidden', 'true');
                 document.body.classList.remove('overflow-hidden');
-            }
-            document.getElementById('btnFaturaCreateOpen')?.addEventListener('click', openModal);
-            document.getElementById('btnFaturaCreateOpenEmpty')?.addEventListener('click', openModal);
-            document.getElementById('faturaCreateClose')?.addEventListener('click', closeModal);
-            document.getElementById('faturaCreateCancel')?.addEventListener('click', closeModal);
-            document.getElementById('faturaCreateBackdrop')?.addEventListener('click', closeModal);
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+            }, 300);
+        }
+
+        function showUpload() {
+            panelUpload.classList.remove('hidden');
+            panelForm.classList.add('hidden');
+            subtitle.textContent = 'PDF faturayı yükleyin; bilgiler otomatik doldurulur.';
+        }
+
+        function showForm(pdfMode) {
+            isPdfMode = pdfMode;
+            panelUpload.classList.add('hidden');
+            panelForm.classList.remove('hidden');
+            subtitle.textContent = pdfMode
+                ? 'PDF\'den çıkarılan bilgileri gözden geçirin ve kaydedin.'
+                : 'Fatura bilgilerini manuel girin.';
+
+            // PDF modunda: cari kartı göster, manual select gizle
+            document.getElementById('cariInfoCard').classList.toggle('hidden', !pdfMode);
+            document.getElementById('fManualCariGroup').classList.toggle('hidden', pdfMode);
+        }
+
+        document.getElementById('btnFaturaCreateOpen')?.addEventListener('click', function () { openModal(false); });
+        document.getElementById('btnFaturaCreateOpenEmpty')?.addEventListener('click', function () { openModal(false); });
+        document.getElementById('faturaCreateClose')?.addEventListener('click', closeModal);
+        document.getElementById('faturaCreateBackdrop')?.addEventListener('click', closeModal);
+        document.getElementById('faturaUploadCancel')?.addEventListener('click', closeModal);
+        document.getElementById('faturaCreateCancel')?.addEventListener('click', closeModal);
+
+        document.getElementById('btnBackToPdf')?.addEventListener('click', showUpload);
+        document.getElementById('btnManualMode')?.addEventListener('click', function () { showForm(false); });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !modal.classList.contains('invisible')) closeModal();
+        });
+
+        @if (Model.OpenCreateModal)
+        {
+            <text>openModal(true);</text>
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           Manuel mod: cari select → hidden input senkronu
+        ════════════════════════════════════════════════════════════ */
+        var manualCariSel = document.getElementById('fManualCariSelect');
+        var hiddenCariId  = document.getElementById('fCounterpartyId');
+        if (manualCariSel && hiddenCariId) {
+            manualCariSel.addEventListener('change', function () {
+                hiddenCariId.value = this.value;
             });
-            @if (Model.OpenCreateModal)
-            {
-                <text>openModal();</text>
+            // İlk seçimi de aktar
+            if (manualCariSel.options.length > 1) {
+                hiddenCariId.value = manualCariSel.options[1]?.value ?? '0';
+                manualCariSel.selectedIndex = 1;
             }
-        })();
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           Dosya seçimi / drag-drop
+        ════════════════════════════════════════════════════════════ */
+        var fileInput        = document.getElementById('pdfFileInput');
+        var dropZone         = document.getElementById('pdfDropZone');
+        var dropContent      = document.getElementById('pdfDropContent');
+        var fileSelected     = document.getElementById('pdfFileSelected');
+        var fileNameDisplay  = document.getElementById('pdfFileNameDisplay');
+        var fileSizeDisplay  = document.getElementById('pdfFileSizeDisplay');
+
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function updateFileUI(file) {
+            if (!file) return;
+            dropContent.classList.add('hidden');
+            fileSelected.classList.remove('hidden');
+            fileNameDisplay.textContent = file.name;
+            fileSizeDisplay.textContent = formatBytes(file.size);
+            dropZone.classList.add('border-green-400', 'bg-green-50');
+            dropZone.classList.remove('border-gray-300');
+        }
+
+        fileInput?.addEventListener('change', function () {
+            if (this.files && this.files[0]) updateFileUI(this.files[0]);
+        });
+
+        dropZone?.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('border-gray-500', 'bg-gray-50');
+        });
+        dropZone?.addEventListener('dragleave', function () {
+            this.classList.remove('border-gray-500', 'bg-gray-50');
+        });
+        dropZone?.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('border-gray-500', 'bg-gray-50');
+            var file = e.dataTransfer?.files[0];
+            if (file && file.name.toLowerCase().endsWith('.pdf')) {
+                // Assign to file input
+                var dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+                updateFileUI(file);
+            }
+        });
+
+        /* ════════════════════════════════════════════════════════════
+           PDF Analiz (AJAX)
+        ════════════════════════════════════════════════════════════ */
+        var btnExtract    = document.getElementById('btnExtractPdf');
+        var btnExtractTxt = document.getElementById('btnExtractText');
+        var extractIcon   = document.getElementById('btnExtractIcon');
+        var extractSpin   = document.getElementById('btnExtractSpinner');
+        var extractTxt    = document.getElementById('btnExtractText');
+        var errorDiv      = document.getElementById('pdfExtractError');
+
+        function setExtracting(busy) {
+            btnExtract.disabled = busy;
+            extractIcon.classList.toggle('hidden', busy);
+            extractSpin.classList.toggle('hidden', !busy);
+            document.getElementById('btnExtractText').textContent = busy ? 'Okunuyor…' : 'PDF\'den Oku';
+        }
+
+        function showError(msg) {
+            errorDiv.textContent = msg;
+            errorDiv.classList.remove('hidden');
+        }
+        function clearError() { errorDiv.classList.add('hidden'); }
+
+        btnExtract?.addEventListener('click', async function () {
+            clearError();
+            var file = fileInput?.files?.[0];
+            if (!file) { showError('Lütfen bir PDF dosyası seçin.'); return; }
+
+            var direction = document.getElementById('pdfDirectionSelect')?.value;
+            var currency  = document.getElementById('pdfCurrencySelect')?.value;
+
+            // Anti-forgery token
+            var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            var fd = new FormData();
+            fd.append('pdfFile', file);
+            fd.append('direction', direction);
+            if (token) fd.append('__RequestVerificationToken', token);
+
+            setExtracting(true);
+            var data;
+            try {
+                var resp = await fetch('?handler=ExtractPdf', { method: 'POST', body: fd });
+                data = await resp.json();
+            } catch (err) {
+                setExtracting(false);
+                showError('Sunucuya bağlanılamadı. Lütfen tekrar deneyin.');
+                return;
+            }
+            setExtracting(false);
+
+            if (!data.success) {
+                showError(data.error ?? 'PDF okunamadı.');
+                return;
+            }
+
+            // ── Cari kartını doldur ──────────────────────────────────
+            document.getElementById('fCounterpartyId').value = data.counterpartyId ?? 0;
+            document.getElementById('cariCardName').textContent      = data.counterpartyName  || '—';
+            document.getElementById('cariCardTaxId').textContent     = data.counterpartyTaxId ? 'VKN/TCKN: ' + data.counterpartyTaxId : '';
+            document.getElementById('cariCardTaxOffice').textContent = data.counterpartyTaxOffice || '';
+            document.getElementById('cariCardNewBadge').classList.toggle('hidden', !data.counterpartyIsNew);
+            document.getElementById('cariCardFoundBadge').classList.toggle('hidden', data.counterpartyIsNew || !data.counterpartyId);
+
+            // ── Form alanlarını doldur ───────────────────────────────
+            // Yön
+            var dirSelect = document.getElementById('fDirection');
+            var dirValue  = direction === 'Incoming' ? '@((int)InvoiceDirection.Incoming)' : '@((int)InvoiceDirection.Outgoing)';
+            if (dirSelect) dirSelect.value = dirValue;
+
+            // Para birimi (partial'ın select'i)
+            var currSelect = document.getElementById('faturaCreateCurrency');
+            if (currSelect && currency) currSelect.value = currency;
+
+            // Fatura no
+            var elNo = document.getElementById('fInvoiceNo');
+            if (elNo) elNo.value = data.invoiceNo || '';
+
+            // Tarih
+            var elDate = document.getElementById('fIssueDate');
+            if (elDate && data.issueDate) elDate.value = data.issueDate;
+
+            // Tutarlar (Invariant F2 → Türkçe formata çevir)
+            function toTr(s) {
+                var n = parseFloat(s);
+                return isNaN(n) ? '' : n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            var elNet   = document.getElementById('fAmountNet');
+            var elVat   = document.getElementById('fAmountVat');
+            var elGross = document.getElementById('fAmountGross');
+            if (elNet)   elNet.value   = toTr(data.amountNet);
+            if (elVat)   elVat.value   = toTr(data.amountVat);
+            if (elGross) elGross.value = toTr(data.amountGross);
+
+            // Formu göster (PDF modu)
+            showForm(true);
+        });
+
+        /* ════════════════════════════════════════════════════════════
+           Tutar otomatik hesaplama
+        ════════════════════════════════════════════════════════════ */
+        var elNet   = document.getElementById('fAmountNet');
+        var elVat   = document.getElementById('fAmountVat');
+        var elGross = document.getElementById('fAmountGross');
+
+        function parseTr(s) {
+            var v = parseFloat(String(s).replace(/\./g, '').replace(',', '.'));
+            return isNaN(v) ? 0 : v;
+        }
+        function formatTr(n) {
+            return Number(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        function recalc() {
+            if (!elNet || !elVat || !elGross) return;
+            elGross.value = formatTr(Math.round((parseTr(elNet.value) + parseTr(elVat.value)) * 100) / 100);
+        }
+
+        elNet?.addEventListener('input',  recalc);
+        elNet?.addEventListener('change', recalc);
+        elVat?.addEventListener('input',  recalc);
+        elVat?.addEventListener('change', recalc);
+
+        document.querySelectorAll('.kdv-rate-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var rate = parseFloat(this.dataset.rate) / 100;
+                if (elNet && elVat) {
+                    elVat.value = formatTr(Math.round(parseTr(elNet.value) * rate * 100) / 100);
+                    recalc();
+                }
+                document.querySelectorAll('.kdv-rate-btn').forEach(function (b) {
+                    b.classList.remove('bg-gray-800', 'text-white');
+                    b.classList.add('bg-gray-100', 'text-gray-700');
+                });
+                this.classList.remove('bg-gray-100', 'text-gray-700');
+                this.classList.add('bg-gray-800', 'text-white');
+            });
+        });
+
+        recalc();
+
+    })();
     </script>
 }

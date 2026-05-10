@@ -70,6 +70,18 @@ public class CounterpartyRepository(DapperContext context)
         }, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
+    public async Task<Counterparty?> GetByTaxIdAsync(string taxId, int companyId, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            SELECT Id, CompanyId, Name, CounterpartyType, TaxId, Email, Phone, Notes, IsActive, CreatedAt, UpdatedAt
+            FROM Counterparties
+            WHERE CompanyId = @CompanyId AND TaxId = @TaxId
+            """;
+        using var connection = context.CreateConnection();
+        return await connection.QueryFirstOrDefaultAsync<Counterparty>(
+            new CommandDefinition(sql, new { CompanyId = companyId, TaxId = taxId }, cancellationToken: cancellationToken)).ConfigureAwait(false);
+    }
+
     public async Task<int> CountByCompanyAsync(int companyId, CancellationToken cancellationToken = default)
     {
         const string sql = "SELECT COUNT(1) FROM Counterparties WHERE CompanyId = @CompanyId AND IsActive = 1";

@@ -96,7 +96,7 @@
                     </button>
                 </div>
                 <form method="post" asp-page="/Muhasebe/Cariler/Detay" asp-route-id="@Model.Counterparty.Id" asp-page-handler="Odeme" id="formOdeme" class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
-                    <div asp-validation-summary="ModelOnly" class="sm:col-span-2 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3"></div>
+                    <div asp-validation-summary="All" class="sm:col-span-2 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3"></div>
                     <div class="min-w-0">
                         <label asp-for="Odeme.MovementDate" class="block text-sm font-medium text-gray-700 mb-2">Tarih</label>
                         <input asp-for="Odeme.MovementDate" type="date" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
@@ -108,16 +108,21 @@
                             <option value="tahsilat">Tahsilat</option>
                             <option value="odeme">Ödeme</option>
                         </select>
+                        <span asp-validation-for="Odeme.Kind" class="text-red-600 text-sm mt-1 block"></span>
                     </div>
                     <div class="min-w-0">
                         <label asp-for="Odeme.Amount" class="block text-sm font-medium text-gray-700 mb-2">Tutar</label>
-                        <input asp-for="Odeme.Amount" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <input asp-for="Odeme.Amount" placeholder="0,00" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
                         <span asp-validation-for="Odeme.Amount" class="text-red-600 text-sm mt-1 block"></span>
                     </div>
-                    <partial name="_MuhasebeIsoCurrencySelect" model='@(new IsoCurrencySelectViewModel { FieldName = "Odeme.Currency", Selected = Model.Odeme.Currency, Label = "Para birimi", ControlId = "odemeCurrency", ShowHint = true })' />
+                    <div class="min-w-0">
+                        <partial name="_MuhasebeIsoCurrencySelect" model='@(new IsoCurrencySelectViewModel { FieldName = "Odeme.Currency", Selected = Model.Odeme.Currency, Label = "Para birimi", ControlId = "odemeCurrency", ShowHint = true })' />
+                        <span asp-validation-for="Odeme.Currency" class="text-red-600 text-sm mt-1 block"></span>
+                    </div>
                     <div class="sm:col-span-2 min-w-0">
                         <label asp-for="Odeme.Description" class="block text-sm font-medium text-gray-700 mb-2">Açıklama (isteğe bağlı)</label>
                         <input asp-for="Odeme.Description" class="w-full min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-transparent transition-all duration-200" />
+                        <span asp-validation-for="Odeme.Description" class="text-red-600 text-sm mt-1 block"></span>
                     </div>
                     <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-3 mt-1 border-t border-gray-200">
                         <button type="submit" class="inline-flex items-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors duration-200 shadow-md" data-loading-text="Kaydediliyor...">
@@ -133,6 +138,7 @@
 }
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
         (function () {
             var modal = document.getElementById('odemeModal');

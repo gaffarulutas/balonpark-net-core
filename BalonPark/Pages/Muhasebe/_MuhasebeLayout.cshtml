@@ -1,6 +1,5 @@
-@using BalonPark.Models.Accounting
 @{
-    var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
+    var settings = ViewData["SiteSettings"] as Settings;
     var companyName = settings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
     var accCompanies = ViewData["AccountingCompanies"] as IReadOnlyList<AccountingCompany> ?? Array.Empty<AccountingCompany>();
     var selectedAccId = ViewData["SelectedAccountingCompanyId"] as int?;
@@ -276,6 +275,12 @@
             });
             $('form').on('submit', function () {
                 var $form = $(this);
+                // jQuery Validation bu handler'dan sonra bağlanır; geçersiz gönderimde
+                // showLoading çağrılırsa overlay açılı kalır (sayfa gitmez).
+                var validator = $form.data('validator');
+                if (validator && !$form.valid()) {
+                    return true;
+                }
                 var $submitBtn = $form.find('button[type="submit"]').first();
                 var loadingText = $submitBtn.data('loading-text') || 'Kaydediliyor...';
                 showLoading(loadingText);
@@ -341,5 +346,38 @@
     </script>
     @await RenderSectionAsync("Styles", required: false)
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // tr-TR sayı formatı: "28.000,00" şeklindeki girişleri jQuery Validate'in sayı olarak kabul etmesi.
+        // Sayfaya özgü _ValidationScriptsPartial'dan SONRA çalışması için RenderSection'dan sonra eklendi.
+        (function () {
+            function applyTrValidators() {
+                if (typeof jQuery === 'undefined' || !jQuery.validator) return;
+                // tr-TR: binlik ayırıcı = nokta, ondalık = virgül  (ör. 28.000,00 → 28000.00)
+                function parseTr(value) {
+                    return parseFloat(String(value).replace(/\./g, '').replace(',', '.'));
+                }
+                jQuery.validator.methods.number = function (value, element) {
+                    if (this.optional(element)) return true;
+                    var v = parseTr(value);
+                    return !isNaN(v) && isFinite(v);
+                };
+                jQuery.validator.methods.range = function (value, element, param) {
+                    if (this.optional(element)) return true;
+                    var v = parseTr(value);
+                    return v >= param[0] && v <= param[1];
+                };
+                // "must be a number" mesajını Türkçeleştir
+                jQuery.extend(jQuery.validator.messages, {
+                    number: 'Lütfen geçerli bir sayı girin (örn. 28.000,00).',
+                    range: jQuery.validator.format('{0} ile {1} arasında bir değer girin.')
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', applyTrValidators);
+            } else {
+                applyTrValidators();
+            }
+        })();
+    </script>
 </body>
 </html>
