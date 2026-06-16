@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using BalonPark.Data;
+using BalonPark.Helpers;
 using BalonPark.Models;
 using BalonPark.Services;
 
@@ -35,7 +36,7 @@ namespace BalonPark.Pages
                 Query = queryParam.Trim();
             }
 
-            if (!string.IsNullOrEmpty(Query) && Query.Length >= 2)
+            if (ProductCodeHelper.IsSearchableQuery(Query))
             {
                 var searchResults = (await _productRepository.SearchAsync(Query, 10)).ToList();
                 var tryToRub = await _yandexExchangeRateService.GetTryToRubRateAsync();

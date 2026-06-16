@@ -3,8 +3,10 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.draw;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using BalonPark.Data;
 using BalonPark.Models;
 
@@ -149,7 +151,9 @@ public class PdfService(
                     var added = false;
                     if (rawBytes != null && rawBytes.Length > 0)
                     {
-                        var squareBytes = CropImageToCenterSquare(rawBytes) ?? rawBytes;
+                        var squareBytes = CropImageToCenterSquare(rawBytes)
+                            ?? ConvertImageToJpeg(rawBytes)
+                            ?? rawBytes;
                         try
                         {
                             var img = iTextSharp.text.Image.GetInstance(squareBytes);
@@ -261,32 +265,26 @@ public class PdfService(
                 HorizontalAlignment = Element.ALIGN_CENTER,
                 BackgroundColor = BaseColor.WHITE
             };
-            string? imagePath = ResolveImagePath(webRoot, mainImage?.LargePath, mainImage?.ThumbnailPath);
             var mainImageAdded = false;
+            byte[]? mainRawBytes = null;
+            var imagePath = ResolveImagePath(webRoot, mainImage?.LargePath, mainImage?.ThumbnailPath);
             if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+                mainRawBytes = await File.ReadAllBytesAsync(imagePath).ConfigureAwait(false);
+            if (mainRawBytes == null || mainRawBytes.Length == 0)
             {
+                var imageUrl = urlService.GetImageUrl(mainImage?.LargePath ?? mainImage?.ThumbnailPath ?? "");
+                mainRawBytes = await FetchImageBytesFromUrlAsync(imageUrl).ConfigureAwait(false);
+            }
+            if (mainRawBytes != null && mainRawBytes.Length > 0)
+            {
+                var pdfReadyBytes = ConvertImageToJpeg(mainRawBytes) ?? mainRawBytes;
                 try
                 {
-                    var img = iTextSharp.text.Image.GetInstance(imagePath);
+                    var img = iTextSharp.text.Image.GetInstance(pdfReadyBytes);
                     AddScaledImageToCell(imgCell, img, MainImageMaxWidthPt, MainImageMaxHeightPt, fixedCellHeightPt: null);
                     mainImageAdded = true;
                 }
-                catch { /* fallback to URL or placeholder */ }
-            }
-            if (!mainImageAdded)
-            {
-                var imageUrl = urlService.GetImageUrl(mainImage?.LargePath ?? mainImage?.ThumbnailPath ?? "");
-                var imageBytes = await FetchImageBytesFromUrlAsync(imageUrl).ConfigureAwait(false);
-                if (imageBytes != null && imageBytes.Length > 0)
-                {
-                    try
-                    {
-                        var img = iTextSharp.text.Image.GetInstance(imageBytes);
-                        AddScaledImageToCell(imgCell, img, MainImageMaxWidthPt, MainImageMaxHeightPt, fixedCellHeightPt: null);
-                        mainImageAdded = true;
-                    }
-                    catch { /* placeholder below */ }
-                }
+                catch { /* placeholder below */ }
             }
             if (!mainImageAdded) AddPlaceholderImage(imgCell);
             topTable.AddCell(imgCell);
@@ -394,7 +392,9 @@ public class PdfService(
                     }
                     if (rawBytes != null && rawBytes.Length > 0)
                     {
-                        var squareBytes = CropImageToCenterSquare(rawBytes) ?? rawBytes;
+                        var squareBytes = CropImageToCenterSquare(rawBytes)
+                            ?? ConvertImageToJpeg(rawBytes)
+                            ?? rawBytes;
                         try
                         {
                             var im = iTextSharp.text.Image.GetInstance(squareBytes);
@@ -487,7 +487,7 @@ public class PdfService(
                 else if (!string.IsNullOrEmpty(product.DeliveryDays))
                     document.Add(new Paragraph($"Teslimat: {product.DeliveryDays}", cellFont) { SpacingAfter = 1 });
                 if (!string.IsNullOrEmpty(product.ColorOptions))
-                    document.Add(new Paragraph($"Renk seçenekleri: {product.ColorOptions}", cellFont) { SpacingAfter = 1 });
+                    AddColorOptionsToDocument(document, product.ColorOptions, labelFont, cellFont);
             }
             document.Add(new Paragraph(" ", cellFont) { SpacingAfter = 4 });
             var linkChunk = new Chunk("Ürün sayfası: " + productUrl, GetTurkishFont(8, Font.UNDERLINE, BaseColor.BLUE));
@@ -557,6 +557,24 @@ public class PdfService(
     }
 
     /// <summary>
+    /// WebP vb. formatları iTextSharp'ın desteklediği JPEG'e dönüştürür.
+    /// </summary>
+    private static byte[]? ConvertImageToJpeg(byte[] imageBytes)
+    {
+        try
+        {
+            using var image = SixLabors.ImageSharp.Image.Load(imageBytes);
+            using var ms = new MemoryStream();
+            image.SaveAsJpeg(ms);
+            return ms.ToArray();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Resmi merkezden kare kırpar; PDF'te kare görünüm için kullanılır.
     /// </summary>
     private static byte[]? CropImageToCenterSquare(byte[] imageBytes)
@@ -618,6 +636,125 @@ public class PdfService(
             logger.LogWarning(ex, "Resim URL'den indirilemedi: {Url}", url);
             return null;
         }
+    }
+
+    private static readonly Dictionary<string, string> KnownColorHex = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Kırmızı"] = "#dc2626",
+        ["Mavi"] = "#2563eb",
+        ["Yeşil"] = "#16a34a",
+        ["Sarı"] = "#eab308",
+        ["Turuncu"] = "#ea580c",
+        ["Mor"] = "#9333ea",
+        ["Pembe"] = "#db2777",
+        ["Beyaz"] = "#ffffff",
+        ["Siyah"] = "#171717",
+        ["Gri"] = "#6b7280",
+        ["Lacivert"] = "#1e3a5f",
+        ["Turkuaz"] = "#0d9488",
+        ["Açık Mavi"] = "#0ea5e9",
+        ["Amber"] = "#f59e0b",
+        ["Kahverengi"] = "#92400e",
+        ["Bordo"] = "#991b1b"
+    };
+
+    private static List<(string Name, string? Hex)> ParseColorOptions(string colorOptionsRaw)
+    {
+        var items = new List<(string Name, string? Hex)>();
+        if (string.IsNullOrWhiteSpace(colorOptionsRaw))
+            return items;
+
+        foreach (var part in colorOptionsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var trim = part.Trim();
+            var hexMatch = Regex.Match(trim, @"^(.+?)\s*\(#?([0-9A-Fa-f]{6})\)\s*$");
+            if (hexMatch.Success)
+                items.Add((hexMatch.Groups[1].Value.Trim(), "#" + hexMatch.Groups[2].Value.TrimStart('#')));
+            else if (Regex.IsMatch(trim, @"^#?[0-9A-Fa-f]{6}$"))
+                items.Add((trim.TrimStart('#'), "#" + trim.TrimStart('#')));
+            else if (!string.IsNullOrEmpty(trim))
+                items.Add((trim, KnownColorHex.GetValueOrDefault(trim)));
+        }
+
+        return items;
+    }
+
+    private static void AddColorOptionsToDocument(Document document, string colorOptionsRaw, Font labelFont, Font cellFont)
+    {
+        var items = ParseColorOptions(colorOptionsRaw);
+        if (items.Count == 0)
+        {
+            document.Add(new Paragraph($"Renk seçenekleri: {colorOptionsRaw}", cellFont) { SpacingAfter = 1 });
+            return;
+        }
+
+        const float circleSizePt = 10f;
+        var row = new Paragraph { SpacingAfter = 2 };
+        row.Add(new Chunk("Renk seçenekleri: ", labelFont));
+
+        foreach (var item in items)
+        {
+            var circle = CreateColorCirclePdfImage(item.Hex ?? KnownColorHex.GetValueOrDefault(item.Name), circleSizePt);
+            circle.Alt = item.Name;
+            row.Add(new Chunk(circle, 0, -2f));
+            row.Add(new Chunk(" ", cellFont));
+        }
+
+        document.Add(row);
+    }
+
+    private static iTextSharp.text.Image CreateColorCirclePdfImage(string? hex, float sizePt)
+    {
+        const int px = 32;
+        using var image = new Image<Rgba32>(px, px);
+        var center = px / 2f;
+        var radius = px / 2f - 1.5f;
+        var fill = ResolveSwatchColor(hex);
+        var border = new Rgba32(209, 213, 219, 255);
+
+        for (var y = 0; y < px; y++)
+        {
+            for (var x = 0; x < px; x++)
+            {
+                var dx = x - center + 0.5f;
+                var dy = y - center + 0.5f;
+                var distSq = dx * dx + dy * dy;
+                if (distSq <= radius * radius)
+                    image[x, y] = fill;
+                else if (distSq <= (radius + 1.2f) * (radius + 1.2f))
+                    image[x, y] = border;
+            }
+        }
+
+        using var ms = new MemoryStream();
+        image.SaveAsPng(ms);
+        var pdfImage = iTextSharp.text.Image.GetInstance(ms.ToArray());
+        pdfImage.ScaleToFit(sizePt, sizePt);
+        return pdfImage;
+    }
+
+    private static Rgba32 ResolveSwatchColor(string? hex)
+    {
+        if (TryParseHexColor(hex, out var r, out var g, out var b))
+            return new Rgba32(r, g, b, 255);
+
+        return new Rgba32(229, 231, 235, 255);
+    }
+
+    private static bool TryParseHexColor(string? hex, out byte r, out byte g, out byte b)
+    {
+        r = g = b = 0;
+        if (string.IsNullOrWhiteSpace(hex))
+            return false;
+
+        var normalized = hex.Trim().TrimStart('#');
+        if (normalized.Length != 6 || !int.TryParse(normalized, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgb))
+            return false;
+
+        r = (byte)((rgb >> 16) & 0xFF);
+        g = (byte)((rgb >> 8) & 0xFF);
+        b = (byte)(rgb & 0xFF);
+        return true;
     }
 
     private static string StripHtml(string html)
@@ -1024,7 +1161,9 @@ public class PdfService(
                         rawBytes = await FetchImageBytesFromUrlAsync(product.ImageUrl).ConfigureAwait(false);
                     if (rawBytes != null && rawBytes.Length > 0)
                     {
-                        var squareBytes = CropImageToCenterSquare(rawBytes) ?? rawBytes;
+                        var squareBytes = CropImageToCenterSquare(rawBytes)
+                            ?? ConvertImageToJpeg(rawBytes)
+                            ?? rawBytes;
                         try
                         {
                             var image = iTextSharp.text.Image.GetInstance(squareBytes);

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BalonPark.Data;
+using BalonPark.Helpers;
 using BalonPark.Services;
 
 namespace BalonPark.Controllers
@@ -35,7 +36,8 @@ namespace BalonPark.Controllers
                 image = urlService.GetImageUrl("/assets/images/no-image.png"), // Default image
                 price = $"₺{p.Price:N2}",
                 category = p.CategoryName,
-                subcategory = p.SubCategoryName
+                subcategory = p.SubCategoryName,
+                productCode = ProductCodeHelper.Format(p.Id)
             }).ToList();
 
             return Ok(new { results });
@@ -128,6 +130,7 @@ namespace BalonPark.Controllers
                     price = $"₺{product.Price:N2}",
                     category = product.CategoryName,
                     subcategory = product.SubCategoryName,
+                    productCode = ProductCodeHelper.Format(product.Id),
                     type = "product"
                 });
             }

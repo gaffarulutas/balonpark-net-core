@@ -40,8 +40,15 @@
         }
     }
 
-    function getLimit() {
-        return window.innerWidth < 640 ? LIMIT_MOBILE : LIMIT_DESKTOP;
+    function isProductCodeOrId(q) {
+        if (!q) return false;
+        return /^\d+$/.test(q) || /^u-\d+$/i.test(q);
+    }
+
+    function isSearchableQuery(q) {
+        if (!q) return false;
+        q = q.trim();
+        return q.length >= 2 || isProductCodeOrId(q);
     }
 
     function getRecentSearches() {
@@ -189,7 +196,16 @@
                 a.appendChild(img);
             }
             var span = document.createElement('span');
-            span.textContent = r.title;
+            span.className = 'flex flex-col min-w-0';
+            var title = document.createElement('span');
+            title.textContent = r.title;
+            span.appendChild(title);
+            if (r.productCode) {
+                var code = document.createElement('span');
+                code.className = 'text-xs text-gray-400';
+                code.textContent = r.productCode;
+                span.appendChild(code);
+            }
             if (r.price) {
                 var price = document.createElement('span');
                 price.className = 'text-primary font-medium ml-auto';
@@ -221,7 +237,7 @@
     }
 
     function fetchSuggestions(q, cb) {
-        if (!q || q.length < 2) {
+        if (!isSearchableQuery(q)) {
             if (cb) cb([]);
             return;
         }

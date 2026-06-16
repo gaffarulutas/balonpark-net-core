@@ -167,6 +167,9 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
 
     public async Task<IEnumerable<Product>> SearchAsync(string query, int limit = 10)
     {
+        var trimmedQuery = query.Trim();
+        int? productId = ProductCodeHelper.TryParseProductId(trimmedQuery, out var parsedId) ? parsedId : null;
+
         var sql = @"
             SELECT TOP (@Limit) p.*, c.Name as CategoryName, c.Slug as CategorySlug,
                    sc.Name as SubCategoryName, sc.Slug as SubCategorySlug
@@ -177,9 +180,11 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
             AND (p.Name LIKE @SearchQuery 
                  OR p.Description LIKE @SearchQuery 
                  OR c.Name LIKE @SearchQuery 
-                 OR sc.Name LIKE @SearchQuery)
+                 OR sc.Name LIKE @SearchQuery
+                 OR (@ProductId IS NOT NULL AND p.Id = @ProductId))
             ORDER BY 
                 CASE 
+                    WHEN @ProductId IS NOT NULL AND p.Id = @ProductId THEN 0
                     WHEN p.Name LIKE @ExactQuery THEN 1
                     WHEN c.Name LIKE @ExactQuery THEN 2
                     WHEN sc.Name LIKE @ExactQuery THEN 3
@@ -188,11 +193,11 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
                 END,
                 p.CreatedAt DESC";
         
-        var searchQuery = $"%{query}%";
-        var exactQuery = $"{query}%";
+        var searchQuery = $"%{trimmedQuery}%";
+        var exactQuery = $"{trimmedQuery}%";
         
         using var connection = context.CreateConnection();
-        return await connection.QueryAsync<Product>(sql, new { SearchQuery = searchQuery, ExactQuery = exactQuery, Limit = limit });
+        return await connection.QueryAsync<Product>(sql, new { SearchQuery = searchQuery, ExactQuery = exactQuery, Limit = limit, ProductId = productId });
     }
 
     public async Task<int> CreateAsync(Product product)
