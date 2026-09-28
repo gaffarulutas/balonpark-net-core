@@ -120,7 +120,18 @@ public sealed class CatalogTranslationService(
         if (nonEmpty.Count == 0)
             return result;
 
-        var apiKey = await GetApiKeyAsync().ConfigureAwait(false);
+        string apiKey;
+        try
+        {
+            apiKey = await GetApiKeyAsync().ConfigureAwait(false);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Do not block catalog sync when AI key is missing/placeholder — ship source text.
+            logger.LogWarning(ex, "CatalogSync: translation skipped for {Entity}/{Locale} (API key unavailable)", entityKind, locale);
+            return result;
+        }
+
         var system = BuildSystemPrompt(locale);
         var user = $"Translate the following {entityKind} fields from Turkish. Return JSON with exactly the same keys.\n\n"
                    + JsonSerializer.Serialize(nonEmpty);
@@ -151,9 +162,12 @@ public sealed class CatalogTranslationService(
                 var raw = await resp.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 if (!resp.IsSuccessStatusCode)
                 {
-                    // Do not retry auth failures.
+                    // Do not retry auth failures — fall back to source text.
                     if ((int)resp.StatusCode is 401 or 403)
-                        throw new InvalidOperationException($"OpenAI HTTP {(int)resp.StatusCode}: invalid API key or forbidden.");
+                    {
+                        logger.LogWarning("CatalogSync: OpenAI auth failed for {Entity}/{Locale}; using source text", entityKind, locale);
+                        return result;
+                    }
                     throw new InvalidOperationException($"OpenAI HTTP {(int)resp.StatusCode}: {raw[..Math.Min(raw.Length, 400)]}");
                 }
 
@@ -177,8 +191,7 @@ public sealed class CatalogTranslationService(
                 }
                 return result;
             }
-            catch (Exception ex) when (ex is not OperationCanceledException
-                                       && ex.Message.Contains("invalid API key", StringComparison.OrdinalIgnoreCase) == false)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 last = ex;
                 logger.LogWarning(ex, "CatalogSync translation attempt {Attempt} failed for {Entity}", attempt, entityKind);
@@ -186,7 +199,8 @@ public sealed class CatalogTranslationService(
             }
         }
 
-        throw new InvalidOperationException($"CatalogSync translation failed for {entityKind}/{locale}", last);
+        logger.LogWarning(last, "CatalogSync: translation gave up for {Entity}/{Locale}; using source text", entityKind, locale);
+        return result;
     }
 
     private async Task<string> GetApiKeyAsync()
