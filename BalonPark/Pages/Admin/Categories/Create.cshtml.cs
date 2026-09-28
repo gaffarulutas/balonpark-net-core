@@ -3,6 +3,7 @@ using BalonPark.Data;
 using BalonPark.Models;
 using BalonPark.Helpers;
 using BalonPark.Services;
+using BalonPark.Services.CatalogSync;
 
 namespace BalonPark.Pages.Admin.Categories;
 
@@ -10,11 +11,13 @@ public class CreateModel : BaseAdminPage
 {
     private readonly CategoryRepository _categoryRepository;
     private readonly ICacheService _cacheService;
+    private readonly ICatalogSyncPublisher _catalogSync;
 
-    public CreateModel(CategoryRepository categoryRepository, ICacheService cacheService)
+    public CreateModel(CategoryRepository categoryRepository, ICacheService cacheService, ICatalogSyncPublisher catalogSync)
     {
         _categoryRepository = categoryRepository;
         _cacheService = cacheService;
+        _catalogSync = catalogSync;
     }
 
     [BindProperty]
@@ -32,16 +35,15 @@ public class CreateModel : BaseAdminPage
             return Page();
         }
 
-        // Slug'ı otomatik oluştur
         Category.Slug = SlugHelper.GenerateSlug(Category.Name);
         Category.CreatedAt = DateTime.Now;
-        await _categoryRepository.CreateAsync(Category);
+        var newId = await _categoryRepository.CreateAsync(Category);
+        Category.Id = newId;
 
-        // Cache'i temizle
         await _cacheService.InvalidateCategoriesAsync();
+        _catalogSync.PublishUpsert(CatalogSyncEntityType.Category, newId);
 
         TempData["SuccessMessage"] = "Kategori başarıyla eklendi!";
         return RedirectToPage("./Index");
     }
 }
-

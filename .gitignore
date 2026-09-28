@@ -441,6 +441,8 @@ BalonPark/wwwroot/uploads/
 .env
 .env.local
 .env.*.local
+.deploy.env
+.publish/
 
 # HTML Template (if you want to keep original separately)
 # html-template/

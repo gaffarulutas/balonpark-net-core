@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using BalonPark.Data;
 using BalonPark.Models;
 using BalonPark.Services;
+using BalonPark.Services.CatalogSync;
 
 namespace BalonPark.Pages.Admin.Products;
 
@@ -13,7 +14,8 @@ public class IndexModel(
     PdfService pdfService,
     ExcelService excelService,
     IUrlService urlService,
-    ICacheService cacheService)
+    ICacheService cacheService,
+    ICatalogSyncPublisher catalogSync)
     : BaseAdminPage
 {
     public List<Product> Products { get; set; } = [];
@@ -170,6 +172,7 @@ public class IndexModel(
                     await cacheService.InvalidateProductBySlugAsync(product.Slug);
                 }
             }
+            catalogSync.PublishDelete(CatalogSyncEntityType.Product, id);
             
             SuccessMessage = "Ürün başarıyla silindi!";
         }

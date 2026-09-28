@@ -3,6 +3,7 @@ using BalonPark.Data;
 using BalonPark.Models;
 using BalonPark.Helpers;
 using BalonPark.Services;
+using BalonPark.Services.CatalogSync;
 using Microsoft.Data.SqlClient;
 
 namespace BalonPark.Pages.Admin.Products;
@@ -16,6 +17,7 @@ public class EditModel : BaseAdminPage
     private readonly IWebHostEnvironment _environment;
     private readonly ICacheService _cacheService;
     private readonly IGeminiImageService _geminiImageService;
+    private readonly ICatalogSyncPublisher _catalogSync;
 
     public EditModel(
         ProductRepository productRepository,
@@ -24,7 +26,8 @@ public class EditModel : BaseAdminPage
         ProductImageRepository productImageRepository,
         IWebHostEnvironment environment,
         ICacheService cacheService,
-        IGeminiImageService geminiImageService)
+        IGeminiImageService geminiImageService,
+        ICatalogSyncPublisher catalogSync)
     {
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
@@ -33,6 +36,7 @@ public class EditModel : BaseAdminPage
         _environment = environment;
         _cacheService = cacheService;
         _geminiImageService = geminiImageService;
+        _catalogSync = catalogSync;
     }
 
     [BindProperty]
@@ -192,6 +196,7 @@ public class EditModel : BaseAdminPage
         await _cacheService.InvalidateProductsAsync();
         await _cacheService.InvalidateProductAsync(Product.Id);
         await _cacheService.InvalidateProductBySlugAsync(Product.Slug);
+        _catalogSync.PublishUpsert(CatalogSyncEntityType.Product, Product.Id);
 
         TempData["SuccessMessage"] = "Ürün başarıyla güncellendi!";
         return RedirectToPage("./Index");
@@ -211,9 +216,9 @@ public class EditModel : BaseAdminPage
             
             await _productImageRepository.DeleteAsync(imageId);
             
-            // Cache'i temizle
             await _cacheService.InvalidateProductsAsync();
             await _cacheService.InvalidateProductAsync(productId);
+            _catalogSync.PublishUpsert(CatalogSyncEntityType.Product, productId);
         }
 
         return RedirectToPage(new { id = productId });
@@ -227,9 +232,9 @@ public class EditModel : BaseAdminPage
             
             if (result > 0)
             {
-                // Cache'i temizle
                 await _cacheService.InvalidateProductsAsync();
                 await _cacheService.InvalidateProductAsync(productId);
+                _catalogSync.PublishUpsert(CatalogSyncEntityType.Product, productId);
                 
                 TempData["SuccessMessage"] = "Ana resim başarıyla güncellendi!";
             }

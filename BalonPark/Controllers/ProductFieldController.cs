@@ -4,6 +4,7 @@ using BalonPark.Attributes;
 using BalonPark.Data;
 using BalonPark.Helpers;
 using BalonPark.Models;
+using BalonPark.Services.CatalogSync;
 
 namespace BalonPark.Controllers;
 
@@ -16,10 +17,8 @@ namespace BalonPark.Controllers;
 public class ProductFieldController : ControllerBase
 {
     private readonly ProductRepository _productRepository;
+    private readonly ICatalogSyncPublisher _catalogSync;
 
-    /// <summary>
-    /// İzin verilen alan adları (over-posting güvenliği).
-    /// </summary>
     /// <summary>
     /// Admin panelindeki Ürün Düzenle ile aynı alanlar (CategoryId/SubCategoryId hariç; URL değişir).
     /// </summary>
@@ -36,9 +35,10 @@ public class ProductFieldController : ControllerBase
         "IsActive", "DisplayOrder"
     };
 
-    public ProductFieldController(ProductRepository productRepository)
+    public ProductFieldController(ProductRepository productRepository, ICatalogSyncPublisher catalogSync)
     {
         _productRepository = productRepository;
+        _catalogSync = catalogSync;
     }
 
     /// <summary>
@@ -75,6 +75,7 @@ public class ProductFieldController : ControllerBase
             }
 
             await _productRepository.UpdateAsync(product);
+            _catalogSync.PublishUpsert(CatalogSyncEntityType.Product, product.Id);
 
             // Slug değiştiyse (örn. Name güncellendi) yeni URL'ye yönlendirme bilgisi dön
             string? redirectPath = null;

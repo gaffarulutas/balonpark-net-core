@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using BalonPark.Data;
 using BalonPark.Models;
 using BalonPark.Services;
+using BalonPark.Services.CatalogSync;
 
 namespace BalonPark.Pages.Admin.Categories;
 
@@ -9,11 +10,13 @@ public class IndexModel : BaseAdminPage
 {
     private readonly CategoryRepository _categoryRepository;
     private readonly ICacheService _cacheService;
+    private readonly ICatalogSyncPublisher _catalogSync;
 
-    public IndexModel(CategoryRepository categoryRepository, ICacheService cacheService)
+    public IndexModel(CategoryRepository categoryRepository, ICacheService cacheService, ICatalogSyncPublisher catalogSync)
     {
         _categoryRepository = categoryRepository;
         _cacheService = cacheService;
+        _catalogSync = catalogSync;
     }
 
     public new List<Category> Categories { get; set; } = new();
@@ -33,13 +36,13 @@ public class IndexModel : BaseAdminPage
             var category = await _categoryRepository.GetByIdAsync(id);
             await _categoryRepository.DeleteAsync(id);
             
-            // Cache'i temizle
             await _cacheService.InvalidateCategoriesAsync();
             await _cacheService.InvalidateCategoryAsync(id);
             if (category != null)
             {
                 await _cacheService.InvalidateCategoryBySlugAsync(category.Slug);
             }
+            _catalogSync.PublishDelete(CatalogSyncEntityType.Category, id);
             
             SuccessMessage = "Kategori başarıyla silindi!";
         }
@@ -51,4 +54,3 @@ public class IndexModel : BaseAdminPage
         return RedirectToPage();
     }
 }
-

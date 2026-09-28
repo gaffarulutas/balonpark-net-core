@@ -3,6 +3,7 @@ using BalonPark.Data;
 using BalonPark.Models;
 using BalonPark.Helpers;
 using BalonPark.Services;
+using BalonPark.Services.CatalogSync;
 
 namespace BalonPark.Pages.Admin.Products;
 
@@ -21,6 +22,7 @@ public class CreateModel : BaseAdminPage
     private readonly IWebHostEnvironment _environment;
     private readonly IAiService _aiService;
     private readonly ICacheService _cacheService;
+    private readonly ICatalogSyncPublisher _catalogSync;
 
     public CreateModel(
         ProductRepository productRepository,
@@ -30,7 +32,8 @@ public class CreateModel : BaseAdminPage
         SettingsRepository settingsRepository,
         IWebHostEnvironment environment,
         IAiService aiService,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        ICatalogSyncPublisher catalogSync)
     {
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
@@ -40,6 +43,7 @@ public class CreateModel : BaseAdminPage
         _environment = environment;
         _aiService = aiService;
         _cacheService = cacheService;
+        _catalogSync = catalogSync;
     }
 
     [BindProperty]
@@ -165,6 +169,7 @@ public class CreateModel : BaseAdminPage
 
             // Cache'i temizle
             await _cacheService.InvalidateProductsAsync();
+            _catalogSync.PublishUpsert(CatalogSyncEntityType.Product, productId);
 
             TempData["SuccessMessage"] = "Ürün başarıyla eklendi!";
             return RedirectToPage("./Index");

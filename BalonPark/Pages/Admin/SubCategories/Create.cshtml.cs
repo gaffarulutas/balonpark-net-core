@@ -3,6 +3,7 @@ using BalonPark.Data;
 using BalonPark.Models;
 using BalonPark.Helpers;
 using BalonPark.Services;
+using BalonPark.Services.CatalogSync;
 
 namespace BalonPark.Pages.Admin.SubCategories;
 
@@ -11,12 +12,18 @@ public class CreateModel : BaseAdminPage
     private readonly SubCategoryRepository _subCategoryRepository;
     private readonly CategoryRepository _categoryRepository;
     private readonly ICacheService _cacheService;
+    private readonly ICatalogSyncPublisher _catalogSync;
 
-    public CreateModel(SubCategoryRepository subCategoryRepository, CategoryRepository categoryRepository, ICacheService cacheService)
+    public CreateModel(
+        SubCategoryRepository subCategoryRepository,
+        CategoryRepository categoryRepository,
+        ICacheService cacheService,
+        ICatalogSyncPublisher catalogSync)
     {
         _subCategoryRepository = subCategoryRepository;
         _categoryRepository = categoryRepository;
         _cacheService = cacheService;
+        _catalogSync = catalogSync;
     }
 
     [BindProperty]
@@ -45,16 +52,15 @@ public class CreateModel : BaseAdminPage
             return Page();
         }
 
-        // Slug'ı otomatik oluştur
         SubCategory.Slug = SlugHelper.GenerateSlug(SubCategory.Name);
         SubCategory.CreatedAt = DateTime.Now;
-        await _subCategoryRepository.CreateAsync(SubCategory);
+        var newId = await _subCategoryRepository.CreateAsync(SubCategory);
+        SubCategory.Id = newId;
 
-        // Cache'i temizle
         await _cacheService.InvalidateSubCategoriesAsync();
+        _catalogSync.PublishUpsert(CatalogSyncEntityType.SubCategory, newId);
 
         TempData["SuccessMessage"] = "Alt kategori başarıyla eklendi!";
         return RedirectToPage("./Index");
     }
 }
-

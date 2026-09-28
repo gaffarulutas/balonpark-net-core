@@ -2,6 +2,7 @@ using System.Diagnostics;
 using BalonPark.Data;
 using BalonPark.Services;
 using BalonPark.Services.Accounting;
+using BalonPark.Services.CatalogSync;
 using BalonPark.Pages.Admin;
 using BalonPark.Middleware;
 using Microsoft.Extensions.Options;
@@ -160,6 +161,20 @@ try
     builder.Services.AddHttpClient<GeminiImageService>();
     builder.Services.AddScoped<IGeminiImageService, GeminiImageService>();
 
+    // Catalog sync TR → GR/DE (background)
+    builder.Services.Configure<CatalogSyncOptions>(builder.Configuration.GetSection(CatalogSyncOptions.SectionName));
+    builder.Services.AddSingleton<ICatalogSyncQueue, CatalogSyncQueue>();
+    builder.Services.AddSingleton<ICatalogSyncPublisher, CatalogSyncPublisher>();
+    builder.Services.AddHttpClient(CatalogTranslationService.HttpClientName, client =>
+    {
+        client.Timeout = TimeSpan.FromMinutes(2);
+    });
+    builder.Services.AddScoped<ICatalogTranslationService, CatalogTranslationService>();
+    builder.Services.AddScoped<ITargetCatalogWriter, TargetCatalogWriter>();
+    builder.Services.AddScoped<ITargetUploadSync, TargetUploadSync>();
+    builder.Services.AddScoped<ICatalogSyncProcessor, CatalogSyncProcessor>();
+    builder.Services.AddHostedService<CatalogSyncHostedService>();
+
     var app = builder.Build();
 
     Log.Information("Ortam: {Environment}. Veritabanı migration'ları çalıştırılıyor…", app.Environment.EnvironmentName);
@@ -186,6 +201,30 @@ try
         BaseAdminPage.SetSettingsRepository(settingsRepository);
     }
     Log.Information("SettingsRepository yüklendi.");
+
+    // One-shot sync smoke: CATALOG_SYNC_SMOKE_ID=1 ASPNETCORE_ENVIRONMENT=Production dotnet run --no-launch-profile
+    if (int.TryParse(Environment.GetEnvironmentVariable("CATALOG_SYNC_SMOKE_ID"), out var smokeEntityId) && smokeEntityId > 0)
+    {
+        var smokeType = Environment.GetEnvironmentVariable("CATALOG_SYNC_SMOKE_TYPE") ?? "Category";
+        if (!Enum.TryParse<CatalogSyncEntityType>(smokeType, ignoreCase: true, out var entityType))
+            entityType = CatalogSyncEntityType.Category;
+
+        Log.Information("CatalogSync SMOKE starting: {Type} Id={Id}", entityType, smokeEntityId);
+        using (var smokeScope = app.Services.CreateScope())
+        {
+            var opts = smokeScope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<CatalogSyncOptions>>().Value;
+            Log.Information("CatalogSync Enabled={Enabled} Targets={Count}", opts.Enabled, opts.Targets.Count);
+            var processor = smokeScope.ServiceProvider.GetRequiredService<ICatalogSyncProcessor>();
+            await processor.ProcessAsync(new CatalogSyncJob
+            {
+                EntityType = entityType,
+                Operation = CatalogSyncOperation.Upsert,
+                EntityId = smokeEntityId
+            });
+        }
+        Log.Information("CatalogSync SMOKE finished.");
+        return;
+    }
 
     Log.Information("HTTP pipeline kuruluyor; Kestrel dinlemeye geçecek.");
 

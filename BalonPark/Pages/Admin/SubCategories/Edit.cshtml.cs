@@ -3,6 +3,7 @@ using BalonPark.Data;
 using BalonPark.Models;
 using BalonPark.Helpers;
 using BalonPark.Services;
+using BalonPark.Services.CatalogSync;
 
 namespace BalonPark.Pages.Admin.SubCategories;
 
@@ -11,12 +12,18 @@ public class EditModel : BaseAdminPage
     private readonly SubCategoryRepository _subCategoryRepository;
     private readonly CategoryRepository _categoryRepository;
     private readonly ICacheService _cacheService;
+    private readonly ICatalogSyncPublisher _catalogSync;
 
-    public EditModel(SubCategoryRepository subCategoryRepository, CategoryRepository categoryRepository, ICacheService cacheService)
+    public EditModel(
+        SubCategoryRepository subCategoryRepository,
+        CategoryRepository categoryRepository,
+        ICacheService cacheService,
+        ICatalogSyncPublisher catalogSync)
     {
         _subCategoryRepository = subCategoryRepository;
         _categoryRepository = categoryRepository;
         _cacheService = cacheService;
+        _catalogSync = catalogSync;
     }
 
     [BindProperty]
@@ -54,18 +61,16 @@ public class EditModel : BaseAdminPage
             return Page();
         }
 
-        // Slug'ı otomatik güncelle
         SubCategory.Slug = SlugHelper.GenerateSlug(SubCategory.Name);
         SubCategory.UpdatedAt = DateTime.Now;
         await _subCategoryRepository.UpdateAsync(SubCategory);
 
-        // Cache'i temizle
         await _cacheService.InvalidateSubCategoriesAsync();
         await _cacheService.InvalidateSubCategoryAsync(SubCategory.Id);
         await _cacheService.InvalidateSubCategoryBySlugAsync(SubCategory.Slug);
+        _catalogSync.PublishUpsert(CatalogSyncEntityType.SubCategory, SubCategory.Id);
 
         TempData["SuccessMessage"] = "Alt kategori başarıyla güncellendi!";
         return RedirectToPage("./Index");
     }
 }
-
