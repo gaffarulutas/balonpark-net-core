@@ -49,13 +49,22 @@ public class EditModel : BaseAdminPage
     public List<SubCategory> SubCategories { get; set; } = [];
     public List<ProductImage> ProductImages { get; set; } = [];
 
+    /// <summary>
+    /// Liste sayfasından gelen sayfa ve filtreler. Güncelleme sonrası aynı yere dönmek için kullanılır.
+    /// </summary>
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
+
+    public string ListReturnUrl => string.IsNullOrEmpty(ReturnUrl) ? AdminProductListUrl.IndexPath : ReturnUrl;
+
     public async Task<IActionResult> OnGetAsync(int id)
     {
+        NormalizeReturnUrl();
         var product = await _productRepository.GetByIdAsync(id);
         
         if (product == null)
         {
-            return RedirectToPage("./Index");
+            return RedirectToProductList();
         }
 
         Product = product;
@@ -74,6 +83,8 @@ public class EditModel : BaseAdminPage
 
     public async Task<IActionResult> OnPostAsync()
     {
+        NormalizeReturnUrl();
+
         if (Product.Id <= 0)
         {
             return NotFound();
@@ -199,7 +210,7 @@ public class EditModel : BaseAdminPage
         _catalogSync.PublishUpsert(CatalogSyncEntityType.Product, Product.Id);
 
         TempData["SuccessMessage"] = "Ürün başarıyla güncellendi!";
-        return RedirectToPage("./Index");
+        return RedirectToProductList();
     }
 
     public async Task<IActionResult> OnPostDeleteImageAsync(int imageId, int productId)
@@ -221,7 +232,8 @@ public class EditModel : BaseAdminPage
             _catalogSync.PublishUpsert(CatalogSyncEntityType.Product, productId);
         }
 
-        return RedirectToPage(new { id = productId });
+        NormalizeReturnUrl();
+        return RedirectToPage(new { id = productId, returnUrl = ReturnUrl });
     }
 
     public async Task<IActionResult> OnPostSetMainImageAsync(int imageId, int productId)
@@ -248,7 +260,8 @@ public class EditModel : BaseAdminPage
             TempData["ErrorMessage"] = $"Hata: {ex.Message}";
         }
         
-        return RedirectToPage(new { id = productId });
+        NormalizeReturnUrl();
+        return RedirectToPage(new { id = productId, returnUrl = ReturnUrl });
     }
 
 
@@ -280,6 +293,20 @@ public class EditModel : BaseAdminPage
         {
             return new JsonResult(new { error = ex.Message }) { StatusCode = 500 };
         }
+    }
+
+    private IActionResult RedirectToProductList()
+    {
+        NormalizeReturnUrl();
+        return string.IsNullOrEmpty(ReturnUrl)
+            ? RedirectToPage("./Index")
+            : LocalRedirect(ReturnUrl);
+    }
+
+    private void NormalizeReturnUrl()
+    {
+        if (!AdminProductListUrl.IsSafe(ReturnUrl, Url.IsLocalUrl))
+            ReturnUrl = null;
     }
 
 }

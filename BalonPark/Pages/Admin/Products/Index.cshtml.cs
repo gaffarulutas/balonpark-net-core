@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BalonPark.Data;
+using BalonPark.Helpers;
 using BalonPark.Models;
 using BalonPark.Services;
 using BalonPark.Services.CatalogSync;
@@ -50,6 +51,9 @@ public class IndexModel(
     
     [TempData]
     public string? SuccessMessage { get; set; }
+
+    [BindProperty]
+    public string? ReturnUrl { get; set; }
 
     /// <summary>
     /// Mevcut filtreleri koruyarak sayfa ve link için query string üretir.
@@ -180,6 +184,9 @@ public class IndexModel(
         {
             SuccessMessage = "Ürün silinirken hata oluştu!";
         }
+
+        if (AdminProductListUrl.IsSafe(ReturnUrl, Url.IsLocalUrl))
+            return LocalRedirect(ReturnUrl!);
 
         return RedirectToPage();
     }

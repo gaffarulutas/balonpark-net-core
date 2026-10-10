@@ -403,6 +403,47 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
     }
 
     /// <summary>
+    /// Görünen ürünlerin yeni sırasını site sırasına yazar.
+    /// Dönüş: gerçekten değişen ürünler (Id, yeni DisplayOrder).
+    /// </summary>
+    public async Task<IReadOnlyList<(int Id, int DisplayOrder)>> ReorderVisibleProductsAsync(IReadOnlyList<int> orderedIds)
+    {
+        using var connection = context.CreateConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+
+        var current = (await connection.QueryAsync<(int Id, int DisplayOrder)>(
+            "SELECT Id, DisplayOrder FROM Products ORDER BY DisplayOrder ASC, Id ASC",
+            transaction: transaction)).ToList();
+
+        var updates = ProductDisplayOrder.PlanUpdates(current, orderedIds);
+        if (updates.Count == 0)
+        {
+            transaction.Commit();
+            return updates;
+        }
+
+        var updatedAt = DateTime.UtcNow;
+        const string sql = """
+            UPDATE Products
+            SET DisplayOrder = @DisplayOrder, UpdatedAt = @UpdatedAt
+            WHERE Id = @Id
+            """;
+
+        foreach (var update in updates)
+        {
+            await connection.ExecuteAsync(
+                sql,
+                new { update.Id, update.DisplayOrder, UpdatedAt = updatedAt },
+                transaction);
+        }
+
+        transaction.Commit();
+        await cacheService.InvalidateProductsAsync();
+        return updates;
+    }
+
+    /// <summary>
     /// Ürünlerin DisplayOrder değerlerini toplu günceller (admin sürükle-bırak sıralama).
     /// </summary>
     public async Task<bool> ReorderProductsAsync(Dictionary<int, int> orderMap)

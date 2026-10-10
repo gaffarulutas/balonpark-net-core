@@ -4,6 +4,8 @@
     Layout = "_AdminLayout";
     ViewData["Title"] = "Ürünler";
     var urlService = ViewData["UrlService"] as IUrlService;
+    var listReturnUrl = "/admin/products" + Model.GetFilterQueryString(Model.PageNumber);
+    var canReorder = string.IsNullOrEmpty(Model.SortBy) || Model.SortBy == "displayOrder";
 }
 @section Styles {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.2/css/lightgallery-bundle.min.css" />
@@ -43,6 +45,9 @@
         }
         .product-drag-handle .grip-icon:active {
             cursor: grabbing;
+        }
+        .product-drag-handle.opacity-40 .grip-icon {
+            cursor: not-allowed;
         }
         /* SortableJS: placeholder (boşalan yerdeki iz) ve seçili satır */
         #admin-product-gallery .sortable-ghost > td {
@@ -319,6 +324,14 @@
     else
     {
         <div class="overflow-x-auto">
+            @if (canReorder)
+            {
+                <p class="px-4 pt-3 text-sm text-gray-500">Tutamacı sürükleyerek bu sayfadaki ürünlerin site sırasını değiştirin. Diğer sayfalardaki ürünler yerinde kalır.</p>
+            }
+            else
+            {
+                <p class="px-4 pt-3 text-sm text-amber-700">Sürükleyerek sıralamak için sıralamayı "Site sırası (sürükle-bırak)" yapıp filtreleyin.</p>
+            }
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
@@ -334,11 +347,11 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
                     </tr>
                 </thead>
-                <tbody id="admin-product-gallery" class="bg-white divide-y divide-gray-200" data-page-number="@Model.PageNumber" data-page-size="@Model.PageSize">
+                <tbody id="admin-product-gallery" class="bg-white divide-y divide-gray-200" data-page-number="@Model.PageNumber" data-page-size="@Model.PageSize" data-can-reorder="@(canReorder ? "true" : "false")">
                     @foreach (var product in Model.Products)
                     {
                         <tr class="hover:bg-gray-50 transition-colors duration-150" data-product-id="@product.Id" data-display-order="@product.DisplayOrder">
-                            <td class="product-drag-handle" aria-label="Sıralamak için sürükle">
+                            <td class="product-drag-handle @(canReorder ? "" : "opacity-40")" aria-label="Sıralamak için sürükle" title="@(canReorder ? $"Site sırası: {product.DisplayOrder}" : "Sıralamak için site sırasını seçin")">
                                 <span class="grip-icon" role="button" tabindex="0">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
@@ -421,13 +434,14 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-2">
-                                    <a href="/admin/products/edit?id=@product.Id" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-200">
+                                    <a href="/admin/products/edit?id=@product.Id&returnUrl=@Uri.EscapeDataString(listReturnUrl)" class="inline-flex items-center px-3 py-1.5 bg-gray-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-200">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                         Düzenle
                                     </a>
                                     <form method="post" asp-page-handler="Delete" asp-route-id="@product.Id" class="delete-form inline">
+                                        <input type="hidden" name="ReturnUrl" value="@listReturnUrl" />
                                         <button type="button" class="delete-btn inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200" data-product-name="@product.Name" data-loading-text="Ürün siliniyor...">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -558,56 +572,76 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
-        // --- Sıralama: SortableJS – tutamaç sütunundan sürükle, bırakınca otomatik kaydet ---
+        // --- Sıralama: tutamaçtan sürükle, bırakınca bu sayfanın ürün sırasını kaydet ---
         (function() {
+            var saving = false;
+
             function saveProductOrder() {
+                if (saving) return;
                 var tbody = document.getElementById('admin-product-gallery');
-                if (!tbody) return;
-                var pageNumber = parseInt(tbody.getAttribute('data-page-number'), 10) || 1;
-                var pageSize = parseInt(tbody.getAttribute('data-page-size'), 10) || 20;
-                var baseOrder = (pageNumber - 1) * pageSize;
+                if (!tbody || tbody.getAttribute('data-can-reorder') !== 'true') return;
                 var rows = tbody.querySelectorAll('tr[data-product-id]');
-                var products = [];
+                var ids = [];
                 for (var i = 0; i < rows.length; i++) {
-                    var id = rows[i].getAttribute('data-product-id');
-                    if (id) products.push({ id: parseInt(id, 10), displayOrder: baseOrder + i + 1 });
+                    var id = parseInt(rows[i].getAttribute('data-product-id'), 10);
+                    if (id > 0) ids.push(id);
                 }
-                if (products.length === 0) return;
+                if (ids.length === 0) return;
+
+                saving = true;
+                if (typeof showLoading === 'function') showLoading('Sıralama kaydediliyor...');
                 fetch('/api/category-order/products/reorder', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(products)
+                    body: JSON.stringify(ids)
                 })
                 .then(function(r) {
                     if (r.status === 401) {
                         return { success: false, unauthorized: true, message: 'Oturum sonlandı.' };
                     }
-                    return r.json();
+                    return r.json().then(function(data) {
+                        data = data || {};
+                        if (!r.ok) data.success = false;
+                        return data;
+                    });
                 })
                 .then(function(data) {
+                    if (typeof hideLoading === 'function') hideLoading();
+                    saving = false;
                     if (data.unauthorized) {
                         if (typeof showSnackbar === 'function') showSnackbar(data.message || 'Oturum sonlandı.', 'error');
-                        setTimeout(function() { window.location.href = '/admin/login'; }, 2000);
+                        setTimeout(function() { window.location.href = '/admin/login'; }, 1500);
                         return;
                     }
-                    if (data.success && typeof showSnackbar === 'function') {
-                        showSnackbar(data.message || 'Sıralama kaydedildi.', 'success');
-                        for (var j = 0; j < rows.length; j++) {
-                            rows[j].setAttribute('data-display-order', baseOrder + j + 1);
+                    if (data.success) {
+                        if (typeof showSnackbar === 'function') showSnackbar(data.message || 'Sıralama kaydedildi.', 'success');
+                        var orders = data.orders || [];
+                        for (var j = 0; j < orders.length; j++) {
+                            var row = tbody.querySelector('tr[data-product-id="' + orders[j].id + '"]');
+                            if (!row) continue;
+                            row.setAttribute('data-display-order', orders[j].displayOrder);
+                            var handle = row.querySelector('.product-drag-handle');
+                            if (handle) handle.title = 'Site sırası: ' + orders[j].displayOrder;
                         }
-                    } else if (data.message && typeof showSnackbar === 'function') {
-                        showSnackbar(data.message, 'error');
+                        return;
                     }
+                    if (typeof showSnackbar === 'function') showSnackbar(data.message || 'Sıralama kaydedilemedi.', 'error');
+                    window.location.reload();
                 })
                 .catch(function(err) {
+                    if (typeof hideLoading === 'function') hideLoading();
+                    saving = false;
                     if (typeof showSnackbar === 'function') showSnackbar('Sıralama kaydedilemedi: ' + (err.message || 'Bağlantı hatası'), 'error');
+                    window.location.reload();
                 });
             }
 
             function initSortable() {
                 if (typeof Sortable === 'undefined') return;
                 var tbody = document.getElementById('admin-product-gallery');
-                if (!tbody || tbody.querySelectorAll('tr[data-product-id]').length === 0) return;
+                if (!tbody || tbody.getAttribute('data-can-reorder') !== 'true') return;
+                if (tbody.querySelectorAll('tr[data-product-id]').length < 2) return;
                 var tableEl = tbody.closest('table');
 
                 Sortable.create(tbody, {
@@ -617,9 +651,14 @@
                     ghostClass: 'sortable-ghost',
                     chosenClass: 'sortable-chosen',
                     dragClass: 'sortable-drag',
-                    forceFallback: false,
-                    fallbackTolerance: 3,
-                    emptyInsertThreshold: 15,
+                    forceFallback: true,
+                    fallbackOnBody: true,
+                    fallbackTolerance: 4,
+                    scroll: true,
+                    bubbleScroll: true,
+                    scrollSensitivity: 60,
+                    scrollSpeed: 12,
+                    onMove: function() { return !saving; },
                     onStart: function(evt) {
                         if (!tableEl || !evt.item) return;
                         var w = tableEl.offsetWidth;
@@ -646,6 +685,7 @@
                                 td.style.maxWidth = '';
                             });
                         }
+                        if (evt.oldIndex === evt.newIndex) return;
                         saveProductOrder();
                     }
                 });

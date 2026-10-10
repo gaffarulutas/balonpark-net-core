@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using BalonPark.Attributes;
 using BalonPark.Data;
 using BalonPark.Services;
+using BalonPark.Services.CatalogSync;
 
 namespace BalonPark.Controllers
 {
@@ -13,6 +14,7 @@ namespace BalonPark.Controllers
         SubCategoryRepository subCategoryRepository,
         ProductRepository productRepository,
         ICacheService cacheService,
+        ICatalogSyncPublisher catalogSync,
         ILogger<CategoryOrderController> logger) : ControllerBase
     {
 
@@ -143,37 +145,42 @@ namespace BalonPark.Controllers
         }
 
         /// <summary>
-        /// Ürünleri yeniden sıralar (admin sürükle-bırak).
+        /// Görünen ürünleri yeni sıraya koyar. Sıra numaralarını sunucu, mevcut yerlere göre hesaplar.
         /// </summary>
         [HttpPost("products/reorder")]
-        public async Task<IActionResult> ReorderProducts([FromBody] List<CategoryOrderDto> products)
+        public async Task<IActionResult> ReorderProducts([FromBody] List<int>? ids)
         {
             try
             {
-                if (products == null || !products.Any())
-                {
+                if (ids == null || ids.Count == 0)
                     return BadRequest(new { success = false, message = "Ürün listesi boş olamaz" });
-                }
 
-                // Aynı Id tekrar gelirse ilk değeri kullan (duplicate key hatası önleme)
-                var orderMap = products
-                    .GroupBy(p => p.Id)
-                    .ToDictionary(g => g.Key, g => g.First().DisplayOrder);
-                var success = await productRepository.ReorderProductsAsync(orderMap);
+                if (ids.Count > 100)
+                    return BadRequest(new { success = false, message = "Tek seferde en fazla 100 ürün sıralanabilir" });
 
-                if (success)
+                if (ids.Any(id => id <= 0))
+                    return BadRequest(new { success = false, message = "Geçersiz ürün numarası" });
+
+                var updates = await productRepository.ReorderVisibleProductsAsync(ids);
+                foreach (var update in updates)
+                    catalogSync.PublishUpsert(CatalogSyncEntityType.Product, update.Id);
+
+                logger.LogInformation("Ürün sırası güncellendi. İstek: {Requested}, değişen: {Changed}", ids.Count, updates.Count);
+                return Ok(new
                 {
-                    await cacheService.InvalidateProductsAsync();
-                    logger.LogInformation("Ürünler başarıyla yeniden sıralandı. Toplam: {Count}", products.Count);
-                    return Ok(new { success = true, message = $"{products.Count} ürün başarıyla sıralandı" });
-                }
-
-                return BadRequest(new { success = false, message = "Sıralama işlemi başarısız" });
+                    success = true,
+                    message = updates.Count == 0 ? "Sıra zaten bu şekilde." : "Sıralama kaydedildi.",
+                    orders = updates.Select(update => new { id = update.Id, displayOrder = update.DisplayOrder })
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Ürün sıralama hatası");
-                return StatusCode(500, new { success = false, message = $"Hata: {ex.Message}" });
+                return StatusCode(500, new { success = false, message = "Sıralama kaydedilemedi." });
             }
         }
     }
