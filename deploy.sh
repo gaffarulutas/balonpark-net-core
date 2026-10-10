@@ -49,7 +49,6 @@ if [[ -z "${FTP_PASS:-}" ]]; then
 fi
 
 require_cmd dotnet
-require_cmd npm
 require_cmd python3
 require_cmd curl
 
@@ -69,18 +68,19 @@ log "=============================================="
 echo ""
 
 # --- 1) CSS ---
-log "[1/4] Tailwind CSS build..."
-cd "${APP_DIR}"
-if [[ ! -f package.json ]]; then
-  err "package.json missing in BalonPark/ (needed for npm run build:css)"
-  exit 1
+if [[ -f "${APP_DIR}/package.json" ]]; then
+  require_cmd npm
+  log "[1/4] Tailwind CSS build..."
+  cd "${APP_DIR}"
+  if [[ ! -d node_modules ]]; then
+    warn "node_modules is missing, running npm install"
+    npm install
+  fi
+  npm run build:css
+  ok "CSS is ready."
+else
+  log "[1/4] CSS build skipped (no package.json; compiled assets are already in wwwroot)."
 fi
-if [[ ! -d node_modules ]]; then
-  warn "node_modules is missing, running npm install"
-  npm install
-fi
-npm run build:css
-ok "CSS is ready."
 echo ""
 
 # --- 2) Publish ---
