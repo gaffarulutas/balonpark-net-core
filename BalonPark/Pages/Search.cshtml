@@ -30,7 +30,7 @@
                     var productWithImage = itemsToShow[i];
                     var product = productWithImage.Product;
                     var urlService = (IUrlService?)ViewData["UrlService"];
-                    var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+                    var baseUrl = BalonPark.Services.UrlService.CanonicalBaseUrl;
                     @: {
                     @:     "@@type": "ListItem",
                     @:     "position": @(i + 1),

@@ -262,8 +262,7 @@ try
     if (!app.Environment.IsDevelopment())
         app.UseHttpsRedirection();
 
-    // Canonical domain redirect: www.balonpark.com -> balonpark.com (301)
-    // Google Merchant Center domain tutarliligi icin kritik
+    // Canonical domain redirect: www / ipv4 / diğer hostlar -> https://balonpark.com (301)
     app.UseCanonicalDomain();
 
     // Static files: cache + security headers (Lighthouse cache-insight iyileştirmesi)

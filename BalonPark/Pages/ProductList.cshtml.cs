@@ -149,8 +149,6 @@ public class ProductListModel : BasePage
         // SEO: CollectionPage + BreadcrumbList + ItemList JSON-LD (2026 best practice)
         var pageUrl = _urlService.GetPageUrl(basePath + GetFilterQueryString());
         var baseUrl = _urlService.GetBaseUrl();
-        if (string.IsNullOrEmpty(baseUrl) && HttpContext?.Request != null)
-            baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
 
         var companyName = SiteSettings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
         var pageName = "Ürünler";

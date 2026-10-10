@@ -261,7 +261,7 @@
 
 </head>
 
-@{ var canonicalUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}"; }
+@{ var canonicalUrl = ((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"{Context.Request.Path}{Context.Request.QueryString}") ?? $"{BalonPark.Services.UrlService.CanonicalBaseUrl}{Context.Request.Path}{Context.Request.QueryString}"; }
 <body class="font-sans text-[15px] sm:text-base bg-white text-ink antialiased min-h-screen flex flex-col" data-site-url="@canonicalUrl">
 @if (!string.IsNullOrEmpty(siteSettings?.GoogleTagManager))
 {

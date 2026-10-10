@@ -141,7 +141,7 @@ public class BlogDetailModel : BasePage
 
     private string CreateStructuredData(BlogWithProducts blog)
     {
-        var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+        var baseUrl = _urlService.GetBaseUrl();
         
         var structuredData = new
         {

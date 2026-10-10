@@ -7,8 +7,8 @@
 #   3) FTP: clean httpdocs (EXCEPT wwwroot/uploads, with retry) then upload
 #   4) Live HTTP health check (with retry)
 #
-# Credentials come from .deploy.env (gitignored) or environment variables.
-#   cp .deploy.env.example .deploy.env
+# FTP defaults live in this file so GitHub Actions can deploy on push to main.
+# Environment variables or .deploy.env still override these values.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,18 +38,14 @@ if [[ -f "${DEPLOY_ENV}" ]]; then
   # shellcheck disable=SC1090
   source "${DEPLOY_ENV}"
   set +a
-elif [[ -f "${SCRIPT_DIR}/.deploy.env.example" ]]; then
-  warn ".deploy.env is missing. Example: cp .deploy.env.example .deploy.env"
 fi
 
 FTP_HOST="${FTP_HOST:-balonpark.com}"
 FTP_USER="${FTP_USER:-balonpar}"
 FTP_PORT="${FTP_PORT:-21}"
 SITE_URL="${SITE_URL:-https://balonpark.com}"
-
 if [[ -z "${FTP_PASS:-}" ]]; then
-  err "FTP_PASS is not set. Create .deploy.env or run FTP_PASS=... ./deploy.sh"
-  exit 1
+  FTP_PASS='6iv22+ZPZe+Po6Sc!0'
 fi
 
 require_cmd dotnet
