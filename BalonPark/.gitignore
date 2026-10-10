@@ -359,6 +359,7 @@ Keys/
 *.json
 !appsettings.json
 !appsettings.Development.json
+!Properties/launchSettings.json
 
 # Logs
 logs/

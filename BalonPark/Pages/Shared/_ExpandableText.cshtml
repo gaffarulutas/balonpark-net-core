@@ -1,0 +1,23 @@
+@using BalonPark.Helpers
+@model TextPreview.ExpandableText
+@{
+    var html = Model.Html ?? string.Empty;
+    var truncated = TextPreview.TryTruncate(html, Model.Limit, out var preview);
+    var toggleId = "product-text-" + Guid.NewGuid().ToString("N");
+}
+@if (!truncated)
+{
+    @Html.Raw(html)
+}
+else
+{
+    <div class="product-expandable">
+        <input type="checkbox" class="product-expandable__state" id="@toggleId" />
+        <span class="product-expandable__preview">@preview…</span>
+        <div class="product-expandable__full">@Html.Raw(html)</div>
+        <label class="product-expandable__toggle" for="@toggleId">
+            <span class="product-expandable__more">devamı gör</span>
+            <span class="product-expandable__less">gizle</span>
+        </label>
+    </div>
+}

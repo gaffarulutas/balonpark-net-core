@@ -193,7 +193,7 @@
                 var currentVal = wrap.getAttribute('data-value') || '';
                 var valueEl = wrap.querySelector('.admin-editable-value');
                 if (valueEl) {
-                    if (dataType === 'textarea') currentVal = valueEl.innerHTML || valueEl.innerText || '';
+                    if (dataType === 'textarea') currentVal = readExpandableText(valueEl);
                     else if (dataType !== 'bool' && !currentVal) currentVal = valueEl.innerText || valueEl.textContent || '';
                 }
 
@@ -221,7 +221,7 @@
                     if (isTextarea) {
                         input.rows = 6;
                         input.className = 'admin-edit-input w-full text-sm border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary';
-                        input.value = (valueEl && valueEl.innerText) ? valueEl.innerText : currentVal;
+                        input.value = valueEl ? readExpandableText(valueEl) : currentVal;
                     } else {
                         input.type = isNumber ? 'number' : 'text';
                         input.min = isNumber ? '0' : undefined;
@@ -381,6 +381,25 @@
             ariaLabelledby: 'Product Gallery',
             ariaDescribedby: ariaDescribedby,
         });
+    }
+
+    function readExpandableText(valueEl) {
+        var fullNode = valueEl.querySelector('.product-expandable__full');
+        if (!fullNode) return (valueEl.innerText || valueEl.textContent || '').trim();
+
+        var clone = fullNode.cloneNode(true);
+        clone.classList.remove('hidden');
+        clone.style.setProperty('display', 'block', 'important');
+        clone.style.setProperty('position', 'absolute');
+        clone.style.setProperty('left', '-99999px');
+        clone.style.setProperty('top', '0');
+        clone.style.setProperty('width', '640px');
+        clone.style.setProperty('height', 'auto');
+        clone.style.setProperty('overflow', 'visible');
+        document.body.appendChild(clone);
+        var text = (clone.innerText || clone.textContent || '').trim();
+        clone.remove();
+        return text;
     }
 
     function onSwiperError(e) {

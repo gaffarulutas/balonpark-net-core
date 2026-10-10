@@ -52,6 +52,10 @@ public class CreateModel : BaseAdminPage
     [BindProperty]
     public List<IFormFile> Images { get; set; } = new();
 
+    /// <summary>Seçilen dosyalar içinde ana görselin sırası. İşaretlenmezse ilk resim ana görsel olur.</summary>
+    [BindProperty]
+    public int MainImageIndex { get; set; }
+
     public new List<Category> Categories { get; set; } = new();
     public List<SubCategory> SubCategories { get; set; } = new();
 
@@ -114,27 +118,26 @@ public class CreateModel : BaseAdminPage
             Product.CreatedAt = DateTime.Now;
             var productId = await _productRepository.CreateAsync(Product);
 
-        // Resimleri yükle
-        if (Images != null && Images.Any())
-        {
-            // Watermark için logo.png kullan
-            var watermarkLogoPath = "/assets/images/logo/logo.png";
-            
-            var uploadPath = Path.Combine(_environment.WebRootPath, "uploads", "products", productId.ToString());
-            Directory.CreateDirectory(uploadPath);
-
-            var displayOrder = 1;
-            var hasMainImage = false;
-            
-            foreach (var image in Images)
+            var imagesToSave = (Images ?? new List<IFormFile>())
+                .Where(image => image.Length > 0)
+                .ToList();
+            if (imagesToSave.Count > 0)
             {
-                if (image.Length > 0)
+                var watermarkLogoPath = "/assets/images/logo/logo.png";
+                var uploadPath = Path.Combine(_environment.WebRootPath, "uploads", "products", productId.ToString());
+                Directory.CreateDirectory(uploadPath);
+
+                var mainImageIndex = MainImageIndex >= 0 && MainImageIndex < imagesToSave.Count
+                    ? MainImageIndex
+                    : 0;
+
+                for (var index = 0; index < imagesToSave.Count; index++)
                 {
+                    var image = imagesToSave[index];
                     var fileName = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
                     var webpFileName = ImageHelper.ToWebPFileName(fileName);
-                    
-                    // Watermark ile kaydet (logo varsa) - large ve thumb WebP formatinda
-                    (string originalPath, string largePath, string thumbnailPath) = await ImageHelper.SaveProductImageWithWatermarkAsync(
+
+                    await ImageHelper.SaveProductImageWithWatermarkAsync(
                         image,
                         uploadPath,
                         fileName,
@@ -150,22 +153,14 @@ public class CreateModel : BaseAdminPage
                         OriginalPath = $"uploads/products/{productId}/original_{fileName}",
                         LargePath = $"uploads/products/{productId}/large_{webpFileName}",
                         ThumbnailPath = $"uploads/products/{productId}/thumb_{webpFileName}",
-                        IsMainImage = !hasMainImage,
-                        DisplayOrder = displayOrder,
+                        IsMainImage = index == mainImageIndex,
+                        DisplayOrder = index + 1,
                         CreatedAt = DateTime.Now
                     };
 
                     await _productImageRepository.CreateAsync(productImage);
-                    
-                    if (!hasMainImage)
-                    {
-                        hasMainImage = true;
-                    }
-                    
-                    displayOrder++;
                 }
             }
-        }
 
             // Cache'i temizle
             await _cacheService.InvalidateProductsAsync();

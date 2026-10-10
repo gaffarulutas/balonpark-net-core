@@ -43,7 +43,7 @@
                     </svg>
                     Ürün Görselleri
                 </h2>
-                <p class="text-sm text-gray-500 mb-4">İlk eklenen resim ana kapak resmi olur.</p>
+                <p class="text-sm text-gray-500 mb-4">Resimleri seçin, ardından kaydetmeden önce birini ana görsel olarak işaretleyin. Yeni seçimler listeye eklenir. İşaretlemezseniz ilk resim ana görsel olur.</p>
                 <div id="imageDropZone" class="relative flex flex-col items-center justify-center px-6 py-12 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/80 hover:bg-gray-100/80 hover:border-gray-400 focus-within:ring-2 focus-within:ring-gray-800 focus-within:ring-offset-2 transition-colors duration-200">
                     <input type="file" id="productImagesInput" name="Images" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" aria-label="Ürün resimleri seçin">
                     <svg class="mx-auto h-14 w-14 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 48 48">
@@ -54,6 +54,7 @@
                     </p>
                     <p class="mt-1 text-sm text-gray-500 pointer-events-none">PNG, JPG, WebP, GIF — dosya başına en fazla 10 MB</p>
                 </div>
+                <input type="hidden" asp-for="MainImageIndex" id="mainImageIndex" />
                 <div id="imagePreviewContainer" class="mt-4 hidden" aria-live="polite">
                     <h3 class="text-sm font-medium text-gray-700 mb-2">Yüklenecek resimler (<span id="imagePreviewCount">0</span>)</h3>
                     <div id="imagePreviewGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
@@ -393,62 +394,154 @@
             var previewGrid = document.getElementById('imagePreviewGrid');
             var previewCountEl = document.getElementById('imagePreviewCount');
             var clearBtn = document.getElementById('imageClearBtn');
-            if (!dropZone || !fileInput) return;
+            var mainImageInput = document.getElementById('mainImageIndex');
+            var previewUrls = [];
+            var selectedFiles = [];
+            if (!dropZone || !fileInput || !previewGrid || !previewContainer || !clearBtn) return;
 
-            function renderPreviews(files) {
+            function revokePreviewUrls() {
+                previewUrls.forEach(function(url) { URL.revokeObjectURL(url); });
+                previewUrls = [];
+            }
+
+            function fileKey(file) {
+                return [file.name, file.size, file.lastModified].join('|');
+            }
+
+            function currentMainIndex() {
+                var index = mainImageInput ? Number(mainImageInput.value) : 0;
+                return Number.isInteger(index) ? index : 0;
+            }
+
+            function syncFileInput() {
+                var dt = new DataTransfer();
+                selectedFiles.forEach(function(file) { dt.items.add(file); });
+                fileInput.files = dt.files;
+            }
+
+            function setMainImage(index) {
+                var cards = previewGrid.querySelectorAll('[data-image-index]');
+                if (!cards.length) {
+                    if (mainImageInput) mainImageInput.value = '0';
+                    return;
+                }
+                if (!Number.isInteger(index) || index < 0 || index >= cards.length) index = 0;
+                if (mainImageInput) mainImageInput.value = String(index);
+                cards.forEach(function(card) {
+                    var cardIndex = Number(card.getAttribute('data-image-index'));
+                    var isMain = cardIndex === index;
+                    card.className = 'rounded-lg overflow-hidden bg-gray-50 border-2 ' + (isMain ? 'border-gray-800 ring-2 ring-gray-200' : 'border-gray-200');
+                    var badge = card.querySelector('[data-main-badge]');
+                    var button = card.querySelector('[data-set-main]');
+                    if (badge) badge.style.display = isMain ? 'inline-flex' : 'none';
+                    if (button) {
+                        button.style.display = isMain ? 'none' : 'inline-flex';
+                        button.setAttribute('aria-pressed', isMain ? 'true' : 'false');
+                    }
+                });
+            }
+
+            function renderPreviews(mainIndex) {
+                revokePreviewUrls();
                 previewGrid.innerHTML = '';
-                if (!files || files.length === 0) {
+                if (selectedFiles.length === 0) {
                     previewContainer.classList.add('hidden');
+                    if (previewCountEl) previewCountEl.textContent = '0';
+                    setMainImage(0);
                     return;
                 }
                 previewContainer.classList.remove('hidden');
-                previewCountEl.textContent = files.length;
-                for (var i = 0; i < files.length; i++) {
-                    var file = files[i];
+                if (previewCountEl) previewCountEl.textContent = selectedFiles.length;
+                for (var i = 0; i < selectedFiles.length; i++) {
+                    var file = selectedFiles[i];
                     var card = document.createElement('div');
-                    card.className = 'relative rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50 group';
+                    card.setAttribute('data-image-index', String(i));
+                    card.className = 'rounded-lg overflow-hidden bg-gray-50 border-2 border-gray-200';
+
+                    var frame = document.createElement('div');
+                    frame.className = 'relative';
                     var img = document.createElement('img');
                     img.className = 'w-full aspect-square object-cover';
                     img.alt = file.name || '';
-                    var reader = new FileReader();
-                    reader.onload = (function(el) { return function(e) { el.src = e.target.result; }; })(img);
-                    reader.readAsDataURL(file);
-                    var overlay = document.createElement('div');
-                    overlay.className = 'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2';
-                    var label = document.createElement('span');
-                    label.className = 'text-white text-xs font-medium block truncate';
-                    label.textContent = file.name || 'isimsiz';
+                    var url = URL.createObjectURL(file);
+                    previewUrls.push(url);
+                    img.src = url;
                     var badge = document.createElement('span');
-                    badge.className = 'text-[10px] text-gray-200 mt-0.5 block';
-                    badge.textContent = i === 0 ? 'Ana resim' : 'Resim ' + (i + 1);
-                    overlay.appendChild(label);
-                    overlay.appendChild(badge);
-                    card.appendChild(img);
-                    card.appendChild(overlay);
+                    badge.setAttribute('data-main-badge', '');
+                    badge.className = 'absolute top-2 left-2 items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-900 text-white shadow-lg';
+                    badge.style.display = 'none';
+                    badge.textContent = 'Ana görsel';
+                    frame.appendChild(img);
+                    frame.appendChild(badge);
+
+                    var footer = document.createElement('div');
+                    footer.className = 'p-2 space-y-1.5';
+                    var label = document.createElement('p');
+                    label.className = 'text-xs font-medium text-gray-700 truncate';
+                    label.textContent = file.name || 'isimsiz';
+                    var button = document.createElement('button');
+                    button.type = 'button';
+                    button.setAttribute('data-set-main', '');
+                    button.setAttribute('data-index', String(i));
+                    button.className = 'w-full items-center justify-center px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium rounded';
+                    button.style.display = 'inline-flex';
+                    button.textContent = 'Ana görsel yap';
+                    footer.appendChild(label);
+                    footer.appendChild(button);
+                    card.appendChild(frame);
+                    card.appendChild(footer);
                     previewGrid.appendChild(card);
                 }
+                setMainImage(mainIndex);
             }
 
             function handleFiles(fileList) {
-                if (!fileList || fileList.length === 0) { renderPreviews([]); return; }
-                var files = Array.prototype.slice.call(fileList);
-                var valid = [];
+                var previousMain = currentMainIndex();
+                var hadFiles = selectedFiles.length > 0;
+                if (!fileList || fileList.length === 0) {
+                    if (!hadFiles) renderPreviews(0);
+                    return;
+                }
+                var known = {};
+                selectedFiles.forEach(function(file) { known[fileKey(file)] = true; });
                 var tooBig = [];
-                for (var i = 0; i < files.length; i++) {
-                    if (!files[i].type.match(/^image\/(jpeg|png|webp|gif)$/i)) continue;
-                    if (files[i].size > MAX_FILE_SIZE_BYTES) { tooBig.push(files[i].name); continue; }
-                    valid.push(files[i]);
+                var added = 0;
+                for (var i = 0; i < fileList.length; i++) {
+                    var file = fileList[i];
+                    if (!file.type || !file.type.match(/^image\/(jpeg|png|webp|gif)$/i)) continue;
+                    if (file.size > MAX_FILE_SIZE_BYTES) { tooBig.push(file.name); continue; }
+                    var key = fileKey(file);
+                    if (known[key]) continue;
+                    known[key] = true;
+                    selectedFiles.push(file);
+                    added++;
                 }
                 if (tooBig.length && typeof showSnackbar === 'function') showSnackbar('Bazı dosyalar ' + MAX_FILE_SIZE_MB + ' MB\'dan büyük olduğu için atlandı: ' + tooBig.join(', '), 'warning');
-                if (valid.length === 0) { fileInput.value = ''; renderPreviews([]); return; }
-                var dt = new DataTransfer();
-                valid.forEach(function(f) { dt.items.add(f); });
-                fileInput.files = dt.files;
-                renderPreviews(fileInput.files);
+                if (added === 0 && hadFiles) {
+                    syncFileInput();
+                    return;
+                }
+                if (selectedFiles.length === 0) {
+                    fileInput.value = '';
+                    renderPreviews(0);
+                    return;
+                }
+                syncFileInput();
+                renderPreviews(hadFiles ? previousMain : 0);
             }
 
             fileInput.addEventListener('change', function() { handleFiles(this.files); });
-            clearBtn.addEventListener('click', function() { fileInput.value = ''; renderPreviews([]); });
+            previewGrid.addEventListener('click', function(e) {
+                var button = e.target.closest('[data-set-main]');
+                if (!button) return;
+                setMainImage(Number(button.getAttribute('data-index')));
+            });
+            clearBtn.addEventListener('click', function() {
+                selectedFiles = [];
+                fileInput.value = '';
+                renderPreviews(0);
+            });
+            window.addEventListener('pagehide', revokePreviewUrls);
             dropZone.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('border-gray-500', 'bg-gray-100'); });
             dropZone.addEventListener('dragleave', function(e) { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('border-gray-500', 'bg-gray-100'); });
             dropZone.addEventListener('drop', function(e) {

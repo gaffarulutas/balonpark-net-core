@@ -237,7 +237,27 @@ def needs_translation(locale: str, source_name: str, target_name: str | None, ta
         return True
     if locale == "el" and TR_SPECIFIC.search(source_name or "") and not GREEK_LETTERS.search(target_name or ""):
         return True
+    if locale == "de" and re.search(r"Sichere|Temali|Kuleli|\bKule\b|Gokk|Reklam Balon|Reklambalon", target_name or "", re.I):
+        return True
     return False
+
+
+def parse_model_json(content: str) -> dict:
+    text = content.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start < 0 or end <= start:
+            raise
+        parsed = json.loads(text[start : end + 1])
+    if not isinstance(parsed, dict):
+        raise RuntimeError("translation payload is not an object")
+    return parsed
 
 
 def system_prompt(locale: str) -> str:
@@ -248,8 +268,11 @@ def system_prompt(locale: str) -> str:
         "You are a professional e-commerce copywriter for inflatable playgrounds and bounce houses.\n"
         f"Brand: Bala Park. Market: {market}.\n"
         f"Translate Turkish shop catalog text into natural, sales-ready {lang}.\n"
+        "Glossary: Turkish 'şişme' means inflatable. German: aufblasbar. Greek: φουσκωτό. "
+        "Never translate şişme as sicher, Sichere, or safe.\n"
         "Rules:\n"
         "- Keep HTML tags intact. Do not translate URLs, emails, phones, codes, or measurements like 5x4x3m.\n"
+        "- Keep brand names such as Turkish Airlines, BMW, Opet, and Diji Türk.\n"
         "- Replace Balon Park / Balapark / BalonPark in prose with Bala Park.\n"
         "- Slug: lowercase a-z0-9 and hyphens only (transliterate; German ä→ae ö→oe ü→ue ß→ss; Greek to Latin).\n"
         "- The Name value MUST be written in the target language, not left in Turkish or Latin transliteration.\n"
@@ -282,24 +305,29 @@ def translate_fields(api_key: str, locale: str, kind: str, entity_id: int, field
     key = cache_key(locale, kind, entity_id, payload)
     with CACHE_LOCK:
         hit = cache.get(key)
-    if hit:
+    if hit and not (locale == "de" and re.search(r"Sichere|Temali|Kuleli|Gokk", str(hit.get("Name") or ""), re.I)):
         return hit
 
-    body = {
-        "model": MODEL,
-        "temperature": 0.2,
-        "response_format": {"type": "json_object"},
-        "messages": [
-            {"role": "system", "content": system_prompt(locale)},
-            {
-                "role": "user",
-                "content": f"Translate the following {kind} fields from Turkish. Return JSON with exactly the same keys.\n\n"
-                + json.dumps(payload, ensure_ascii=False),
-            },
-        ],
-    }
     last_error = None
-    for attempt in range(1, 5):
+    correction = ""
+    for attempt in range(1, 6):
+        body = {
+            "model": MODEL,
+            "temperature": 0.2 if attempt < 4 else 0.4,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": system_prompt(locale)},
+                {
+                    "role": "user",
+                    "content": (
+                        f"Translate the following {kind} fields from Turkish. "
+                        f"Attempt {attempt}. Return one minified JSON object with exactly the same keys and valid JSON strings.\n\n"
+                        + json.dumps(payload, ensure_ascii=False)
+                        + correction
+                    ),
+                },
+            ],
+        }
         try:
             req = Request(
                 OPENAI_URL,
@@ -313,14 +341,19 @@ def translate_fields(api_key: str, locale: str, kind: str, entity_id: int, field
             )
             with urlopen(req, timeout=120) as resp:
                 raw = resp.read().decode("utf-8")
-            content = json.loads(raw)["choices"][0]["message"]["content"]
-            parsed = json.loads(content)
+            content = json.loads(raw)["choices"][0]["message"]["content"] or ""
+            parsed = parse_model_json(content)
             if not isinstance(parsed, dict):
                 raise RuntimeError("translation payload is not an object")
             name = str(parsed.get("Name") or "")
             if locale == "el" and TR_SPECIFIC.search(fields.get("Name") or "") and not GREEK_LETTERS.search(name):
+                correction = f"\n\nPrevious Name was rejected: {name}. Write Name in Greek script."
                 raise RuntimeError(f"Greek name missing Greek letters: {name[:80]}")
             if TR_SPECIFIC.search(name):
+                correction = (
+                    f"\n\nPrevious Name still contains Turkish letters ({name}). "
+                    "Rewrite Name completely in the target language. Do not leave Turkish words."
+                )
                 raise RuntimeError(f"translated name still has Turkish letters: {name[:80]}")
             merged = dict(fields)
             for field, value in parsed.items():
@@ -677,26 +710,68 @@ def image_paths(images: list[dict]) -> list[str]:
     return found
 
 
-def download(rel: str) -> bytes | None:
-    url = f"{SOURCE_HTTP}/{quote(rel, safe='/')}"
-    last = None
-    for attempt in range(1, 5):
+def load_source_ftp_auth() -> dict[str, str]:
+    env: dict[str, str] = {}
+    deploy_env = ROOT / ".deploy.env"
+    for line in deploy_env.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        env[key.strip()] = value.strip().strip("'\"")
+    host = env.get("FTP_HOST", "")
+    if host.lower() not in {"balonpark.com", "www.balonpark.com"}:
+        raise SystemExit(f"Refusing source FTP host {host!r}")
+    if not env.get("FTP_USER") or not env.get("FTP_PASS"):
+        raise SystemExit("Source FTP credentials missing in .deploy.env")
+    return env
+
+
+def source_ftp_for_thread() -> FTP:
+    ftp = getattr(_thread_ftp, "source", None)
+    if ftp is not None:
         try:
-            req = Request(url, headers={"User-Agent": UA})
-            with urlopen(req, timeout=90) as resp:
-                data = resp.read()
-            if not data:
-                raise RuntimeError("empty body")
-            return data
-        except HTTPError as exc:
-            if exc.code == 404:
+            ftp.voidcmd("NOOP")
+            return ftp
+        except Exception:
+            try:
+                ftp.close()
+            except Exception:
+                pass
+    auth = load_source_ftp_auth()
+    ftp = FTP()
+    ftp.connect(auth["FTP_HOST"], int(auth.get("FTP_PORT") or 21), timeout=120)
+    ftp.login(auth["FTP_USER"], auth["FTP_PASS"])
+    ftp.set_pasv(True)
+    _thread_ftp.source = ftp
+    return ftp
+
+
+def download(rel: str) -> bytes | None:
+    """Read a catalog file from balonpark.com FTP. Never writes or deletes on the source."""
+    rel = rel.replace("\\", "/").lstrip("/")
+    if not rel.startswith("uploads/") or ".." in rel.split("/"):
+        raise RuntimeError(f"refusing unexpected upload path: {rel}")
+    remote = "/httpdocs/wwwroot/" + rel
+    last: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            ftp = source_ftp_for_thread()
+            buf = BytesIO()
+            ftp.retrbinary("RETR " + remote, buf.write)
+            data = buf.getvalue()
+            return data or None
+        except error_perm as exc:
+            if "550" in str(exc):
                 return None
             last = exc
-            time.sleep(min(2 ** attempt, 15))
-        except (URLError, TimeoutError, OSError) as exc:
+            _thread_ftp.source = None
+            time.sleep(min(2 ** attempt, 10))
+        except (OSError, EOFError, error_temp) as exc:
             last = exc
-            time.sleep(min(2 ** attempt, 15))
-    raise RuntimeError(f"download failed for {rel}: {last}")
+            _thread_ftp.source = None
+            time.sleep(min(2 ** attempt, 10))
+    raise RuntimeError(f"source FTP read failed for {rel}: {last}")
 
 
 class FtpUploader:
@@ -807,11 +882,28 @@ def ftp_for_thread(target: dict) -> FtpUploader:
     return current
 
 
+def source_size(rel: str) -> int | None:
+    remote = "/httpdocs/wwwroot/" + rel.replace("\\", "/").lstrip("/")
+    try:
+        size = source_ftp_for_thread().size(remote)
+    except Exception:
+        _thread_ftp.source = None
+        return None
+    return size if isinstance(size, int) and size >= 0 else None
+
+
 def copy_one(target: dict, rel: str) -> tuple[str, str]:
+    src_size = source_size(rel)
+    if not src_size:
+        return rel, "missing"
+    uploader = ftp_for_thread(target)
+    remote = f"{uploader.root}/{rel}".replace("//", "/")
+    if uploader.remote_size(remote) == src_size:
+        return rel, "skipped"
     data = download(rel)
     if data is None:
         return rel, "missing"
-    status = ftp_for_thread(target).upload(rel, data)
+    status = uploader.upload(rel, data)
     return rel, status
 
 
@@ -956,6 +1048,7 @@ def main() -> int:
                     to_translate.append(row)
             log(f"  translating {len(to_translate)} products")
             translated_products: dict[int, dict] = {}
+            failed_ids: set[int] = set()
 
             def _translate_product(row: dict) -> tuple[int, dict]:
                 fields = {field: row.get(field) for field in ("Slug", *TEXT_FIELDS)}
@@ -969,16 +1062,20 @@ def main() -> int:
                     done = 0
                     for fut in as_completed(futures):
                         product_id = futures[fut]
+                        done += 1
                         try:
                             pid, text = fut.result()
+                            translated_products[pid] = text
                         except Exception as exc:
-                            raise RuntimeError(f"product {product_id} translation: {exc}") from exc
-                        translated_products[pid] = text
-                        done += 1
+                            failed_ids.add(product_id)
+                            failures.append(f"{name} product {product_id} translation: {exc}")
+                            log(f"  translation failed product {product_id}: {exc}")
                         if done % 10 == 0 or done == len(to_translate):
-                            log(f"  translated {done}/{len(to_translate)}")
+                            log(f"  translated {done}/{len(to_translate)} failed={len(failed_ids)}")
 
             for index, row in enumerate(products, start=1):
+                if row["Id"] in failed_ids:
+                    continue
                 current = tgt_products.get(row["Id"])
                 text = translated_products.get(row["Id"])
                 specs_changed = product_spec_changed(row, current)
@@ -1003,12 +1100,12 @@ def main() -> int:
 
             all_paths: list[str] = []
             seen_paths: set[str] = set()
-            for _product_id, paths in image_jobs:
-                for rel in paths:
+            for row in products:
+                for rel in image_paths(images_by_product.get(row["Id"], [])):
                     if rel not in seen_paths:
                         seen_paths.add(rel)
                         all_paths.append(rel)
-            log(f"  FTP {name}: {len(all_paths)} files from {len(image_jobs)} products")
+            log(f"  FTP {name}: {len(all_paths)} source files (db image rows refreshed for {len(image_jobs)} products)")
             uploaded, skipped, missing, errors = sync_files(target, all_paths)
             if errors == 0:
                 ftp_ids.clear()

@@ -1,4 +1,5 @@
 @page "/category/{categorySlug}/{subCategorySlug}/{productSlug}"
+@using BalonPark.Helpers
 @model ProductDetailModel
 @{
     var settings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
@@ -280,7 +281,9 @@
                 var dataField = showSummary ? "Summary" : "Description";
                 var ariaLabel = showSummary ? "Özeti düzenle" : "Açıklamayı düzenle";
                 <div class="product-description-block border-b border-gray-100 pb-4 admin-editable-field product-detail-editable flex flex-row items-start gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="@dataField" data-product-id="@Model.Product?.Id" data-type="textarea">
-                    <div class="text-sm text-gray-700 leading-relaxed admin-editable-value flex-1 min-w-0">@Html.Raw(content)</div>
+                    <div class="text-sm text-gray-700 leading-relaxed admin-editable-value flex-1 min-w-0">
+                        @await Html.PartialAsync("Shared/_ExpandableText", new TextPreview.ExpandableText(content, showSummary ? TextPreview.SummaryLimit : TextPreview.DescriptionLimit))
+                    </div>
                     @if (isAdminLoggedIn)
                     {
                         <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0" aria-label="@ariaLabel" title="Düzenle">
@@ -417,7 +420,9 @@
                 <i data-lucide="book-open" class="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true"></i>
                 Açıklama
             </h3>
-            <div class="text-sm text-ink leading-relaxed font-medium">@Html.Raw(Model.Product?.Description)</div>
+            <div class="text-sm text-ink leading-relaxed font-medium">
+                @await Html.PartialAsync("Shared/_ExpandableText", new TextPreview.ExpandableText(Model.Product?.Description, TextPreview.DescriptionLimit))
+            </div>
         </div>
     }
 
