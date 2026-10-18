@@ -94,6 +94,14 @@ public class Product
     [StringLength(ColorOptionsMaxLength)]
     public string? ColorOptions { get; set; }
     public decimal? InflatedWeightKg { get; set; }
+
+    public const int YouTubeUrlMaxLength = 200;
+
+    [StringLength(YouTubeUrlMaxLength, ErrorMessage = "YouTube bağlantısı en fazla {1} karakter olabilir.")]
+    public string? YouTubeUrl { get; set; }
+
+    /// <summary>True ise video, ürün görsellerinin ilk sırasında gösterilir.</summary>
+    public bool YouTubeShowFirst { get; set; }
     
     // Navigation properties
     public string? CategoryName { get; set; }

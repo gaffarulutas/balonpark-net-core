@@ -206,11 +206,11 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
             INSERT INTO Products (CategoryId, SubCategoryId, Name, Slug, Description, TechnicalDescription, Summary, Price, Stock, DisplayOrder, IsActive, CreatedAt,
                 InflatedLength, InflatedWidth, InflatedHeight, UserCount, AssemblyTime, RequiredPersonCount, FanDescription, FanWeightKg,
                 PackagedLength, PackagedDepth, PackagedWeightKg, PackagePalletCount, HasCertificate, WarrantyDescription, AfterSalesService,
-                IsDiscounted, IsPopular, IsProjectSpecial, DeliveryDays, DeliveryDaysMin, DeliveryDaysMax, IsFireResistant, MaterialWeight, MaterialWeightGrm2, ColorOptions, InflatedWeightKg)
+                IsDiscounted, IsPopular, IsProjectSpecial, DeliveryDays, DeliveryDaysMin, DeliveryDaysMax, IsFireResistant, MaterialWeight, MaterialWeightGrm2, ColorOptions, InflatedWeightKg, YouTubeUrl, YouTubeShowFirst)
             VALUES (@CategoryId, @SubCategoryId, @Name, @Slug, @Description, @TechnicalDescription, @Summary, @Price, @Stock, @DisplayOrder, @IsActive, @CreatedAt,
                 @InflatedLength, @InflatedWidth, @InflatedHeight, @UserCount, @AssemblyTime, @RequiredPersonCount, @FanDescription, @FanWeightKg,
                 @PackagedLength, @PackagedDepth, @PackagedWeightKg, @PackagePalletCount, @HasCertificate, @WarrantyDescription, @AfterSalesService,
-                @IsDiscounted, @IsPopular, @IsProjectSpecial, @DeliveryDays, @DeliveryDaysMin, @DeliveryDaysMax, @IsFireResistant, @MaterialWeight, @MaterialWeightGrm2, @ColorOptions, @InflatedWeightKg);
+                @IsDiscounted, @IsPopular, @IsProjectSpecial, @DeliveryDays, @DeliveryDaysMin, @DeliveryDaysMax, @IsFireResistant, @MaterialWeight, @MaterialWeightGrm2, @ColorOptions, @InflatedWeightKg, @YouTubeUrl, @YouTubeShowFirst);
             SELECT CAST(SCOPE_IDENTITY() as int)";
         
         using var connection = context.CreateConnection();
@@ -271,7 +271,9 @@ public class ProductRepository(DapperContext context, ICacheService cacheService
                 MaterialWeight = @MaterialWeight,
                 MaterialWeightGrm2 = @MaterialWeightGrm2,
                 ColorOptions = @ColorOptions,
-                InflatedWeightKg = @InflatedWeightKg
+                InflatedWeightKg = @InflatedWeightKg,
+                YouTubeUrl = @YouTubeUrl,
+                YouTubeShowFirst = @YouTubeShowFirst
             WHERE Id = @Id";
         
         using var connection = context.CreateConnection();

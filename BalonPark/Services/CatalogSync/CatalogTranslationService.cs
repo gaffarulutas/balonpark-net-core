@@ -339,6 +339,8 @@ public sealed class CatalogTranslationService(
         MaterialWeight = s.MaterialWeight,
         MaterialWeightGrm2 = s.MaterialWeightGrm2,
         ColorOptions = s.ColorOptions,
-        InflatedWeightKg = s.InflatedWeightKg
+        InflatedWeightKg = s.InflatedWeightKg,
+        YouTubeUrl = s.YouTubeUrl,
+        YouTubeShowFirst = s.YouTubeShowFirst
     };
 }

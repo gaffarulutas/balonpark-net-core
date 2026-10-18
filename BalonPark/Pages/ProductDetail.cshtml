@@ -25,6 +25,11 @@
     var productShareUrlEncoded = Uri.EscapeDataString(productShareUrl);
     var productShareTitle = Uri.EscapeDataString(Model.Product?.Name ?? string.Empty);
     var productNameEncoded = System.Net.WebUtility.HtmlEncode(Model.Product?.Name ?? "");
+    var youtubeId = YouTubeVideo.TryGetId(Model.Product?.YouTubeUrl);
+    var videoFirst = youtubeId != null && Model.Product?.YouTubeShowFirst == true;
+    var galleryCount = Model.ProductImages.Count + (youtubeId == null ? 0 : 1);
+    var videoPlayLabel = "Videoyu oynat";
+    var videoThumbLabel = "Videoyu seç";
     var whatsAppDigits = string.IsNullOrEmpty(settings?.WhatsApp) ? "" : new string(settings.WhatsApp.Where(c => char.IsDigit(c)).ToArray());
     var isAdminLoggedIn = ViewData["IsAdminLoggedIn"] as bool? ?? false;
 }
@@ -52,6 +57,10 @@
             <div class="product-gallery-main-wrap">
             <div class="swiper productMainSwiper product-gallery-main" data-swiper-autoplay="false" id="lightgallery" data-aria-describedby="@(productNameEncoded)">
                 <div class="swiper-wrapper">
+                    @if (videoFirst)
+                    {
+                        <partial name="_ProductVideoSlide" model="@(new ProductVideoSlide(youtubeId!, Model.Product?.Name ?? string.Empty, videoPlayLabel, false))" />
+                    }
                     @if (Model.ProductImages.Any())
                     {
                         @foreach (var image in Model.ProductImages)
@@ -75,7 +84,7 @@
                             </div>
                         }
                     }
-                    else
+                    else if (youtubeId == null)
                     {
                         <div class="swiper-slide">
                             <div class="image-wrapper product-image-wrap product-gallery-slide-inner">
@@ -94,6 +103,10 @@
                             </div>
                         </div>
                     }
+                    @if (youtubeId != null && !videoFirst)
+                    {
+                        <partial name="_ProductVideoSlide" model="@(new ProductVideoSlide(youtubeId!, Model.Product?.Name ?? string.Empty, videoPlayLabel, false))" />
+                    }
                 </div>
                 <div class="swiper-button-next product-gallery-next" aria-label="Sonraki resim"></div>
                 <div class="swiper-button-prev product-gallery-prev" aria-label="Önceki resim"></div>
@@ -101,11 +114,15 @@
             </div>
             </div>
 
-            @if (Model.ProductImages.Count > 1)
+            @if (galleryCount > 1)
             {
                 <div class="product-gallery-thumbs-wrap">
                     <div class="swiper productThumbsSwiper product-gallery-thumbs">
                         <div class="swiper-wrapper">
+                            @if (videoFirst)
+                            {
+                                <partial name="_ProductVideoSlide" model="@(new ProductVideoSlide(youtubeId!, Model.Product?.Name ?? string.Empty, videoThumbLabel, true))" />
+                            }
                             @foreach (var image in Model.ProductImages)
                             {
                                 <div class="swiper-slide">
@@ -119,6 +136,10 @@
                                              onerror="this.src='@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl("/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/assets/images/no-image.png")'; this.classList.add('loaded'); var s=this.closest('.product-image-wrap').querySelector('.img-loading-spinner'); if(s) s.classList.add('hidden');">
                                     </div>
                                 </div>
+                            }
+                            @if (youtubeId != null && !videoFirst)
+                            {
+                                <partial name="_ProductVideoSlide" model="@(new ProductVideoSlide(youtubeId!, Model.Product?.Name ?? string.Empty, videoThumbLabel, true))" />
                             }
                         </div>
                     </div>

@@ -261,7 +261,8 @@ public sealed class TargetCatalogWriter(ILogger<TargetCatalogWriter> logger) : I
             FanDescription, FanWeightKg, PackagedLength, PackagedDepth, PackagedWeightKg, PackagePalletCount,
             HasCertificate, WarrantyDescription, AfterSalesService,
             IsDiscounted, IsPopular, IsProjectSpecial, DeliveryDays, DeliveryDaysMin, DeliveryDaysMax,
-            IsFireResistant, MaterialWeight, MaterialWeightGrm2, ColorOptions, InflatedWeightKg)
+            IsFireResistant, MaterialWeight, MaterialWeightGrm2, ColorOptions, InflatedWeightKg,
+            YouTubeUrl, YouTubeShowFirst)
         VALUES (
             @Id, @CategoryId, @SubCategoryId, @Name, @Slug, @Description, @TechnicalDescription, @Summary,
             @Price, @Stock, @DisplayOrder, @IsActive, @CreatedAt, @UpdatedAt, @ViewCount,
@@ -269,7 +270,8 @@ public sealed class TargetCatalogWriter(ILogger<TargetCatalogWriter> logger) : I
             @FanDescription, @FanWeightKg, @PackagedLength, @PackagedDepth, @PackagedWeightKg, @PackagePalletCount,
             @HasCertificate, @WarrantyDescription, @AfterSalesService,
             @IsDiscounted, @IsPopular, @IsProjectSpecial, @DeliveryDays, @DeliveryDaysMin, @DeliveryDaysMax,
-            @IsFireResistant, @MaterialWeight, @MaterialWeightGrm2, @ColorOptions, @InflatedWeightKg)
+            @IsFireResistant, @MaterialWeight, @MaterialWeightGrm2, @ColorOptions, @InflatedWeightKg,
+            @YouTubeUrl, @YouTubeShowFirst)
         """;
 
     private const string ProductUpdateSql = """
@@ -286,7 +288,8 @@ public sealed class TargetCatalogWriter(ILogger<TargetCatalogWriter> logger) : I
             IsDiscounted=@IsDiscounted, IsPopular=@IsPopular, IsProjectSpecial=@IsProjectSpecial,
             DeliveryDays=@DeliveryDays, DeliveryDaysMin=@DeliveryDaysMin, DeliveryDaysMax=@DeliveryDaysMax,
             IsFireResistant=@IsFireResistant, MaterialWeight=@MaterialWeight, MaterialWeightGrm2=@MaterialWeightGrm2,
-            ColorOptions=@ColorOptions, InflatedWeightKg=@InflatedWeightKg
+            ColorOptions=@ColorOptions, InflatedWeightKg=@InflatedWeightKg,
+            YouTubeUrl=@YouTubeUrl, YouTubeShowFirst=@YouTubeShowFirst
         WHERE Id=@Id
         """;
 }

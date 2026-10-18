@@ -89,6 +89,14 @@ public class CreateModel : BaseAdminPage
                 return Page();
             }
 
+            if (!YouTubeVideo.TryApply(Product, out var youtubeError))
+            {
+                ModelState.AddModelError("Product.YouTubeUrl", youtubeError!);
+                Categories = (await _categoryRepository.GetAllAsync()).ToList();
+                SubCategories = (await _subCategoryRepository.GetAllAsync()).ToList();
+                return Page();
+            }
+
             if (string.IsNullOrWhiteSpace(Product.Description) || Product.Description.Length < 140)
             {
                 ModelState.AddModelError("Product.Description", "Açıklama en az 140 karakter olmalıdır.");

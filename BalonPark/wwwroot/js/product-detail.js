@@ -53,9 +53,10 @@
                 formatFractionCurrent: function (n) { return n; },
                 formatFractionTotal: function (n) { return n; },
             },
-            loop: slideCount > 1,
+            loop: slideCount > 1 && !mainSwiperElement.querySelector('[data-youtube-id]'),
             on: {
                 slideChange: function () {
+                    stopProductVideos(mainSwiperElement);
                     if (productThumbsSwiper && !productThumbsSwiper.destroyed) {
                         var realIndex = this.realIndex;
                         productThumbsSwiper.slideTo(realIndex, 300);
@@ -402,6 +403,48 @@
         return text;
     }
 
+    function stopProductVideos(root) {
+        if (!root) return;
+        root.querySelectorAll('iframe.product-video-frame').forEach(function (frame) {
+            frame.remove();
+        });
+        root.querySelectorAll('.product-video-poster').forEach(function (poster) {
+            poster.hidden = false;
+        });
+    }
+
+    function playProductVideo(slide) {
+        var id = slide.getAttribute('data-youtube-id') || '';
+        if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return;
+        var gallery = slide.closest('.product-detail-gallery') || slide;
+        stopProductVideos(gallery);
+        var host = slide.querySelector('.product-video-slide');
+        var poster = slide.querySelector('.product-video-poster');
+        if (!host || !poster) return;
+        poster.hidden = true;
+        var frame = document.createElement('iframe');
+        frame.className = 'product-video-frame';
+        frame.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+        frame.title = poster.getAttribute('aria-label') || 'Video';
+        frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        frame.setAttribute('allowfullscreen', '');
+        frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        host.appendChild(frame);
+    }
+
+    function initProductVideo() {
+        var gallery = document.querySelector('.product-detail-gallery');
+        if (!gallery) return;
+        gallery.addEventListener('click', function (event) {
+            var poster = event.target.closest('.product-video-poster');
+            if (!poster || !gallery.contains(poster)) return;
+            event.preventDefault();
+            event.stopPropagation();
+            var slide = poster.closest('.swiper-slide');
+            if (slide) playProductVideo(slide);
+        });
+    }
+
     function onSwiperError(e) {
         if (e.message && e.message.includes('Swiper')) {
             var slides = document.querySelectorAll('.swiper-slide');
@@ -413,6 +456,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         initSwipers();
+        initProductVideo();
         initPdfButton();
         initProductCodeCopy();
         initEditModeSwitch();

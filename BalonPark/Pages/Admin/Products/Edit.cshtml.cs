@@ -107,6 +107,12 @@ public class EditModel : BaseAdminPage
             return Page();
         }
 
+        if (!YouTubeVideo.TryApply(Product, out var youtubeError))
+        {
+            ModelState.AddModelError("Product.YouTubeUrl", youtubeError!);
+            return Page();
+        }
+
         if (Product.CategoryId <= 0)
         {
             ModelState.AddModelError("Product.CategoryId", "Kategori seçilmelidir.");

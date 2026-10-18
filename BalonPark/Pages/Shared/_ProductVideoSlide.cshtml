@@ -1,0 +1,49 @@
+@model BalonPark.Helpers.ProductVideoSlide
+@{
+    var alt = string.IsNullOrWhiteSpace(Model.Alt) ? "Ürün videosu" : Model.Alt;
+}
+@if (Model.IsThumb)
+{
+    <div class="swiper-slide">
+        <div class="thumbnail-item product-image-wrap product-video-thumb" role="button" tabindex="0" aria-label="@Model.Label">
+            <img src="@Model.ThumbnailUrl"
+                 class="lazy-image product-gallery-thumb-img"
+                 alt="@alt"
+                 width="120"
+                 height="90"
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.onerror=null;this.src='@Model.FallbackThumbnailUrl';">
+            <span class="product-video-thumb-badge" aria-hidden="true">
+                <svg viewBox="0 0 64 64" width="28" height="28" focusable="false">
+                    <circle cx="32" cy="32" r="30" fill="rgba(0,0,0,.45)"></circle>
+                    <circle cx="32" cy="32" r="26" fill="#fff"></circle>
+                    <path d="M27 20.5v23l18-11.5z" fill="#111"></path>
+                </svg>
+            </span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="swiper-slide" data-youtube-id="@Model.VideoId">
+        <div class="image-wrapper product-image-wrap product-gallery-slide-inner product-video-slide">
+            <button type="button" class="product-video-poster" aria-label="@Model.Label">
+                <img src="@Model.ThumbnailUrl"
+                     class="main-image product-gallery-img"
+                     alt="@alt"
+                     width="1280"
+                     height="720"
+                     decoding="async"
+                     onerror="this.onerror=null;this.src='@Model.FallbackThumbnailUrl';">
+                <span class="product-video-play" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" width="68" height="68" focusable="false">
+                        <circle cx="32" cy="32" r="30" fill="rgba(0,0,0,.35)"></circle>
+                        <circle cx="32" cy="32" r="28" fill="#fff"></circle>
+                        <path d="M26 20v24l20-12z" fill="#111"></path>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+}
