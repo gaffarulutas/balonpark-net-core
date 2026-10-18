@@ -1,6 +1,8 @@
 @{
     var siteSettings = ViewData["SiteSettings"] as BalonPark.Models.Settings;
     var companyName = siteSettings?.CompanyName ?? "Balon Park Şişme Oyun Grupları";
+    // Sadece gerçek GTM konteyner kimlikleri; bu alana yazılan AW-/G- kimlikleri GTM olarak yüklenmez
+    var isValidGtmId = siteSettings?.GoogleTagManager?.Trim().StartsWith("GTM-", StringComparison.OrdinalIgnoreCase) == true;
     var defaultDescription = $"{companyName} - Türkiye'nin en kaliteli şişme oyun parkları, kaydıraklar, havuzlar ve çocuk oyun grupları. Güvenli, dayanıklı ve eğlenceli ürünler. Hızlı teslimat ve uygun fiyatlar.";
     var rawCategories = ViewData["Categories"];
     var headerCategories = rawCategories as List<BalonPark.Models.Category>;
@@ -71,18 +73,45 @@
         <!-- Yandex Webmaster Verification (Admin Ayarlardan güncellenir) -->
         <meta name="yandex-verification" content="@siteSettings.YandexSiteVerification">
     }
-    @if (!string.IsNullOrEmpty(siteSettings?.GoogleTag))
-    {
-        <!-- Google tag (gtag.js) - Admin Ayarlardan güncellenir -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=@siteSettings.GoogleTag"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '@siteSettings.GoogleTag');
-        </script>
+    @{
+        // Google Ads (ZaferBala hesabı) - Admin'deki Google Tag alanı GA4 için kullanılıyor
+        const string googleAdsId = "AW-725959043";
+        // Google Ads "Kişi" dönüşümü (ctId 7853866738)
+        const string googleAdsContactConversion = "AW-725959043/bE7CCPL9gaEdEIODldoC";
+        var googleTagId = siteSettings?.GoogleTag;
+        var hasSeparateGoogleTag = !string.IsNullOrWhiteSpace(googleTagId)
+            && !string.Equals(googleTagId, googleAdsId, StringComparison.OrdinalIgnoreCase);
+        var gtagScriptId = hasSeparateGoogleTag ? googleTagId : googleAdsId;
     }
-    @if (!string.IsNullOrEmpty(siteSettings?.GoogleTagManager))
+    <!-- Google tag (gtag.js) + Google Ads - GA4 kimliği Admin Ayarlardan güncellenir -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=@gtagScriptId"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '@googleAdsId');
+        @if (hasSeparateGoogleTag)
+        {
+            @:gtag('config', '@googleTagId');
+        }
+
+        // İletişim dönüşümü: WhatsApp, telefon tıklamaları ve iletişim formu
+        window.trackContactConversion = function (method) {
+            gtag('event', 'conversion', { 'send_to': '@googleAdsContactConversion', 'transport_type': 'beacon' });
+            gtag('event', 'generate_lead', { 'method': method, 'transport_type': 'beacon' });
+        };
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest && e.target.closest('a[href]');
+            if (!link) return;
+            var href = link.getAttribute('href') || '';
+            if (href.indexOf('https://wa.me/') === 0 || href.indexOf('https://api.whatsapp.com/') === 0) {
+                window.trackContactConversion('whatsapp');
+            } else if (href.indexOf('tel:') === 0) {
+                window.trackContactConversion('phone');
+            }
+        }, true);
+    </script>
+    @if (isValidGtmId)
     {
         <!-- Google Tag Manager - Admin Ayarlardan güncellenir -->
         <script>
@@ -263,7 +292,7 @@
 
 @{ var canonicalUrl = ((IUrlService?)ViewData["UrlService"])?.GetPageUrl($"{Context.Request.Path}{Context.Request.QueryString}") ?? $"{BalonPark.Services.UrlService.CanonicalBaseUrl}{Context.Request.Path}{Context.Request.QueryString}"; }
 <body class="font-sans text-[15px] sm:text-base bg-white text-ink antialiased min-h-screen flex flex-col" data-site-url="@canonicalUrl">
-@if (!string.IsNullOrEmpty(siteSettings?.GoogleTagManager))
+@if (isValidGtmId)
 {
 <!-- Google Tag Manager (noscript) - Admin Ayarlardan güncellenir -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=@siteSettings.GoogleTagManager" height="0" width="0" class="gtm-noscript-iframe" title="GTM"></iframe></noscript>

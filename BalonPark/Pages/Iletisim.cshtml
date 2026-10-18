@@ -278,6 +278,12 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial"/>
+    @if (Model.IsEmailSent)
+    {
+        <script>
+            if (window.trackContactConversion) window.trackContactConversion('contact_form');
+        </script>
+    }
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var form = document.getElementById('contact-form');
