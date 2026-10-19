@@ -90,6 +90,7 @@
             <p class="text-gray-600 mt-2">Ürünleri görüntüle, ekle, düzenle ve sil</p>
         </div>
             <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
+            <partial name="_PriceSettingsModal" model="Model.PriceSites" />
             <a href="/admin/products/create" id="createProductBtn" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors duration-200 shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -111,6 +112,21 @@
             <div>
                 <p class="font-semibold text-green-800">İşlem Başarılı</p>
                 <p class="text-green-700">@Model.SuccessMessage</p>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <p class="font-semibold text-red-800">İşlem tamamlanamadı</p>
+                <p class="text-red-700">@Model.ErrorMessage</p>
             </div>
         </div>
     </div>
@@ -407,7 +423,7 @@
                                 }
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm font-bold text-gray-900">₺@product.Price.ToString("N2")</span>
+                                <span class="text-sm font-bold text-gray-900">₺@product.Price.ToString("N0")</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="text-sm text-gray-600">@product.Stock adet</span>

@@ -42,8 +42,11 @@
                     @:         "image": "@(((IUrlService?)ViewData["UrlService"])?.GetImageUrl(productWithImage.MainImage?.LargePath ?? "/assets/images/no-image.png") ?? $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{(productWithImage.MainImage?.LargePath ?? "/assets/images/no-image.png")}")",
                     @:         "offers": {
                     @:             "@@type": "Offer",
+                    @if (PriceGate.Visible)
+                    {
                     @:             "price": "@product.Price.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)",
                     @:             "priceCurrency": "TRY",
+                    }
                     @:             "availability": "@(product.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")"
                     @:         }
                     @:     }

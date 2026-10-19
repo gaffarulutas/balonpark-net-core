@@ -175,6 +175,10 @@ try
     builder.Services.AddScoped<ICatalogSyncProcessor, CatalogSyncProcessor>();
     builder.Services.AddHostedService<CatalogSyncHostedService>();
 
+    builder.Services.AddScoped<IPriceSettingsStore, PriceSettingsStore>();
+    builder.Services.AddScoped<IPriceSiteCatalog, PriceSiteCatalog>();
+    builder.Services.AddScoped<IStorefrontPriceGate, StorefrontPriceGate>();
+
     var app = builder.Build();
 
     Log.Information("Ortam: {Environment}. Veritabanı migration'ları çalıştırılıyor…", app.Environment.EnvironmentName);
@@ -288,6 +292,7 @@ try
         }
     };
     app.UseStaticFiles(staticFileOptions);
+    app.UseMiddleware<PriceRevisionMiddleware>();
 
     app.UseRequestLocalization();
     app.UseRouting();

@@ -58,7 +58,7 @@
             <div class="flex-1 min-h-[2.5rem]"></div>
         }
         <div class="mt-auto pt-2.5">
-            @if (product.Price <= 0)
+            @if (!PriceGate.Visible || product.Price <= 0)
             {
                 <p class="text-xs text-gray-500">Fiyat için iletişime geçin</p>
             }

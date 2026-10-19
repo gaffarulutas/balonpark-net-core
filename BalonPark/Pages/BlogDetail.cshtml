@@ -182,7 +182,7 @@
                                         }
                                         <p class="text-sm font-medium text-ink group-hover:text-primary line-clamp-2 transition mt-0.5">@(p?.Name ?? "Ürün")</p>
                                         <p class="text-xs text-gray-400 mt-0.5">Ürün Kodu: U-@(p?.Id ?? 0)</p>
-                                        @if (p != null && p.Price > 0)
+                                        @if (PriceGate.Visible && p != null && p.Price > 0)
                                         {
                                             <p class="text-sm font-semibold text-primary mt-1">₺@p.Price.ToString("N0")</p>
                                         }

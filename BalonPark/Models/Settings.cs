@@ -123,6 +123,9 @@ public class Settings
     /// <summary>Gemini görsel üretiminde Imagen yedek kullanılsın mı (faturalandırma gerekir).</summary>
     public bool GeminiUseImagenFallback { get; set; }
 
+    /// <summary>Müşteri vitrininde fiyat gösterilsin mi. Admin → Ürünler → Fiyat Ayarları.</summary>
+    public bool ShowPrices { get; set; } = true;
+
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

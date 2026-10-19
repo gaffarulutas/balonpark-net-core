@@ -12,7 +12,8 @@ namespace BalonPark.Controllers
         ProductImageRepository productImageRepository,
         CategoryRepository categoryRepository,
         SubCategoryRepository subCategoryRepository,
-        IUrlService urlService) : ControllerBase
+        IUrlService urlService,
+        IStorefrontPriceGate priceGate) : ControllerBase
     {
 
         private const int MaxSearchLimit = 50;
@@ -34,7 +35,7 @@ namespace BalonPark.Controllers
                 title = p.Name,
                 url = $"/category/{p.CategorySlug}/{p.SubCategorySlug}/{p.Slug}",
                 image = urlService.GetImageUrl("/assets/images/no-image.png"), // Default image
-                price = $"₺{p.Price:N2}",
+                price = priceGate.Visible && p.Price > 0 ? $"₺{p.Price:N0}" : "",
                 category = p.CategoryName,
                 subcategory = p.SubCategoryName,
                 productCode = ProductCodeHelper.Format(p.Id)
@@ -127,7 +128,7 @@ namespace BalonPark.Controllers
                     title = product.Name,
                     url = $"/category/{product.CategorySlug}/{product.SubCategorySlug}/{product.Slug}",
                     image = imageUrl,
-                    price = $"₺{product.Price:N2}",
+                    price = priceGate.Visible && product.Price > 0 ? $"₺{product.Price:N0}" : "",
                     category = product.CategoryName,
                     subcategory = product.SubCategoryName,
                     productCode = ProductCodeHelper.Format(product.Id),

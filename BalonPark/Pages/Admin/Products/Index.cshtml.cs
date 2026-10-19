@@ -16,7 +16,8 @@ public class IndexModel(
     ExcelService excelService,
     IUrlService urlService,
     ICacheService cacheService,
-    ICatalogSyncPublisher catalogSync)
+    ICatalogSyncPublisher catalogSync,
+    IPriceSiteCatalog priceSiteCatalog)
     : BaseAdminPage
 {
     public List<Product> Products { get; set; } = [];
@@ -51,6 +52,11 @@ public class IndexModel(
     
     [TempData]
     public string? SuccessMessage { get; set; }
+
+    [TempData]
+    public string? ErrorMessage { get; set; }
+
+    public IReadOnlyList<PriceSiteStatus> PriceSites { get; private set; } = [];
 
     [BindProperty]
     public string? ReturnUrl { get; set; }
@@ -157,6 +163,65 @@ public class IndexModel(
             var mainImage = await productImageRepository.GetMainImageAsync(product.Id);
             MainImages[product.Id] = mainImage;
         }
+
+        PriceSites = await priceSiteCatalog.GetStatusesAsync();
+    }
+
+    public async Task<IActionResult> OnPostSavePriceFlagsAsync(List<string>? showPriceSites)
+    {
+        var known = await priceSiteCatalog.GetStatusesAsync();
+        var enabled = new HashSet<string>(showPriceSites ?? [], StringComparer.OrdinalIgnoreCase);
+        var map = known
+            .Where(site => site.Reachable)
+            .ToDictionary(site => site.Key, site => enabled.Contains(site.Key), StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            SuccessMessage = await priceSiteCatalog.SaveFlagsAsync(map);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Fiyat görünürlüğü kaydedilemedi.";
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAdjustPricesAsync(List<string>? adjustSites, int percent, string? direction)
+    {
+        if (adjustSites == null || adjustSites.Count == 0)
+        {
+            ErrorMessage = "En az bir site seçin.";
+            return RedirectToPage();
+        }
+
+        if (percent < PriceAdjustment.MinPercent || percent > PriceAdjustment.MaxPercent)
+        {
+            ErrorMessage = $"Yüzde {PriceAdjustment.MinPercent} ile {PriceAdjustment.MaxPercent} arasında olmalıdır.";
+            return RedirectToPage();
+        }
+
+        var increase = string.Equals(direction, "increase", StringComparison.OrdinalIgnoreCase);
+        if (!increase && !string.Equals(direction, "decrease", StringComparison.OrdinalIgnoreCase))
+        {
+            ErrorMessage = "İşlem türü geçersiz.";
+            return RedirectToPage();
+        }
+
+        try
+        {
+            SuccessMessage = await priceSiteCatalog.AdjustAsync(adjustSites, percent, increase);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            ErrorMessage = $"Yüzde {PriceAdjustment.MinPercent} ile {PriceAdjustment.MaxPercent} arasında olmalıdır.";
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Fiyatlar güncellenemedi.";
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(int id)

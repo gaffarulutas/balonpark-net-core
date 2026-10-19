@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BalonPark.Data;
 using BalonPark.Models;
+using BalonPark.Services;
 
 namespace BalonPark.Controllers
 {
@@ -8,7 +9,8 @@ namespace BalonPark.Controllers
     [Route("api/[controller]")]
     public class CompareController(
         ProductRepository productRepository,
-        ProductImageRepository productImageRepository) : ControllerBase
+        ProductImageRepository productImageRepository,
+        IStorefrontPriceGate priceGate) : ControllerBase
     {
 
         [HttpPost("products")]
@@ -37,9 +39,9 @@ namespace BalonPark.Controllers
                         Description = product.Description,
                         TechnicalDescription = product.TechnicalDescription,
                         Summary = product.Summary,
-                        Price = product.Price,
-                        UsdPrice = product.UsdPrice,
-                        EuroPrice = product.EuroPrice,
+                        Price = priceGate.Visible ? product.Price : 0,
+                        UsdPrice = priceGate.Visible ? product.UsdPrice : 0,
+                        EuroPrice = priceGate.Visible ? product.EuroPrice : 0,
                         Stock = product.Stock,
                         ProductCode = $"U-{product.Id}",
                         CategoryName = product.CategoryName,

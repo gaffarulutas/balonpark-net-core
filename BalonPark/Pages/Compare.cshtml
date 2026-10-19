@@ -106,7 +106,7 @@
                             @foreach (var item in Model.Products)
                             {
                                 <td class="px-4 py-3 min-w-[200px] max-w-[320px] align-top">
-                                    @if (item.Product.Price <= 0)
+                                    @if (!PriceGate.Visible || item.Product.Price <= 0)
                                     {
                                         <span class="text-sm text-gray-500">Fiyat için iletişime geçin</span>
                                     }

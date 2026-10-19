@@ -313,7 +313,10 @@ public class PdfService(
             AddInfoRow(infoTable, "Ürün Kodu", $"U-{product.Id}", labelFont, cellFont, true, productUrl);
             AddInfoRow(infoTable, "Kategori", $"{product.CategoryName ?? "-"} / {product.SubCategoryName ?? "-"}", labelFont, cellFont, false, null);
             var priceFont = GetTurkishFont(8, Font.BOLD, BaseColor.DARK_GRAY);
-            AddInfoRow(infoTable, "Fiyatlar", $"₺ {product.Price:N2}  ·  $ {product.UsdPrice:N2}  ·  € {product.EuroPrice:N2}", labelFont, priceFont, false, null);
+            var showStorefrontPrices = (await settingsRepository.GetFirstAsync())?.ShowPrices ?? true;
+            AddInfoRow(infoTable, "Fiyatlar", showStorefrontPrices
+                ? $"₺ {product.Price:N0}  ·  $ {product.UsdPrice:N0}  ·  € {product.EuroPrice:N0}"
+                : "Fiyat için iletişime geçin", labelFont, priceFont, false, null);
             AddInfoRow(infoTable, "Stok", product.Stock > 0 ? product.Stock.ToString() : "Stok yok", labelFont, cellFont, false, null);
             var badges = new List<string>();
             if (product.IsDiscounted) badges.Add("İndirimli");

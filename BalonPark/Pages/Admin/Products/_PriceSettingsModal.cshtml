@@ -1,0 +1,160 @@
+@model IReadOnlyList<BalonPark.Services.PriceSiteStatus>
+@{
+    var sites = Model ?? [];
+    var reachable = sites.Where(site => site.Reachable).ToList();
+}
+
+<button type="button" id="openPriceSettingsBtn" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg border border-gray-300 transition-colors duration-200 shadow-sm">
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    Fiyat Ayarları
+</button>
+
+<div id="priceSettingsModal" class="hidden fixed inset-0 z-[80] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="priceSettingsTitle">
+    <div class="flex min-h-full items-end justify-center p-4 sm:items-center">
+        <button type="button" class="price-settings-dismiss fixed inset-0 bg-gray-900/50" aria-label="Kapat"></button>
+        <div class="relative w-full max-w-2xl rounded-xl bg-white shadow-xl">
+            <div class="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
+                <div>
+                    <h2 id="priceSettingsTitle" class="text-lg font-semibold text-gray-900">Fiyat Ayarları</h2>
+                    <p class="mt-1 text-sm text-gray-500">Vitrindeki fiyatları site bazında açın veya kapatın. Toplu değişiklikte kuruş kalmaz. Üç sitenin birlikte ayarı balonpark.com yönetimindedir.</p>
+                </div>
+                <button type="button" class="price-settings-dismiss inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Kapat">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="space-y-6 px-6 py-5">
+                <form method="post" asp-page-handler="SavePriceFlags" class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900">Fiyatları göster</h3>
+                        <p class="mt-1 text-sm text-gray-500">Kapalı olan sitede müşteri fiyat yerine iletişim metni görür. Yönetim listesi etkilenmez.</p>
+                    </div>
+                    @if (reachable.Count == 0)
+                    {
+                        <p class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">Site ayarlarına şu an ulaşılamıyor.</p>
+                    }
+                    else
+                    {
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            @foreach (var site in sites)
+                            {
+                                <label class="flex items-start gap-3 rounded-lg border px-3 py-3 @(site.Reachable ? "border-gray-200" : "border-gray-100 bg-gray-50 opacity-70")">
+                                    <input type="checkbox" name="showPriceSites" value="@site.Key" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900" @(site.ShowPrices ? "checked" : "") @(site.Reachable ? "" : "disabled")>
+                                    <span>
+                                        <span class="block text-sm font-medium text-gray-900">@site.Label</span>
+                                        <span class="block text-xs text-gray-500">@(site.Reachable ? (site.ShowPrices ? "Açık" : "Kapalı") : site.Error)</span>
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                        <button type="submit" class="inline-flex items-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Görünürlüğü kaydet</button>
+                    }
+                </form>
+
+                <form method="post" asp-page-handler="AdjustPrices" id="adjustPricesForm" class="space-y-4 border-t border-gray-100 pt-5">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900">Toplu fiyat düşür / yükselt</h3>
+                        <p class="mt-1 text-sm text-gray-500">Seçili sitelerdeki taban fiyat, yüzde oranında kalıcı olarak değişir ve tam sayıya yuvarlanır. 0 fiyatlı ürünler aynı kalır. En düşük sonuç 1 olur.</p>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="block text-sm">
+                            <span class="font-medium text-gray-700">Yüzde</span>
+                            <input type="number" name="percent" id="priceAdjustPercent" min="1" max="90" step="1" value="10" required class="mt-1 h-11 w-full rounded-lg border border-gray-300 px-3 text-sm focus:border-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-800">
+                        </label>
+                        <fieldset class="text-sm">
+                            <legend class="font-medium text-gray-700">İşlem</legend>
+                            <div class="mt-2 flex gap-4">
+                                <label class="inline-flex items-center gap-2"><input type="radio" name="direction" value="decrease" checked class="text-gray-900 focus:ring-gray-900"> Düşür</label>
+                                <label class="inline-flex items-center gap-2"><input type="radio" name="direction" value="increase" class="text-gray-900 focus:ring-gray-900"> Yükselt</label>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        @foreach (var site in sites)
+                        {
+                            <label class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm @(site.Reachable ? "" : "opacity-60")">
+                                <input type="checkbox" name="adjustSites" value="@site.Key" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900" @(site.Reachable ? "checked" : "disabled")>
+                                @site.Label
+                            </label>
+                        }
+                    </div>
+                    <p id="priceAdjustPreview" class="rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700"></p>
+                    <button type="submit" class="inline-flex items-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800" @(reachable.Count == 0 ? "disabled" : "")>Fiyatları uygula</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var modal = document.getElementById('priceSettingsModal');
+        var openBtn = document.getElementById('openPriceSettingsBtn');
+        if (!modal || !openBtn) return;
+
+        function setOpen(open) {
+            modal.classList.toggle('hidden', !open);
+            document.body.classList.toggle('overflow-hidden', open);
+            if (open) openBtn.setAttribute('aria-expanded', 'true');
+            else openBtn.removeAttribute('aria-expanded');
+        }
+
+        openBtn.addEventListener('click', function () { setOpen(true); });
+        modal.querySelectorAll('.price-settings-dismiss').forEach(function (el) {
+            el.addEventListener('click', function () { setOpen(false); });
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !modal.classList.contains('hidden')) setOpen(false);
+        });
+
+        var form = document.getElementById('adjustPricesForm');
+        var percentInput = document.getElementById('priceAdjustPercent');
+        var preview = document.getElementById('priceAdjustPreview');
+        var samples = [2500, 10000];
+
+        function roundAway(value) {
+            return value < 0 ? -Math.round(Math.abs(value)) : Math.round(value);
+        }
+
+        function refreshPreview() {
+            if (!preview || !percentInput) return;
+            var percent = parseInt(percentInput.value, 10);
+            var increase = form && form.querySelector('input[name="direction"]:checked')?.value === 'increase';
+            if (!percent || percent < 1 || percent > 90) {
+                preview.textContent = 'Yüzde 1 ile 90 arasında olmalıdır.';
+                return;
+            }
+            var factor = increase ? 1 + (percent / 100) : 1 - (percent / 100);
+            var parts = samples.map(function (price) {
+                var next = roundAway(price * factor);
+                if (next < 1) next = 1;
+                var formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(next);
+                var current = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(price);
+                return current + ' → ' + formatted;
+            });
+            preview.textContent = (increase ? 'Yükseltme' : 'Düşürme') + ' önizlemesi: ' + parts.join(' · ') + ' TL';
+        }
+
+        if (form) {
+            form.addEventListener('input', refreshPreview);
+            form.addEventListener('change', refreshPreview);
+            form.addEventListener('submit', function (event) {
+                var percent = parseInt(percentInput.value, 10);
+                var increase = form.querySelector('input[name="direction"]:checked')?.value === 'increase';
+                var selected = form.querySelectorAll('input[name="adjustSites"]:checked').length;
+                if (!selected) {
+                    event.preventDefault();
+                    preview.textContent = 'En az bir site seçin.';
+                    return;
+                }
+                var verb = increase ? 'yükseltilecek' : 'düşürülecek';
+                var ok = window.confirm('Seçili sitelerde fiyatlar %' + percent + ' ' + verb + '. Sonuçlar tam sayı olacak ve işlem geri alınmayacak. Devam edilsin mi?');
+                if (!ok) event.preventDefault();
+            });
+        }
+
+        refreshPreview();
+    })();
+</script>
