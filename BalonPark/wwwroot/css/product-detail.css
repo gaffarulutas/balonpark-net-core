@@ -185,6 +185,13 @@
     display: block;
     vertical-align: middle;
 }
+@media (max-width: 767px) {
+    .product-detail-gallery .product-gallery-img {
+        object-fit: contain;
+        object-position: center;
+        background: #fff;
+    }
+}
 
 .product-detail-gallery .product-gallery-next,
 .product-detail-gallery .product-gallery-prev {

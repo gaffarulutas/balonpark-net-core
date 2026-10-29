@@ -199,10 +199,14 @@ body {
         padding: 0;
         box-sizing: border-box;
     }
-    .site-header__action-icon,
-    .site-header__menu-icon {
+    .site-header__action-icon {
         width: 1.25rem;
         height: 1.25rem;
+    }
+    .site-header__menu-icon {
+        width: 1.625rem;
+        height: 1.625rem;
+        stroke-width: 2.75;
     }
     .site-header__action-badge {
         display: none;
@@ -246,16 +250,19 @@ body {
     width: var(--header-action-size);
     height: var(--header-action-size);
     padding: 0;
-    border: none;
+    border: 2px solid #0f172a;
     border-radius: 0.5rem;
-    background: #f3f4f6;
-    color: #111827;
+    background: #0f172a;
+    color: #ffffff;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .site-header__menu-btn:hover {
-    background: #e5e7eb;
+    background: #00A8E8;
+    border-color: #00A8E8;
+    color: #ffffff;
 }
 
 .site-header__menu-btn:focus-visible {
@@ -270,8 +277,9 @@ body {
 }
 
 .site-header__menu-icon {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.625rem;
+    height: 1.625rem;
+    stroke-width: 2.75;
 }
 
 /* Logo */
@@ -361,7 +369,29 @@ body {
 @media (min-width: 1024px) {
     .site-header__search {
         display: flex;
+        flex: 1 1 280px;
+        min-width: 220px;
         margin: 0 0.75rem 0 1rem;
+    }
+}
+
+/* Sidebar açıkken arama şeridi sıkışıp kaybolmasın; kendi satırında tam genişlik */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .site-header__row {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+    .site-header__start {
+        order: 1;
+    }
+    .site-header__end {
+        order: 2;
+    }
+    .site-header__search {
+        order: 3;
+        flex: 1 0 100%;
+        min-width: 0;
+        margin: 0;
     }
 }
 
@@ -374,11 +404,12 @@ body {
     width: 100%;
     height: 2.5rem;
     padding: 0 2.75rem 0 0.875rem;
-    border: 1px solid var(--header-border);
+    border: 2px solid #1e293b;
     border-radius: 0.5rem;
     font-size: 0.875rem;
     color: #111827;
     background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -390,11 +421,11 @@ body {
 }
 
 .site-header__search-input::placeholder {
-    color: #9ca3af;
+    color: #64748b;
 }
 
 .site-header__search-input:hover {
-    border-color: #d1d5db;
+    border-color: #0f172a;
 }
 
 .site-header__search-input:focus {
@@ -422,7 +453,7 @@ body {
     border: none;
     border-radius: 0.375rem;
     background: transparent;
-    color: #9ca3af;
+    color: #1e293b;
     cursor: pointer;
     transition: color 0.15s ease, background 0.15s ease;
 }
@@ -593,10 +624,10 @@ body {
     right: 0;
     top: 100%;
     width: 100%;
-    margin-top: -1px;
+    margin-top: -2px;
     max-height: min(70vh, 420px);
     background: #fff;
-    border: 1px solid var(--header-border);
+    border: 2px solid #1e293b;
     border-top: none;
     border-radius: 0 0 0.5rem 0.5rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
@@ -2021,4 +2052,64 @@ body {
     transform: scale(1);
     pointer-events: auto;
     visibility: visible;
+}
+
+/* Ürün fiyatı: büyük punto, yanında + KDV. Uzun tutar kartı taşırmasın. */
+.price-amount {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.35rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+
+.price-amount.hidden {
+    display: none;
+}
+
+.price-kdv {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.product-card .price-amount,
+.product-detail-card .price-amount {
+    font-size: 1.125rem;
+}
+
+@media (min-width: 640px) {
+    .product-card .price-amount,
+    .product-detail-card .price-amount {
+        font-size: 1.25rem;
+    }
+}
+
+.price-main.price-amount {
+    font-size: 2.125rem;
+}
+
+@media (min-width: 640px) {
+    .price-main.price-amount {
+        font-size: 2.5rem;
+    }
+}
+
+/* Mobil: ürün ve vitrin görselleri kırpılmadan tam görünsün */
+@media (max-width: 767px) {
+    .product-card img,
+    .product-detail-card img,
+    .product-image-wrap img {
+        object-fit: contain;
+        object-position: center;
+        background-color: #f3f4f6;
+    }
+
+    html.dark .product-card img,
+    html.dark .product-detail-card img,
+    html.dark .product-image-wrap img {
+        background-color: #1e293b;
+    }
 }

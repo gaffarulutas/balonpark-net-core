@@ -502,6 +502,26 @@
 
             <footer class="layout-footer bg-white border-t border-gray-200 mt-auto">
                 <div class="w-full px-3 sm:px-4 lg:px-6 py-6">
+                    @{
+                        var footerPhones = new[] { siteSettings?.PhoneNumber, siteSettings?.PhoneNumber2 }
+                            .Where(p => !string.IsNullOrWhiteSpace(p))
+                            .Select(p => p!.Trim())
+                            .Distinct(StringComparer.Ordinal)
+                            .ToList();
+                    }
+                    @if (footerPhones.Count > 0)
+                    {
+                        <div class="footer-phones flex flex-wrap items-center gap-x-6 gap-y-2 mb-4">
+                            @foreach (var footerPhone in footerPhones)
+                            {
+                                var footerTel = "tel:" + new string(footerPhone.Where(c => char.IsDigit(c) || c == '+').ToArray());
+                                <a href="@footerTel" class="footer-phone inline-flex items-center gap-2 text-base font-semibold text-ink hover:text-primary">
+                                    <i data-lucide="phone" class="w-5 h-5 text-primary" aria-hidden="true"></i>
+                                    <span>@footerPhone</span>
+                                </a>
+                            }
+                        </div>
+                    }
                     <div class="flex flex-wrap items-center justify-between gap-4">
                 <p class="text-sm text-gray-600">© @DateTime.Now.Year @Html.Raw(companyName). Tüm hakları saklıdır.</p>
                 <nav class="flex flex-wrap gap-4 text-sm">

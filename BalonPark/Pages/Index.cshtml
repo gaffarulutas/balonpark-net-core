@@ -238,13 +238,17 @@
         .hero-aspect { height: 0; padding-bottom: 40%; min-height: 0; }
         .hero-aspect .hero-swiper-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
     }
-    @@media (max-width: 479px) {
-        .hero-row { min-height: 240px; }
-        .hero-panel { min-height: 240px; }
-        .hero-aspect { min-height: 240px; max-height: 420px; }
-    }
-    @@media (min-width: 480px) and (max-width: 767px) {
-        .hero-aspect { min-height: 280px; max-height: 420px; }
+    @@media (max-width: 767px) {
+        .hero-row,
+        .hero-panel,
+        .hero-aspect {
+            min-height: 0;
+            height: auto;
+        }
+        .hero-aspect {
+            aspect-ratio: 2 / 1;
+            max-height: none;
+        }
     }
     @@media (min-width: 768px) {
         .hero-row { min-height: 0; }
@@ -298,6 +302,11 @@
         object-fit: cover;
         display: block;
         z-index: 2;
+    }
+    @@media (max-width: 767px) {
+        .hero-slide-inner {
+            min-height: 0;
+        }
     }
     .hero-slide-overlay {
         position: absolute;

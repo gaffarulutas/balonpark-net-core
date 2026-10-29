@@ -112,19 +112,19 @@
                                     }
                                     else if (Model.SelectedCurrency == "TL")
                                     {
-                                        <span class="font-semibold text-ink">₺@item.Product.Price.ToString("N0")</span>
+                                        <span class="price-amount text-primary">₺@item.Product.Price.ToString("N0")<span class="price-kdv">+ KDV</span></span>
                                     }
                                     else if (Model.SelectedCurrency == "USD")
                                     {
-                                        <span class="font-semibold text-ink">$@item.Product.UsdPrice.ToString("N0")</span>
+                                        <span class="price-amount text-primary">$@item.Product.UsdPrice.ToString("N0")<span class="price-kdv">+ KDV</span></span>
                                     }
                                     else if (Model.SelectedCurrency == "EUR")
                                     {
-                                        <span class="font-semibold text-ink">€@item.Product.EuroPrice.ToString("N0")</span>
+                                        <span class="price-amount text-primary">€@item.Product.EuroPrice.ToString("N0")<span class="price-kdv">+ KDV</span></span>
                                     }
                                     else if (Model.SelectedCurrency == "RUB")
                                     {
-                                        <span class="font-semibold text-ink">₽@item.Product.RubPrice.ToString("N0")</span>
+                                        <span class="price-amount text-primary">₽@item.Product.RubPrice.ToString("N0")<span class="price-kdv">+ KDV</span></span>
                                     }
                                 </td>
                             }

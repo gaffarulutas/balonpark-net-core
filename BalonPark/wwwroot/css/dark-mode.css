@@ -226,12 +226,15 @@ html.dark .site-header {
 }
 
 html.dark .site-header__menu-btn {
-  background: var(--dm-bg-tertiary);
-  color: var(--dm-text);
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #f8fafc;
 }
 
 html.dark .site-header__menu-btn:hover {
-  background: var(--dm-surface-hover);
+  background: #00a8e8;
+  border-color: #00a8e8;
+  color: #ffffff;
 }
 
 html.dark .site-header__nav-link {
@@ -245,8 +248,12 @@ html.dark .site-header__nav-link:hover {
 
 html.dark .site-header__search-input {
   background: var(--dm-input-bg);
-  border-color: var(--dm-border);
+  border: 2px solid #e2e8f0;
   color: var(--dm-input-text);
+}
+
+html.dark .site-header__search-input:hover {
+  border-color: #ffffff;
 }
 
 html.dark .site-header__search-input::placeholder {
@@ -258,7 +265,7 @@ html.dark .site-header__search-input:focus {
 }
 
 html.dark .site-header__search-btn {
-  color: var(--dm-text-muted);
+  color: #f8fafc;
 }
 
 html.dark .site-header__search-btn:hover {

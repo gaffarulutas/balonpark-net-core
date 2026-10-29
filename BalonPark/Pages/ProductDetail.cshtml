@@ -271,7 +271,7 @@
                 {
                     <div class="flex items-center gap-2 flex-wrap">
                         <div class="admin-editable-field product-detail-editable flex items-center gap-2 group @(isAdminLoggedIn ? "cursor-pointer" : "")" data-field="Price" data-product-id="@Model.Product?.Id" data-type="number" data-value="@Model.Product?.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">
-                            <span class="price-main price-tl text-primary text-2xl font-semibold admin-editable-value @(selectedCurrency == "TL" ? "block" : "hidden")">₺@Model.Product?.Price.ToString("N0")</span>
+                            <span class="price-main price-amount price-tl text-primary @(selectedCurrency == "TL" ? "block" : "hidden")"><span class="admin-editable-value">₺@Model.Product?.Price.ToString("N0")</span><span class="price-kdv">+ KDV</span></span>
                             @if (isAdminLoggedIn)
                             {
                                 <button type="button" class="admin-edit-icon inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition flex-shrink-0" aria-label="Fiyat düzenle" title="Düzenle">
@@ -279,9 +279,9 @@
                                 </button>
                             }
                         </div>
-                        <span class="price-main price-usd text-primary text-2xl font-semibold @(selectedCurrency == "USD" ? "block" : "hidden")">$@Model.Product?.UsdPrice.ToString("N0")</span>
-                        <span class="price-main price-eur text-primary text-2xl font-semibold @(selectedCurrency == "EUR" ? "block" : "hidden")">€@Model.Product?.EuroPrice.ToString("N0")</span>
-                        <span class="price-main price-rub text-primary text-2xl font-semibold @(selectedCurrency == "RUB" ? "block" : "hidden")">₽@Model.Product?.RubPrice.ToString("N0")</span>
+                        <span class="price-main price-amount price-usd text-primary @(selectedCurrency == "USD" ? "block" : "hidden")">$@Model.Product?.UsdPrice.ToString("N0")<span class="price-kdv">+ KDV</span></span>
+                        <span class="price-main price-amount price-eur text-primary @(selectedCurrency == "EUR" ? "block" : "hidden")">€@Model.Product?.EuroPrice.ToString("N0")<span class="price-kdv">+ KDV</span></span>
+                        <span class="price-main price-amount price-rub text-primary @(selectedCurrency == "RUB" ? "block" : "hidden")">₽@Model.Product?.RubPrice.ToString("N0")<span class="price-kdv">+ KDV</span></span>
                         @if (Model.Product?.IsDiscounted == true)
                         {
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">İndirimli</span>
@@ -576,10 +576,10 @@
                                 <a href="@purl" class="font-medium text-sm text-ink hover:text-primary line-clamp-2 mt-0.5">@item.Product.Name</a>
                                 @if (pricesVisible && item.Product.Price > 0)
                                 {
-                                    <p class="mt-1 price-tl text-sm font-semibold text-primary @(selectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N0")</p>
-                                    <p class="mt-1 price-usd text-sm font-semibold text-primary @(selectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N0")</p>
-                                    <p class="mt-1 price-eur text-sm font-semibold text-primary @(selectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N0")</p>
-                                    <p class="mt-1 price-rub text-sm font-semibold text-primary @(selectedCurrency == "RUB" ? "block" : "hidden")">₽@item.Product.RubPrice.ToString("N0")</p>
+                                    <p class="mt-1 price-tl price-amount text-primary @(selectedCurrency == "TL" ? "block" : "hidden")">₺@item.Product.Price.ToString("N0")<span class="price-kdv">+ KDV</span></p>
+                                    <p class="mt-1 price-usd price-amount text-primary @(selectedCurrency == "USD" ? "block" : "hidden")">$@item.Product.UsdPrice.ToString("N0")<span class="price-kdv">+ KDV</span></p>
+                                    <p class="mt-1 price-eur price-amount text-primary @(selectedCurrency == "EUR" ? "block" : "hidden")">€@item.Product.EuroPrice.ToString("N0")<span class="price-kdv">+ KDV</span></p>
+                                    <p class="mt-1 price-rub price-amount text-primary @(selectedCurrency == "RUB" ? "block" : "hidden")">₽@item.Product.RubPrice.ToString("N0")<span class="price-kdv">+ KDV</span></p>
                                 }
                                 else
                                 {
